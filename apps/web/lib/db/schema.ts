@@ -112,8 +112,8 @@ export const embeddings = pgTable(
     contentId: uuid('content_id')
       .notNull()
       .references(() => content.id, { onDelete: 'cascade' }),
-    embedding: vector('embedding', { dimensions: 1536 }).notNull(), // OpenAI ada-002 dimension
-    model: varchar('model', { length: 100 }).notNull().default('text-embedding-3-small'),
+    embedding: vector('embedding', { dimensions: 768 }).notNull(), // Gemini text-embedding-004 dimension
+    model: varchar('model', { length: 100 }).notNull().default('text-embedding-004'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => ({

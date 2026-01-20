@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **ORM**: Drizzle ORM
 - **Auth**: Auth.js v5 (NextAuth)
 - **AI**: Claude API (Anthropic)
-- **Embeddings**: OpenAI (text-embedding-3-small) or Cohere
+- **Embeddings**: Google Gemini (text-embedding-004)
 - **Styling**: Tailwind CSS + shadcn/ui components
 - **Package Manager**: pnpm 9.5
 - **Build System**: Turborepo 2.0
@@ -106,7 +106,7 @@ AUTH_GOOGLE_SECRET=<optional>
 
 # AI
 ANTHROPIC_API_KEY=<get from console.anthropic.com>
-OPENAI_API_KEY=<get from platform.openai.com>
+GOOGLE_AI_API_KEY=<get from aistudio.google.com/app/apikey>
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -148,7 +148,7 @@ See [STATUS.md](STATUS.md) for current feature development status and progress.
 
 ### Embeddings
 - `contentId`: Reference to content
-- `embedding`: Vector (1536 dimensions for OpenAI)
+- `embedding`: Vector (768 dimensions for Gemini)
 - `model`: Embedding model used
 
 ## AI Integration
@@ -168,10 +168,7 @@ Used for:
 
 Files: `lib/ai/embeddings.ts`
 
-**Note**: Embedding generation is a placeholder. Choose and configure:
-- OpenAI (recommended)
-- Cohere
-- HuggingFace (self-hosted)
+**Note**: Embeddings are now configured to use Google Gemini (text-embedding-004) with 768 dimensions.
 
 ## Code Style
 

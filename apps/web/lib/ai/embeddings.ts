@@ -1,64 +1,58 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { db } from '@/lib/db/client';
 import { embeddings, content } from '@/lib/db/schema';
-import { eq, sql, desc } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 /**
- * TODO: Choose and configure an embedding service
+ * Gemini Embedding Configuration
  *
- * Options:
- * 1. OpenAI (recommended) - text-embedding-3-small
- *    - Cost: $0.02 per 1M tokens
- *    - Dimensions: 1536
- *    - Setup: Add OPENAI_API_KEY to .env.local
- *
- * 2. Cohere - embed-english-v3.0
- *    - Free tier available
- *    - Dimensions: 1024
- *    - Setup: Add COHERE_API_KEY to .env.local
- *
- * 3. HuggingFace - sentence-transformers
- *    - Free (self-hosted)
- *    - Various models available
- *    - Requires more setup
+ * Using Google's Gemini embedding model for semantic search
+ * - Model: text-embedding-004
+ * - Dimensions: 768
+ * - Cost: Free tier available, then $0.025 per 1M tokens
+ * - Setup: Add GOOGLE_AI_API_KEY to .env.local
  */
+
+if (!process.env.GOOGLE_AI_API_KEY) {
+  console.warn('GOOGLE_AI_API_KEY is not set. Embedding features will be disabled.');
+}
+
+const genAI = process.env.GOOGLE_AI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
+  : null;
 
 export interface EmbeddingConfig {
   model: string;
   dimensions: number;
 }
 
-// Default configuration for OpenAI
+// Configuration for Gemini embeddings
 export const EMBEDDING_CONFIG: EmbeddingConfig = {
-  model: 'text-embedding-3-small',
-  dimensions: 1536,
+  model: 'text-embedding-004',
+  dimensions: 768,
 };
 
 /**
- * Generate embedding for text using configured service
- *
- * PLACEHOLDER: Implement based on chosen embedding service
+ * Generate embedding for text using Gemini
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  // TODO: Implement based on chosen service
-  // Example for OpenAI:
-  /*
-  import OpenAI from 'openai';
+  if (!genAI) {
+    console.warn('Gemini AI not configured. Skipping embedding generation.');
+    return new Array(EMBEDDING_CONFIG.dimensions).fill(0);
+  }
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  try {
+    const model = genAI.getGenerativeModel({ model: EMBEDDING_CONFIG.model });
 
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text,
-  });
+    const result = await model.embedContent(text);
+    const embedding = result.embedding;
 
-  return response.data[0].embedding;
-  */
-
-  // For now, return a placeholder
-  console.warn('Embedding generation not implemented yet. Please configure an embedding service.');
-  return new Array(EMBEDDING_CONFIG.dimensions).fill(0);
+    return embedding.values;
+  } catch (error) {
+    console.error('Error generating embedding with Gemini:', error);
+    // Return zero vector as fallback
+    return new Array(EMBEDDING_CONFIG.dimensions).fill(0);
+  }
 }
 
 /**
@@ -84,7 +78,7 @@ export async function upsertContentEmbedding(contentId: string): Promise<void> {
     ]
       .filter(Boolean)
       .join(' ')
-      .slice(0, 8000); // Limit length
+      .slice(0, 10000); // Gemini can handle longer context
 
     // Generate embedding
     const embeddingVector = await generateEmbedding(textToEmbed);
