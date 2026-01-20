@@ -76,10 +76,11 @@ export function getDomain(url: string): string | null {
 export function slugify(text: string): string {
   return text
     .toLowerCase()
+    .trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/--+/g, '-')
-    .trim();
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 }
 
 /**
