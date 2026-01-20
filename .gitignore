@@ -2,6 +2,7 @@
 node_modules/
 .pnp
 .pnp.js
+jspm_packages/
 
 # Testing
 coverage/
@@ -32,6 +33,7 @@ lerna-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
 
 # Vercel
 .vercel

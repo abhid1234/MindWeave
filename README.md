@@ -7,7 +7,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 ## Features
 
 - **Quick Capture**: Save notes, links, and files instantly
-- **AI Auto-Tagging**: Claude automatically organizes your content
+- **AI Auto-Tagging**: Automatically organize your content
 - **Semantic Search**: Find content by meaning, not just keywords
 - **Knowledge Q&A**: Ask questions and get answers from your knowledge base
 - **Smart Library**: Browse and filter all your content in one place
@@ -19,10 +19,9 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Backend**: Next.js Server Actions, Drizzle ORM
 - **Database**: PostgreSQL 16 + pgvector
 - **Auth**: Auth.js v5 with Google OAuth
-- **AI**: Claude API (Anthropic)
 - **Embeddings**: OpenAI text-embedding-3-small
 - **Styling**: Tailwind CSS + shadcn/ui
-- **Tooling**: pnpm, Turborepo, Docker Compose
+- **Tooling**: npm, Turborepo, Docker Compose
 
 ## Quick Start
 
@@ -30,14 +29,13 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 
 - Node.js 20+ ([download](https://nodejs.org/))
 - Docker Desktop ([download](https://www.docker.com/products/docker-desktop))
-- pnpm 9.5+ (will be installed by setup script)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/mindweave.git
-   cd mindweave
+   git clone https://github.com/abhid1234/MindWeave.git
+   cd MindWeave
    ```
 
 2. **Run the setup script**
@@ -46,7 +44,6 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
    ```
 
    This will:
-   - Install pnpm if needed
    - Install dependencies
    - Start PostgreSQL with Docker
    - Run database migrations
@@ -60,14 +57,12 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
    # Generate auth secret
    openssl rand -base64 32
 
-   # Get API keys from:
-   # - https://console.anthropic.com/ (Claude)
-   # - https://platform.openai.com/ (OpenAI)
+   # Get API keys from required providers
    ```
 
 4. **Start the development server**
    ```bash
-   pnpm dev
+   npm run dev
    ```
 
 5. **Open your browser**
@@ -95,21 +90,21 @@ Mindweave/
 
 ```bash
 # Development
-pnpm dev              # Start dev server (http://localhost:3000)
-pnpm build            # Build for production
-pnpm start            # Start production server
-pnpm lint             # Run ESLint
-pnpm type-check       # Run TypeScript compiler
-pnpm format           # Format code with Prettier
+npm run dev              # Start dev server (http://localhost:3000)
+npm run build            # Build for production
+npm start                # Start production server
+npm run lint             # Run ESLint
+npm run type-check       # Run TypeScript compiler
+npm run format           # Format code with Prettier
 
 # Database
-pnpm docker:up        # Start PostgreSQL
-pnpm docker:down      # Stop PostgreSQL
-pnpm docker:logs      # View database logs
-pnpm db:generate      # Generate migration files
-pnpm db:migrate       # Apply migrations
-pnpm db:push          # Push schema changes
-pnpm db:studio        # Open Drizzle Studio (GUI)
+npm run docker:up        # Start PostgreSQL
+npm run docker:down      # Stop PostgreSQL
+npm run docker:logs      # View database logs
+npm run db:generate      # Generate migration files
+npm run db:migrate       # Apply migrations
+npm run db:push          # Push schema changes
+npm run db:studio        # Open Drizzle Studio (GUI)
 
 # Development Tools
 ./scripts/setup-dev.sh              # Initial setup
@@ -120,7 +115,7 @@ tsx scripts/seed-db.ts              # Seed sample data
 
 **View database in GUI:**
 ```bash
-pnpm db:studio
+npm run db:studio
 # Opens at http://localhost:4983
 ```
 
@@ -139,11 +134,9 @@ tsx ../../scripts/seed-db.ts
 
 ### Required APIs
 
-1. **Claude API** (Required for AI features)
-   - Sign up: https://console.anthropic.com/
-   - Create API key
+1. **AI API** (Required for AI features)
+   - Create API key from your provider
    - Add to `.env.local` as `ANTHROPIC_API_KEY`
-   - Cost: ~$10-20/month for personal use
 
 2. **OpenAI API** (Required for embeddings)
    - Sign up: https://platform.openai.com/
@@ -163,14 +156,15 @@ See [STATUS.md](STATUS.md) for current development status.
 
 ### Phase 1: Core Features (In Progress)
 - [x] Project scaffolding
-- [x] Authentication (Google OAuth)
+- [x] Docker PostgreSQL setup
+- [ ] Authentication (Google OAuth)
 - [ ] Content capture (notes, links, files)
 - [ ] Content library with filtering
 - [ ] Full-text search
 - [ ] Manual tagging
 
 ### Phase 2: AI Features (Planned)
-- [ ] Claude auto-tagging
+- [ ] AI auto-tagging
 - [ ] Vector embeddings
 - [ ] Semantic search
 - [ ] Knowledge Q&A chat interface
@@ -182,23 +176,6 @@ See [STATUS.md](STATUS.md) for current development status.
 - [ ] Advanced analytics and insights
 - [ ] Import from Notion, Evernote, etc.
 
-## Development Workflow
-
-This project uses the **Ralph Wiggum plugin** for iterative, test-driven development:
-
-1. **One feature at a time** - Don't start next until current works
-2. **Test thoroughly** - Try edge cases, error scenarios
-3. **Fix immediately** - Don't defer bugs to later
-4. **Commit often** - Git commit after each feature completes
-
-### Using Ralph
-
-```bash
-/ralph-loop      # Start iterative development loop
-/cancel-ralph    # Stop current Ralph session
-/ralph           # View Ralph documentation
-```
-
 ## Environment Variables
 
 Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
@@ -208,7 +185,7 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 | `AUTH_SECRET` | NextAuth secret (generate with `openssl rand -base64 32`) | Yes |
 | `AUTH_URL` | App URL (http://localhost:3000) | Yes |
-| `ANTHROPIC_API_KEY` | Claude API key | Yes |
+| `ANTHROPIC_API_KEY` | AI API key | Yes |
 | `OPENAI_API_KEY` | OpenAI API key for embeddings | Yes |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID | No |
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret | No |
@@ -223,39 +200,11 @@ Mindweave is optimized for deployment on Google Cloud Platform using Cloud Run, 
 
 ```bash
 # 1. Setup secrets
-pnpm gcp:setup-secrets
+npm run gcp:setup-secrets
 
 # 2. Deploy to Cloud Run
-pnpm gcp:deploy
+npm run gcp:deploy
 ```
-
-#### Manual Deployment
-
-1. **Prerequisites**
-   - Google Cloud account with billing enabled
-   - gcloud CLI installed
-   - Project created in GCP
-
-2. **Setup Cloud SQL (PostgreSQL + pgvector)**
-   ```bash
-   gcloud sql instances create mindweave-db \
-     --database-version=POSTGRES_16 \
-     --tier=db-f1-micro \
-     --region=us-central1
-   ```
-
-3. **Configure Secrets**
-   ```bash
-   # Create secrets in Secret Manager
-   echo -n "your-db-url" | gcloud secrets create database-url --data-file=-
-   echo -n "$(openssl rand -base64 32)" | gcloud secrets create auth-secret --data-file=-
-   ```
-
-4. **Deploy**
-   ```bash
-   # Build and deploy with Cloud Build
-   gcloud builds submit --config=cloudbuild.yaml
-   ```
 
 **See [DEPLOYMENT.md](DEPLOYMENT.md) for complete GCP deployment guide including:**
 - Cloud SQL setup with pgvector
@@ -274,7 +223,6 @@ pnpm gcp:deploy
 
 2. **Run with Docker Compose**
    ```bash
-   # Use production docker-compose (create your own based on docker/docker-compose.yml)
    docker-compose -f docker-compose.prod.yml up -d
    ```
 
@@ -290,7 +238,7 @@ pnpm gcp:deploy
 ### Docker won't start
 - Ensure Docker Desktop is running
 - Check for port conflicts (5432)
-- Try: `pnpm docker:down && pnpm docker:up`
+- Try: `npm run docker:down && npm run docker:up`
 
 ### Database connection errors
 - Verify Docker container is running: `docker ps`
@@ -298,7 +246,7 @@ pnpm gcp:deploy
 - Test connection: `psql $DATABASE_URL`
 
 ### TypeScript errors
-- Run `pnpm type-check` to see all errors
+- Run `npm run type-check` to see all errors
 - Ensure all dependencies are installed
 - Clear `.next` folder and rebuild
 
@@ -324,18 +272,13 @@ MIT License - see [LICENSE](LICENSE) file for details
 ## Support
 
 - **Documentation**: See [CLAUDE.md](CLAUDE.md) for development guide
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/yourusername/mindweave/issues)
-- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/yourusername/mindweave/discussions)
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/abhid1234/MindWeave/issues)
+- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/abhid1234/MindWeave/discussions)
 
 ## Acknowledgments
 
 Built with:
 - [Next.js](https://nextjs.org/) by Vercel
-- [Claude AI](https://www.anthropic.com/claude) by Anthropic
 - [pgvector](https://github.com/pgvector/pgvector) for vector search
 - [Drizzle ORM](https://orm.drizzle.team/)
 - [shadcn/ui](https://ui.shadcn.com/)
-
----
-
-**Made with ❤️ using Claude Code**
