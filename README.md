@@ -166,7 +166,25 @@ npm run test:coverage
 - Re-run all tests until they pass
 - Main branch must ALWAYS be stable
 
-#### 7. Move to Next Feature
+#### 7. Update Documentation
+**📝 MANDATORY after every feature:**
+```bash
+# Update STATUS.md
+# - Mark feature complete in "Completed Features"
+# - Add entry to "Recent Updates" with timestamp
+# - Update "Current Focus" to next feature
+# - Mark checkbox [x] in "Pending Features"
+
+# Update README.md
+# - Mark feature complete [x] in "Feature Roadmap"
+
+# Commit and push
+git add README.md STATUS.md
+git commit -m "docs: Update documentation after [feature-name] completion"
+git push origin main
+```
+
+#### 8. Move to Next Feature
 Only start the next feature after:
 - ✅ Current feature fully implemented
 - ✅ Thoroughly tested in feature branch
@@ -174,6 +192,7 @@ Only start the next feature after:
 - ✅ **ALL tests passing in main branch**
 - ✅ No regressions detected
 - ✅ Build succeeds in main
+- ✅ **Documentation updated (README.md and STATUS.md)**
 
 ### Available Commands
 

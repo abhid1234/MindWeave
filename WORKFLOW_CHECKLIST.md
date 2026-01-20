@@ -217,13 +217,28 @@ npm run build
 
 ---
 
-### ☐ Step 7: Document and Move to Next Feature
+### ☐ Step 7: Update Documentation and Move to Next Feature
 
-**Documentation:**
-- [ ] Update STATUS.md (mark feature as completed)
+**📝 MANDATORY Documentation Updates:**
+- [ ] Update **STATUS.md**:
+  - [ ] Mark feature as complete in "Completed Features" section
+  - [ ] Add detailed completion entry in "Recent Updates" with timestamp
+  - [ ] Update "Current Focus" to reflect completion
+  - [ ] Mark feature checkbox in "Pending Features" as done
+- [ ] Update **README.md**:
+  - [ ] Mark feature as complete `[x]` in "Feature Roadmap" section
+  - [ ] Update feature status from `[ ]` to `[x]`
+  - [ ] Ensure roadmap reflects current state
+- [ ] Add comments to complex code (if needed)
 - [ ] Update CLAUDE.md if workflow changed
-- [ ] Add comments to complex code
 - [ ] Update API documentation (if applicable)
+
+**Commit Documentation:**
+```bash
+git add README.md STATUS.md
+git commit -m "docs: Update documentation after [feature-name] completion"
+git push origin main
+```
 
 **Final Verification:**
 - [ ] Feature fully implemented ✓

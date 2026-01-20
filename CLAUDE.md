@@ -153,7 +153,32 @@ npm run build             # Production build
 - Ensures main branch is always production-ready
 - Prevents cascading failures in future features
 
-#### 7. Move to Next Feature
+#### 7. Update Documentation
+**📝 MANDATORY: Update documentation after every feature completion**
+
+```bash
+# Update STATUS.md
+# - Mark feature as complete in "Completed Features" section
+# - Add entry in "Recent Updates" with timestamp and details
+# - Update "Current Focus" to next feature
+# - Mark feature checkbox in "Pending Features" as [x]
+
+# Update README.md
+# - Mark feature as complete [x] in "Feature Roadmap" section
+
+# Commit documentation updates
+git add README.md STATUS.md
+git commit -m "docs: Update documentation after [feature-name] completion"
+git push origin main
+```
+
+**Why this is critical:**
+- Keeps project status transparent and up-to-date
+- Helps team understand what's completed
+- Prevents confusion (like we just had!)
+- Makes it easy to see project progress
+
+#### 8. Move to Next Feature
 **Do not start the next feature until the current one is:**
 - ✅ Fully implemented
 - ✅ All tests passing with ≥80% coverage in feature branch
@@ -161,6 +186,7 @@ npm run build             # Production build
 - ✅ **ALL tests passing in main branch (no regressions)**
 - ✅ Build succeeds in main
 - ✅ Feature verified working in main branch
+- ✅ **Documentation updated (README.md and STATUS.md)**
 
 ### Using Ralph Wiggum Plugin
 
