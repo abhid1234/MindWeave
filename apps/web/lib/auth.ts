@@ -85,19 +85,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return true;
     },
-    async session({ session, user, token }) {
-      // For database sessions (OAuth providers)
-      if (user && session.user) {
-        session.user.id = user.id;
-      }
-      // For JWT sessions (Credentials provider)
+    async session({ session, token }) {
+      // Add user ID to session from JWT token
       if (token && session.user) {
         session.user.id = token.sub as string;
       }
       return session;
     },
-    async jwt({ token, user }) {
-      // Store user id in JWT for Credentials provider
+    async jwt({ token, user, account }) {
+      // Store user ID in token on sign in
       if (user) {
         token.id = user.id;
       }
@@ -105,6 +101,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
   session: {
-    strategy: isDevelopment ? 'jwt' : 'database',
+    strategy: 'jwt', // Use JWT for Edge Runtime compatibility
   },
 });
