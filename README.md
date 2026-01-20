@@ -256,7 +256,7 @@ See [STATUS.md](STATUS.md) for current development status.
 ### Phase 1: Core Features (In Progress)
 - [x] Project scaffolding
 - [x] Docker PostgreSQL setup
-- [ ] Authentication (Google OAuth)
+- [x] Authentication (Google OAuth + JWT sessions)
 - [ ] Content capture (notes, links, files)
 - [ ] Content library with filtering
 - [ ] Full-text search
