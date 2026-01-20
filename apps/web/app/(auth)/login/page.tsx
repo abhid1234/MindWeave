@@ -3,6 +3,7 @@ import { auth, signIn } from '@/lib/auth';
 
 export default async function LoginPage() {
   const session = await auth();
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   if (session?.user) {
     redirect('/dashboard');
@@ -19,6 +20,53 @@ export default async function LoginPage() {
         </div>
 
         <div className="mt-8 space-y-4">
+          {/* Development-only test login */}
+          {isDevelopment && (
+            <>
+              <div className="rounded-lg border-2 border-amber-300 bg-amber-50 p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-800">
+                  ⚠️ Development Mode Only
+                </p>
+                <form
+                  action={async (formData: FormData) => {
+                    'use server';
+                    const email = formData.get('email') as string;
+                    await signIn('dev-login', {
+                      email,
+                      redirectTo: '/dashboard',
+                    });
+                  }}
+                  className="space-y-3"
+                >
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="test@example.com"
+                    defaultValue="test@mindweave.dev"
+                    className="w-full rounded-lg border border-amber-300 px-4 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="w-full rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-700"
+                  >
+                    Dev Login (No Password)
+                  </button>
+                </form>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-slate-500">or</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Google OAuth */}
           <form
             action={async () => {
               'use server';
@@ -50,22 +98,6 @@ export default async function LoginPage() {
               Continue with Google
             </button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-slate-500">Coming soon</span>
-            </div>
-          </div>
-
-          <button
-            disabled
-            className="w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400"
-          >
-            Email & Password
-          </button>
         </div>
 
         <p className="mt-8 text-center text-xs text-slate-500">
