@@ -139,7 +139,9 @@ export async function searchSimilarContent(
       LIMIT ${limit}
     `);
 
-    return results.rows as any;
+    return results as unknown as Array<
+      typeof content.$inferSelect & { similarity: number }
+    >;
   } catch (error) {
     console.error('Error searching similar content:', error);
     return [];
@@ -176,7 +178,11 @@ export async function getRecommendations(
       LIMIT ${limit}
     `);
 
-    return results.rows as any;
+    return results as unknown as Array<{
+      id: string;
+      title: string;
+      similarity: number;
+    }>;
   } catch (error) {
     console.error('Error getting recommendations:', error);
     return [];

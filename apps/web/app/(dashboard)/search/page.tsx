@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
-import { eq, or, ilike } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
 export default async function SearchPage({
@@ -17,7 +17,7 @@ export default async function SearchPage({
   }
 
   const query = params.q || '';
-  let results: any[] = [];
+  let results: Array<typeof content.$inferSelect> = [];
 
   if (query) {
     // Simple keyword search for now
