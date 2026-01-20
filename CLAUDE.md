@@ -52,17 +52,131 @@ Mindweave/
 
 ## Development Workflow
 
-This project uses the **Ralph Wiggum plugin** for iterative, test-driven development:
-1. Build ONE feature at a time
-2. Test thoroughly before moving to next feature
-3. Fix issues immediately, no deferred bugs
-4. Commit after each feature completes
+This project uses a **strict test-driven development workflow** with feature branches and comprehensive testing:
 
-### Using Ralph
+### Feature Development Cycle
+
+**For each feature, follow these steps in order:**
+
+#### 1. Create Feature Branch
+```bash
+git checkout -b feature/feature-name
+```
+
+Branch naming convention:
+- `feature/authentication-flow`
+- `feature/note-capture`
+- `feature/semantic-search`
+
+#### 2. Build the Feature
+- Implement the feature following the plan in STATUS.md
+- Focus on ONE feature at a time
+- Follow existing code patterns and conventions
+- Use Ralph Wiggum plugin for iterative development: `/ralph-loop`
+
+#### 3. Write Comprehensive Test Cases
+**Testing Requirements:**
+- Unit tests for all business logic functions
+- Integration tests for API routes and database operations
+- Component tests for React components with React Testing Library
+- E2E tests for critical user flows with Playwright
+- **Minimum code coverage: 80%**
+
+```bash
+npm run test:watch       # Develop tests in watch mode
+npm run test:coverage    # Check coverage percentage
+```
+
+#### 4. Verify All Quality Checks Pass
+Before merging, ensure:
+```bash
+npm run test             # ✅ All tests pass
+npm run test:coverage    # ✅ Coverage ≥ 80%
+npm run type-check       # ✅ No TypeScript errors
+npm run lint             # ✅ No linting errors
+npm run build            # ✅ Build succeeds
+```
+
+**Manual verification:**
+- ✅ Feature works as expected in browser
+- ✅ Edge cases handled
+- ✅ Error states tested
+- ✅ No console errors or warnings
+
+#### 5. Merge to Main
+Only merge when feature is **completely solid**:
+```bash
+# Run all checks one final time in feature branch
+npm run test && npm run type-check && npm run lint
+
+# Merge to main
+git checkout main
+git merge feature/feature-name
+
+# Push to remote
+git push origin main
+
+# Delete feature branch
+git branch -d feature/feature-name
+```
+
+#### 6. Run Full Test Suite in Main Branch
+**CRITICAL: Verify main branch stability after every merge**
+```bash
+# Switch to main branch
+git checkout main
+
+# Run complete test suite
+npm run test              # All unit & integration tests
+npm run test:e2e          # All E2E tests
+npm run test:coverage     # Verify coverage ≥ 80%
+npm run type-check        # TypeScript validation
+npm run lint              # Code quality
+npm run build             # Production build
+
+# Manual verification
+# - Test the feature in the browser
+# - Check for console errors
+# - Verify existing features still work
+```
+
+**If any tests fail after merge:**
+- ⚠️ **STOP - Do not proceed to next feature**
+- Fix the issue immediately in main branch
+- Re-run all tests until they pass
+- Investigate why tests passed in feature branch but failed in main
+- Main branch must **ALWAYS** be stable and deployable
+
+**Why this step is critical:**
+- Catches integration issues between features
+- Detects regressions in existing functionality
+- Ensures main branch is always production-ready
+- Prevents cascading failures in future features
+
+#### 7. Move to Next Feature
+**Do not start the next feature until the current one is:**
+- ✅ Fully implemented
+- ✅ All tests passing with ≥80% coverage in feature branch
+- ✅ Merged to main
+- ✅ **ALL tests passing in main branch (no regressions)**
+- ✅ Build succeeds in main
+- ✅ Feature verified working in main branch
+
+### Using Ralph Wiggum Plugin
+
+Ralph helps with iterative development within a feature branch:
 
 - Start loop: `/ralph-loop`
 - Cancel loop: `/cancel-ralph`
 - Help: `/ralph`
+
+**Ralph's role:**
+- Helps build the feature iteratively
+- Runs tests after each change
+- Fixes issues immediately
+- Ensures code quality
+
+**Important:** Ralph operates within the feature branch workflow above.
 
 ## Common Commands
 
@@ -113,9 +227,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-## Feature Status
+## Documentation
 
-See [STATUS.md](STATUS.md) for current feature development status and progress.
+- **[STATUS.md](STATUS.md)** - Current feature development status and progress
+- **[TESTING.md](TESTING.md)** - Comprehensive testing strategy and best practices
+- **[WORKFLOW_CHECKLIST.md](WORKFLOW_CHECKLIST.md)** - Step-by-step checklist for each feature
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - GCP deployment guide
 
 ## Key Features (Planned)
 

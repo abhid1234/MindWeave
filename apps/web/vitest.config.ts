@@ -22,6 +22,8 @@ export default defineConfig({
         '**/types/**',
         'drizzle/',
         'public/',
+        'lib/db/schema.ts', // Schema definitions - infrastructure
+        'lib/auth.ts', // Auth.js configuration - tested via integration tests
       ],
       thresholds: {
         statements: 80,

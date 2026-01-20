@@ -1,11 +1,13 @@
 # Mindweave Project Status
 
 **Last Updated**: 2026-01-20
-**Current Phase**: Development Environment Ready - Ready for Database Setup
+**Current Phase**: Testing Framework Complete - Ready for Feature Development
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **Docker PostgreSQL setup complete!** Database running with pgvector extension. Ready for environment configuration and migrations.
+✅ **Testing framework fully operational!** All tests passing with 100% statement coverage and 85.71% branch coverage.
+
+**Next Step**: Begin feature development with `/ralph-loop`. Start with Feature #1: Authentication Flow.
 
 ## ✅ Completed Features
 
@@ -26,7 +28,19 @@
 - [x] Documentation updates (CLAUDE.md, README.md)
 
 ## 🚧 In Progress
-None - Docker setup complete, ready for environment configuration
+None - Ready for feature development
+
+## 📋 Immediate Tasks
+
+### Testing Framework Setup ✅ COMPLETE
+- [x] **Install Vitest** - Installed v4.0.17
+- [x] **Install React Testing Library** - Installed v16.3.2
+- [x] **Install Playwright** - Installed v1.57.0 with Chromium
+- [x] **Configure test scripts** - Added test, test:watch, test:coverage, test:e2e
+- [x] **Set up coverage reporting** - Configured with ≥80% thresholds
+- [x] **Create test utilities** - Database helpers and test fixtures created
+- [x] **Write example tests** - 56 tests total (36 unit + 20 component)
+- [x] **Verify test setup** - All tests passing, 100% statement coverage
 
 ## 📋 Pending Features
 
@@ -72,6 +86,37 @@ None - fresh scaffolding
   - Database `mindweave_dev` created and accessible
   - Docker scripts added to package.json (docker:up, docker:down, docker:logs)
   - Using npm as package manager (pnpm not available in corp environment)
+- **2026-01-20 04:55** - ✅ **DEVELOPMENT ENVIRONMENT SETUP COMPLETE**
+  - Installed all npm dependencies (522 packages)
+  - Configured API keys in .env.local:
+    - AUTH_SECRET generated and set
+    - ANTHROPIC_API_KEY configured
+    - GOOGLE_AI_API_KEY configured
+  - Generated database migrations with drizzle-kit
+  - Created all database tables via migration SQL
+  - Verified database structure (6 tables with pgvector support)
+  - Started Next.js development server on http://localhost:3000
+  - **STATUS: Ready for feature development with Ralph (`/ralph-loop`)**
+- **2026-01-20 05:10** - ✅ **DEVELOPMENT WORKFLOW DOCUMENTATION COMPLETE**
+  - Updated workflow to include 7 steps (was 6)
+  - Added critical Step 6: Run ALL tests in main after every merge
+  - Created comprehensive WORKFLOW_CHECKLIST.md for feature development
+  - Updated README.md, CLAUDE.md, STATUS.md, TESTING.md with new workflow
+  - Emphasized: Main branch must ALWAYS be stable and deployable
+  - **KEY CHANGE: Must run complete test suite in main after each merge to catch regressions**
+- **2026-01-20 05:36** - ✅ **TESTING FRAMEWORK SETUP COMPLETE**
+  - Installed Vitest v4.0.17 for unit/integration tests
+  - Installed React Testing Library v16.3.2 for component tests
+  - Installed Playwright v1.57.0 for E2E tests
+  - Created vitest.config.ts with 80% coverage thresholds
+  - Created playwright.config.ts for E2E test configuration
+  - Added 7 test scripts to package.json (test, test:watch, test:ui, test:coverage, test:e2e, test:e2e:ui, test:e2e:debug)
+  - Created test utilities: database helpers (cleanDatabase, createTestUser, createTestContent, createTestEmbedding)
+  - Created test fixtures for users and content
+  - Wrote 56 example tests: 36 unit tests (utils) + 20 component tests (Button)
+  - Fixed slugify() function bug discovered during testing
+  - Verified all tests passing with 100% statement coverage and 85.71% branch coverage
+  - **STATUS: Ready for feature development with test-driven workflow**
 
 ## 📚 Tech Stack
 - **Framework**: Next.js 15 (App Router)
@@ -95,46 +140,112 @@ None - fresh scaffolding
    - Accessible at localhost:5432
    - Database: mindweave_dev
 
-3. **Configure API keys** in `apps/web/.env.local`:
-   - Generate `AUTH_SECRET`: `openssl rand -base64 32`
-   - Add `ANTHROPIC_API_KEY` from https://console.anthropic.com/
-   - Add `GOOGLE_AI_API_KEY` from https://aistudio.google.com/app/apikey
-   - (Optional) Add Google OAuth credentials
+3. ✅ **Configure API keys** - DONE (API keys configured in .env.local)
+   - AUTH_SECRET generated and set
+   - ANTHROPIC_API_KEY configured
+   - GOOGLE_AI_API_KEY configured
+   - Google OAuth credentials (optional - can be added later)
 
-4. **Run database migrations**
+4. ✅ **Run database migrations** - DONE
+   - Migration files generated with drizzle-kit
+   - All 6 tables created in PostgreSQL:
+     - users, accounts, sessions, verificationTokens (Auth.js)
+     - content (notes, links, files)
+     - embeddings (vector(768) for Gemini semantic search)
+   - Foreign key constraints and indexes applied
+
+5. ✅ **Start development server** - DONE
+   - Next.js dev server running on http://localhost:3000
+   - Hot reload enabled
+
+6. ✅ **Verify application** - READY
+   - Application accessible at http://localhost:3000
+
+### Then (Begin Feature Development with Test-Driven Workflow)
+
+**Build features one at a time following this strict workflow:**
+
+📋 **Use [WORKFLOW_CHECKLIST.md](WORKFLOW_CHECKLIST.md) for each feature to ensure all steps are completed.**
+
+#### For Each Feature:
+
+1. **Create Feature Branch**
    ```bash
-   cd apps/web
-   npm run db:generate
-   npm run db:push
-   cd ../..
+   git checkout -b feature/feature-name
    ```
 
-5. **Start development server**
+2. **Build the Feature**
+   - Use `/ralph-loop` for iterative development
+   - Focus on one feature at a time
+   - Follow existing code patterns
+
+3. **Write Test Cases**
+   - Unit tests for business logic
+   - Integration tests for APIs and database
+   - Component tests for React components
+   - E2E tests for critical flows
+   - **Target: ≥80% code coverage**
+
+4. **Verify Quality**
    ```bash
-   npm run dev
+   npm run test              # All tests must pass
+   npm run test:coverage     # Coverage ≥ 80%
+   npm run type-check        # No TypeScript errors
+   npm run lint              # No linting errors
+   npm run build             # Build succeeds
+   ```
+   - Manual testing in browser
+   - All edge cases covered
+   - No console errors
+
+5. **Merge to Main**
+   ```bash
+   # Verify all checks pass in feature branch
+   npm run test && npm run type-check && npm run lint
+
+   # Merge to main
+   git checkout main
+   git merge feature/feature-name
+   git push origin main
+   git branch -d feature/feature-name
    ```
 
-6. **Verify** http://localhost:3000 loads successfully
+6. **Run ALL Tests in Main Branch**
+   ```bash
+   # CRITICAL: Verify main branch stability
+   git checkout main
+   npm run test              # All tests
+   npm run test:e2e          # E2E tests
+   npm run test:coverage     # Coverage check
+   npm run type-check        # TypeScript
+   npm run lint              # Linting
+   npm run build             # Build
+   ```
+   **If any tests fail: STOP and fix immediately before next feature**
 
-### Then (Begin Feature Development with Ralph)
-1. Run `/ralph-loop` to start iterative development
-2. Build features **one at a time** in this order:
-   - Authentication Flow (login/logout)
-   - Note Capture (form + database)
-   - Content Library (display + filtering)
-   - Full-text Search
-   - Manual Tagging
-   - Claude Auto-Tagging
-   - Vector Embeddings
-   - Semantic Search
-   - Knowledge Q&A
+7. **Move to Next Feature**
+   - Only after current feature is 100% complete
+   - Merged to main
+   - **ALL tests passing in main (no regressions)**
 
-**Remember**: With Ralph, complete and test each feature before moving to the next!
+#### Feature Order (One at a Time):
+1. Authentication Flow (login/logout)
+2. Note Capture (form + database)
+3. Content Library (display + filtering)
+4. Full-text Search
+5. Manual Tagging
+6. Claude Auto-Tagging
+7. Vector Embeddings
+8. Semantic Search
+9. Knowledge Q&A
 
 ## 📖 Development Approach
-This project uses the **Ralph Wiggum plugin** for iterative, test-driven development:
-- Build ONE feature at a time
-- Test thoroughly before moving to next feature
-- Fix issues immediately, no deferred bugs
-- Commit after each feature completes
-- Always maintain working software baseline
+This project uses **strict test-driven development** with feature branches:
+- ✅ Build ONE feature at a time in a feature branch
+- ✅ Write comprehensive test cases (≥80% coverage)
+- ✅ Run all quality checks (tests, types, lint, build) in feature branch
+- ✅ Merge to main only when feature is completely solid
+- ✅ **Run ALL tests in main after every merge (catch regressions)**
+- ✅ Fix any failures immediately before next feature
+- ✅ Main branch must ALWAYS be stable and deployable
+- ✅ No deferred bugs - address issues immediately

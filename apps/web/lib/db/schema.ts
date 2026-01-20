@@ -8,6 +8,7 @@ import {
   jsonb,
   vector,
   index,
+  integer,
   primaryKey,
 } from 'drizzle-orm/pg-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
@@ -35,7 +36,7 @@ export const accounts = pgTable(
     providerAccountId: text('providerAccountId').notNull(),
     refresh_token: text('refresh_token'),
     access_token: text('access_token'),
-    expires_at: timestamp('expires_at', { mode: 'date' }),
+    expires_at: integer('expires_at'),
     token_type: text('token_type'),
     scope: text('scope'),
     id_token: text('id_token'),
@@ -90,7 +91,7 @@ export const content = pgTable(
       filePath?: string;
       favicon?: string;
       domain?: string;
-      [key: string]: any;
+      [key: string]: unknown;
     }>(),
     tags: text('tags').array().notNull().default([]),
     autoTags: text('auto_tags').array().notNull().default([]),

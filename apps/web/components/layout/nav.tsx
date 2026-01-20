@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PlusCircle, Search, Library, MessageSquare } from 'lucide-react';
+import { Home, PlusCircle, Search, Library } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },

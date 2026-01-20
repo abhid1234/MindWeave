@@ -19,7 +19,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Backend**: Next.js Server Actions, Drizzle ORM
 - **Database**: PostgreSQL 16 + pgvector
 - **Auth**: Auth.js v5 with Google OAuth
-- **Embeddings**: OpenAI text-embedding-3-small
+- **AI**: Claude API (Anthropic) + Google Gemini (embeddings)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Tooling**: npm, Turborepo, Docker Compose
 
@@ -86,6 +86,95 @@ Mindweave/
 
 ## Development
 
+### Development Workflow
+
+This project follows a **strict test-driven development workflow** with feature branches:
+
+#### 1. Create Feature Branch
+```bash
+git checkout -b feature/authentication-flow
+git checkout -b feature/note-capture
+git checkout -b feature/semantic-search
+```
+
+#### 2. Build the Feature
+- Implement the feature following the plan
+- Focus on one feature at a time
+- Follow existing code patterns and conventions
+
+#### 3. Write Test Cases
+```bash
+npm run test:watch              # Run tests in watch mode
+npm run test:coverage           # Generate coverage report
+```
+
+**Testing Requirements:**
+- **Unit tests** for all business logic functions
+- **Integration tests** for API routes and database operations
+- **Component tests** for React components
+- **E2E tests** for critical user flows
+- **Minimum code coverage**: 80%
+
+#### 4. Run Tests & Verify Coverage
+```bash
+npm run test                    # Run all tests
+npm run test:coverage           # Check coverage
+npm run type-check              # TypeScript validation
+npm run lint                    # Code quality check
+```
+
+**Feature is ready to merge only when:**
+- ✅ All tests pass
+- ✅ Code coverage ≥ 80%
+- ✅ No TypeScript errors
+- ✅ No linting errors
+- ✅ Feature is manually tested and working
+
+#### 5. Merge to Main
+```bash
+# Ensure all checks pass in feature branch first
+npm run test && npm run type-check && npm run lint
+
+# Merge to main
+git checkout main
+git merge feature/feature-name
+
+# Push to remote
+git push origin main
+
+# Delete feature branch
+git branch -d feature/feature-name
+```
+
+#### 6. Run Full Test Suite in Main
+**CRITICAL: After every merge, verify main branch stability**
+```bash
+# In main branch, run complete test suite
+npm run test              # All unit & integration tests
+npm run test:e2e          # All E2E tests
+npm run type-check        # TypeScript validation
+npm run lint              # Code quality
+npm run build             # Production build
+
+# Verify coverage hasn't dropped
+npm run test:coverage
+```
+
+**If any tests fail after merge:**
+- ⚠️ DO NOT proceed to next feature
+- Fix the issue immediately in main
+- Re-run all tests until they pass
+- Main branch must ALWAYS be stable
+
+#### 7. Move to Next Feature
+Only start the next feature after:
+- ✅ Current feature fully implemented
+- ✅ Thoroughly tested in feature branch
+- ✅ Merged to main
+- ✅ **ALL tests passing in main branch**
+- ✅ No regressions detected
+- ✅ Build succeeds in main
+
 ### Available Commands
 
 ```bash
@@ -96,6 +185,12 @@ npm start                # Start production server
 npm run lint             # Run ESLint
 npm run type-check       # Run TypeScript compiler
 npm run format           # Format code with Prettier
+
+# Testing (to be configured)
+npm run test             # Run all tests
+npm run test:watch       # Run tests in watch mode
+npm run test:coverage    # Generate coverage report
+npm run test:e2e         # Run end-to-end tests
 
 # Database
 npm run docker:up        # Start PostgreSQL
@@ -134,15 +229,19 @@ tsx ../../scripts/seed-db.ts
 
 ### Required APIs
 
-1. **AI API** (Required for AI features)
-   - Create API key from your provider
-   - Add to `.env.local` as `ANTHROPIC_API_KEY`
-
-2. **OpenAI API** (Required for embeddings)
-   - Sign up: https://platform.openai.com/
+1. **Anthropic API** (Required for AI features)
+   - Sign up: https://console.anthropic.com/
    - Create API key
-   - Add to `.env.local` as `OPENAI_API_KEY`
-   - Cost: ~$1-5/month for embeddings
+   - Add to `.env.local` as `ANTHROPIC_API_KEY`
+   - Used for: Auto-tagging, Q&A, content summarization
+   - Cost: Pay-as-you-go pricing
+
+2. **Google AI API** (Required for embeddings)
+   - Sign up: https://aistudio.google.com/app/apikey
+   - Create API key
+   - Add to `.env.local` as `GOOGLE_AI_API_KEY`
+   - Used for: Vector embeddings (text-embedding-004)
+   - Cost: Free tier available
 
 3. **Google OAuth** (Optional - for authentication)
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
@@ -185,8 +284,8 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 | `AUTH_SECRET` | NextAuth secret (generate with `openssl rand -base64 32`) | Yes |
 | `AUTH_URL` | App URL (http://localhost:3000) | Yes |
-| `ANTHROPIC_API_KEY` | AI API key | Yes |
-| `OPENAI_API_KEY` | OpenAI API key for embeddings | Yes |
+| `ANTHROPIC_API_KEY` | Claude API key for AI features | Yes |
+| `GOOGLE_AI_API_KEY` | Google Gemini API key for embeddings | Yes |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID | No |
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret | No |
 
@@ -271,7 +370,11 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## Support
 
-- **Documentation**: See [CLAUDE.md](CLAUDE.md) for development guide
+- **Documentation**:
+  - [CLAUDE.md](CLAUDE.md) - Development guide and workflow
+  - [TESTING.md](TESTING.md) - Testing strategy and best practices
+  - [WORKFLOW_CHECKLIST.md](WORKFLOW_CHECKLIST.md) - Feature development checklist
+  - [DEPLOYMENT.md](DEPLOYMENT.md) - GCP deployment guide
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/abhid1234/MindWeave/issues)
 - **Discussions**: Ask questions in [GitHub Discussions](https://github.com/abhid1234/MindWeave/discussions)
 
