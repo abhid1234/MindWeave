@@ -1,0 +1,93 @@
+# Google Cloud Run Service Configuration Template
+# Deploy with: gcloud run services replace cloud-run-service.yaml
+#
+# Before deploying:
+# 1. Replace PROJECT_ID with your GCP project ID
+# 2. Update image tag (SHORT_SHA or latest)
+# 3. Ensure secrets exist in Secret Manager
+# 4. Update service name and region if needed
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: mindweave
+  labels:
+    app: mindweave
+    cloud.googleapis.com/location: us-central1
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/launch-stage: GA
+spec:
+  template:
+    metadata:
+      annotations:
+        # Scaling configuration
+        autoscaling.knative.dev/minScale: '0'
+        autoscaling.knative.dev/maxScale: '10'
+
+        # Resource limits
+        run.googleapis.com/cpu-throttling: 'true'
+        run.googleapis.com/startup-cpu-boost: 'true'
+
+        # Secret Manager integration
+        run.googleapis.com/secrets: |
+          DATABASE_URL:database-url:latest,
+          ANTHROPIC_API_KEY:anthropic-api-key:latest,
+          OPENAI_API_KEY:openai-api-key:latest,
+          AUTH_SECRET:auth-secret:latest,
+          AUTH_GOOGLE_ID:google-oauth-client-id:latest,
+          AUTH_GOOGLE_SECRET:google-oauth-client-secret:latest
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: PROJECT_NUMBER-compute@developer.gserviceaccount.com
+      containers:
+        - image: gcr.io/PROJECT_ID/mindweave:latest
+          ports:
+            - name: http1
+              containerPort: 3000
+          env:
+            # Public environment variables
+            - name: NODE_ENV
+              value: production
+            - name: NEXT_PUBLIC_APP_URL
+              value: https://mindweave-us-central1.run.app
+            - name: AUTH_URL
+              value: https://mindweave-us-central1.run.app
+
+            # Secrets from Secret Manager (automatically injected)
+            # - DATABASE_URL
+            # - ANTHROPIC_API_KEY
+            # - OPENAI_API_KEY
+            # - AUTH_SECRET
+            # - AUTH_GOOGLE_ID
+            # - AUTH_GOOGLE_SECRET
+
+          resources:
+            limits:
+              cpu: '1'
+              memory: 512Mi
+
+          # Health check (liveness probe)
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # Startup probe
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 10
+
+  traffic:
+    - percent: 100
+      latestRevision: true
