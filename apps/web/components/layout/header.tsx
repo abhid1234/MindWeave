@@ -1,5 +1,5 @@
-import { signOut } from '@/lib/auth';
 import Image from 'next/image';
+import { signOutAction } from '@/app/actions/auth';
 
 interface HeaderProps {
   user: {
@@ -34,12 +34,7 @@ export default function Header({ user }: HeaderProps) {
             </div>
           </div>
 
-          <form
-            action={async () => {
-              'use server';
-              await signOut({ redirectTo: '/' });
-            }}
-          >
+          <form action={signOutAction}>
             <button
               type="submit"
               className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-accent"

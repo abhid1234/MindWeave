@@ -6,9 +6,9 @@ import { Home, PlusCircle, Search, Library } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/capture', label: 'Capture', icon: PlusCircle },
-  { href: '/search', label: 'Search', icon: Search },
-  { href: '/library', label: 'Library', icon: Library },
+  { href: '/dashboard/capture', label: 'Capture', icon: PlusCircle },
+  { href: '/dashboard/search', label: 'Search', icon: Search },
+  { href: '/dashboard/library', label: 'Library', icon: Library },
 ];
 
 export default function Nav() {

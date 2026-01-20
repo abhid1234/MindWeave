@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       <div className="mt-8">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Recent Items</h2>
-          <Link href="/library" className="text-sm text-primary hover:underline">
+          <Link href="/dashboard/library" className="text-sm text-primary hover:underline">
             View All
           </Link>
         </div>
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-muted-foreground">No content yet. Start capturing your ideas!</p>
             <Link
-              href="/capture"
+              href="/dashboard/capture"
               className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Create Your First Note
@@ -114,21 +114,21 @@ export default async function DashboardPage() {
       {/* Quick Actions */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Link
-          href="/capture"
+          href="/dashboard/capture"
           className="rounded-lg border bg-card p-6 hover:bg-accent"
         >
           <h3 className="font-semibold">Quick Capture</h3>
           <p className="mt-2 text-sm text-muted-foreground">Save a note, link, or file</p>
         </Link>
         <Link
-          href="/search"
+          href="/dashboard/search"
           className="rounded-lg border bg-card p-6 hover:bg-accent"
         >
           <h3 className="font-semibold">Search</h3>
           <p className="mt-2 text-sm text-muted-foreground">Find anything in your knowledge base</p>
         </Link>
         <Link
-          href="/library"
+          href="/dashboard/library"
           className="rounded-lg border bg-card p-6 hover:bg-accent"
         >
           <h3 className="font-semibold">Browse Library</h3>
