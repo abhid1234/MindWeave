@@ -107,7 +107,7 @@ pnpm gcp:setup-secrets
 echo -n "your-database-url" | gcloud secrets create database-url --data-file=-
 echo -n "$(openssl rand -base64 32)" | gcloud secrets create auth-secret --data-file=-
 echo -n "your-anthropic-key" | gcloud secrets create anthropic-api-key --data-file=-
-echo -n "your-openai-key" | gcloud secrets create openai-api-key --data-file=-
+echo -n "your-gemini-key" | gcloud secrets create google-ai-api-key --data-file=-
 echo -n "your-google-oauth-id" | gcloud secrets create google-oauth-client-id --data-file=-
 echo -n "your-google-oauth-secret" | gcloud secrets create google-oauth-client-secret --data-file=-
 ```
@@ -177,7 +177,7 @@ gcloud run deploy mindweave \
   --region=us-central1 \
   --platform=managed \
   --allow-unauthenticated \
-  --set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,OPENAI_API_KEY=openai-api-key:latest,AUTH_SECRET=auth-secret:latest
+  --set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest
 ```
 
 ### Option 3: Deploy with Service YAML

@@ -56,6 +56,15 @@ None - fresh scaffolding
   - Complete DEPLOYMENT.md guide
   - Cloud Run service configuration
   - Production-ready setup for GCR, Cloud Build, and Cloud SQL
+- **2026-01-20 00:30** - ✅ **MIGRATED FROM OPENAI TO GEMINI**
+  - Replaced OpenAI embeddings with Google Gemini (text-embedding-004)
+  - Updated embedding dimensions from 1536 to 768
+  - Changed all environment files to use GOOGLE_AI_API_KEY
+  - Updated GCP deployment configs (cloudbuild.yaml, cloud-run-service.yaml)
+  - Modified deployment scripts to use google-ai-api-key secret
+  - Updated all documentation (CLAUDE.md, DEPLOYMENT.md)
+  - Added @google/generative-ai package dependency
+  - Tech stack now: Claude AI for tagging/Q&A + Gemini for embeddings
 - **2026-01-20 00:06** - ✅ **DOCKER DEVELOPMENT ENVIRONMENT SETUP COMPLETE**
   - Fixed Podman user namespace configuration (subuid/subgid)
   - PostgreSQL 16 container running successfully
@@ -70,7 +79,7 @@ None - fresh scaffolding
 - **Database**: PostgreSQL 16 + pgvector (Docker container for local dev)
 - **ORM**: Drizzle ORM
 - **Auth**: Auth.js v5
-- **AI**: Claude API
+- **AI**: Claude API (tagging, Q&A, summarization) + Google Gemini (embeddings)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Package Manager**: npm (using npm instead of pnpm in corp environment)
 - **Build System**: Turborepo 2.0
@@ -89,7 +98,7 @@ None - fresh scaffolding
 3. **Configure API keys** in `apps/web/.env.local`:
    - Generate `AUTH_SECRET`: `openssl rand -base64 32`
    - Add `ANTHROPIC_API_KEY` from https://console.anthropic.com/
-   - Add `OPENAI_API_KEY` from https://platform.openai.com/
+   - Add `GOOGLE_AI_API_KEY` from https://aistudio.google.com/app/apikey
    - (Optional) Add Google OAuth credentials
 
 4. **Run database migrations**

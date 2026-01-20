@@ -7,8 +7,8 @@
 #   _DATABASE_URL: Cloud SQL connection string
 #
 # Secrets (stored in Secret Manager):
-#   - anthropic-api-key
-#   - openai-api-key
+#   - anthropic-api-key (Claude AI)
+#   - google-ai-api-key (Gemini embeddings)
 #   - auth-secret
 #   - google-oauth-client-id (optional)
 #   - google-oauth-client-secret (optional)
@@ -53,7 +53,7 @@ steps:
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_APP_URL=https://${_SERVICE_NAME}-${_REGION}.run.app'
-      - '--set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,OPENAI_API_KEY=openai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest'
+      - '--set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest'
       - '--min-instances=0'
       - '--max-instances=10'
       - '--memory=512Mi'
