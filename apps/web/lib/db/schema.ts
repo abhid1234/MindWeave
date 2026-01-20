@@ -54,7 +54,7 @@ export const sessions = pgTable('sessions', {
   userId: uuid('userId')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  expires: timestamp('expires', { mode: 'date' }).notNull(),
+  expires: integer('expires').notNull(),
 });
 
 export const verificationTokens = pgTable(
@@ -62,7 +62,7 @@ export const verificationTokens = pgTable(
   {
     identifier: text('identifier').notNull(),
     token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
+    expires: integer('expires').notNull(),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
