@@ -235,7 +235,491 @@ LIMIT 10;
 
 ---
 
-## 3. Future Agent Capabilities
+## 3. Ralph - Autonomous Development Agent
+
+**Purpose**: Autonomous feature development with test-driven workflow
+
+**Type**: Development automation agent
+
+**Implementation**: Bash script loop with Claude Code integration
+
+### Overview
+
+Ralph is an autonomous AI agent that implements product requirements iteratively with comprehensive testing and quality assurance. Unlike the AI agents above that process user content, Ralph is a development agent that helps build the Mindweave application itself.
+
+**Key Characteristics**:
+- **Autonomous**: Runs without manual intervention for multiple iterations
+- **Test-Driven**: Writes tests first, then implementation (≥80% coverage required)
+- **Quality-Focused**: Enforces strict quality gates (tests, types, lint, build)
+- **Learning**: Documents patterns and gotchas for future iterations
+- **Iterative**: Works through stories one at a time until completion
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Ralph Agent Loop                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  1. Read prd.json (Product Requirements)     │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  2. Select highest-priority incomplete story │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  3. Create feature branch                    │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  4. Implement with TDD (tests first)         │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  5. Run quality checks (≥80% coverage)       │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  6. Merge to main, verify no regressions     │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  7. Update status in prd.json                │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  8. Log learnings to progress.txt            │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│  ┌──────────────────────────────────────────────┐           │
+│  │  9. Commit metadata (prd.json, progress.txt) │           │
+│  └──────────────────────────────────────────────┘           │
+│                        ↓                                     │
+│             Continue until all stories pass                  │
+│              or max iterations reached                       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Implementation Files
+
+**Core Files**:
+- `scripts/ralph/ralph.sh` - Main execution script (bash loop)
+- `scripts/ralph/CLAUDE.md` - Prompt template for AI agent
+- `scripts/ralph/prd.json` - Product requirements and task status
+- `scripts/ralph/progress.txt` - Learning log from iterations
+
+**Skills** (User-invocable commands):
+- `/ralph-loop` - Start Ralph autonomous loop
+- `/ralph-status` - Check progress and view completed stories
+- `/ralph-prd` - View/edit product requirements
+
+### Workflow Detail
+
+#### 1. Story Selection
+Ralph reads `prd.json` and finds the highest-priority story with `"passes": false`.
+
+**Story Structure**:
+```json
+{
+  "id": "feature-4",
+  "title": "Full-text Search",
+  "description": "Implement search functionality...",
+  "acceptance_criteria": [
+    "Search bar component",
+    "Server action for search",
+    "≥80% test coverage",
+    "All quality checks passing"
+  ],
+  "priority": 1,
+  "passes": false,
+  "completed_at": null
+}
+```
+
+#### 2. Feature Branch Creation
+```bash
+git checkout -b feature/full-text-search
+```
+
+**Naming Convention**: `feature/story-name` (lowercase, hyphenated)
+
+#### 3. Test-Driven Implementation
+
+**TDD Workflow**:
+1. Write tests FIRST (unit, component, integration, E2E)
+2. Run tests (should fail initially)
+3. Implement feature code
+4. Run tests (should pass)
+5. Refactor if needed
+6. Verify coverage ≥80%
+
+**Test Types Required**:
+- Unit tests for business logic functions
+- Component tests for React components (React Testing Library)
+- Integration tests for API routes and database operations
+- E2E tests for critical user flows (Playwright)
+
+#### 4. Quality Gates
+
+All checks must pass before merge:
+
+```bash
+npm test              # All tests pass
+npm run test:coverage # Coverage ≥ 80%
+npm run type-check    # No TypeScript errors
+npm run lint          # No ESLint warnings
+npm run build         # Production build succeeds
+```
+
+**Coverage Thresholds**:
+- Statements: ≥80%
+- Branches: ≥80%
+- Functions: ≥80%
+- Lines: ≥80%
+
+#### 5. Merge to Main
+
+```bash
+git checkout main
+git merge feature/story-name --no-ff  # No fast-forward
+git push origin main
+git branch -d feature/story-name      # Delete merged branch
+```
+
+**Post-Merge Verification**:
+```bash
+# CRITICAL: Run ALL tests in main to catch regressions
+npm test              # All unit & integration tests
+npm run test:e2e      # All E2E tests
+npm run test:coverage # Verify coverage maintained
+npm run type-check    # TypeScript validation
+npm run lint          # Code quality
+npm run build         # Production build
+```
+
+**If tests fail in main**: STOP immediately, fix issue, re-run all tests.
+
+#### 6. Status Update
+
+Update `prd.json`:
+```json
+{
+  "id": "feature-4",
+  "passes": true,
+  "completed_at": "2026-01-21T12:00:00Z"
+}
+```
+
+#### 7. Progress Logging
+
+Append to `progress.txt`:
+```
+## Iteration 3 - 2026-01-21T12:00:00Z
+Story: feature-4 (Full-text Search)
+Status: Complete
+Coverage: 85.2%
+
+### What Worked
+- PostgreSQL full-text search with ts_rank
+- Combined keyword and filter search
+
+### Challenges
+- URL encoding for special characters
+- Test coverage initially at 75%
+
+### Learnings
+- Use to_tsquery() for proper operator handling
+- Mock searchParams with 'as any' in tests
+
+### Gotchas
+- Remember to index tsvector columns
+- Search needs debouncing in UI
+```
+
+#### 8. Metadata Commit
+
+```bash
+git add scripts/ralph/prd.json scripts/ralph/progress.txt
+git commit -m "chore: Update Ralph task status for full-text-search
+
+Story: Full-text Search
+Status: Complete
+Coverage: 85.2%
+
+Co-Authored-By: Ralph AI <ralph@mindweave.dev>"
+```
+
+### Completion Signal
+
+When all stories have `"passes": true`, Ralph outputs:
+
+```
+<promise>COMPLETE</promise>
+```
+
+The bash script detects this and exits gracefully.
+
+### Quality Standards
+
+Ralph enforces these standards for every story:
+
+**Testing**:
+- Minimum 80% code coverage (statements, branches, functions, lines)
+- All test types present (unit, component, integration, E2E)
+- No skipped or pending tests
+- All tests passing in both feature branch AND main
+
+**Code Quality**:
+- TypeScript strict mode, no `any` without justification
+- Zero ESLint warnings
+- Production build successful
+- No console errors in browser
+
+**Git Hygiene**:
+- Descriptive commit messages
+- Feature branches for each story
+- Clean main branch history (no fast-forward merges)
+- Main branch always stable and deployable
+
+### Error Handling
+
+**If Tests Fail**:
+- DO NOT mark story as complete
+- DO NOT proceed to next story
+- Fix the issue immediately
+- Re-run all quality checks
+
+**If Build Fails**:
+- Review TypeScript errors
+- Check for missing dependencies
+- Verify import paths
+- Fix and rebuild
+
+**If Coverage < 80%**:
+- Write additional tests
+- Focus on untested branches
+- Test edge cases and error paths
+- Review coverage report for gaps
+
+**If Merge Creates Regressions**:
+- Revert merge if needed
+- Fix regression in new commit
+- Re-run full test suite
+- Never leave main branch broken
+
+### Configuration
+
+**Environment Variables**:
+```bash
+# None required - Ralph uses existing project config
+```
+
+**Tool Selection**:
+```bash
+# Default: Claude Code
+./scripts/ralph/ralph.sh
+
+# Use Amp CLI instead
+./scripts/ralph/ralph.sh --tool amp
+
+# Custom max iterations
+./scripts/ralph/ralph.sh --max-iterations 20
+./scripts/ralph/ralph.sh 20  # Shorthand
+```
+
+**Max Iterations**: Default 10, adjustable
+
+### Usage Examples
+
+#### Start Ralph Loop
+```bash
+# From project root
+./scripts/ralph/ralph.sh
+
+# Or using Claude Code skill
+/ralph-loop
+```
+
+#### Check Status
+```bash
+# View progress
+/ralph-status
+
+# Check specific story
+/ralph-prd view feature-4
+```
+
+#### Manage Stories
+```bash
+# View all stories
+/ralph-prd
+
+# Add new story
+/ralph-prd add
+
+# Edit story
+/ralph-prd edit feature-4
+
+# Mark story complete manually
+/ralph-prd complete feature-4
+```
+
+### Branch Change Detection
+
+Ralph automatically detects when the branch changes in `prd.json` and:
+1. Archives previous run's files to `scripts/ralph/archive/{branch}_{timestamp}/`
+2. Resets `progress.txt` for the new branch
+3. Continues with new branch's stories
+
+**Archive Structure**:
+```
+scripts/ralph/archive/
+├── main_20260120_143000/
+│   ├── progress.txt
+│   └── prd.json
+└── feature-search_20260121_090000/
+    ├── progress.txt
+    └── prd.json
+```
+
+### Best Practices
+
+**Story Definition**:
+- Clear acceptance criteria (specific and measurable)
+- Include test coverage requirement (≥80%)
+- Include quality gate requirements (types, lint, build)
+- One feature per story (don't combine multiple features)
+- Realistic scope (break large features into smaller stories)
+
+**Running Ralph**:
+- Review stories in `prd.json` before starting
+- Check `progress.txt` for previous learnings
+- Monitor output during iterations
+- Don't interrupt mid-iteration
+- Let Ralph complete one story before stopping
+
+**After Ralph Runs**:
+- Review what was completed (`/ralph-status`)
+- Check `progress.txt` for learnings
+- Verify all tests still pass in main
+- Update project documentation if needed
+- Commit any manual fixes separately
+
+### Monitoring & Debugging
+
+**Output Files**:
+- Ralph outputs to stdout/stderr in real-time
+- Check `scripts/ralph/progress.txt` for iteration history
+- Check `scripts/ralph/prd.json` for current status
+
+**Common Issues**:
+
+1. **Max iterations reached without completion**
+   - Review `progress.txt` for blockers
+   - Increase max iterations: `./scripts/ralph/ralph.sh 20`
+   - Or finish remaining stories manually
+
+2. **Ralph marks story complete but tests fail**
+   - Use `/ralph-prd incomplete feature-X` to reset
+   - Fix the issue manually
+   - Update acceptance criteria to be more specific
+
+3. **Branch state confusion**
+   - Check `.last-branch` file
+   - Review archived runs if branch changed
+   - Reset with `rm scripts/ralph/.last-branch`
+
+### Conventions from Previous Features
+
+These patterns have proven successful across Features #1-3:
+
+**Server Actions**:
+```typescript
+// Always in app/actions/ directory
+export async function someAction(params: ParamsType): Promise<ResultType> {
+  // 1. Authenticate first
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  // 2. Validate with Zod
+  const validated = schema.safeParse(params);
+  if (!validated.success) {
+    return { success: false, error: validated.error };
+  }
+
+  // 3. Database operations with Drizzle
+  const result = await db.insert(table).values(data);
+
+  // 4. Return result object
+  return { success: true, data: result };
+}
+```
+
+**Component Testing**:
+```typescript
+// Mock Next.js hooks
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({ push: vi.fn() })),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+}));
+
+// Mock server actions
+vi.mock('@/app/actions/content', () => ({
+  getContentAction: vi.fn(),
+}));
+
+// Render with Testing Library
+render(<Component />);
+
+// Assert
+expect(screen.getByText('Expected')).toBeInTheDocument();
+```
+
+**Database Queries**:
+```typescript
+// Filter at database level (not in-memory)
+const items = await db
+  .select()
+  .from(content)
+  .where(
+    and(
+      eq(content.userId, userId),
+      typeFilter ? eq(content.type, typeFilter) : undefined,
+      tagFilter ? sql`${content.tags} @> ARRAY[${tagFilter}]::text[]` : undefined
+    )
+  )
+  .orderBy(/* sorting */);
+```
+
+**Route Structure**:
+- Protected routes: `/dashboard/*`
+- Public routes: Root and `/auth/*`
+- API routes: `/api/*`
+
+### Integration with Other Agents
+
+Ralph is a **development agent** that builds features that use the **AI agents**:
+
+**Example Flow**:
+1. Ralph implements Feature #6 (Claude Auto-Tagging)
+2. Creates server action that calls Claude AI agent
+3. Tests the integration with mocked Claude API
+4. Deploys to production
+5. Users capture content → Claude agent generates tags
+
+**Clear Separation**:
+- **Ralph**: Develops features (autonomous developer)
+- **Claude AI**: Processes user content (tagging, Q&A)
+- **Gemini**: Generates embeddings (semantic search)
+
+---
+
+## 4. Future Agent Capabilities
 
 ### Planned Features
 

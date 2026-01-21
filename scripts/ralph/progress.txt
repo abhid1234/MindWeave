@@ -1,0 +1,136 @@
+# Ralph Progress Log
+
+Started: 2026-01-21T00:00:00Z
+Branch: main
+
+## Overview
+
+This log tracks Ralph's learning and progress as it works through the product requirements in prd.json.
+Each iteration documents what worked well, challenges encountered, patterns discovered, and gotchas to avoid.
+
+---
+
+## Project Context
+
+**Mindweave** - AI-Powered Personal Knowledge Hub
+- Framework: Next.js 15 (App Router), TypeScript 5.5
+- Database: PostgreSQL 16 + pgvector
+- ORM: Drizzle ORM
+- Auth: Auth.js v5 (JWT sessions)
+- AI: Claude API (Anthropic) + Google Gemini (embeddings)
+- Testing: Vitest + React Testing Library + Playwright
+- Styling: Tailwind CSS + shadcn/ui
+
+**Completed Features:**
+1. ✅ Authentication Flow (Google OAuth + JWT sessions) - 97 tests, 94.73% coverage
+2. ✅ Note Capture (Form + validation + database) - 124 tests, 81.03% coverage
+3. ✅ Content Library (Filtering + sorting + components) - 164 tests, 87.5% coverage
+
+**Next Features (from prd.json):**
+4. Full-text Search
+5. Manual Tagging
+6. Claude Auto-Tagging
+7. Vector Embeddings
+8. Semantic Search
+9. Knowledge Q&A Chat
+
+---
+
+## Patterns & Conventions (from previous features)
+
+### ✅ What Works Well
+
+1. **Feature Branch Workflow**
+   - Create feature branch: `git checkout -b feature/feature-name`
+   - Implement with TDD: tests first, then implementation
+   - Run all checks in feature branch before merge
+   - Merge to main with `--no-ff` for clear history
+   - Run ALL tests in main after merge to catch regressions
+
+2. **Test-Driven Development**
+   - Write tests BEFORE implementation
+   - Aim for ≥80% coverage minimum
+   - Unit tests for business logic
+   - Component tests for React components (React Testing Library)
+   - Integration tests for API routes and database operations
+   - E2E tests for critical user flows (Playwright)
+
+3. **Server Actions Pattern**
+   - Create server actions in `app/actions/` directory
+   - Authenticate with `await auth()` at the top
+   - Return `{ success: boolean, ... }` result objects
+   - Use Zod schemas for validation
+   - Perform database operations with Drizzle ORM
+
+4. **Component Structure**
+   - Server components by default
+   - Client components only when needed (`'use client'`)
+   - Extract reusable components (ContentCard, FilterBar pattern)
+   - Use shadcn/ui for base components
+   - Tailwind CSS for styling
+
+5. **Database-Level Operations**
+   - Filter and sort at database level (not in-memory)
+   - Use Drizzle ORM query builders (`eq()`, `or()`, `sql`)
+   - For array containment: `sql\`${column} @> ARRAY[${value}]::text[]\``
+   - Index key columns for performance
+
+### ⚠️ Gotchas to Avoid
+
+1. **Edge Runtime Limitations**
+   - JWT sessions required for middleware (database sessions don't work in Edge Runtime)
+   - Use integer Unix timestamps for expires columns (not timestamp type)
+   - Some libraries don't work in Edge Runtime - check compatibility
+
+2. **Type Safety**
+   - Use strict TypeScript mode
+   - Avoid `any` unless absolutely necessary
+   - Add `@ts-expect-error` with clear explanation when needed (like auth adapter type mismatches)
+   - Use Zod for runtime validation
+
+3. **Testing**
+   - Mock external APIs (Claude, Gemini) in tests
+   - Use test database helpers for setup/teardown
+   - Mock `useSearchParams` and `useRouter` in Next.js component tests
+   - Clean up database state between tests
+
+4. **Route Paths**
+   - Protected routes under `/dashboard` directory
+   - Use `/dashboard/` prefix in all navigation links
+   - Middleware protects entire `/dashboard/*` path
+
+5. **Documentation**
+   - Update STATUS.md after every feature completion
+   - Update README.md feature checklist
+   - Commit documentation updates separately
+   - Keep AGENTS.md updated with AI integration changes
+
+---
+
+## Iteration History
+
+(Ralph will append entries here after each iteration)
+
+<!-- Example format:
+## Iteration 1 - 2026-01-21T12:00:00Z
+Story: feature-4 (Full-text Search)
+Status: In Progress
+Coverage: 75%
+
+### What Worked
+- Successfully implemented search bar component
+- PostgreSQL full-text search performing well
+
+### Challenges
+- URL parameter handling needed refactoring
+- Test coverage initially below 80%
+
+### Learnings
+- Use ts_rank for relevance scoring
+- Combine tsvector columns for multi-field search
+
+### Next Steps
+- Add highlighting to search results
+- Increase test coverage to ≥80%
+-->
+
