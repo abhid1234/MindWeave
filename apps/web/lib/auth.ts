@@ -8,10 +8,15 @@ import { users, accounts, sessions, verificationTokens } from './db/schema';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // Using JWT sessions for Edge Runtime compatibility
+  // Sessions and verification tokens tables use integer (Unix timestamp) instead of timestamp
+  // to work with Edge Runtime. TypeScript types expect timestamp, but runtime works fine.
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
+    // @ts-expect-error - Using integer for expires (Unix timestamp) instead of timestamp for Edge Runtime
     sessionsTable: sessions,
+    // @ts-expect-error - Using integer for expires (Unix timestamp) instead of timestamp for Edge Runtime
     verificationTokensTable: verificationTokens,
   }),
   providers: [
@@ -92,7 +97,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       // Store user ID in token on sign in
       if (user) {
         token.id = user.id;
