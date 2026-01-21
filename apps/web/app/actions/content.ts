@@ -2,10 +2,11 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { content } from '@/lib/db/schema';
+import { content, type ContentType } from '@/lib/db/schema';
 import { createContentSchema } from '@/lib/validations';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { eq, desc, asc, and, or, sql, type SQL } from 'drizzle-orm';
 
 export type ActionResult = {
   success: boolean;
@@ -89,6 +90,121 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
     return {
       success: false,
       message: 'Failed to save content. Please try again.',
+    };
+  }
+}
+
+export type GetContentParams = {
+  type?: ContentType;
+  tag?: string;
+  sortBy?: 'createdAt' | 'title';
+  sortOrder?: 'asc' | 'desc';
+};
+
+export type GetContentResult = {
+  success: boolean;
+  items: Array<{
+    id: string;
+    type: ContentType;
+    title: string;
+    body: string | null;
+    url: string | null;
+    tags: string[];
+    autoTags: string[];
+    createdAt: Date;
+  }>;
+  allTags: string[];
+};
+
+export async function getContentAction(
+  params: GetContentParams = {}
+): Promise<GetContentResult> {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        items: [],
+        allTags: [],
+      };
+    }
+
+    const { type: typeFilter, tag: tagFilter, sortBy = 'createdAt', sortOrder = 'desc' } = params;
+
+    // Build where conditions
+    const conditions: SQL[] = [eq(content.userId, session.user.id)];
+
+    if (typeFilter) {
+      conditions.push(eq(content.type, typeFilter));
+    }
+
+    if (tagFilter) {
+      // Check if tag exists in either tags or autoTags array
+      conditions.push(
+        or(
+          sql`${content.tags} @> ARRAY[${tagFilter}]::text[]`,
+          sql`${content.autoTags} @> ARRAY[${tagFilter}]::text[]`
+        )!
+      );
+    }
+
+    const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
+
+    // Determine sort order
+    const orderByClause =
+      sortBy === 'title'
+        ? sortOrder === 'asc'
+          ? asc(content.title)
+          : desc(content.title)
+        : sortOrder === 'asc'
+          ? asc(content.createdAt)
+          : desc(content.createdAt);
+
+    // Fetch content with filters and sorting
+    const items = await db
+      .select({
+        id: content.id,
+        type: content.type,
+        title: content.title,
+        body: content.body,
+        url: content.url,
+        tags: content.tags,
+        autoTags: content.autoTags,
+        createdAt: content.createdAt,
+      })
+      .from(content)
+      .where(whereClause)
+      .orderBy(orderByClause);
+
+    // Fetch all unique tags for the user
+    const allContent = await db
+      .select({
+        tags: content.tags,
+        autoTags: content.autoTags,
+      })
+      .from(content)
+      .where(eq(content.userId, session.user.id));
+
+    const allTagsSet = new Set<string>();
+    allContent.forEach((item) => {
+      item.tags.forEach((tag) => allTagsSet.add(tag));
+      item.autoTags.forEach((tag) => allTagsSet.add(tag));
+    });
+
+    const allTags = Array.from(allTagsSet).sort();
+
+    return {
+      success: true,
+      items,
+      allTags,
+    };
+  } catch (error) {
+    console.error('Error fetching content:', error);
+    return {
+      success: false,
+      items: [],
+      allTags: [],
     };
   }
 }
