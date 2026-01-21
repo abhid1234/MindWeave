@@ -17,7 +17,7 @@ describe('FilterBar', () => {
     mockSearchParams.delete('tag');
     mockSearchParams.delete('sortBy');
     mockSearchParams.delete('sortOrder');
-    vi.mocked(useSearchParams).mockReturnValue(mockSearchParams);
+    vi.mocked(useSearchParams).mockReturnValue(mockSearchParams as any);
   });
 
   describe('Type Filter', () => {
