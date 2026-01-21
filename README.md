@@ -277,7 +277,7 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Docker PostgreSQL setup
 - [x] Authentication (Google OAuth + JWT sessions)
 - [x] Content capture (notes, links, files)
-- [ ] Content library with filtering
+- [x] Content library with filtering and sorting
 - [ ] Full-text search
 - [ ] Manual tagging
 
