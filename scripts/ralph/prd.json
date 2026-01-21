@@ -1,0 +1,140 @@
+{
+  "branch": "main",
+  "title": "Mindweave - AI-Powered Personal Knowledge Hub",
+  "description": "Complete the remaining features for Mindweave, building one feature at a time with comprehensive testing and ≥80% code coverage.",
+  "stories": [
+    {
+      "id": "feature-4",
+      "title": "Full-text Search",
+      "description": "Implement basic keyword search functionality to allow users to search their content by title, body, and tags using PostgreSQL full-text search.",
+      "acceptance_criteria": [
+        "Search bar component in library page",
+        "Server action that performs full-text search on content table",
+        "Search across title, body, tags, and autoTags fields",
+        "Display search results with highlighting",
+        "Search works in combination with existing filters",
+        "URL parameter persistence for search queries",
+        "Empty state for no search results",
+        "Unit tests for search logic (≥80% coverage)",
+        "Component tests for search UI (≥80% coverage)",
+        "E2E tests for complete search flow",
+        "All quality checks passing (tests, types, lint, build)"
+      ],
+      "priority": 1,
+      "passes": false,
+      "completed_at": null
+    },
+    {
+      "id": "feature-5",
+      "title": "Manual Tagging",
+      "description": "Enable users to create, edit, and manage tags for their content items. Tags should be editable inline and persistent in the database.",
+      "acceptance_criteria": [
+        "Tag input component with autocomplete from existing tags",
+        "Edit tags inline on content cards in library",
+        "Server action to update content tags",
+        "Tag management UI (create, edit, delete tags)",
+        "Tag validation (no duplicates, max length)",
+        "Optimistic UI updates for better UX",
+        "Filter by user-created tags in library",
+        "Unit tests for tag operations (≥80% coverage)",
+        "Component tests for tag UI (≥80% coverage)",
+        "E2E tests for tag creation and editing",
+        "All quality checks passing (tests, types, lint, build)"
+      ],
+      "priority": 2,
+      "passes": false,
+      "completed_at": null
+    },
+    {
+      "id": "feature-6",
+      "title": "Claude Auto-Tagging",
+      "description": "Integrate Claude API to automatically generate relevant tags for content items when they are created or on-demand.",
+      "acceptance_criteria": [
+        "Server action that calls Claude API for tag generation",
+        "Auto-tagging triggered on content creation",
+        "Manual re-tagging option for existing content",
+        "Store auto-generated tags in autoTags field",
+        "Display auto-tags distinctly from user tags",
+        "Error handling for API failures",
+        "Rate limiting and cost controls",
+        "Background job for batch tagging existing content",
+        "Unit tests for Claude integration (≥80% coverage)",
+        "Integration tests for auto-tagging flow",
+        "Mock Claude API in tests",
+        "All quality checks passing (tests, types, lint, build)"
+      ],
+      "priority": 3,
+      "passes": false,
+      "completed_at": null
+    },
+    {
+      "id": "feature-7",
+      "title": "Vector Embeddings",
+      "description": "Generate and store vector embeddings for all content using Google Gemini text-embedding-004 model to enable semantic search.",
+      "acceptance_criteria": [
+        "Server action to generate embeddings using Gemini API",
+        "Automatic embedding generation on content creation",
+        "Store embeddings in embeddings table with pgvector",
+        "Batch processing for existing content embeddings",
+        "Background job queue for embedding generation",
+        "Error handling and retry logic for API failures",
+        "Progress tracking for batch operations",
+        "Unit tests for embedding generation (≥80% coverage)",
+        "Integration tests for embeddings storage",
+        "Mock Gemini API in tests",
+        "Verify vector dimensions (768) in database",
+        "All quality checks passing (tests, types, lint, build)"
+      ],
+      "priority": 4,
+      "passes": false,
+      "completed_at": null
+    },
+    {
+      "id": "feature-8",
+      "title": "Semantic Search",
+      "description": "Implement similarity-based content discovery using pgvector for semantic search that finds content by meaning rather than keywords.",
+      "acceptance_criteria": [
+        "Server action for semantic search using pgvector",
+        "Convert search query to embedding vector",
+        "Use cosine similarity to find related content",
+        "Combine semantic search with keyword search",
+        "Relevance scoring and ranking",
+        "Search results show similarity scores",
+        "Performance optimization for vector queries",
+        "Toggle between keyword and semantic search modes",
+        "Unit tests for similarity calculations (≥80% coverage)",
+        "Integration tests for vector search",
+        "E2E tests for semantic search flow",
+        "All quality checks passing (tests, types, lint, build)"
+      ],
+      "priority": 5,
+      "passes": false,
+      "completed_at": null
+    },
+    {
+      "id": "feature-9",
+      "title": "Knowledge Q&A Chat Interface",
+      "description": "Build a chat interface where users can ask questions and get answers from their knowledge base using Claude API with RAG (Retrieval Augmented Generation).",
+      "acceptance_criteria": [
+        "Chat UI component with message history",
+        "Server action that processes questions with Claude API",
+        "Semantic search to retrieve relevant content",
+        "Pass retrieved content as context to Claude",
+        "Stream responses in real-time",
+        "Display source content cards with answers",
+        "Conversation history persistence",
+        "Clear chat and start new conversation",
+        "Error handling for API failures",
+        "Rate limiting and usage tracking",
+        "Unit tests for RAG logic (≥80% coverage)",
+        "Component tests for chat UI (≥80% coverage)",
+        "Integration tests for Q&A flow",
+        "E2E tests for complete chat experience",
+        "All quality checks passing (tests, types, lint, build)"
+      ],
+      "priority": 6,
+      "passes": false,
+      "completed_at": null
+    }
+  ]
+}
