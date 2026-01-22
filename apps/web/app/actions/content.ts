@@ -117,6 +117,84 @@ export type GetContentResult = {
   allTags: string[];
 };
 
+export type UpdateTagsParams = {
+  contentId: string;
+  tags: string[];
+};
+
+export async function updateContentTagsAction(
+  params: UpdateTagsParams
+): Promise<ActionResult> {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    const { contentId, tags } = params;
+
+    // Validate inputs
+    if (!contentId || typeof contentId !== 'string') {
+      return {
+        success: false,
+        message: 'Invalid content ID.',
+      };
+    }
+
+    if (!Array.isArray(tags)) {
+      return {
+        success: false,
+        message: 'Tags must be an array.',
+      };
+    }
+
+    // Validate and clean tags
+    const cleanedTags = tags
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0 && tag.length <= 50)
+      .slice(0, 20); // Max 20 tags
+
+    // Verify content belongs to the user
+    const existingContent = await db
+      .select({ id: content.id })
+      .from(content)
+      .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
+      .limit(1);
+
+    if (existingContent.length === 0) {
+      return {
+        success: false,
+        message: 'Content not found or access denied.',
+      };
+    }
+
+    // Update tags
+    await db
+      .update(content)
+      .set({ tags: cleanedTags })
+      .where(eq(content.id, contentId));
+
+    // Revalidate relevant pages
+    revalidatePath('/dashboard/library');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      message: 'Tags updated successfully!',
+    };
+  } catch (error) {
+    console.error('Error updating tags:', error);
+    return {
+      success: false,
+      message: 'Failed to update tags. Please try again.',
+    };
+  }
+}
+
 export async function getContentAction(
   params: GetContentParams = {}
 ): Promise<GetContentResult> {
