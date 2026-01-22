@@ -44,6 +44,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for "React"
@@ -72,6 +73,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search by body content
@@ -99,6 +101,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search by tag
@@ -128,6 +131,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search by autoTag
@@ -150,6 +154,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search with lowercase
@@ -186,6 +191,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for React
@@ -196,8 +202,8 @@ test.describe('Full-text Search', () => {
     await expect(page.locator('text=React Note')).toBeVisible();
     await expect(page.locator('text=React Link')).toBeVisible();
 
-    // Filter by note type
-    await page.click('text=Note');
+    // Filter by note type (use the Notes link in the filter section)
+    await page.click('a:has-text("Notes")');
 
     // Only note should be visible
     await expect(page.locator('text=React Note')).toBeVisible();
@@ -221,6 +227,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for React
@@ -231,8 +238,8 @@ test.describe('Full-text Search', () => {
     await expect(page.locator('text=React TypeScript')).toBeVisible();
     await expect(page.locator('text=React JavaScript')).toBeVisible();
 
-    // Filter by typescript tag
-    await page.click('text=typescript');
+    // Filter by typescript tag (use link selector in tag filter section)
+    await page.locator('a:has-text("typescript")').first().click();
 
     // Only TypeScript one should be visible
     await expect(page.locator('text=React TypeScript')).toBeVisible();
@@ -256,22 +263,23 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for React
     await page.fill('input[placeholder*="Search"]', 'React');
     await page.waitForTimeout(500);
 
-    // Sort by title A-Z
-    await page.selectOption('select', 'title-asc');
+    // Sort by title A-Z (library uses links for sorting)
+    await page.click('a:has-text("Title A-Z")');
     await page.waitForTimeout(300);
 
     // Check order (Apple should be first)
-    const cards = page.locator('[data-testid="content-card"]');
+    const cards = page.locator('.grid > div');
     await expect(cards.first()).toContainText('Apple React');
 
     // Sort by title Z-A
-    await page.selectOption('select', 'title-desc');
+    await page.click('a:has-text("Title Z-A")');
     await page.waitForTimeout(300);
 
     // Check order (Zebra should be first)
@@ -290,6 +298,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for something
@@ -319,6 +328,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for something that doesn't exist
@@ -351,6 +361,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user1.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for React
@@ -374,6 +385,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search with special characters
@@ -400,6 +412,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // All content should be visible initially
@@ -435,6 +448,7 @@ test.describe('Full-text Search', () => {
     await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
+    await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
     // Search for something
