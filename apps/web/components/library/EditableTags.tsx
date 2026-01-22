@@ -26,6 +26,11 @@ export function EditableTags({
   const [isSaving, setIsSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
+  // Sync local state when initialTags prop changes (after server re-fetch)
+  React.useEffect(() => {
+    setTags(initialTags);
+  }, [initialTags]);
+
   const handleSave = React.useCallback(async () => {
     setIsSaving(true);
     setError(null);
@@ -58,17 +63,23 @@ export function EditableTags({
   }, [initialTags]);
 
   // Auto-save when tags change (debounced)
+  // Use ref to avoid re-creating effect when handleSave changes
+  const handleSaveRef = React.useRef(handleSave);
+  React.useEffect(() => {
+    handleSaveRef.current = handleSave;
+  }, [handleSave]);
+
   React.useEffect(() => {
     if (!isEditing) return;
 
     const timer = setTimeout(() => {
       if (JSON.stringify(tags) !== JSON.stringify(initialTags)) {
-        handleSave();
+        handleSaveRef.current();
       }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [tags, initialTags, isEditing, handleSave]);
+  }, [tags, initialTags, isEditing]);
 
   if (isEditing) {
     return (
