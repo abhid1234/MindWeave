@@ -1,18 +1,19 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-01-21
-**Current Phase**: Feature Development - Content Library Complete
+**Last Updated**: 2026-01-22
+**Current Phase**: Feature Development - Full-text Search Complete
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **Content Library feature complete!** Database-level filtering, sorting, and comprehensive testing.
+✅ **Full-text Search feature complete!** PostgreSQL ILIKE search with debounced UI and comprehensive testing.
 
 **Completed Features**:
 - Authentication (Google OAuth with JWT sessions) - 97 tests, 94.73% coverage
 - Note Capture (Form + validation + database) - 124 tests, 81.03% coverage
 - Content Library (Filtering + sorting + components) - 164 tests total, 87.5% coverage
+- Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
 
-**Next Step**: Ready for Feature #4: Full-text Search.
+**Next Step**: Ready for Feature #5: Manual Tagging.
 
 ## ✅ Completed Features
 
@@ -87,6 +88,23 @@
 - [x] Manual verification completed
 - [x] Auth.ts type errors fixed (JWT session compatibility)
 
+### Phase 2: Feature #4 - Full-text Search ✅ COMPLETE
+- [x] Added query parameter to getContentAction server action
+- [x] PostgreSQL ILIKE search across title, body, tags, autoTags
+- [x] UNNEST for searching within array fields
+- [x] SearchBar component with 300ms debounce
+- [x] Created Input UI component (shadcn/ui pattern)
+- [x] Clear button with accessible aria-label
+- [x] URL parameter persistence for search queries
+- [x] Search works with existing filters (type, tag) and sorting
+- [x] Empty states for no search results
+- [x] Comprehensive test coverage:
+  - 18 component tests for SearchBar (100% coverage)
+  - 22 E2E test scenarios for complete search flows
+  - **Total: 182 tests passing with 89.71% overall coverage**
+- [x] All quality checks passing (types, lint, build)
+- [x] Manual verification completed
+
 ## 🚧 In Progress
 None - Ready for feature development
 
@@ -108,7 +126,7 @@ None - Ready for feature development
 - [x] **Authentication Flow** - Complete login/logout functionality with session management ✅
 - [x] **Note Capture** - Form with validation, database save ✅
 - [x] **Content Library** - Display saved content with filtering and sorting ✅
-- [ ] **Full-text Search** - Basic keyword search implementation
+- [x] **Full-text Search** - Basic keyword search implementation ✅
 - [ ] **Manual Tagging** - Tag creation, editing, and association
 - [ ] **Claude Auto-Tagging** - AI-powered tag generation for all content
 - [ ] **Vector Embeddings** - Generate and store embeddings for semantic search
@@ -220,6 +238,24 @@ None - fresh scaffolding
   - Documented Claude AI and Google Gemini agent architecture
   - Manual testing verified on localhost
   - **STATUS: Feature #3 complete, ready for Feature #4 (Full-text Search)**
+- **2026-01-22 03:24** - ✅ **FULL-TEXT SEARCH FEATURE COMPLETE**
+  - Implemented PostgreSQL ILIKE search for case-insensitive queries
+  - Added query parameter to getContentAction server action
+  - Search across title, body, tags, and autoTags fields
+  - Used UNNEST in SQL to search within PostgreSQL arrays
+  - Created SearchBar component with 300ms debounce for better UX
+  - Created Input UI component following shadcn/ui pattern
+  - Clear button with accessible aria-label
+  - URL parameter persistence for search queries
+  - Search works seamlessly with existing filters (type, tag) and sorting
+  - Empty states for no search results
+  - Comprehensive testing: 18 component tests + 22 E2E scenarios
+  - Total: 182 tests passing with 89.71% overall coverage
+  - All quality checks passing (tests, types, lint, build)
+  - Fixed TypeScript errors (empty interface -> type alias)
+  - Fixed E2E test helper function signature issues
+  - Manual testing verified on localhost
+  - **STATUS: Feature #4 complete, ready for Feature #5 (Manual Tagging)**
 
 ## 📚 Tech Stack
 - **Framework**: Next.js 15 (App Router)
