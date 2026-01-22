@@ -278,7 +278,7 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Authentication (Google OAuth + JWT sessions)
 - [x] Content capture (notes, links, files)
 - [x] Content library with filtering and sorting
-- [ ] Full-text search
+- [x] Full-text search
 - [ ] Manual tagging
 
 ### Phase 2: AI Features (Planned)
