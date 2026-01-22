@@ -212,3 +212,71 @@ Coverage: 89.71%
 - 182 total tests passing (including 18 new SearchBar tests)
 - 22 E2E test scenarios covering all search combinations
 
+## Iteration 12 (Manual) - 2026-01-22T05:11:00Z
+Story: feature-5 (Manual Tagging)
+Status: Complete ✅
+Coverage: 92.22%
+
+### What Worked
+- Badge component with removable functionality (100% coverage)
+- TagInput component with autocomplete from existing tags (95.91% coverage)
+- EditableTags component for inline editing (94.11% coverage)
+- updateContentTagsAction server action with validation
+- Auto-save with 1 second debounce for better UX
+- Tag suggestions filtered to exclude already selected tags
+- Optimistic UI updates with comprehensive error handling
+- Integration with ContentCard component seamless
+- Comprehensive E2E tests (60+ test scenarios)
+
+### Challenges
+- Initial test failures due to fake timers in auto-save tests
+- React Testing Library "act" warnings in async tests
+- Needed to mock TagInput component in EditableTags tests for simplicity
+- Fixed by using waitFor with proper timeout instead of fake timers
+
+### Learnings
+- Avoid fake timers (vi.useFakeTimers) with userEvent in tests - causes timeouts
+- Use waitFor with realistic timeout for auto-save testing (1100ms)
+- Mock child components to simplify parent component tests
+- Remove unused imports immediately to avoid linting warnings
+- Test debounced auto-save with real timers, not fake timers
+- Use data-testid for mocked components to simplify assertions
+
+### Patterns Confirmed
+- Server actions pattern: auth check → validation → database operation → revalidatePath
+- Component composition: Badge → TagInput → EditableTags
+- Controlled component pattern with onChange callbacks
+- shadcn/ui styling patterns with cn() utility
+- Ref forwarding for all base UI components
+
+### Gotchas to Avoid
+- Don't use vi.useFakeTimers with userEvent.setup() - causes test timeouts
+- Always clear mocks with vi.clearAllMocks() in beforeEach
+- Mock server actions in component tests to avoid Next.js errors
+- Use catch-all catch {} instead of catch(err) if error variable unused
+- Test auto-save with real setTimeout, not fake timers
+
+### Technical Notes
+- Tag validation: max 20 tags, max 50 chars each, trimmed, no duplicates
+- Auto-save triggers 1 second after last tag change
+- Autocomplete shows top 5 suggestions filtered by input
+- Tags stored as PostgreSQL text[] array
+- Remove tag with backspace when input is empty
+- ESC key closes autocomplete suggestions
+- Enter key adds tag or selects first suggestion
+- Click outside closes suggestions (useEffect with event listener)
+- 241 total tests passing (59 new tag-related unit tests + 60+ E2E)
+- Component tests use mocked dependencies for isolation
+
+### Components Created
+1. Badge (badge.tsx) - 15 tests, 100% coverage
+2. TagInput (tag-input.tsx) - 26 tests, 95.91% coverage  
+3. EditableTags (EditableTags.tsx) - 18 tests, 94.11% coverage
+4. Server Action: updateContentTagsAction - tested via E2E
+
+### Files Modified
+- app/actions/content.ts - added updateContentTagsAction
+- app/dashboard/library/page.tsx - pass allTags to ContentCard
+- components/library/ContentCard.tsx - use EditableTags component
+- app/actions/content.test.ts - documented E2E test coverage
+
