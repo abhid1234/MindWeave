@@ -139,10 +139,12 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
 
     # Run Claude with the CLAUDE.md prompt
     # The prompt will read prd.json and progress.txt
-    OUTPUT=$(claude --prompt-file="$CLAUDE_PROMPT" --allow-bash --allow-edit --allow-write 2>&1 || true)
+    PROMPT_CONTENT=$(cat "$CLAUDE_PROMPT")
+    OUTPUT=$(claude --print "$PROMPT_CONTENT" 2>&1 || true)
   else
     echo -e "${YELLOW}Running Amp CLI...${NC}"
-    OUTPUT=$(amp --prompt-file="scripts/ralph/prompt.md" --allow-bash --allow-edit --allow-write 2>&1 || true)
+    PROMPT_CONTENT=$(cat "scripts/ralph/prompt.md")
+    OUTPUT=$(amp --print "$PROMPT_CONTENT" 2>&1 || true)
   fi
 
   echo "$OUTPUT"
