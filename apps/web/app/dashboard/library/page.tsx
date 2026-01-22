@@ -1,6 +1,7 @@
 import { getContentAction } from '@/app/actions/content';
 import { ContentCard } from '@/components/library/ContentCard';
 import { FilterBar } from '@/components/library/FilterBar';
+import { SearchBar } from '@/components/library/SearchBar';
 import Link from 'next/link';
 import type { ContentType } from '@/lib/db/schema';
 
@@ -10,6 +11,7 @@ export default async function LibraryPage({
   searchParams: Promise<{
     type?: ContentType;
     tag?: string;
+    query?: string;
     sortBy?: 'createdAt' | 'title';
     sortOrder?: 'asc' | 'desc';
   }>;
@@ -20,11 +22,12 @@ export default async function LibraryPage({
   const { items, allTags } = await getContentAction({
     type: params.type,
     tag: params.tag,
+    query: params.query,
     sortBy: params.sortBy,
     sortOrder: params.sortOrder,
   });
 
-  const hasFilters = params.type || params.tag;
+  const hasFilters = params.type || params.tag || params.query;
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -34,6 +37,11 @@ export default async function LibraryPage({
         <p className="mt-2 text-muted-foreground">
           Browse and organize all your saved content
         </p>
+      </div>
+
+      {/* Search */}
+      <div className="mb-6">
+        <SearchBar />
       </div>
 
       {/* Filters and Sorting */}
