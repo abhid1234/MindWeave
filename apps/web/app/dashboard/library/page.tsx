@@ -69,7 +69,7 @@ export default async function LibraryPage({
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
-              <ContentCard key={item.id} {...item} />
+              <ContentCard key={item.id} {...item} allTags={allTags} />
             ))}
           </div>
         </>
