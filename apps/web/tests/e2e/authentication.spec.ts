@@ -53,7 +53,7 @@ test.describe('Authentication Flow', () => {
     test('should redirect unauthenticated users to login from capture', async ({
       page,
     }) => {
-      await page.goto('/capture');
+      await page.goto('/dashboard/capture');
 
       // Should be redirected to login
       await page.waitForURL(/\/login/);
@@ -63,7 +63,7 @@ test.describe('Authentication Flow', () => {
     test('should redirect unauthenticated users to login from search', async ({
       page,
     }) => {
-      await page.goto('/search');
+      await page.goto('/dashboard/search');
 
       // Should be redirected to login
       await page.waitForURL(/\/login/);
@@ -73,7 +73,7 @@ test.describe('Authentication Flow', () => {
     test('should redirect unauthenticated users to login from library', async ({
       page,
     }) => {
-      await page.goto('/library');
+      await page.goto('/dashboard/library');
 
       // Should be redirected to login
       await page.waitForURL(/\/login/);

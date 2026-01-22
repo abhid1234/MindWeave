@@ -30,7 +30,7 @@ test.describe('Capture Feature', () => {
 
       // Should be on capture page
       await expect(page).toHaveURL('/dashboard/capture');
-      await expect(page.locator('h1')).toHaveText('Capture');
+      await expect(page.getByRole('heading', { name: 'Capture', level: 1 })).toBeVisible();
     });
 
     test('should navigate to capture page from quick action', async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe('Capture Feature', () => {
       await page.fill('textarea[name="body"]', 'Content with tags');
       await page.fill('input[name="tags"]', 'important, work, project');
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
     });
@@ -100,7 +100,7 @@ test.describe('Capture Feature', () => {
     test('should create a note with minimal information', async ({ page }) => {
       await page.fill('input[name="title"]', 'Minimal Note');
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
     });
@@ -109,7 +109,7 @@ test.describe('Capture Feature', () => {
       await page.fill('input[name="title"]', 'Note with <special> & "characters"');
       await page.fill('textarea[name="body"]', 'Content with émojis 🎉 and symbols: @#$%');
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
     });
@@ -126,7 +126,7 @@ test.describe('Capture Feature', () => {
       await page.fill('input[name="url"]', 'https://example.com');
       await page.fill('input[name="tags"]', 'resource, web');
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
     });
@@ -137,7 +137,7 @@ test.describe('Capture Feature', () => {
       await page.fill('input[name="url"]', 'https://blog.example.com/article');
       await page.fill('textarea[name="body"]', 'Notes about why this article is important');
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
     });
@@ -154,7 +154,7 @@ test.describe('Capture Feature', () => {
       await page.fill('textarea[name="body"]', 'Summary of the document contents');
       await page.fill('input[name="tags"]', 'document, pdf, reference');
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
     });
@@ -167,7 +167,7 @@ test.describe('Capture Feature', () => {
 
     test('should show error for empty title', async ({ page }) => {
       // Try to submit without title
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       // HTML5 validation should prevent submission
       const titleInput = page.locator('input[name="title"]');
@@ -179,7 +179,7 @@ test.describe('Capture Feature', () => {
       await page.fill('input[name="title"]', 'Bad Link');
       await page.fill('input[name="url"]', 'not-a-valid-url');
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       // Should show validation error
       await expect(page.locator('text=Invalid URL')).toBeVisible({ timeout: 5000 });
@@ -213,10 +213,10 @@ test.describe('Capture Feature', () => {
       await page.fill('input[name="title"]', 'Test Note');
 
       // Start submission
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
 
       // Should see "Saving..." text (briefly)
-      const submitButton = page.locator('button[type="submit"]');
+      const submitButton = page.locator('button[type="submit"]:has-text("Save")');
 
       // Check for disabled state and loading text
       await expect(submitButton).toBeDisabled();
@@ -231,7 +231,7 @@ test.describe('Capture Feature', () => {
     test('should allow creating multiple notes in sequence', async ({ page }) => {
       // First note
       await page.fill('input[name="title"]', 'First Note');
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
       await page.waitForURL('/dashboard/library');
 
@@ -240,7 +240,7 @@ test.describe('Capture Feature', () => {
 
       // Second note
       await page.fill('input[name="title"]', 'Second Note');
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Save")');
       await expect(page.locator('text=Content saved successfully')).toBeVisible();
     });
   });
