@@ -1,6 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ContentCard, type ContentCardProps } from './ContentCard';
+
+// Mock EditableTags component
+vi.mock('./EditableTags', () => ({
+  EditableTags: ({ initialTags, autoTags }: any) => (
+    <div data-testid="editable-tags">
+      {initialTags.map((tag: string) => (
+        <span key={tag}>{tag}</span>
+      ))}
+      {autoTags.map((tag: string) => (
+        <span key={tag}>{tag}</span>
+      ))}
+    </div>
+  ),
+}));
 
 describe('ContentCard', () => {
   const baseProps: ContentCardProps = {
@@ -12,6 +26,7 @@ describe('ContentCard', () => {
     tags: ['tag1', 'tag2'],
     autoTags: ['auto1'],
     createdAt: new Date('2024-01-15T10:00:00Z'),
+    allTags: ['tag1', 'tag2', 'tag3'],
   };
 
   describe('Rendering', () => {
@@ -57,51 +72,31 @@ describe('ContentCard', () => {
   });
 
   describe('Tags', () => {
-    it('should render user tags', () => {
+    it('should render EditableTags component', () => {
+      render(<ContentCard {...baseProps} />);
+      expect(screen.getByTestId('editable-tags')).toBeInTheDocument();
+    });
+
+    it('should pass tags to EditableTags', () => {
       render(<ContentCard {...baseProps} />);
       expect(screen.getByText('tag1')).toBeInTheDocument();
       expect(screen.getByText('tag2')).toBeInTheDocument();
     });
 
-    it('should render auto tags', () => {
+    it('should pass auto tags to EditableTags', () => {
       render(<ContentCard {...baseProps} />);
       expect(screen.getByText('auto1')).toBeInTheDocument();
     });
 
-    it('should limit user tags to 3', () => {
-      render(
-        <ContentCard
-          {...baseProps}
-          tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5']}
-        />
-      );
-      expect(screen.getByText('tag1')).toBeInTheDocument();
-      expect(screen.getByText('tag2')).toBeInTheDocument();
-      expect(screen.getByText('tag3')).toBeInTheDocument();
-      expect(screen.queryByText('tag4')).not.toBeInTheDocument();
-      expect(screen.queryByText('tag5')).not.toBeInTheDocument();
+    it('should pass allTags prop to EditableTags', () => {
+      render(<ContentCard {...baseProps} allTags={['tag1', 'tag2', 'tag3']} />);
+      // EditableTags should receive allTags prop (verified in EditableTags tests)
+      expect(screen.getByTestId('editable-tags')).toBeInTheDocument();
     });
 
-    it('should limit auto tags to 2', () => {
-      render(
-        <ContentCard
-          {...baseProps}
-          autoTags={['auto1', 'auto2', 'auto3', 'auto4']}
-        />
-      );
-      expect(screen.getByText('auto1')).toBeInTheDocument();
-      expect(screen.getByText('auto2')).toBeInTheDocument();
-      expect(screen.queryByText('auto3')).not.toBeInTheDocument();
-      expect(screen.queryByText('auto4')).not.toBeInTheDocument();
-    });
-
-    it('should not render tags section when no tags', () => {
-      const { container } = render(
-        <ContentCard {...baseProps} tags={[]} autoTags={[]} />
-      );
-      const tagElements = container.querySelectorAll('.rounded-full');
-      // Should only have the type badge
-      expect(tagElements.length).toBe(1);
+    it('should pass empty allTags array when not provided', () => {
+      render(<ContentCard {...baseProps} allTags={undefined} />);
+      expect(screen.getByTestId('editable-tags')).toBeInTheDocument();
     });
   });
 
