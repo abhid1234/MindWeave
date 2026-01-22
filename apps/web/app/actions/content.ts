@@ -97,6 +97,7 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
 export type GetContentParams = {
   type?: ContentType;
   tag?: string;
+  query?: string;
   sortBy?: 'createdAt' | 'title';
   sortOrder?: 'asc' | 'desc';
 };
@@ -130,7 +131,13 @@ export async function getContentAction(
       };
     }
 
-    const { type: typeFilter, tag: tagFilter, sortBy = 'createdAt', sortOrder = 'desc' } = params;
+    const {
+      type: typeFilter,
+      tag: tagFilter,
+      query: searchQuery,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = params;
 
     // Build where conditions
     const conditions: SQL[] = [eq(content.userId, session.user.id)];
@@ -145,6 +152,25 @@ export async function getContentAction(
         or(
           sql`${content.tags} @> ARRAY[${tagFilter}]::text[]`,
           sql`${content.autoTags} @> ARRAY[${tagFilter}]::text[]`
+        )!
+      );
+    }
+
+    if (searchQuery && searchQuery.trim()) {
+      // Search across title, body, tags, and autoTags using ILIKE (case-insensitive)
+      const searchPattern = `%${searchQuery.trim()}%`;
+      conditions.push(
+        or(
+          sql`${content.title} ILIKE ${searchPattern}`,
+          sql`${content.body} ILIKE ${searchPattern}`,
+          sql`EXISTS (
+            SELECT 1 FROM unnest(${content.tags}) as tag
+            WHERE tag ILIKE ${searchPattern}
+          )`,
+          sql`EXISTS (
+            SELECT 1 FROM unnest(${content.autoTags}) as tag
+            WHERE tag ILIKE ${searchPattern}
+          )`
         )!
       );
     }
