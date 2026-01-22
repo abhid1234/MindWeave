@@ -164,3 +164,51 @@ Status: 6 incomplete stories remaining
 ## Iteration 10 - 2026-01-22T02:42:03+00:00
 Status: 6 incomplete stories remaining
 
+## Iteration 11 (Manual) - 2026-01-22T03:24:00Z
+Story: feature-4 (Full-text Search)
+Status: Complete ✅
+Coverage: 89.71%
+
+### What Worked
+- PostgreSQL ILIKE for case-insensitive search (simpler than full-text search)
+- UNNEST for searching within array fields (tags, autoTags)
+- SearchBar component with 300ms debounce for better UX
+- Combining search with existing filters (type, tag, sorting)
+- Created Input UI component following shadcn/ui pattern
+- URL parameter persistence using Next.js searchParams
+- Comprehensive E2E tests (22 test scenarios)
+
+### Challenges
+- Initial TypeScript errors with Input component (empty interface)
+- E2E test helper function signature mismatch (createTestContent)
+- Fixed with Python script to update all test calls correctly
+- Button aria-label needed for accessibility
+
+### Learnings
+- Use PostgreSQL ILIKE instead of full-text search for simple queries
+- UNNEST in SQL to search within PostgreSQL arrays
+- Debouncing search input improves performance (300ms is good balance)
+- Always add aria-label to icon-only buttons for accessibility
+- Python scripts useful for bulk find-and-replace in test files
+- createTestContent(userId, data) signature from existing helpers
+
+### Patterns Confirmed
+- Server actions in app/actions/ for mutations
+- Database-level filtering (not in-memory)
+- URL parameters for client-side state persistence
+- Component tests with mocked Next.js hooks (useRouter, useSearchParams)
+- E2E tests for complete user flows
+
+### Gotchas to Avoid
+- Remember to add aria-label to buttons with only icons
+- Check test helper function signatures before writing tests
+- Use type alias instead of empty interface (ESLint rule)
+- ILIKE is simpler than to_tsquery for basic search needs
+
+### Technical Notes
+- Search implementation uses ILIKE with wildcards (%query%)
+- Searches across: title, body, tags array, autoTags array
+- Works with filters: type (note/link/file), tag, sortBy, sortOrder
+- 182 total tests passing (including 18 new SearchBar tests)
+- 22 E2E test scenarios covering all search combinations
+
