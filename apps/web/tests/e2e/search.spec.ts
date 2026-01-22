@@ -10,10 +10,9 @@ test.describe('Full-text Search', () => {
     const user = await createTestUser();
 
     // Login
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.waitForURL('/dashboard');
 
     // Navigate to library
@@ -42,10 +41,9 @@ test.describe('Full-text Search', () => {
     });
 
     // Login and navigate
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for "React"
@@ -71,10 +69,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search by body content
@@ -99,10 +96,9 @@ test.describe('Full-text Search', () => {
       tags: ['react', 'css'],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search by tag
@@ -129,10 +125,9 @@ test.describe('Full-text Search', () => {
       autoTags: ['web', 'frontend'],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search by autoTag
@@ -152,10 +147,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search with lowercase
@@ -189,10 +183,9 @@ test.describe('Full-text Search', () => {
       url: 'https://react.dev',
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for React
@@ -225,10 +218,9 @@ test.describe('Full-text Search', () => {
       tags: ['react', 'javascript'],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for React
@@ -261,10 +253,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for React
@@ -296,10 +287,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for something
@@ -326,10 +316,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for something that doesn't exist
@@ -359,10 +348,9 @@ test.describe('Full-text Search', () => {
     });
 
     // Login as user1
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user1.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for React
@@ -383,10 +371,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search with special characters
@@ -410,10 +397,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // All content should be visible initially
@@ -446,10 +432,9 @@ test.describe('Full-text Search', () => {
       tags: [],
     });
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'Test123!@#');
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.goto('/dashboard/library');
 
     // Search for something

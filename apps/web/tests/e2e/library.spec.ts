@@ -62,7 +62,7 @@ test.describe('Library Feature', () => {
 
       // Should be on library page
       await expect(page).toHaveURL('/dashboard/library');
-      await expect(page.locator('h1')).toHaveText('Library');
+      await expect(page.getByRole('heading', { name: 'Library', level: 1 })).toBeVisible();
     });
 
     test('should show correct page description', async ({ page }) => {
@@ -80,11 +80,11 @@ test.describe('Library Feature', () => {
       // Should show 4 items
       await expect(page.locator('text=Showing 4 items')).toBeVisible();
 
-      // Should display all content cards
-      await expect(page.locator('text=First Note')).toBeVisible();
-      await expect(page.locator('text=Second Note')).toBeVisible();
-      await expect(page.locator('text=Useful Link')).toBeVisible();
-      await expect(page.locator('text=Important File')).toBeVisible();
+      // Should display all content cards (use heading selector to be specific)
+      await expect(page.getByRole('heading', { name: 'First Note' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Second Note' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Useful Link' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Important File' })).toBeVisible();
     });
 
     test('should display content type badges', async ({ page }) => {
@@ -99,11 +99,11 @@ test.describe('Library Feature', () => {
     });
 
     test('should display tags', async ({ page }) => {
-      // Check for various tags
-      await expect(page.locator('text=important')).toBeVisible();
-      await expect(page.locator('text=personal')).toBeVisible();
-      await expect(page.locator('text=work')).toBeVisible();
-      await expect(page.locator('text=reference')).toBeVisible();
+      // Check for various tags (use first() since tags appear on multiple cards)
+      await expect(page.locator('text=important').first()).toBeVisible();
+      await expect(page.locator('text=personal').first()).toBeVisible();
+      await expect(page.locator('text=work').first()).toBeVisible();
+      await expect(page.locator('text=reference').first()).toBeVisible();
     });
 
     test('should display URLs for link type content', async ({ page }) => {
@@ -125,10 +125,10 @@ test.describe('Library Feature', () => {
 
       // Should show only notes
       await expect(page.locator('text=Showing 2 items')).toBeVisible();
-      await expect(page.locator('text=First Note')).toBeVisible();
-      await expect(page.locator('text=Second Note')).toBeVisible();
-      await expect(page.locator('text=Useful Link')).not.toBeVisible();
-      await expect(page.locator('text=Important File')).not.toBeVisible();
+      await expect(page.getByRole('heading', { name: 'First Note' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Second Note' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Useful Link' })).not.toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Important File' })).not.toBeVisible();
     });
 
     test('should filter by link type', async ({ page }) => {
@@ -139,8 +139,8 @@ test.describe('Library Feature', () => {
 
       // Should show only links
       await expect(page.locator('text=Showing 1 item')).toBeVisible();
-      await expect(page.locator('text=Useful Link')).toBeVisible();
-      await expect(page.locator('text=First Note')).not.toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Useful Link' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'First Note' })).not.toBeVisible();
     });
 
     test('should filter by file type', async ({ page }) => {
@@ -151,7 +151,7 @@ test.describe('Library Feature', () => {
 
       // Should show only files
       await expect(page.locator('text=Showing 1 item')).toBeVisible();
-      await expect(page.locator('text=Important File')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Important File' })).toBeVisible();
     });
 
     test('should show all content when clicking All filter', async ({ page }) => {
@@ -187,10 +187,10 @@ test.describe('Library Feature', () => {
       const cards = page.locator('.grid > div');
 
       // First should be "Important File" (2024-01-25)
-      await expect(cards.nth(0).locator('text=Important File')).toBeVisible();
+      await expect(cards.nth(0).getByRole('heading', { name: 'Important File' })).toBeVisible();
 
       // Second should be "Second Note" (2024-01-20)
-      await expect(cards.nth(1).locator('text=Second Note')).toBeVisible();
+      await expect(cards.nth(1).getByRole('heading', { name: 'Second Note' })).toBeVisible();
     });
 
     test('should sort by oldest first', async ({ page }) => {
@@ -202,10 +202,10 @@ test.describe('Library Feature', () => {
       const cards = page.locator('.grid > div');
 
       // First should be "Useful Link" (2024-01-10)
-      await expect(cards.nth(0).locator('text=Useful Link')).toBeVisible();
+      await expect(cards.nth(0).getByRole('heading', { name: 'Useful Link' })).toBeVisible();
 
       // Last should be "Important File" (2024-01-25)
-      await expect(cards.nth(3).locator('text=Important File')).toBeVisible();
+      await expect(cards.nth(3).getByRole('heading', { name: 'Important File' })).toBeVisible();
     });
 
     test('should sort by title A-Z', async ({ page }) => {
@@ -217,10 +217,10 @@ test.describe('Library Feature', () => {
       const cards = page.locator('.grid > div');
 
       // Should be alphabetically sorted
-      await expect(cards.nth(0).locator('text=First Note')).toBeVisible();
-      await expect(cards.nth(1).locator('text=Important File')).toBeVisible();
-      await expect(cards.nth(2).locator('text=Second Note')).toBeVisible();
-      await expect(cards.nth(3).locator('text=Useful Link')).toBeVisible();
+      await expect(cards.nth(0).getByRole('heading', { name: 'First Note' })).toBeVisible();
+      await expect(cards.nth(1).getByRole('heading', { name: 'Important File' })).toBeVisible();
+      await expect(cards.nth(2).getByRole('heading', { name: 'Second Note' })).toBeVisible();
+      await expect(cards.nth(3).getByRole('heading', { name: 'Useful Link' })).toBeVisible();
     });
 
     test('should sort by title Z-A', async ({ page }) => {
@@ -232,10 +232,10 @@ test.describe('Library Feature', () => {
       const cards = page.locator('.grid > div');
 
       // Should be reverse alphabetically sorted
-      await expect(cards.nth(0).locator('text=Useful Link')).toBeVisible();
-      await expect(cards.nth(1).locator('text=Second Note')).toBeVisible();
-      await expect(cards.nth(2).locator('text=Important File')).toBeVisible();
-      await expect(cards.nth(3).locator('text=First Note')).toBeVisible();
+      await expect(cards.nth(0).getByRole('heading', { name: 'Useful Link' })).toBeVisible();
+      await expect(cards.nth(1).getByRole('heading', { name: 'Second Note' })).toBeVisible();
+      await expect(cards.nth(2).getByRole('heading', { name: 'Important File' })).toBeVisible();
+      await expect(cards.nth(3).getByRole('heading', { name: 'First Note' })).toBeVisible();
     });
 
     test('should highlight active sort option', async ({ page }) => {
@@ -258,20 +258,20 @@ test.describe('Library Feature', () => {
 
     test('should filter by tag', async ({ page }) => {
       // Click on "important" tag
-      await page.click('a:has-text("important"):first');
+      await page.locator('a:has-text("important")').first().click();
 
       await expect(page).toHaveURL('/dashboard/library?tag=important&sortBy=createdAt&sortOrder=desc');
 
       // Should show only items with "important" tag
       await expect(page.locator('text=Showing 2 items')).toBeVisible();
-      await expect(page.locator('text=First Note')).toBeVisible();
-      await expect(page.locator('text=Important File')).toBeVisible();
-      await expect(page.locator('text=Second Note')).not.toBeVisible();
+      await expect(page.getByRole('heading', { name: 'First Note' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Important File' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Second Note' })).not.toBeVisible();
     });
 
     test('should show clear tag filter button when tag is selected', async ({ page }) => {
       // Filter by tag
-      await page.click('a:has-text("work"):first');
+      await page.locator('a:has-text("work")').first().click();
 
       // Clear button should appear
       await expect(page.locator('text=Clear tag filter')).toBeVisible();
@@ -279,7 +279,7 @@ test.describe('Library Feature', () => {
 
     test('should clear tag filter when clicking clear button', async ({ page }) => {
       // Filter by tag
-      await page.click('a:has-text("work"):first');
+      await page.locator('a:has-text("work")').first().click();
       await expect(page.locator('text=Showing 2 items')).toBeVisible();
 
       // Click clear button
@@ -290,9 +290,9 @@ test.describe('Library Feature', () => {
     });
 
     test('should highlight selected tag', async ({ page }) => {
-      await page.click('a:has-text("personal"):first');
+      await page.locator('a:has-text("personal")').first().click();
 
-      const tagButton = page.locator('a:has-text("personal"):first');
+      const tagButton = page.locator('a:has-text("personal")').first();
       const className = await tagButton.getAttribute('class');
       expect(className).toContain('bg-primary');
     });
@@ -308,14 +308,14 @@ test.describe('Library Feature', () => {
       await page.click('a:has-text("Notes")');
 
       // Then filter by "work" tag
-      await page.click('a:has-text("work"):first');
+      await page.locator('a:has-text("work")').first().click();
 
       await expect(page).toHaveURL('/dashboard/library?type=note&tag=work&sortBy=createdAt&sortOrder=desc');
 
       // Should show only the "Second Note" which is type=note AND has "work" tag
       await expect(page.locator('text=Showing 1 item')).toBeVisible();
-      await expect(page.locator('text=Second Note')).toBeVisible();
-      await expect(page.locator('text=First Note')).not.toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Second Note' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'First Note' })).not.toBeVisible();
     });
 
     test('should combine type filter with sorting', async ({ page }) => {
@@ -331,14 +331,14 @@ test.describe('Library Feature', () => {
 
       // Should show 2 notes in alphabetical order
       await expect(cards).toHaveCount(2);
-      await expect(cards.nth(0).locator('text=First Note')).toBeVisible();
-      await expect(cards.nth(1).locator('text=Second Note')).toBeVisible();
+      await expect(cards.nth(0).getByRole('heading', { name: 'First Note' })).toBeVisible();
+      await expect(cards.nth(1).getByRole('heading', { name: 'Second Note' })).toBeVisible();
     });
 
     test('should preserve filters when changing sort order', async ({ page }) => {
       // Apply type and tag filters
       await page.click('a:has-text("Notes")');
-      await page.click('a:has-text("important"):first');
+      await page.locator('a:has-text("important")').first().click();
 
       // Change sort order
       await page.click('a:has-text("Oldest First")');
@@ -361,7 +361,7 @@ test.describe('Library Feature', () => {
       await page.click('a:has-text("Files")');
 
       // Then try to filter by "work" tag (files don't have this tag)
-      await page.click('a:has-text("work"):first');
+      await page.locator('a:has-text("work")').first().click();
 
       // Should show empty state
       await expect(page.locator('text=No content matches your filters')).toBeVisible();
@@ -372,7 +372,7 @@ test.describe('Library Feature', () => {
 
       // Apply filters that return no results
       await page.click('a:has-text("Files")');
-      await page.click('a:has-text("personal"):first');
+      await page.locator('a:has-text("personal")').first().click();
 
       // Should show link to capture page
       const createLink = page.locator('a:has-text("Create Content")');
@@ -389,7 +389,7 @@ test.describe('Library Feature', () => {
     test('should navigate to capture page from empty state', async ({ page }) => {
       // Apply filters with no results
       await page.click('a:has-text("Files")');
-      await page.click('a:has-text("personal"):first');
+      await page.locator('a:has-text("personal")').first().click();
 
       // Click create content link
       await page.click('a:has-text("Create Content")');
