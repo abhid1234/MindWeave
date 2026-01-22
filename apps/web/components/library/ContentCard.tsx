@@ -1,4 +1,5 @@
 import type { ContentType } from '@/lib/db/schema';
+import { EditableTags } from './EditableTags';
 
 export type ContentCardProps = {
   id: string;
@@ -9,9 +10,11 @@ export type ContentCardProps = {
   tags: string[];
   autoTags: string[];
   createdAt: Date;
+  allTags?: string[];
 };
 
 export function ContentCard({
+  id,
   type,
   title,
   body,
@@ -19,6 +22,7 @@ export function ContentCard({
   tags,
   autoTags,
   createdAt,
+  allTags = [],
 }: ContentCardProps) {
   return (
     <div className="rounded-lg border bg-card p-4 hover:shadow-md transition-shadow">
@@ -50,26 +54,12 @@ export function ContentCard({
         </a>
       )}
 
-      {(tags.length > 0 || autoTags.length > 0) && (
-        <div className="flex flex-wrap gap-1">
-          {tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
-            >
-              {tag}
-            </span>
-          ))}
-          {autoTags.slice(0, 2).map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-secondary px-2 py-0.5 text-xs"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
+      <EditableTags
+        contentId={id}
+        initialTags={tags}
+        autoTags={autoTags}
+        allTags={allTags}
+      />
     </div>
   );
 }

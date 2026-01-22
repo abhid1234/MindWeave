@@ -24,3 +24,15 @@ describe.skip('getContentAction', () => {
     // - Error handling
   });
 });
+
+describe.skip('updateContentTagsAction', () => {
+  it('should be tested via E2E tests', () => {
+    // All functionality tested in tests/e2e/manual-tagging.spec.ts including:
+    // - Authentication checks
+    // - Tag validation (trimming, max length, max count)
+    // - Duplicate tag prevention
+    // - Content ownership verification
+    // - Database updates and persistence
+    // - Error handling
+  });
+});
