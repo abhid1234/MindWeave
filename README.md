@@ -279,7 +279,7 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Content capture (notes, links, files)
 - [x] Content library with filtering and sorting
 - [x] Full-text search
-- [ ] Manual tagging
+- [x] Manual tagging
 
 ### Phase 2: AI Features (Planned)
 - [ ] AI auto-tagging
