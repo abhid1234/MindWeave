@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content, type ContentType } from '@/lib/db/schema';
 import { createContentSchema } from '@/lib/validations';
+import { generateTags } from '@/lib/ai/claude';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { eq, desc, asc, and, or, sql, type SQL } from 'drizzle-orm';
@@ -52,6 +53,20 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
 
     const validatedData = validationResult.data;
 
+    // Generate auto-tags using Claude AI
+    let autoTags: string[] = [];
+    try {
+      autoTags = await generateTags({
+        title: validatedData.title,
+        body: validatedData.body,
+        url: validatedData.url,
+        type: validatedData.type,
+      });
+    } catch (error) {
+      // Don't fail content creation if auto-tagging fails
+      console.error('Auto-tagging failed:', error);
+    }
+
     // Insert into database
     const [newContent] = await db
       .insert(content)
@@ -62,7 +77,7 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
         body: validatedData.body || null,
         url: validatedData.url || null,
         tags: validatedData.tags,
-        autoTags: [], // TODO: Generate with Claude API
+        autoTags,
         metadata: validatedData.metadata || {},
       })
       .returning({ id: content.id });
