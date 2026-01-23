@@ -5,6 +5,7 @@ import { db } from '@/lib/db/client';
 import { content, type ContentType } from '@/lib/db/schema';
 import { createContentSchema } from '@/lib/validations';
 import { generateTags } from '@/lib/ai/claude';
+import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { eq, desc, asc, and, or, sql, type SQL } from 'drizzle-orm';
@@ -81,6 +82,11 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
         metadata: validatedData.metadata || {},
       })
       .returning({ id: content.id });
+
+    // Generate embedding asynchronously (non-blocking)
+    upsertContentEmbedding(newContent.id).catch((error) => {
+      console.error('Failed to generate embedding for content:', newContent.id, error);
+    });
 
     // Revalidate relevant pages
     revalidatePath('/dashboard/library');
@@ -197,6 +203,11 @@ export async function updateContentTagsAction(
       .update(content)
       .set({ tags: cleanedTags })
       .where(eq(content.id, contentId));
+
+    // Regenerate embedding with new tags (non-blocking)
+    upsertContentEmbedding(contentId).catch((error) => {
+      console.error('Failed to refresh embedding after tag update:', contentId, error);
+    });
 
     // Revalidate relevant pages
     revalidatePath('/dashboard/library');
