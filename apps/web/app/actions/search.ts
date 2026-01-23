@@ -2,6 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { searchSimilarContent, getRecommendations } from '@/lib/ai/embeddings';
+import { answerQuestion } from '@/lib/ai/claude';
 import type { ContentType } from '@/lib/db/schema';
 
 export type SemanticSearchResult = {
@@ -145,6 +146,109 @@ export async function getRecommendationsAction(
       success: false,
       message: 'Failed to get recommendations. Please try again.',
       recommendations: [],
+    };
+  }
+}
+
+export type AskQuestionResponse = {
+  success: boolean;
+  message?: string;
+  answer?: string;
+  citations?: Array<{
+    contentId: string;
+    title: string;
+    relevance: string;
+  }>;
+  sourcesUsed?: number;
+};
+
+/**
+ * Ask a question about your knowledge base
+ * Uses semantic search to find relevant content and Claude AI to generate an answer
+ */
+export async function askQuestionAction(
+  question: string
+): Promise<AskQuestionResponse> {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    // Validate question
+    if (!question || typeof question !== 'string') {
+      return {
+        success: false,
+        message: 'Please enter a question.',
+      };
+    }
+
+    const trimmedQuestion = question.trim();
+    if (trimmedQuestion.length === 0) {
+      return {
+        success: false,
+        message: 'Please enter a question.',
+      };
+    }
+
+    if (trimmedQuestion.length > 2000) {
+      return {
+        success: false,
+        message: 'Question is too long. Please use fewer than 2000 characters.',
+      };
+    }
+
+    // Find relevant content using semantic search
+    const relevantContent = await searchSimilarContent(
+      trimmedQuestion,
+      session.user.id,
+      10 // Get top 10 most relevant pieces of content
+    );
+
+    if (relevantContent.length === 0) {
+      return {
+        success: true,
+        answer: "I couldn't find any relevant content in your knowledge base to answer this question. Try adding more notes, links, or files related to this topic.",
+        citations: [],
+        sourcesUsed: 0,
+      };
+    }
+
+    // Format context for Claude (answerQuestion expects title, body, tags)
+    const context = relevantContent.map((item) => ({
+      title: item.title,
+      body: item.body || undefined,
+      tags: [...item.tags, ...item.autoTags],
+    }));
+
+    // Ask Claude to answer the question
+    const answer = await answerQuestion({
+      question: trimmedQuestion,
+      context,
+    });
+
+    // Build citations from the relevant content used
+    const citations = relevantContent.slice(0, 5).map((item) => ({
+      contentId: item.id,
+      title: item.title,
+      relevance: `${Math.round(item.similarity * 100)}% match`,
+    }));
+
+    return {
+      success: true,
+      answer,
+      citations,
+      sourcesUsed: relevantContent.length,
+    };
+  } catch (error) {
+    console.error('Error answering question:', error);
+    return {
+      success: false,
+      message: 'Failed to answer question. Please try again.',
     };
   }
 }

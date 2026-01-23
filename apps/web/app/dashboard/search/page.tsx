@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
-import { eq, or, sql, ilike } from 'drizzle-orm';
+import { sql, ilike } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { SemanticSearchForm } from '@/components/search/SemanticSearchForm';
 

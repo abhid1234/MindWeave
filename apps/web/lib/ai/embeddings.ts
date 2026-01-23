@@ -111,6 +111,18 @@ export async function upsertContentEmbedding(contentId: string): Promise<void> {
   }
 }
 
+export type SearchResult = {
+  id: string;
+  title: string;
+  body: string | null;
+  type: 'note' | 'link' | 'file';
+  tags: string[];
+  autoTags: string[];
+  url: string | null;
+  createdAt: Date;
+  similarity: number;
+};
+
 /**
  * Search for similar content using vector similarity
  */
@@ -118,7 +130,7 @@ export async function searchSimilarContent(
   query: string,
   userId: string,
   limit: number = 10
-): Promise<Array<{ id: string; title: string; similarity: number }>> {
+): Promise<SearchResult[]> {
   try {
     // Generate embedding for the query
     const queryEmbedding = await generateEmbedding(query);
@@ -130,7 +142,11 @@ export async function searchSimilarContent(
         c.id,
         c.title,
         c.body,
+        c.type,
         c.tags,
+        c.auto_tags as "autoTags",
+        c.url,
+        c.created_at as "createdAt",
         1 - (e.embedding <=> ${sql`ARRAY[${sql.join(queryEmbedding.map((v) => sql`${v}`), sql`, `)}]::vector`}) as similarity
       FROM ${content} c
       INNER JOIN ${embeddings} e ON c.id = e.content_id
@@ -139,9 +155,7 @@ export async function searchSimilarContent(
       LIMIT ${limit}
     `);
 
-    return results as unknown as Array<
-      typeof content.$inferSelect & { similarity: number }
-    >;
+    return results as unknown as SearchResult[];
   } catch (error) {
     console.error('Error searching similar content:', error);
     return [];

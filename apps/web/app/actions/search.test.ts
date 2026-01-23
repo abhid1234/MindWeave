@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Use vi.hoisted for mock functions
-const { mockAuth, mockSearchSimilarContent, mockGetRecommendations } = vi.hoisted(() => ({
+const { mockAuth, mockSearchSimilarContent, mockGetRecommendations, mockAnswerQuestion } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockSearchSimilarContent: vi.fn(),
   mockGetRecommendations: vi.fn(),
+  mockAnswerQuestion: vi.fn(),
 }));
 
 // Mock the auth module
@@ -18,8 +19,13 @@ vi.mock('@/lib/ai/embeddings', () => ({
   getRecommendations: (...args: any[]) => mockGetRecommendations(...args),
 }));
 
+// Mock the claude module
+vi.mock('@/lib/ai/claude', () => ({
+  answerQuestion: (...args: any[]) => mockAnswerQuestion(...args),
+}));
+
 // Import after mocks are set up
-import { semanticSearchAction, getRecommendationsAction } from './search';
+import { semanticSearchAction, getRecommendationsAction, askQuestionAction } from './search';
 
 describe('Semantic Search Actions', () => {
   beforeEach(() => {
@@ -234,6 +240,155 @@ describe('Semantic Search Actions', () => {
 
       expect(result.success).toBe(true);
       expect(result.recommendations).toEqual([]);
+    });
+  });
+
+  describe('askQuestionAction', () => {
+    it('should return answer with citations on success', async () => {
+      const mockContent = [
+        {
+          id: 'content-1',
+          title: 'React Hooks Guide',
+          body: 'useState is a hook for state management',
+          type: 'note',
+          tags: ['react'],
+          autoTags: ['hooks'],
+          url: null,
+          createdAt: new Date(),
+          similarity: 0.95,
+        },
+        {
+          id: 'content-2',
+          title: 'TypeScript Tips',
+          body: 'Use generics for type safety',
+          type: 'note',
+          tags: ['typescript'],
+          autoTags: [],
+          url: null,
+          createdAt: new Date(),
+          similarity: 0.85,
+        },
+      ];
+      mockSearchSimilarContent.mockResolvedValueOnce(mockContent);
+      mockAnswerQuestion.mockResolvedValueOnce('Based on your notes, useState is a React hook for state management [1].');
+
+      const result = await askQuestionAction('What is useState?');
+
+      expect(result.success).toBe(true);
+      expect(result.answer).toContain('useState');
+      expect(result.citations).toHaveLength(2);
+      expect(result.citations?.[0].title).toBe('React Hooks Guide');
+      expect(result.citations?.[0].relevance).toBe('95% match');
+      expect(result.sourcesUsed).toBe(2);
+      expect(mockSearchSimilarContent).toHaveBeenCalledWith('What is useState?', 'user-123', 10);
+      expect(mockAnswerQuestion).toHaveBeenCalledWith({
+        question: 'What is useState?',
+        context: [
+          { title: 'React Hooks Guide', body: 'useState is a hook for state management', tags: ['react', 'hooks'] },
+          { title: 'TypeScript Tips', body: 'Use generics for type safety', tags: ['typescript'] },
+        ],
+      });
+    });
+
+    it('should return error when not authenticated', async () => {
+      mockAuth.mockResolvedValueOnce(null);
+
+      const result = await askQuestionAction('What is useState?');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Unauthorized');
+      expect(mockSearchSimilarContent).not.toHaveBeenCalled();
+    });
+
+    it('should return error for empty question', async () => {
+      const result = await askQuestionAction('');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('enter a question');
+    });
+
+    it('should return error for whitespace-only question', async () => {
+      const result = await askQuestionAction('   ');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('enter a question');
+    });
+
+    it('should return error for question that is too long', async () => {
+      const longQuestion = 'a'.repeat(2001);
+      const result = await askQuestionAction(longQuestion);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('too long');
+    });
+
+    it('should trim the question before processing', async () => {
+      mockSearchSimilarContent.mockResolvedValueOnce([]);
+
+      await askQuestionAction('  What is React?  ');
+
+      expect(mockSearchSimilarContent).toHaveBeenCalledWith('What is React?', 'user-123', 10);
+    });
+
+    it('should return helpful message when no relevant content found', async () => {
+      mockSearchSimilarContent.mockResolvedValueOnce([]);
+
+      const result = await askQuestionAction('What is quantum computing?');
+
+      expect(result.success).toBe(true);
+      expect(result.answer).toContain("couldn't find any relevant content");
+      expect(result.citations).toEqual([]);
+      expect(result.sourcesUsed).toBe(0);
+      expect(mockAnswerQuestion).not.toHaveBeenCalled();
+    });
+
+    it('should handle answerQuestion errors gracefully', async () => {
+      mockSearchSimilarContent.mockResolvedValueOnce([
+        { id: 'content-1', title: 'Test', body: 'body', type: 'note', tags: [], autoTags: [], similarity: 0.9 },
+      ]);
+      mockAnswerQuestion.mockRejectedValueOnce(new Error('AI service unavailable'));
+
+      const result = await askQuestionAction('What is this?');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Failed to answer question');
+    });
+
+    it('should limit citations to top 5', async () => {
+      const mockContent = Array.from({ length: 10 }, (_, i) => ({
+        id: `content-${i}`,
+        title: `Note ${i}`,
+        body: `Body ${i}`,
+        type: 'note',
+        tags: [],
+        autoTags: [],
+        url: null,
+        createdAt: new Date(),
+        similarity: 0.9 - i * 0.05,
+      }));
+      mockSearchSimilarContent.mockResolvedValueOnce(mockContent);
+      mockAnswerQuestion.mockResolvedValueOnce('Here is the answer.');
+
+      const result = await askQuestionAction('Tell me about my notes');
+
+      expect(result.success).toBe(true);
+      expect(result.citations).toHaveLength(5);
+      expect(result.sourcesUsed).toBe(10);
+    });
+
+    it('should handle content with no body', async () => {
+      mockSearchSimilarContent.mockResolvedValueOnce([
+        { id: 'content-1', title: 'Bookmark', body: null, type: 'link', tags: ['web'], autoTags: [], url: 'https://example.com', similarity: 0.9 },
+      ]);
+      mockAnswerQuestion.mockResolvedValueOnce('Based on your bookmark...');
+
+      const result = await askQuestionAction('What bookmarks do I have?');
+
+      expect(result.success).toBe(true);
+      expect(mockAnswerQuestion).toHaveBeenCalledWith({
+        question: 'What bookmarks do I have?',
+        context: [{ title: 'Bookmark', body: undefined, tags: ['web'] }],
+      });
     });
   });
 });
