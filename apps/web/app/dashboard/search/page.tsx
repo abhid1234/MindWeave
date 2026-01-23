@@ -1,13 +1,16 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, or, sql, ilike } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
+import { SemanticSearchForm } from '@/components/search/SemanticSearchForm';
+
+type SearchMode = 'keyword' | 'semantic';
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; mode?: SearchMode }>;
 }) {
   const session = await auth();
   const params = await searchParams;
@@ -17,25 +20,26 @@ export default async function SearchPage({
   }
 
   const query = params.q || '';
-  let results: Array<typeof content.$inferSelect> = [];
+  const mode = params.mode || 'keyword';
+  let keywordResults: Array<typeof content.$inferSelect> = [];
 
-  if (query) {
-    // Simple keyword search for now
-    // TODO: Implement semantic search with embeddings in feature development phase
-    results = await db
+  // Only perform keyword search on server if mode is keyword
+  if (query && mode === 'keyword') {
+    // Database-level keyword search using ILIKE
+    const searchPattern = `%${query}%`;
+
+    keywordResults = await db
       .select()
       .from(content)
       .where(
-        eq(content.userId, session.user.id)
+        sql`${content.userId} = ${session.user.id} AND (
+          ${ilike(content.title, searchPattern)} OR
+          ${ilike(content.body, searchPattern)} OR
+          EXISTS (SELECT 1 FROM unnest(${content.tags}) AS tag WHERE tag ILIKE ${searchPattern}) OR
+          EXISTS (SELECT 1 FROM unnest(${content.autoTags}) AS tag WHERE tag ILIKE ${searchPattern})
+        )`
       )
-      .then((items) =>
-        items.filter(
-          (item) =>
-            item.title.toLowerCase().includes(query.toLowerCase()) ||
-            item.body?.toLowerCase().includes(query.toLowerCase()) ||
-            item.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
-        )
-      );
+      .orderBy(content.createdAt);
   }
 
   return (
@@ -47,41 +51,29 @@ export default async function SearchPage({
         </p>
       </div>
 
-      {/* Search Form */}
-      <form method="get" className="mb-8">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            name="q"
-            defaultValue={query}
-            placeholder="Search your notes, links, and files..."
-            className="flex-1 rounded-lg border border-input bg-background px-4 py-3"
-            autoFocus
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Search
-          </button>
-        </div>
-      </form>
+      {/* Search Form with Mode Toggle */}
+      <SemanticSearchForm
+        initialQuery={query}
+        initialMode={mode}
+      />
 
-      {/* Results */}
-      {query && (
+      {/* Keyword Search Results (server-rendered) */}
+      {mode === 'keyword' && query && (
         <div>
           <p className="mb-4 text-sm text-muted-foreground">
-            Found {results.length} result{results.length !== 1 ? 's' : ''} for &quot;{query}&quot;
+            Found {keywordResults.length} result{keywordResults.length !== 1 ? 's' : ''} for &quot;{query}&quot;
           </p>
 
-          {results.length === 0 ? (
+          {keywordResults.length === 0 ? (
             <div className="rounded-lg border border-dashed p-12 text-center">
-              <p className="text-muted-foreground">No results found. Try a different search term.</p>
+              <p className="text-muted-foreground">
+                No results found. Try different keywords or switch to semantic search.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {results.map((item) => (
-                <div key={item.id} className="rounded-lg border bg-card p-4 hover:bg-accent">
+              {keywordResults.map((item) => (
+                <div key={item.id} className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -117,7 +109,7 @@ export default async function SearchPage({
                           ))}
                           {item.autoTags.map((tag: string) => (
                             <span
-                              key={tag}
+                              key={`auto-${tag}`}
                               className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"
                             >
                               {tag} (AI)
@@ -126,7 +118,7 @@ export default async function SearchPage({
                         </div>
                       )}
                     </div>
-                    <span className="ml-4 text-xs text-muted-foreground">
+                    <span className="ml-4 text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -137,13 +129,15 @@ export default async function SearchPage({
         </div>
       )}
 
+      {/* Initial State (no query) */}
       {!query && (
         <div className="rounded-lg border border-dashed p-12 text-center">
           <p className="text-muted-foreground">
             Enter a search term to find content in your knowledge base
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Tip: Semantic search with AI will be available soon!
+            Use <strong>Keyword Search</strong> for exact matches or{' '}
+            <strong>Semantic Search</strong> to find content by meaning
           </p>
         </div>
       )}
