@@ -78,6 +78,9 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
     };
   } catch (error) {
     console.error('Error creating content:', error);
+    console.error('Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
 
     if (error instanceof z.ZodError) {
       return {
@@ -87,9 +90,11 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
       };
     }
 
+    // Return more specific error message for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
       success: false,
-      message: 'Failed to save content. Please try again.',
+      message: `Failed to save content: ${errorMessage}`,
     };
   }
 }
