@@ -1,11 +1,11 @@
 # Mindweave Project Status
 
 **Last Updated**: 2026-01-23
-**Current Phase**: Feature Development - Claude Auto-Tagging Complete
+**Current Phase**: Feature Development - Vector Embeddings Complete
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **Claude Auto-Tagging feature complete!** AI-powered tag generation using Claude API.
+✅ **Vector Embeddings feature complete!** Automatic embedding generation on content creation and tag updates.
 
 **Completed Features**:
 - Authentication (Google OAuth with JWT sessions) - 97 tests, 94.73% coverage
@@ -14,8 +14,9 @@
 - Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
 - Manual Tagging (Inline editing + autocomplete) - 241 tests total, 92.22% coverage
 - Claude Auto-Tagging (AI tag generation on content creation) - Requires ANTHROPIC_API_KEY
+- Vector Embeddings (Auto-generation via Google Gemini) - 38 new tests, requires GOOGLE_AI_API_KEY
 
-**Next Step**: Ready for Feature #7: Vector Embeddings for semantic search.
+**Next Step**: Ready for Feature #8: Semantic Search using pgvector similarity.
 
 ## ✅ Completed Features
 
@@ -152,7 +153,7 @@ None - Ready for feature development
 - [x] **Full-text Search** - Basic keyword search implementation ✅
 - [x] **Manual Tagging** - Tag creation, editing, and association ✅
 - [x] **Claude Auto-Tagging** - AI-powered tag generation for all content ✅
-- [ ] **Vector Embeddings** - Generate and store embeddings for semantic search
+- [x] **Vector Embeddings** - Generate and store embeddings for semantic search ✅
 - [ ] **Semantic Search** - Similarity-based content discovery using pgvector
 - [ ] **Knowledge Q&A** - Chat interface for querying knowledge base
 
@@ -311,6 +312,17 @@ None - fresh scaffolding
   - Root cause: Next.js App Router client-side navigation timing issues
   - All remaining tests are stable and reliable
   - Commits: 646e757, ae90992, 2c7670d
+- **2026-01-23 20:48** - ✅ **VECTOR EMBEDDINGS FEATURE COMPLETE**
+  - Hooked upsertContentEmbedding into createContentAction after content creation
+  - Hooked upsertContentEmbedding into updateContentTagsAction after tag updates
+  - Non-blocking async calls so content operations don't fail if embedding fails
+  - Created batch script (scripts/generate-embeddings.ts) for backfilling existing content
+  - Added 25 unit tests for embeddings module (lib/ai/embeddings.test.ts)
+  - Added 13 integration tests for content-embeddings hooks
+  - Total: 38 new tests, all passing
+  - TypeScript compilation passes
+  - Commit: 7a068d4
+  - **STATUS: Feature #7 complete, ready for Feature #8 (Semantic Search)**
 
 ## 📚 Tech Stack
 - **Framework**: Next.js 15 (App Router)
