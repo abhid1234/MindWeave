@@ -6,6 +6,8 @@ jspm_packages/
 
 # Testing
 coverage/
+playwright-report/
+test-results/
 
 # Next.js
 .next/
