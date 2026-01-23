@@ -1,11 +1,11 @@
 # Mindweave Project Status
 
 **Last Updated**: 2026-01-23
-**Current Phase**: Feature Development - Manual Tagging Complete
+**Current Phase**: Feature Development - Claude Auto-Tagging Complete
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **Manual Tagging feature complete!** Inline tag editing with autocomplete and comprehensive testing.
+✅ **Claude Auto-Tagging feature complete!** AI-powered tag generation using Claude API.
 
 **Completed Features**:
 - Authentication (Google OAuth with JWT sessions) - 97 tests, 94.73% coverage
@@ -13,8 +13,9 @@
 - Content Library (Filtering + sorting + components) - 164 tests total, 87.5% coverage
 - Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
 - Manual Tagging (Inline editing + autocomplete) - 241 tests total, 92.22% coverage
+- Claude Auto-Tagging (AI tag generation on content creation) - Requires ANTHROPIC_API_KEY
 
-**Next Step**: Ready for Feature #6: AI Auto-Tagging with Claude API.
+**Next Step**: Ready for Feature #7: Vector Embeddings for semantic search.
 
 ## ✅ Completed Features
 
@@ -150,7 +151,7 @@ None - Ready for feature development
 - [x] **Content Library** - Display saved content with filtering and sorting ✅
 - [x] **Full-text Search** - Basic keyword search implementation ✅
 - [x] **Manual Tagging** - Tag creation, editing, and association ✅
-- [ ] **Claude Auto-Tagging** - AI-powered tag generation for all content
+- [x] **Claude Auto-Tagging** - AI-powered tag generation for all content ✅
 - [ ] **Vector Embeddings** - Generate and store embeddings for semantic search
 - [ ] **Semantic Search** - Similarity-based content discovery using pgvector
 - [ ] **Knowledge Q&A** - Chat interface for querying knowledge base
