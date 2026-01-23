@@ -27,15 +27,15 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
     }
 
     // Parse and prepare data
+    const tagsInput = formData.get('tags') as string | null;
     const rawData = {
       type: formData.get('type'),
       title: formData.get('title'),
       body: formData.get('body') || '',
       url: formData.get('url') || '',
-      tags: (formData.get('tags') as string)
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter(Boolean),
+      tags: tagsInput
+        ? tagsInput.split(',').map((tag) => tag.trim()).filter(Boolean)
+        : [],
     };
 
     // Validate with Zod
