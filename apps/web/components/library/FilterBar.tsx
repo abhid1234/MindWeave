@@ -12,6 +12,7 @@ export function FilterBar({ allTags }: FilterBarProps) {
   const searchParams = useSearchParams();
   const typeFilter = searchParams.get('type') as ContentType | null;
   const tagFilter = searchParams.get('tag');
+  const queryFilter = searchParams.get('query');
   const sortBy = searchParams.get('sortBy') || 'createdAt';
   const sortOrder = searchParams.get('sortOrder') || 'desc';
 
@@ -41,6 +42,7 @@ export function FilterBar({ allTags }: FilterBarProps) {
 
     if (finalType) newParams.set('type', finalType);
     if (finalTag) newParams.set('tag', finalTag);
+    if (queryFilter) newParams.set('query', queryFilter); // Preserve search query
     if (finalSortBy) newParams.set('sortBy', finalSortBy);
     if (finalSortOrder) newParams.set('sortOrder', finalSortOrder);
 
