@@ -93,14 +93,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       // Add user ID to session from JWT token
       if (token && session.user) {
+        // Use token.sub (set in jwt callback) as the user ID
         session.user.id = token.sub as string;
       }
       return session;
     },
     async jwt({ token, user }) {
-      // Store user ID in token on sign in
+      // Store user ID in token.sub on sign in
+      // token.sub is the standard JWT subject claim used for user ID
       if (user) {
-        token.id = user.id;
+        token.sub = user.id;
       }
       return token;
     },
