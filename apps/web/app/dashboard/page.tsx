@@ -88,9 +88,9 @@ export default async function DashboardPage() {
                         {item.body}
                       </p>
                     )}
-                    {item.tags.length > 0 && (
+                    {(item.tags?.length ?? 0) > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {item.tags.map((tag) => (
+                        {(item.tags ?? []).map((tag) => (
                           <span
                             key={tag}
                             className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"
