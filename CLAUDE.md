@@ -28,15 +28,19 @@ Mindweave/
 │   └── web/                    # Next.js application
 │       ├── app/
 │       │   ├── (auth)/         # Auth pages (login, register)
-│       │   ├── (dashboard)/    # Protected dashboard pages
+│       │   ├── dashboard/      # Protected dashboard pages
 │       │   │   ├── capture/    # Content creation
-│       │   │   ├── search/     # Search interface
+│       │   │   ├── search/     # Search interface (keyword + semantic)
+│       │   │   ├── ask/        # Knowledge Q&A chat
 │       │   │   └── library/    # Content library
+│       │   ├── actions/        # Server actions
 │       │   ├── api/            # API routes
 │       │   └── layout.tsx      # Root layout
 │       ├── components/
 │       │   ├── ui/             # shadcn/ui components
-│       │   └── layout/         # Layout components (header, nav)
+│       │   ├── layout/         # Layout components (header, nav)
+│       │   ├── library/        # Library components (ContentCard, FilterBar, etc.)
+│       │   └── search/         # Search components (SemanticSearchForm, KnowledgeQA)
 │       ├── lib/
 │       │   ├── db/             # Database schema and client
 │       │   ├── ai/             # Claude API and embeddings
@@ -260,19 +264,20 @@ NODE_ENV=development
 - **[WORKFLOW_CHECKLIST.md](WORKFLOW_CHECKLIST.md)** - Step-by-step checklist for each feature
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - GCP deployment guide
 
-## Key Features (Planned)
+## Key Features
 
-### Phase 1: Core Functionality
-- [x] Authentication (Google OAuth)
-- [ ] Content capture (notes, links, files)
-- [ ] Content library with filtering
-- [ ] Full-text search
+### Phase 1: Core Functionality ✅ Complete
+- [x] Authentication (Google OAuth + JWT sessions)
+- [x] Content capture (notes, links, files)
+- [x] Content library with filtering and sorting
+- [x] Full-text search
+- [x] Manual tagging
 
-### Phase 2: AI Features
-- [ ] Claude auto-tagging
-- [ ] Vector embeddings
-- [ ] Semantic search
-- [ ] Knowledge Q&A
+### Phase 2: AI Features ✅ Complete
+- [x] Claude auto-tagging
+- [x] Vector embeddings (Google Gemini)
+- [x] Semantic search (pgvector)
+- [x] Knowledge Q&A (RAG with Claude)
 
 ## Database Schema
 
@@ -322,11 +327,21 @@ Files: `lib/ai/embeddings.ts`
 - Use Tailwind utility classes
 - Validate inputs with Zod schemas
 
-## Testing Strategy (Future)
+## Testing Strategy
 
-- Unit tests: Vitest
-- Integration tests: Playwright
-- Run tests before commits with Ralph workflow
+**Current Status**: 352 tests passing with comprehensive coverage
+
+- **Unit tests**: Vitest - testing business logic, utilities, server actions
+- **Component tests**: React Testing Library - testing UI components
+- **E2E tests**: Playwright - testing critical user flows
+- **Coverage**: Target ≥80% for all features
+
+```bash
+npm run test              # Run all unit/component tests
+npm run test:watch        # Watch mode for development
+npm run test:coverage     # Generate coverage report
+npm run test:e2e          # Run Playwright E2E tests
+```
 
 ## Deployment
 

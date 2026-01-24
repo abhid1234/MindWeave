@@ -272,7 +272,7 @@ tsx ../../scripts/seed-db.ts
 
 See [STATUS.md](STATUS.md) for current development status.
 
-### Phase 1: Core Features (In Progress)
+### Phase 1: Core Features ✅ Complete
 - [x] Project scaffolding
 - [x] Docker PostgreSQL setup
 - [x] Authentication (Google OAuth + JWT sessions)
@@ -281,11 +281,11 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Full-text search
 - [x] Manual tagging
 
-### Phase 2: AI Features (Planned)
-- [ ] AI auto-tagging
-- [ ] Vector embeddings
-- [ ] Semantic search
-- [ ] Knowledge Q&A chat interface
+### Phase 2: AI Features ✅ Complete
+- [x] AI auto-tagging (Claude API)
+- [x] Vector embeddings (Google Gemini)
+- [x] Semantic search (pgvector similarity)
+- [x] Knowledge Q&A chat interface (RAG with Claude)
 
 ### Phase 3: Advanced Features (Future)
 - [ ] Browser extension for quick capture
