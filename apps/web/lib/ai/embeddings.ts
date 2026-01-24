@@ -135,6 +135,9 @@ export async function searchSimilarContent(
     // Generate embedding for the query
     const queryEmbedding = await generateEmbedding(query);
 
+    // Convert embedding to pgvector string format: '[1,2,3,...]'
+    const vectorString = `[${queryEmbedding.join(',')}]`;
+
     // Perform vector similarity search using pgvector
     // Using cosine distance (1 - cosine similarity)
     const results = await db.execute(sql`
@@ -147,11 +150,11 @@ export async function searchSimilarContent(
         c.auto_tags as "autoTags",
         c.url,
         c.created_at as "createdAt",
-        1 - (e.embedding <=> ${sql`ARRAY[${sql.join(queryEmbedding.map((v) => sql`${v}`), sql`, `)}]::vector`}) as similarity
+        1 - (e.embedding <=> ${vectorString}::vector) as similarity
       FROM ${content} c
       INNER JOIN ${embeddings} e ON c.id = e.content_id
       WHERE c.user_id = ${userId}
-      ORDER BY e.embedding <=> ${sql`ARRAY[${sql.join(queryEmbedding.map((v) => sql`${v}`), sql`, `)}]::vector`}
+      ORDER BY e.embedding <=> ${vectorString}::vector
       LIMIT ${limit}
     `);
 
@@ -179,16 +182,19 @@ export async function getRecommendations(
       return [];
     }
 
+    // Convert embedding to pgvector string format
+    const vectorString = `[${embedding.embedding.join(',')}]`;
+
     // Find similar content
     const results = await db.execute(sql`
       SELECT
         c.id,
         c.title,
-        1 - (e.embedding <=> ${embedding.embedding}) as similarity
+        1 - (e.embedding <=> ${vectorString}::vector) as similarity
       FROM ${content} c
       INNER JOIN ${embeddings} e ON c.id = e.content_id
       WHERE c.id != ${contentId}
-      ORDER BY e.embedding <=> ${embedding.embedding}
+      ORDER BY e.embedding <=> ${vectorString}::vector
       LIMIT ${limit}
     `);
 

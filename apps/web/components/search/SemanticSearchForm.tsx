@@ -186,9 +186,9 @@ export function SemanticSearchForm({
                           {item.url}
                         </a>
                       )}
-                      {(item.tags.length > 0 || item.autoTags.length > 0) && (
+                      {((item.tags?.length ?? 0) > 0 || (item.autoTags?.length ?? 0) > 0) && (
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {item.tags.map((tag: string) => (
+                          {(item.tags ?? []).map((tag: string) => (
                             <span
                               key={tag}
                               className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
@@ -196,7 +196,7 @@ export function SemanticSearchForm({
                               {tag}
                             </span>
                           ))}
-                          {item.autoTags.map((tag: string) => (
+                          {(item.autoTags ?? []).map((tag: string) => (
                             <span
                               key={`auto-${tag}`}
                               className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"

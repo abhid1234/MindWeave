@@ -222,7 +222,7 @@ export async function askQuestionAction(
     const context = relevantContent.map((item) => ({
       title: item.title,
       body: item.body || undefined,
-      tags: [...item.tags, ...item.autoTags],
+      tags: [...(item.tags ?? []), ...(item.autoTags ?? [])],
     }));
 
     // Ask Claude to answer the question
