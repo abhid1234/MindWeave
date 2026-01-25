@@ -147,13 +147,16 @@ export function KnowledgeQA() {
           </div>
         ) : (
           <>
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <div
                 key={message.id}
                 className={cn(
-                  'flex flex-col',
-                  message.role === 'user' ? 'items-end' : 'items-start'
+                  'flex flex-col animate-in duration-300',
+                  message.role === 'user'
+                    ? 'items-end slide-in-from-right-4'
+                    : 'items-start slide-in-from-left-4'
                 )}
+                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
               >
                 <div
                   className={cn(

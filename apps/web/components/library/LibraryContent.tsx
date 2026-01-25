@@ -71,7 +71,7 @@ export function LibraryContent({ items, allTags, hasFilters }: LibraryContentPro
 
       {/* Content Grid */}
       {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-12 text-center">
+        <div className="rounded-lg border border-dashed p-12 text-center animate-in fade-in-50 duration-300">
           <p className="text-muted-foreground">
             {hasFilters
               ? 'No content matches your filters.'
@@ -86,8 +86,14 @@ export function LibraryContent({ items, allTags, hasFilters }: LibraryContentPro
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pb-20">
-          {items.map((item) => (
-            <SelectableContentCard key={item.id} {...item} allTags={allTags} />
+          {items.map((item, index) => (
+            <div
+              key={item.id}
+              className="animate-in fade-in-50 slide-in-from-bottom-4 duration-300"
+              style={{ animationDelay: `${Math.min(index * 50, 300)}ms`, animationFillMode: 'backwards' }}
+            >
+              <SelectableContentCard {...item} allTags={allTags} />
+            </div>
           ))}
         </div>
       )}

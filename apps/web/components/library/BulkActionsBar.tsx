@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { X, Trash2, Share2, Tag, Lock, Download, FolderPlus } from 'lucide-react';
+import { X, Trash2, Share2, Tag, Lock, Download, FolderPlus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/toast';
 import {
   Dialog,
   DialogContent,
@@ -29,7 +30,7 @@ export function BulkActionsBar() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showCollectionDialog, setShowCollectionDialog] = useState(false);
   const [tagInput, setTagInput] = useState('');
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addToast } = useToast();
 
   const selectedCount = selectedIds.size;
 
@@ -41,11 +42,11 @@ export function BulkActionsBar() {
     startTransition(async () => {
       const result = await bulkDeleteContentAction(Array.from(selectedIds));
       if (result.success) {
-        setMessage({ type: 'success', text: result.message });
+        addToast({ variant: 'success', title: 'Deleted', description: result.message });
         deselectAll();
         toggleSelectionMode();
       } else {
-        setMessage({ type: 'error', text: result.message });
+        addToast({ variant: 'error', title: 'Delete failed', description: result.message });
       }
       setShowDeleteDialog(false);
     });
@@ -55,9 +56,9 @@ export function BulkActionsBar() {
     startTransition(async () => {
       const result = await bulkShareContentAction(Array.from(selectedIds));
       if (result.success) {
-        setMessage({ type: 'success', text: result.message });
+        addToast({ variant: 'success', title: 'Shared', description: result.message });
       } else {
-        setMessage({ type: 'error', text: result.message });
+        addToast({ variant: 'error', title: 'Share failed', description: result.message });
       }
     });
   };
@@ -66,9 +67,9 @@ export function BulkActionsBar() {
     startTransition(async () => {
       const result = await bulkUnshareContentAction(Array.from(selectedIds));
       if (result.success) {
-        setMessage({ type: 'success', text: result.message });
+        addToast({ variant: 'success', title: 'Unshared', description: result.message });
       } else {
-        setMessage({ type: 'error', text: result.message });
+        addToast({ variant: 'error', title: 'Unshare failed', description: result.message });
       }
     });
   };
@@ -80,18 +81,18 @@ export function BulkActionsBar() {
       .filter((t) => t.length > 0);
 
     if (tags.length === 0) {
-      setMessage({ type: 'error', text: 'Please enter at least one tag.' });
+      addToast({ variant: 'warning', title: 'No tags', description: 'Please enter at least one tag.' });
       return;
     }
 
     startTransition(async () => {
       const result = await bulkAddTagsAction(Array.from(selectedIds), tags);
       if (result.success) {
-        setMessage({ type: 'success', text: result.message });
+        addToast({ variant: 'success', title: 'Tags added', description: result.message });
         setTagInput('');
         setShowTagDialog(false);
       } else {
-        setMessage({ type: 'error', text: result.message });
+        addToast({ variant: 'error', title: 'Failed', description: result.message });
       }
     });
   };
@@ -103,26 +104,8 @@ export function BulkActionsBar() {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card shadow-lg animate-in slide-in-from-bottom-full duration-300">
         <div className="mx-auto max-w-6xl px-4 py-3">
-          {message && (
-            <div
-              className={`mb-3 rounded-lg p-3 text-sm ${
-                message.type === 'success'
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-              }`}
-            >
-              {message.text}
-              <button
-                onClick={() => setMessage(null)}
-                className="ml-2 font-medium hover:underline"
-              >
-                Dismiss
-              </button>
-            </div>
-          )}
-
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">
@@ -196,7 +179,7 @@ export function BulkActionsBar() {
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isPending}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
                 Delete
               </Button>
             </div>
@@ -281,7 +264,7 @@ export function BulkActionsBar() {
         onOpenChange={setShowCollectionDialog}
         contentIds={Array.from(selectedIds)}
         onSuccess={() => {
-          setMessage({ type: 'success', text: 'Added to collection' });
+          addToast({ variant: 'success', title: 'Added to collection', description: 'Content added to collection successfully.' });
         }}
       />
     </>

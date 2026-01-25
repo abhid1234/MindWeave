@@ -59,10 +59,10 @@ export function FilterBar({ allTags }: FilterBarProps) {
             <Link
               key={type.value || 'all'}
               href={buildUrl({ type: type.value })}
-              className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+              className={`rounded-lg border px-3 py-1.5 text-sm transition-all duration-200 ${
                 typeFilter === type.value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-accent'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'hover:bg-accent hover:border-primary/30 hover:shadow-sm'
               }`}
             >
               {type.label}
@@ -79,10 +79,10 @@ export function FilterBar({ allTags }: FilterBarProps) {
             <Link
               key={option.value}
               href={buildUrl({ sortBy: option.sortBy, sortOrder: option.sortOrder })}
-              className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+              className={`rounded-lg border px-3 py-1.5 text-sm transition-all duration-200 ${
                 currentSort === option.value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-accent'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'hover:bg-accent hover:border-primary/30 hover:shadow-sm'
               }`}
             >
               {option.label}
@@ -108,10 +108,10 @@ export function FilterBar({ allTags }: FilterBarProps) {
               <Link
                 key={tag}
                 href={buildUrl({ tag })}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                className={`rounded-full border px-3 py-1 text-xs transition-all duration-200 ${
                   tagFilter === tag
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'hover:bg-accent hover:border-primary/30 hover:shadow-sm'
                 }`}
               >
                 {tag}
