@@ -1,6 +1,10 @@
+import React from 'react';
 import '@testing-library/jest-dom';
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+
+// Make React available globally for JSX transformation
+globalThis.React = React;
 
 // Cleanup after each test
 afterEach(() => {

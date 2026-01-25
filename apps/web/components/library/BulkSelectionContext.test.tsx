@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, renderHook, act } from '@testing-library/react';
 import { BulkSelectionProvider, useBulkSelection } from './BulkSelectionContext';

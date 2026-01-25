@@ -1,5 +1,6 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@/tests/test-utils';
 import { BulkActionsBar } from './BulkActionsBar';
 import * as BulkSelectionModule from './BulkSelectionContext';
 import * as contentActions from '@/app/actions/content';
@@ -63,9 +64,11 @@ describe('BulkActionsBar', () => {
       });
     });
 
-    it('should return null and not render anything', () => {
-      const { container } = render(<BulkActionsBar />);
-      expect(container.firstChild).toBeNull();
+    it('should not render the action bar when no items selected', () => {
+      render(<BulkActionsBar />);
+      // Action bar content should not be rendered
+      expect(screen.queryByText(/items? selected/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
     });
   });
 
@@ -364,7 +367,8 @@ describe('BulkActionsBar', () => {
         fireEvent.click(screen.getByText('Share All'));
 
         await waitFor(() => {
-          expect(screen.getByText('Dismiss')).toBeInTheDocument();
+          // Toast has close button with aria-label
+          expect(screen.getByLabelText('Close notification')).toBeInTheDocument();
         });
       });
 
@@ -381,7 +385,8 @@ describe('BulkActionsBar', () => {
           expect(screen.getByText('Success!')).toBeInTheDocument();
         });
 
-        fireEvent.click(screen.getByText('Dismiss'));
+        // Toast close button
+        fireEvent.click(screen.getByLabelText('Close notification'));
 
         await waitFor(() => {
           expect(screen.queryByText('Success!')).not.toBeInTheDocument();
@@ -398,8 +403,9 @@ describe('BulkActionsBar', () => {
         fireEvent.click(screen.getByText('Share All'));
 
         await waitFor(() => {
-          const messageDiv = screen.getByText('Error occurred').closest('div');
-          expect(messageDiv).toHaveClass('bg-red-100');
+          // Toast notifications use bg-red-50 for error variant
+          const messageDiv = screen.getByText('Error occurred').closest('div[role="alert"]');
+          expect(messageDiv).toHaveClass('bg-red-50');
         });
       });
     });
