@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import Link from 'next/link';
+import { formatDateUTC } from '@/lib/utils';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -102,7 +103,7 @@ export default async function DashboardPage() {
                     )}
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(item.createdAt).toLocaleDateString()}
+                    {formatDateUTC(item.createdAt)}
                   </span>
                 </div>
               </div>

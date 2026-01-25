@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { semanticSearchAction, type SemanticSearchResult } from '@/app/actions/search';
 import { Input } from '@/components/ui/input';
+import { formatDateUTC } from '@/lib/utils';
 
 type SearchMode = 'keyword' | 'semantic';
 
@@ -208,7 +209,7 @@ export function SemanticSearchForm({
                       )}
                     </div>
                     <span className="ml-4 text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {formatDateUTC(item.createdAt)}
                     </span>
                   </div>
                 </div>

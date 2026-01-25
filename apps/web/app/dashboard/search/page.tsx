@@ -4,6 +4,7 @@ import { content } from '@/lib/db/schema';
 import { sql, ilike } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { SemanticSearchForm } from '@/components/search/SemanticSearchForm';
+import { formatDateUTC } from '@/lib/utils';
 
 type SearchMode = 'keyword' | 'semantic';
 
@@ -119,7 +120,7 @@ export default async function SearchPage({
                       )}
                     </div>
                     <span className="ml-4 text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {formatDateUTC(item.createdAt)}
                     </span>
                   </div>
                 </div>
