@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
+import { formatDateUTC } from '@/lib/utils';
 import { EditableTags } from './EditableTags';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { ContentEditDialog } from './ContentEditDialog';
@@ -119,7 +120,7 @@ export function ContentCard({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
-              {new Date(createdAt).toLocaleDateString()}
+              {formatDateUTC(createdAt)}
             </span>
             <Button
               variant="ghost"

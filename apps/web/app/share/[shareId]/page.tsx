@@ -2,6 +2,7 @@ import { getSharedContentAction } from '@/app/actions/content';
 import { FileText, Link as LinkIcon, File, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
+import { formatDateLongUTC } from '@/lib/utils';
 
 type Props = {
   params: Promise<{ shareId: string }>;
@@ -94,11 +95,7 @@ export default async function SharePage({ params }: Props) {
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-bold mb-1">{content.title}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(content.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDateLongUTC(content.createdAt)}
                 </p>
               </div>
             </div>
