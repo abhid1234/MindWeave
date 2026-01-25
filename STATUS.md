@@ -588,6 +588,28 @@ None - fresh scaffolding
   - All quality checks passing (tests, types, lint, build)
   - Commits: 0adbecf, b3f006c
   - **STATUS: Browser extension complete! One-click capture working.**
+- **2026-01-25 21:30** - ✅ **PERFORMANCE & OPTIMIZATION SPRINT COMPLETE**
+  - Fixed N+1 query issues:
+    - Tags query now uses SQL UNNEST for efficient aggregation
+    - Bulk operations (delete, share, unshare, add tags) use batch queries with inArray()
+    - Reduced from 2N queries to 1-2 queries for bulk operations
+  - Added dynamic imports for dialogs to reduce initial bundle size:
+    - DeleteConfirmDialog, ContentEditDialog, ShareDialog, CollectionSelector, ExportDialog
+  - Added PWA support:
+    - manifest.json with app info, icons, and shortcuts
+    - App icons (192x192, 512x512) in apps/web/public/icons/
+    - PWA meta tags in layout.tsx (manifest, appleWebApp, themeColor, viewport)
+  - Added SEO setup:
+    - robots.ts with crawler rules (allow /, disallow /api/ and /dashboard/)
+    - sitemap.ts with public pages (/, /login, /register)
+    - Open Graph and Twitter Card metadata for share pages
+  - Image optimization:
+    - Added priority loading for header avatar
+  - Code cleanup:
+    - Removed 4 redundant revalidatePath calls from bulk operations
+  - All quality checks passing (tests, types, lint, build)
+  - Commit: e33d3b4
+  - **STATUS: Performance & optimization complete! App is production-ready.**
 
 ## 📚 Tech Stack
 - **Framework**: Next.js 15 (App Router)

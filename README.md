@@ -13,6 +13,8 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Knowledge Q&A**: Ask questions and get answers from your knowledge base
 - **Smart Library**: Browse and filter all your content in one place
 - **Dark Mode**: Light, dark, and system theme options
+- **PWA Support**: Install as a native app on desktop and mobile
+- **SEO Optimized**: Open Graph and Twitter Card metadata for shared content
 - **Privacy First**: Your data stays yours - self-host or use our secure cloud
 
 ## Tech Stack
