@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { signOutAction } from '@/app/actions/auth';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 interface HeaderProps {
   user: {
@@ -18,6 +19,7 @@ export default function Header({ user }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <div className="flex items-center gap-3">
             {user.image && (
               <Image
