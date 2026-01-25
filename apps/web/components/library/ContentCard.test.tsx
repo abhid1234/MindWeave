@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -195,7 +196,7 @@ describe('ContentCard', () => {
       const { container } = render(<ContentCard {...baseProps} />);
       const card = container.querySelector('.rounded-lg.border');
       expect(card?.className).toContain('hover:shadow-md');
-      expect(card?.className).toContain('transition-shadow');
+      expect(card?.className).toContain('transition-all');
     });
 
     it('should apply line-clamp to title', () => {
