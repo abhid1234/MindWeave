@@ -51,6 +51,44 @@ vi.mock('./ContentEditDialog', () => ({
   ),
 }));
 
+// Mock ShareDialog component
+vi.mock('./ShareDialog', () => ({
+  ShareDialog: ({
+    open,
+    contentTitle,
+  }: {
+    open: boolean;
+    contentTitle: string;
+  }) => (
+    open ? (
+      <div data-testid="share-dialog">
+        Share dialog for: {contentTitle}
+      </div>
+    ) : null
+  ),
+}));
+
+// Mock CollectionSelector component
+vi.mock('./CollectionSelector', () => ({
+  CollectionSelector: ({
+    open,
+  }: {
+    open: boolean;
+    contentId: string;
+  }) => (
+    open ? (
+      <div data-testid="collection-dialog">
+        Collection selector dialog
+      </div>
+    ) : null
+  ),
+}));
+
+// Mock toggleFavoriteAction
+vi.mock('@/app/actions/content', () => ({
+  toggleFavoriteAction: vi.fn().mockResolvedValue({ success: true, isFavorite: true }),
+}));
+
 describe('ContentCard', () => {
   const baseProps: ContentCardProps = {
     id: '1',
@@ -220,6 +258,80 @@ describe('ContentCard', () => {
         expect(screen.getByTestId('delete-dialog')).toBeInTheDocument();
         expect(screen.getByText('Delete dialog for: Test Note')).toBeInTheDocument();
       });
+    });
+
+    it('should show Share option in dropdown menu', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /Share/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should show "Manage Share" when content is already shared', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} isShared={true} shareId="abc123" />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /Manage Share/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should open share dialog when Share is clicked', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      const shareButton = await screen.findByRole('menuitem', { name: /Share/i });
+      await user.click(shareButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('share-dialog')).toBeInTheDocument();
+        expect(screen.getByText('Share dialog for: Test Note')).toBeInTheDocument();
+      });
+    });
+
+    it('should show Add to Collection option in dropdown menu', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /Add to Collection/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should open collection dialog when Add to Collection is clicked', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      const collectionButton = await screen.findByRole('menuitem', { name: /Add to Collection/i });
+      await user.click(collectionButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('collection-dialog')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Sharing indicator', () => {
+    it('should show Shared badge when content is shared', () => {
+      render(<ContentCard {...baseProps} isShared={true} shareId="abc123" />);
+      expect(screen.getByText('Shared')).toBeInTheDocument();
+    });
+
+    it('should not show Shared badge when content is not shared', () => {
+      render(<ContentCard {...baseProps} isShared={false} />);
+      expect(screen.queryByText('Shared')).not.toBeInTheDocument();
     });
   });
 });

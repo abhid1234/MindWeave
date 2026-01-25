@@ -22,15 +22,16 @@ describe('CapturePage', () => {
   });
 
   describe('rendering', () => {
-    it('should render the capture form', () => {
+    it('should render the capture form for note type by default', () => {
       render(<CapturePage />);
 
       expect(screen.getByRole('heading', { name: /capture/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/type/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/content/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/url/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/tags/i)).toBeInTheDocument();
+      // URL field is not shown for note type
+      expect(screen.queryByLabelText(/^url$/i)).not.toBeInTheDocument();
     });
 
     it('should render all form fields with correct default values', () => {
@@ -84,11 +85,15 @@ describe('CapturePage', () => {
       expect(bodyTextarea).toHaveValue('This is my note content');
     });
 
-    it('should allow typing in URL field', async () => {
+    it('should allow typing in URL field when link type is selected', async () => {
       const user = userEvent.setup();
       render(<CapturePage />);
 
-      const urlInput = screen.getByLabelText(/url/i);
+      // Select link type first to show URL field
+      const typeSelect = screen.getByLabelText(/type/i);
+      await user.selectOptions(typeSelect, 'link');
+
+      const urlInput = screen.getByLabelText(/^url$/i);
       await user.type(urlInput, 'https://example.com');
 
       expect(urlInput).toHaveValue('https://example.com');
@@ -112,6 +117,35 @@ describe('CapturePage', () => {
       await user.selectOptions(typeSelect, 'link');
 
       expect(typeSelect.value).toBe('link');
+    });
+
+    it('should show file upload when file type is selected', async () => {
+      const user = userEvent.setup();
+      render(<CapturePage />);
+
+      const typeSelect = screen.getByLabelText(/type/i) as HTMLSelectElement;
+      await user.selectOptions(typeSelect, 'file');
+
+      expect(typeSelect.value).toBe('file');
+      // File upload area should be visible
+      expect(screen.getByText(/click or drag file to upload/i)).toBeInTheDocument();
+      // Description field should show instead of content
+      expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
+    });
+
+    it('should hide URL field when switching from link to note type', async () => {
+      const user = userEvent.setup();
+      render(<CapturePage />);
+
+      const typeSelect = screen.getByLabelText(/type/i) as HTMLSelectElement;
+
+      // Switch to link type
+      await user.selectOptions(typeSelect, 'link');
+      expect(screen.getByLabelText(/^url$/i)).toBeInTheDocument();
+
+      // Switch back to note type
+      await user.selectOptions(typeSelect, 'note');
+      expect(screen.queryByLabelText(/^url$/i)).not.toBeInTheDocument();
     });
   });
 
@@ -145,14 +179,23 @@ describe('CapturePage', () => {
   });
 
   describe('accessibility', () => {
-    it('should have proper labels for all form fields', () => {
+    it('should have proper labels for all form fields (note type)', () => {
       render(<CapturePage />);
 
       expect(screen.getByLabelText(/type/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/content/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/url/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/tags/i)).toBeInTheDocument();
+    });
+
+    it('should show URL field when link type is selected', async () => {
+      const user = userEvent.setup();
+      render(<CapturePage />);
+
+      const typeSelect = screen.getByLabelText(/type/i);
+      await user.selectOptions(typeSelect, 'link');
+
+      expect(screen.getByLabelText(/^url$/i)).toBeInTheDocument();
     });
 
     it('should mark required fields', () => {
