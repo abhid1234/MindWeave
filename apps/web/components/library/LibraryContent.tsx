@@ -1,15 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Download } from 'lucide-react';
 import { BulkSelectionProvider } from './BulkSelectionContext';
 import { BulkActionsBar } from './BulkActionsBar';
 import { SelectableContentCard } from './SelectableContentCard';
 import { SelectionToggle } from './SelectionToggle';
-import { ExportDialog } from './ExportDialog';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import type { ContentType } from '@/lib/db/schema';
+
+// Dynamic import for ExportDialog to reduce initial bundle size
+const ExportDialog = dynamic(() => import('./ExportDialog').then((mod) => mod.ExportDialog), {
+  loading: () => null,
+});
 
 type ContentItem = {
   id: string;

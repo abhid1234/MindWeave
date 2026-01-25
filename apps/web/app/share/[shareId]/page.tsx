@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { getSharedContentAction } from '@/app/actions/content';
 import { FileText, Link as LinkIcon, File, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import NextImage from 'next/image';
@@ -7,6 +8,51 @@ import { formatDateLongUTC } from '@/lib/utils';
 type Props = {
   params: Promise<{ shareId: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { shareId } = await params;
+  const result = await getSharedContentAction(shareId);
+
+  if (!result.success || !result.content) {
+    return {
+      title: 'Content Not Found - Mindweave',
+      description: 'This shared content is no longer available.',
+    };
+  }
+
+  const { content } = result;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const description = content.body
+    ? content.body.slice(0, 160) + (content.body.length > 160 ? '...' : '')
+    : `A ${content.type} shared via Mindweave`;
+
+  return {
+    title: `${content.title} - Mindweave`,
+    description,
+    openGraph: {
+      title: content.title,
+      description,
+      type: 'article',
+      url: `${baseUrl}/share/${shareId}`,
+      siteName: 'Mindweave',
+      ...(content.type === 'file' &&
+        content.metadata?.fileType?.startsWith('image/') &&
+        content.metadata?.filePath && {
+          images: [
+            {
+              url: content.metadata.filePath,
+              alt: content.title,
+            },
+          ],
+        }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: content.title,
+      description,
+    },
+  };
+}
 
 function getTypeIcon(type: string) {
   switch (type) {
