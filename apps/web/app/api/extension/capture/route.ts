@@ -1,0 +1,148 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { content } from '@/lib/db/schema';
+import { generateTags } from '@/lib/ai/claude';
+import { upsertContentEmbedding } from '@/lib/ai/embeddings';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+
+// Schema for extension capture (slightly modified from createContentSchema)
+const extensionCaptureSchema = z.object({
+  type: z.enum(['note', 'link', 'file']),
+  title: z.string().min(1, 'Title is required').max(500, 'Title is too long'),
+  url: z.string().url('Invalid URL').optional().or(z.literal('')),
+  body: z.string().max(50000, 'Content is too long').optional(),
+  tags: z.array(z.string()).default([]),
+});
+
+/**
+ * POST /api/extension/capture
+ * Save content from browser extension
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        {
+          status: 401,
+          headers: getCorsHeaders(),
+        }
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, message: 'Invalid JSON body' },
+        {
+          status: 400,
+          headers: getCorsHeaders(),
+        }
+      );
+    }
+
+    // Validate input
+    const validationResult = extensionCaptureSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.flatten().fieldErrors;
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Validation failed',
+          errors,
+        },
+        {
+          status: 400,
+          headers: getCorsHeaders(),
+        }
+      );
+    }
+
+    const validatedData = validationResult.data;
+
+    // Generate auto-tags using Claude AI
+    let autoTags: string[] = [];
+    try {
+      autoTags = await generateTags({
+        title: validatedData.title,
+        body: validatedData.body,
+        url: validatedData.url,
+        type: validatedData.type,
+      });
+    } catch (error) {
+      // Don't fail content creation if auto-tagging fails
+      console.error('Auto-tagging failed:', error);
+    }
+
+    // Insert into database
+    const [newContent] = await db
+      .insert(content)
+      .values({
+        userId: session.user.id,
+        type: validatedData.type,
+        title: validatedData.title,
+        body: validatedData.body || null,
+        url: validatedData.url || null,
+        tags: validatedData.tags,
+        autoTags,
+        metadata: {},
+      })
+      .returning({ id: content.id });
+
+    // Generate embedding asynchronously (non-blocking)
+    upsertContentEmbedding(newContent.id).catch((error) => {
+      console.error('Failed to generate embedding for content:', newContent.id, error);
+    });
+
+    // Revalidate relevant pages
+    revalidatePath('/dashboard/library');
+    revalidatePath('/dashboard');
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Content saved successfully',
+        data: { id: newContent.id },
+      },
+      {
+        status: 201,
+        headers: getCorsHeaders(),
+      }
+    );
+  } catch (error) {
+    console.error('Extension capture error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Failed to save content' },
+      {
+        status: 500,
+        headers: getCorsHeaders(),
+      }
+    );
+  }
+}
+
+/**
+ * OPTIONS handler for CORS preflight
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: getCorsHeaders(),
+  });
+}
+
+function getCorsHeaders(): HeadersInit {
+  return {
+    'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}

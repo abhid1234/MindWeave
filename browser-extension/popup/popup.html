@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mindweave - Quick Capture</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Mindweave</span>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading" class="state loading-state">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Login Required State -->
+    <div id="login-required" class="state hidden">
+      <div class="icon-container">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2>Login Required</h2>
+      <p>Please log in to Mindweave to save content</p>
+      <button id="login-btn" class="btn btn-primary">Login to Mindweave</button>
+    </div>
+
+    <!-- Capture Form State -->
+    <div id="capture-form" class="state hidden">
+      <div class="user-info">
+        <span class="user-name" id="user-name"></span>
+        <span class="status-badge">Connected</span>
+      </div>
+
+      <form id="save-form">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" required placeholder="Page title">
+        </div>
+
+        <div class="form-group">
+          <label for="url">URL</label>
+          <input type="url" id="url" name="url" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="body">Description (optional)</label>
+          <textarea id="body" name="body" rows="3" placeholder="Add a description..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="tags">Tags (comma separated)</label>
+          <input type="text" id="tags" name="tags" placeholder="tag1, tag2, tag3">
+        </div>
+
+        <button type="submit" id="save-btn" class="btn btn-primary">
+          <span class="btn-text">Save to Mindweave</span>
+          <span class="btn-loading hidden">
+            <div class="spinner-small"></div>
+            Saving...
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Success State -->
+    <div id="success" class="state hidden">
+      <div class="icon-container success-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>Saved!</h2>
+      <p>Content has been added to your Mindweave library</p>
+      <button id="view-library-btn" class="btn btn-secondary">View in Library</button>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="state hidden">
+      <div class="icon-container error-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2>Error</h2>
+      <p id="error-message">Something went wrong</p>
+      <button id="retry-btn" class="btn btn-primary">Try Again</button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <a href="#" id="open-mindweave" target="_blank">Open Mindweave</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
