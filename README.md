@@ -301,7 +301,10 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Error boundaries (global, dashboard, reusable)
 - [x] Accessibility improvements (skip nav, ARIA, keyboard support)
 
-### Phase 4: Future Features
+### Phase 4: UI Enhancements ✅ In Progress
+- [x] Dark mode (Light/Dark/System theme switching)
+
+### Phase 5: Future Features
 - [ ] Browser extension for quick capture
 - [ ] Mobile app (React Native)
 - [ ] Collaborative knowledge bases

@@ -1,7 +1,7 @@
 # Mindweave Project Status
 
 **Last Updated**: 2026-01-25
-**Current Phase**: Phase 3 Complete - Polish & Optimization Done
+**Current Phase**: Phase 4 - UI Enhancements
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
@@ -29,6 +29,11 @@
   - Component tests for all Phase 3 components (11 new test files)
   - Error boundaries (global, dashboard, reusable component)
   - Accessibility improvements (skip nav, ARIA live regions, keyboard support)
+- **Dark Mode** - 661 total tests:
+  - Theme switching (Light/Dark/System) using next-themes
+  - ThemeProvider wrapper with localStorage persistence
+  - ThemeToggle dropdown in header with Sun/Moon/Monitor icons
+  - Respects OS preference with system default
 
 **Next Step**: All core features complete! Ready for deployment or additional features.
 
@@ -224,6 +229,16 @@ None - Ready for feature development
   - Keyboard accessible FileUpload (Enter/Space to trigger)
   - Improved ContentCard with article element and aria-labelledby
 - [x] **Comprehensive test coverage**: 647 tests passing (216 new tests)
+- [x] All quality checks passing (tests, types, lint, build)
+
+### Phase 4: UI Enhancements ✅ IN PROGRESS
+- [x] **Dark Mode** - Theme switching with next-themes
+  - ThemeProvider with class-based theme switching
+  - ThemeToggle dropdown (Light/Dark/System)
+  - OS preference detection with system default
+  - localStorage persistence (mindweave-theme key)
+  - 14 new tests for theme components
+- [x] **Total test coverage**: 661 tests passing
 - [x] All quality checks passing (tests, types, lint, build)
 
 ## 🐛 Known Issues
@@ -518,6 +533,26 @@ None - fresh scaffolding
   - All quality checks passing (tests, types, lint, build)
   - Commit: f525b71
   - **STATUS: Polish & optimization complete! Production ready.**
+- **2026-01-25 19:55** - ✅ **DARK MODE FEATURE COMPLETE**
+  - Installed next-themes package for theme management
+  - Created ThemeProvider component wrapping NextThemesProvider
+    - attribute="class" matching Tailwind darkMode config
+    - defaultTheme="system" for OS preference detection
+    - storageKey="mindweave-theme" for localStorage persistence
+  - Created ThemeToggle dropdown component
+    - Light/Dark/System options with radio selection
+    - Sun/Moon/Monitor icons from lucide-react
+    - Hydration-safe with mounted state check
+  - Added icon size variant to Button component
+  - Updated app/layout.tsx with ThemeProvider and suppressHydrationWarning
+  - Updated header.tsx with ThemeToggle before user info
+  - Comprehensive test coverage:
+    - 4 tests for ThemeProvider
+    - 10 tests for ThemeToggle
+  - **Total: 661 tests passing (14 new tests)**
+  - All quality checks passing (tests, types, lint, build)
+  - Commit: 25b5fef
+  - **STATUS: Dark mode complete! Theme switching fully functional.**
 
 ## 📚 Tech Stack
 - **Framework**: Next.js 15 (App Router)
