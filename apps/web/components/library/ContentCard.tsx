@@ -103,9 +103,29 @@ export function ContentCard({
     }
   };
 
+  // Screen reader announcements
+  const [announcement, setAnnouncement] = useState<string | null>(null);
+
+  const handleToggleFavoriteWithAnnouncement = async () => {
+    await handleToggleFavorite();
+    setAnnouncement(isFavorite ? 'Removed from favorites' : 'Added to favorites');
+    setTimeout(() => setAnnouncement(null), 1000);
+  };
+
   return (
     <>
-      <div className="rounded-lg border bg-card p-4 hover:shadow-md transition-shadow">
+      {/* Screen reader announcement */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+        {isFavoriteLoading && 'Updating favorite status...'}
+      </div>
+
+      <article className="rounded-lg border bg-card p-4 hover:shadow-md transition-shadow" aria-labelledby={`content-title-${id}`}>
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium capitalize">
@@ -113,27 +133,29 @@ export function ContentCard({
             </span>
             {isShared && (
               <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                <Globe className="h-3 w-3" />
+                <Globe className="h-3 w-3" aria-hidden="true" />
                 Shared
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
-              {formatDateUTC(createdAt)}
+              <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
             </span>
             <Button
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0"
-              onClick={handleToggleFavorite}
+              onClick={handleToggleFavoriteWithAnnouncement}
               disabled={isFavoriteLoading}
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              aria-pressed={isFavorite}
             >
               <Star
                 className={`h-4 w-4 ${
                   isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
                 }`}
+                aria-hidden="true"
               />
             </Button>
             <DropdownMenu>
@@ -173,7 +195,7 @@ export function ContentCard({
           </div>
         </div>
 
-        <h3 className="font-semibold line-clamp-2 mb-2">{title}</h3>
+        <h3 id={`content-title-${id}`} className="font-semibold line-clamp-2 mb-2">{title}</h3>
 
         {/* File preview for file type */}
         {type === 'file' && metadata?.filePath && (
@@ -242,7 +264,7 @@ export function ContentCard({
           autoTags={autoTags}
           allTags={allTags}
         />
-      </div>
+      </article>
 
       <DeleteConfirmDialog
         contentId={id}

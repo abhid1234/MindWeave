@@ -80,11 +80,22 @@ export function KnowledgeQA() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] border rounded-lg bg-card">
+    <div className="flex flex-col h-[600px] border rounded-lg bg-card" role="region" aria-label="Knowledge Q&A">
+      {/* Screen reader announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {isPending && 'Searching your knowledge base...'}
+        {error && `Error: ${error}`}
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between border-b px-4 py-3">
         <div>
-          <h2 className="font-semibold">Knowledge Q&A</h2>
+          <h2 className="font-semibold" id="qa-heading">Knowledge Q&A</h2>
           <p className="text-xs text-muted-foreground">
             Ask questions about your saved content
           </p>
@@ -95,6 +106,7 @@ export function KnowledgeQA() {
             size="sm"
             onClick={handleClearChat}
             className="text-muted-foreground hover:text-foreground"
+            aria-label="Clear chat history"
           >
             Clear chat
           </Button>
@@ -102,7 +114,7 @@ export function KnowledgeQA() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" role="log" aria-labelledby="qa-heading" aria-live="polite">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="rounded-full bg-primary/10 p-4 mb-4">
