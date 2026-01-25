@@ -154,14 +154,36 @@ export function FileUpload({
 
   return (
     <div>
+      {/* Screen reader announcements */}
       <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {isUploading && 'Uploading file...'}
+        {error && `Upload error: ${error}`}
+      </div>
+
+      <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-label="Upload file. Click or drag and drop a file here."
+        aria-describedby="file-upload-description"
+        aria-disabled={disabled}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => !disabled && fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
         className={`
           relative rounded-lg border-2 border-dashed p-8 text-center cursor-pointer
-          transition-colors duration-200
+          transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
           ${isDragging ? 'border-primary bg-primary/5' : 'border-input hover:border-primary/50'}
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
@@ -173,20 +195,21 @@ export function FileUpload({
           accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.txt,.md,.doc,.docx"
           className="hidden"
           disabled={disabled || isUploading}
+          aria-hidden="true"
         />
 
         {isUploading ? (
           <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" role="status" aria-label="Uploading" />
             <p className="text-sm text-muted-foreground">Uploading...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <Upload className="h-8 w-8 text-muted-foreground" />
+            <Upload className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
             <p className="font-medium">
               {isDragging ? 'Drop file here' : 'Click or drag file to upload'}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p id="file-upload-description" className="text-sm text-muted-foreground">
               PDF, images, text files up to 10MB
             </p>
           </div>

@@ -141,7 +141,10 @@ describe('FileUpload', () => {
       fireEvent.change(input, { target: { files: [file] } });
 
       await waitFor(() => {
-        expect(screen.getByText(/uploading/i)).toBeInTheDocument();
+        // Look for the visible uploading text (not the sr-only one)
+        const uploadingTexts = screen.getAllByText(/uploading/i);
+        const visibleUploading = uploadingTexts.find(el => !el.closest('.sr-only'));
+        expect(visibleUploading).toBeInTheDocument();
       });
     });
 
@@ -190,7 +193,10 @@ describe('FileUpload', () => {
       await userEvent.upload(input, file);
 
       await waitFor(() => {
-        expect(screen.getByText(/failed to upload file/i)).toBeInTheDocument();
+        // Look for the visible error text (not the sr-only one)
+        const errorTexts = screen.getAllByText(/failed to upload file/i);
+        const visibleError = errorTexts.find(el => !el.closest('.sr-only'));
+        expect(visibleError).toBeInTheDocument();
       });
     });
   });
