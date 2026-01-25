@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ContentCard, type ContentCardProps } from './ContentCard';
 
 // Mock EditableTags component
 vi.mock('./EditableTags', () => ({
-  EditableTags: ({ initialTags, autoTags }: any) => (
+  EditableTags: ({ initialTags, autoTags }: { initialTags: string[]; autoTags: string[] }) => (
     <div data-testid="editable-tags">
       {initialTags.map((tag: string) => (
         <span key={tag}>{tag}</span>
@@ -13,6 +14,40 @@ vi.mock('./EditableTags', () => ({
         <span key={tag}>{tag}</span>
       ))}
     </div>
+  ),
+}));
+
+// Mock DeleteConfirmDialog component
+vi.mock('./DeleteConfirmDialog', () => ({
+  DeleteConfirmDialog: ({
+    open,
+    contentTitle,
+  }: {
+    open: boolean;
+    contentTitle: string;
+  }) => (
+    open ? (
+      <div data-testid="delete-dialog">
+        Delete dialog for: {contentTitle}
+      </div>
+    ) : null
+  ),
+}));
+
+// Mock ContentEditDialog component
+vi.mock('./ContentEditDialog', () => ({
+  ContentEditDialog: ({
+    open,
+    content,
+  }: {
+    open: boolean;
+    content: { title: string };
+  }) => (
+    open ? (
+      <div data-testid="edit-dialog">
+        Edit dialog for: {content.title}
+      </div>
+    ) : null
   ),
 }));
 
@@ -120,9 +155,9 @@ describe('ContentCard', () => {
   describe('Styling', () => {
     it('should have hover shadow effect', () => {
       const { container } = render(<ContentCard {...baseProps} />);
-      const card = container.firstChild as HTMLElement;
-      expect(card.className).toContain('hover:shadow-md');
-      expect(card.className).toContain('transition-shadow');
+      const card = container.querySelector('.rounded-lg.border');
+      expect(card?.className).toContain('hover:shadow-md');
+      expect(card?.className).toContain('transition-shadow');
     });
 
     it('should apply line-clamp to title', () => {
@@ -135,6 +170,56 @@ describe('ContentCard', () => {
       render(<ContentCard {...baseProps} />);
       const body = screen.getByText('This is a test note body');
       expect(body.className).toContain('line-clamp-3');
+    });
+  });
+
+  describe('Actions dropdown', () => {
+    it('should render actions button', () => {
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      expect(actionsButton).toBeInTheDocument();
+    });
+
+    it('should show dropdown menu when actions button is clicked', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /Edit/i })).toBeInTheDocument();
+        expect(screen.getByRole('menuitem', { name: /Delete/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should open edit dialog when Edit is clicked', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      const editButton = await screen.findByRole('menuitem', { name: /Edit/i });
+      await user.click(editButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-dialog')).toBeInTheDocument();
+        expect(screen.getByText('Edit dialog for: Test Note')).toBeInTheDocument();
+      });
+    });
+
+    it('should open delete dialog when Delete is clicked', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      const deleteButton = await screen.findByRole('menuitem', { name: /Delete/i });
+      await user.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('delete-dialog')).toBeInTheDocument();
+        expect(screen.getByText('Delete dialog for: Test Note')).toBeInTheDocument();
+      });
     });
   });
 });
