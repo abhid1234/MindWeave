@@ -2,13 +2,13 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { content, type ContentType } from '@/lib/db/schema';
+import { content, contentCollections, type ContentType } from '@/lib/db/schema';
 import { createContentSchema, updateContentSchema } from '@/lib/validations';
 import { generateTags } from '@/lib/ai/claude';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { eq, desc, asc, and, or, sql, type SQL } from 'drizzle-orm';
+import { eq, desc, asc, and, or, sql, inArray, type SQL } from 'drizzle-orm';
 
 export type ActionResult = {
   success: boolean;
@@ -126,6 +126,8 @@ export type GetContentParams = {
   query?: string;
   sortBy?: 'createdAt' | 'title';
   sortOrder?: 'asc' | 'desc';
+  collectionId?: string;
+  favoritesOnly?: boolean;
 };
 
 export type GetContentResult = {
@@ -139,6 +141,16 @@ export type GetContentResult = {
     tags: string[];
     autoTags: string[];
     createdAt: Date;
+    metadata: {
+      fileType?: string;
+      fileSize?: number;
+      filePath?: string;
+      fileName?: string;
+      [key: string]: unknown;
+    } | null;
+    isShared: boolean;
+    shareId: string | null;
+    isFavorite: boolean;
   }>;
   allTags: string[];
 };
@@ -438,6 +450,8 @@ export async function getContentAction(
       query: searchQuery,
       sortBy = 'createdAt',
       sortOrder = 'desc',
+      collectionId,
+      favoritesOnly,
     } = params;
 
     // Build where conditions
@@ -476,6 +490,31 @@ export async function getContentAction(
       );
     }
 
+    // Filter favorites only if specified
+    if (favoritesOnly) {
+      conditions.push(eq(content.isFavorite, true));
+    }
+
+    // Filter by collection if specified
+    if (collectionId) {
+      const collectionContentIds = await db
+        .select({ contentId: contentCollections.contentId })
+        .from(contentCollections)
+        .where(eq(contentCollections.collectionId, collectionId));
+
+      const contentIds = collectionContentIds.map((c) => c.contentId);
+      if (contentIds.length > 0) {
+        conditions.push(inArray(content.id, contentIds));
+      } else {
+        // No content in collection, return empty result
+        return {
+          success: true,
+          items: [],
+          allTags: [],
+        };
+      }
+    }
+
     const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
 
     // Determine sort order
@@ -499,6 +538,10 @@ export async function getContentAction(
         tags: content.tags,
         autoTags: content.autoTags,
         createdAt: content.createdAt,
+        metadata: content.metadata,
+        isShared: content.isShared,
+        shareId: content.shareId,
+        isFavorite: content.isFavorite,
       })
       .from(content)
       .where(whereClause)
@@ -532,6 +575,608 @@ export async function getContentAction(
       success: false,
       items: [],
       allTags: [],
+    };
+  }
+}
+
+// Generate a unique share ID
+function generateShareId(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 16; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+export type ShareContentResult = {
+  success: boolean;
+  message: string;
+  shareUrl?: string;
+  shareId?: string;
+};
+
+export async function shareContentAction(
+  contentId: string
+): Promise<ShareContentResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    // Verify the content belongs to the user
+    const existingContent = await db
+      .select({ id: content.id, isShared: content.isShared, shareId: content.shareId })
+      .from(content)
+      .where(
+        and(eq(content.id, contentId), eq(content.userId, session.user.id))
+      )
+      .limit(1);
+
+    if (existingContent.length === 0) {
+      return {
+        success: false,
+        message: 'Content not found or access denied.',
+      };
+    }
+
+    // If already shared, return the existing share URL
+    if (existingContent[0].isShared && existingContent[0].shareId) {
+      const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/share/${existingContent[0].shareId}`;
+      return {
+        success: true,
+        message: 'Content is already shared.',
+        shareUrl,
+        shareId: existingContent[0].shareId,
+      };
+    }
+
+    // Generate a new share ID
+    const shareId = generateShareId();
+
+    // Update the content to be shared
+    await db
+      .update(content)
+      .set({
+        isShared: true,
+        shareId,
+        updatedAt: new Date(),
+      })
+      .where(eq(content.id, contentId));
+
+    revalidatePath('/dashboard/library');
+
+    const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/share/${shareId}`;
+
+    return {
+      success: true,
+      message: 'Content shared successfully.',
+      shareUrl,
+      shareId,
+    };
+  } catch (error) {
+    console.error('Error sharing content:', error);
+    return {
+      success: false,
+      message: 'Failed to share content. Please try again.',
+    };
+  }
+}
+
+export async function unshareContentAction(
+  contentId: string
+): Promise<ActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    // Verify the content belongs to the user
+    const existingContent = await db
+      .select({ id: content.id })
+      .from(content)
+      .where(
+        and(eq(content.id, contentId), eq(content.userId, session.user.id))
+      )
+      .limit(1);
+
+    if (existingContent.length === 0) {
+      return {
+        success: false,
+        message: 'Content not found or access denied.',
+      };
+    }
+
+    // Update the content to be unshared
+    await db
+      .update(content)
+      .set({
+        isShared: false,
+        shareId: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(content.id, contentId));
+
+    revalidatePath('/dashboard/library');
+
+    return {
+      success: true,
+      message: 'Content is no longer shared.',
+    };
+  } catch (error) {
+    console.error('Error unsharing content:', error);
+    return {
+      success: false,
+      message: 'Failed to unshare content. Please try again.',
+    };
+  }
+}
+
+export type SharedContentResult = {
+  success: boolean;
+  message?: string;
+  content?: {
+    id: string;
+    type: ContentType;
+    title: string;
+    body: string | null;
+    url: string | null;
+    tags: string[];
+    autoTags: string[];
+    createdAt: Date;
+    metadata: {
+      fileType?: string;
+      fileSize?: number;
+      filePath?: string;
+      fileName?: string;
+      [key: string]: unknown;
+    } | null;
+    userName: string | null;
+  };
+};
+
+export async function getSharedContentAction(
+  shareId: string
+): Promise<SharedContentResult> {
+  try {
+    if (!shareId || typeof shareId !== 'string') {
+      return {
+        success: false,
+        message: 'Invalid share ID.',
+      };
+    }
+
+    // Fetch the shared content
+    const result = await db
+      .select({
+        id: content.id,
+        type: content.type,
+        title: content.title,
+        body: content.body,
+        url: content.url,
+        tags: content.tags,
+        autoTags: content.autoTags,
+        createdAt: content.createdAt,
+        metadata: content.metadata,
+        isShared: content.isShared,
+      })
+      .from(content)
+      .where(and(eq(content.shareId, shareId), eq(content.isShared, true)))
+      .limit(1);
+
+    if (result.length === 0) {
+      return {
+        success: false,
+        message: 'Shared content not found or has been unshared.',
+      };
+    }
+
+    const item = result[0];
+
+    return {
+      success: true,
+      content: {
+        id: item.id,
+        type: item.type as ContentType,
+        title: item.title,
+        body: item.body,
+        url: item.url,
+        tags: item.tags,
+        autoTags: item.autoTags,
+        createdAt: item.createdAt,
+        metadata: item.metadata,
+        userName: null, // We don't expose the user name for privacy
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching shared content:', error);
+    return {
+      success: false,
+      message: 'Failed to load shared content.',
+    };
+  }
+}
+
+// Bulk Operations
+
+export type BulkActionResult = {
+  success: boolean;
+  message: string;
+  successCount?: number;
+  failedCount?: number;
+};
+
+export async function bulkDeleteContentAction(
+  contentIds: string[]
+): Promise<BulkActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return {
+        success: false,
+        message: 'No content selected for deletion.',
+      };
+    }
+
+    // Delete only content that belongs to the user
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const contentId of contentIds) {
+      try {
+        const result = await db
+          .delete(content)
+          .where(
+            and(eq(content.id, contentId), eq(content.userId, session.user.id))
+          )
+          .returning({ id: content.id });
+
+        if (result.length > 0) {
+          successCount++;
+        } else {
+          failedCount++;
+        }
+      } catch {
+        failedCount++;
+      }
+    }
+
+    revalidatePath('/dashboard/library');
+
+    if (successCount === 0) {
+      return {
+        success: false,
+        message: 'Failed to delete any content.',
+        successCount,
+        failedCount,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Successfully deleted ${successCount} item${successCount !== 1 ? 's' : ''}.${failedCount > 0 ? ` ${failedCount} item${failedCount !== 1 ? 's' : ''} could not be deleted.` : ''}`,
+      successCount,
+      failedCount,
+    };
+  } catch (error) {
+    console.error('Error bulk deleting content:', error);
+    return {
+      success: false,
+      message: 'Failed to delete content. Please try again.',
+    };
+  }
+}
+
+export async function bulkAddTagsAction(
+  contentIds: string[],
+  tags: string[]
+): Promise<BulkActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return {
+        success: false,
+        message: 'No content selected.',
+      };
+    }
+
+    if (!tags || tags.length === 0) {
+      return {
+        success: false,
+        message: 'No tags provided.',
+      };
+    }
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const contentId of contentIds) {
+      try {
+        // Get existing tags
+        const existing = await db
+          .select({ tags: content.tags })
+          .from(content)
+          .where(
+            and(eq(content.id, contentId), eq(content.userId, session.user.id))
+          )
+          .limit(1);
+
+        if (existing.length === 0) {
+          failedCount++;
+          continue;
+        }
+
+        // Merge tags (avoid duplicates)
+        const existingTags = new Set(existing[0].tags);
+        const newTags = [...existingTags, ...tags.filter((t) => !existingTags.has(t))];
+
+        await db
+          .update(content)
+          .set({ tags: newTags, updatedAt: new Date() })
+          .where(eq(content.id, contentId));
+
+        successCount++;
+      } catch {
+        failedCount++;
+      }
+    }
+
+    revalidatePath('/dashboard/library');
+
+    if (successCount === 0) {
+      return {
+        success: false,
+        message: 'Failed to add tags to any content.',
+        successCount,
+        failedCount,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Successfully added tags to ${successCount} item${successCount !== 1 ? 's' : ''}.`,
+      successCount,
+      failedCount,
+    };
+  } catch (error) {
+    console.error('Error bulk adding tags:', error);
+    return {
+      success: false,
+      message: 'Failed to add tags. Please try again.',
+    };
+  }
+}
+
+export async function bulkShareContentAction(
+  contentIds: string[]
+): Promise<BulkActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return {
+        success: false,
+        message: 'No content selected.',
+      };
+    }
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const contentId of contentIds) {
+      try {
+        // Check ownership and if already shared
+        const existing = await db
+          .select({ isShared: content.isShared })
+          .from(content)
+          .where(
+            and(eq(content.id, contentId), eq(content.userId, session.user.id))
+          )
+          .limit(1);
+
+        if (existing.length === 0) {
+          failedCount++;
+          continue;
+        }
+
+        if (existing[0].isShared) {
+          // Already shared, count as success
+          successCount++;
+          continue;
+        }
+
+        // Generate share ID and update
+        const shareId = generateShareId();
+        await db
+          .update(content)
+          .set({ isShared: true, shareId, updatedAt: new Date() })
+          .where(eq(content.id, contentId));
+
+        successCount++;
+      } catch {
+        failedCount++;
+      }
+    }
+
+    revalidatePath('/dashboard/library');
+
+    if (successCount === 0) {
+      return {
+        success: false,
+        message: 'Failed to share any content.',
+        successCount,
+        failedCount,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Successfully shared ${successCount} item${successCount !== 1 ? 's' : ''}.`,
+      successCount,
+      failedCount,
+    };
+  } catch (error) {
+    console.error('Error bulk sharing content:', error);
+    return {
+      success: false,
+      message: 'Failed to share content. Please try again.',
+    };
+  }
+}
+
+export async function bulkUnshareContentAction(
+  contentIds: string[]
+): Promise<BulkActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return {
+        success: false,
+        message: 'No content selected.',
+      };
+    }
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const contentId of contentIds) {
+      try {
+        const result = await db
+          .update(content)
+          .set({ isShared: false, shareId: null, updatedAt: new Date() })
+          .where(
+            and(eq(content.id, contentId), eq(content.userId, session.user.id))
+          )
+          .returning({ id: content.id });
+
+        if (result.length > 0) {
+          successCount++;
+        } else {
+          failedCount++;
+        }
+      } catch {
+        failedCount++;
+      }
+    }
+
+    revalidatePath('/dashboard/library');
+
+    if (successCount === 0) {
+      return {
+        success: false,
+        message: 'Failed to unshare any content.',
+        successCount,
+        failedCount,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Successfully unshared ${successCount} item${successCount !== 1 ? 's' : ''}.`,
+      successCount,
+      failedCount,
+    };
+  } catch (error) {
+    console.error('Error bulk unsharing content:', error);
+    return {
+      success: false,
+      message: 'Failed to unshare content. Please try again.',
+    };
+  }
+}
+
+// Toggle favorite status
+export type ToggleFavoriteResult = {
+  success: boolean;
+  message: string;
+  isFavorite?: boolean;
+};
+
+export async function toggleFavoriteAction(
+  contentId: string
+): Promise<ToggleFavoriteResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    // Get the current favorite status
+    const [existingContent] = await db
+      .select({ id: content.id, isFavorite: content.isFavorite })
+      .from(content)
+      .where(
+        and(eq(content.id, contentId), eq(content.userId, session.user.id))
+      );
+
+    if (!existingContent) {
+      return {
+        success: false,
+        message: 'Content not found or access denied.',
+      };
+    }
+
+    const newFavoriteStatus = !existingContent.isFavorite;
+
+    // Toggle the favorite status
+    await db
+      .update(content)
+      .set({
+        isFavorite: newFavoriteStatus,
+        updatedAt: new Date(),
+      })
+      .where(eq(content.id, contentId));
+
+    revalidatePath('/dashboard/library');
+
+    return {
+      success: true,
+      message: newFavoriteStatus ? 'Added to favorites.' : 'Removed from favorites.',
+      isFavorite: newFavoriteStatus,
+    };
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    return {
+      success: false,
+      message: 'Failed to toggle favorite. Please try again.',
     };
   }
 }

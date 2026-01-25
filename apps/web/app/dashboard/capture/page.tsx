@@ -4,6 +4,7 @@ import { createContentAction } from '@/app/actions/content';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { FileUpload, type UploadedFile } from '@/components/capture/FileUpload';
 
 export default function CapturePage() {
   const [isPending, startTransition] = useTransition();
@@ -12,11 +13,30 @@ export default function CapturePage() {
     message: string;
   } | null>(null);
   const [errors, setErrors] = useState<Partial<Record<string, string[]>>>({});
+  const [contentType, setContentType] = useState<'note' | 'link' | 'file'>('note');
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
     setFeedback(null);
     setErrors({});
+
+    // Add file metadata to form data if file is uploaded
+    if (contentType === 'file' && uploadedFile) {
+      formData.set('metadata', JSON.stringify({
+        fileType: uploadedFile.fileType,
+        fileSize: uploadedFile.fileSize,
+        filePath: uploadedFile.filePath,
+        fileName: uploadedFile.fileName,
+      }));
+      // Set URL to file path for easy access
+      formData.set('url', uploadedFile.filePath);
+      // Use filename as title if not provided
+      const title = formData.get('title') as string;
+      if (!title || title.trim() === '') {
+        formData.set('title', uploadedFile.fileName);
+      }
+    }
 
     startTransition(async () => {
       const result = await createContentAction(formData);
@@ -35,6 +55,11 @@ export default function CapturePage() {
       }
     });
   }
+
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setContentType(e.target.value as 'note' | 'link' | 'file');
+    setUploadedFile(null);
+  };
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -68,7 +93,8 @@ export default function CapturePage() {
           <select
             id="type"
             name="type"
-            defaultValue="note"
+            value={contentType}
+            onChange={handleTypeChange}
             className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             required
             disabled={isPending}
@@ -82,18 +108,42 @@ export default function CapturePage() {
           )}
         </div>
 
+        {/* File Upload - only show when type is file */}
+        {contentType === 'file' && (
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Upload File
+            </label>
+            <FileUpload
+              onFileUploaded={setUploadedFile}
+              onFileRemoved={() => setUploadedFile(null)}
+              uploadedFile={uploadedFile}
+              disabled={isPending}
+            />
+            {!uploadedFile && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                Select a file to upload. Title will be auto-filled from filename.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Title */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium">
-            Title
+            Title {contentType === 'file' && uploadedFile ? '(Optional)' : ''}
           </label>
           <input
             id="title"
             type="text"
             name="title"
-            placeholder="Give your content a title..."
+            placeholder={
+              contentType === 'file' && uploadedFile
+                ? uploadedFile.fileName
+                : 'Give your content a title...'
+            }
             className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            required
+            required={contentType !== 'file' || !uploadedFile}
             disabled={isPending}
           />
           {errors.title && (
@@ -101,41 +151,66 @@ export default function CapturePage() {
           )}
         </div>
 
-        {/* Body */}
-        <div>
-          <label htmlFor="body" className="block text-sm font-medium">
-            Content (Optional)
-          </label>
-          <textarea
-            id="body"
-            name="body"
-            rows={8}
-            placeholder="Add your notes, thoughts, or content..."
-            className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            disabled={isPending}
-          />
-          {errors.body && (
-            <p className="mt-1 text-sm text-red-600">{errors.body[0]}</p>
-          )}
-        </div>
+        {/* Body - hide for file type */}
+        {contentType !== 'file' && (
+          <div>
+            <label htmlFor="body" className="block text-sm font-medium">
+              Content (Optional)
+            </label>
+            <textarea
+              id="body"
+              name="body"
+              rows={8}
+              placeholder="Add your notes, thoughts, or content..."
+              className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              disabled={isPending}
+            />
+            {errors.body && (
+              <p className="mt-1 text-sm text-red-600">{errors.body[0]}</p>
+            )}
+          </div>
+        )}
 
-        {/* URL */}
-        <div>
-          <label htmlFor="url" className="block text-sm font-medium">
-            URL (Optional)
-          </label>
-          <input
-            id="url"
-            type="url"
-            name="url"
-            placeholder="https://example.com"
-            className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            disabled={isPending}
-          />
-          {errors.url && (
-            <p className="mt-1 text-sm text-red-600">{errors.url[0]}</p>
-          )}
-        </div>
+        {/* Description for file type */}
+        {contentType === 'file' && (
+          <div>
+            <label htmlFor="body" className="block text-sm font-medium">
+              Description (Optional)
+            </label>
+            <textarea
+              id="body"
+              name="body"
+              rows={4}
+              placeholder="Add a description for this file..."
+              className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              disabled={isPending}
+            />
+            {errors.body && (
+              <p className="mt-1 text-sm text-red-600">{errors.body[0]}</p>
+            )}
+          </div>
+        )}
+
+        {/* URL - only show for link type */}
+        {contentType === 'link' && (
+          <div>
+            <label htmlFor="url" className="block text-sm font-medium">
+              URL
+            </label>
+            <input
+              id="url"
+              type="url"
+              name="url"
+              placeholder="https://example.com"
+              className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              required
+              disabled={isPending}
+            />
+            {errors.url && (
+              <p className="mt-1 text-sm text-red-600">{errors.url[0]}</p>
+            )}
+          </div>
+        )}
 
         {/* Tags */}
         <div>
@@ -162,7 +237,7 @@ export default function CapturePage() {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || (contentType === 'file' && !uploadedFile)}
             className="rounded-lg bg-primary px-6 py-2.5 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? 'Saving...' : 'Save'}

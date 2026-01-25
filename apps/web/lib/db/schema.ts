@@ -10,6 +10,7 @@ import {
   index,
   integer,
   primaryKey,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
 
@@ -95,6 +96,9 @@ export const content = pgTable(
     }>(),
     tags: text('tags').array().notNull().default([]),
     autoTags: text('auto_tags').array().notNull().default([]),
+    isShared: boolean('is_shared').notNull().default(false),
+    shareId: varchar('share_id', { length: 32 }).unique(),
+    isFavorite: boolean('is_favorite').notNull().default(false),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -102,6 +106,46 @@ export const content = pgTable(
     userIdIdx: index('content_user_id_idx').on(table.userId),
     typeIdx: index('content_type_idx').on(table.type),
     createdAtIdx: index('content_created_at_idx').on(table.createdAt),
+    shareIdIdx: index('content_share_id_idx').on(table.shareId),
+  })
+);
+
+// Collections table (folders for organizing content)
+export const collections = pgTable(
+  'collections',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: text('description'),
+    color: varchar('color', { length: 7 }), // Hex color like #FF5733
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('collections_user_id_idx').on(table.userId),
+    nameIdx: index('collections_name_idx').on(table.name),
+  })
+);
+
+// Junction table for content-collections many-to-many relationship
+export const contentCollections = pgTable(
+  'content_collections',
+  {
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    collectionId: uuid('collection_id')
+      .notNull()
+      .references(() => collections.id, { onDelete: 'cascade' }),
+    addedAt: timestamp('added_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.contentId, table.collectionId] }),
+    contentIdIdx: index('content_collections_content_id_idx').on(table.contentId),
+    collectionIdIdx: index('content_collections_collection_id_idx').on(table.collectionId),
   })
 );
 
@@ -127,6 +171,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   content: many(content),
   accounts: many(accounts),
   sessions: many(sessions),
+  collections: many(collections),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -135,6 +180,7 @@ export const contentRelations = relations(content, ({ one, many }) => ({
     references: [users.id],
   }),
   embeddings: many(embeddings),
+  contentCollections: many(contentCollections),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -152,6 +198,25 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
 
+export const collectionsRelations = relations(collections, ({ one, many }) => ({
+  user: one(users, {
+    fields: [collections.userId],
+    references: [users.id],
+  }),
+  contentCollections: many(contentCollections),
+}));
+
+export const contentCollectionsRelations = relations(contentCollections, ({ one }) => ({
+  content: one(content, {
+    fields: [contentCollections.contentId],
+    references: [content.id],
+  }),
+  collection: one(collections, {
+    fields: [contentCollections.collectionId],
+    references: [collections.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -161,3 +226,9 @@ export type NewContent = typeof content.$inferInsert;
 
 export type Embedding = typeof embeddings.$inferSelect;
 export type NewEmbedding = typeof embeddings.$inferInsert;
+
+export type Collection = typeof collections.$inferSelect;
+export type NewCollection = typeof collections.$inferInsert;
+
+export type ContentCollection = typeof contentCollections.$inferSelect;
+export type NewContentCollection = typeof contentCollections.$inferInsert;

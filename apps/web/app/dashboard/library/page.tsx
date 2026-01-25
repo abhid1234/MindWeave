@@ -1,8 +1,9 @@
 import { getContentAction } from '@/app/actions/content';
-import { ContentCard } from '@/components/library/ContentCard';
 import { FilterBar } from '@/components/library/FilterBar';
 import { SearchBar } from '@/components/library/SearchBar';
-import Link from 'next/link';
+import { LibraryContent } from '@/components/library/LibraryContent';
+import { CollectionFilter } from '@/components/library/CollectionFilter';
+import { FavoritesToggle } from '@/components/library/FavoritesToggle';
 import type { ContentType } from '@/lib/db/schema';
 
 export default async function LibraryPage({
@@ -14,9 +15,12 @@ export default async function LibraryPage({
     query?: string;
     sortBy?: 'createdAt' | 'title';
     sortOrder?: 'asc' | 'desc';
+    collectionId?: string;
+    favorites?: string;
   }>;
 }) {
   const params = await searchParams;
+  const favoritesOnly = params.favorites === 'true';
 
   // Fetch content with filters and sorting
   const { items, allTags } = await getContentAction({
@@ -25,9 +29,11 @@ export default async function LibraryPage({
     query: params.query,
     sortBy: params.sortBy,
     sortOrder: params.sortOrder,
+    collectionId: params.collectionId,
+    favoritesOnly,
   });
 
-  const hasFilters = params.type || params.tag || params.query;
+  const hasFilters = !!(params.type || params.tag || params.query || params.collectionId || favoritesOnly);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -39,41 +45,20 @@ export default async function LibraryPage({
         </p>
       </div>
 
-      {/* Search */}
-      <div className="mb-6">
-        <SearchBar />
+      {/* Search and Collection Filter */}
+      <div className="mb-6 flex flex-wrap items-center gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <SearchBar />
+        </div>
+        <FavoritesToggle />
+        <CollectionFilter />
       </div>
 
       {/* Filters and Sorting */}
       <FilterBar allTags={allTags} />
 
-      {/* Content Grid */}
-      {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">
-            {hasFilters
-              ? 'No content matches your filters.'
-              : 'No content yet. Start capturing your ideas!'}
-          </p>
-          <Link
-            href="/dashboard/capture"
-            className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Create Content
-          </Link>
-        </div>
-      ) : (
-        <>
-          <div className="mb-4 text-sm text-muted-foreground">
-            Showing {items.length} item{items.length !== 1 ? 's' : ''}
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
-              <ContentCard key={item.id} {...item} allTags={allTags} />
-            ))}
-          </div>
-        </>
-      )}
+      {/* Content Grid with Bulk Selection */}
+      <LibraryContent items={items} allTags={allTags} hasFilters={hasFilters} />
     </div>
   );
 }
