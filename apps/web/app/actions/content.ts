@@ -90,8 +90,7 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
 
     // Revalidate relevant pages
     revalidatePath('/dashboard/library');
-    revalidatePath('/dashboard');
-
+    
     return {
       success: true,
       message: 'Content saved successfully!',
@@ -223,8 +222,7 @@ export async function updateContentTagsAction(
 
     // Revalidate relevant pages
     revalidatePath('/dashboard/library');
-    revalidatePath('/dashboard');
-
+    
     return {
       success: true,
       message: 'Tags updated successfully!',
@@ -352,8 +350,7 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
 
     // Revalidate relevant pages
     revalidatePath('/dashboard/library');
-    revalidatePath('/dashboard');
-
+    
     return {
       success: true,
       message: 'Content updated successfully!',
@@ -415,8 +412,7 @@ export async function deleteContentAction(contentId: string): Promise<ActionResu
 
     // Revalidate relevant pages
     revalidatePath('/dashboard/library');
-    revalidatePath('/dashboard');
-
+    
     return {
       success: true,
       message: 'Content deleted successfully!',
@@ -547,22 +543,17 @@ export async function getContentAction(
       .where(whereClause)
       .orderBy(orderByClause);
 
-    // Fetch all unique tags for the user
-    const allContent = await db
-      .select({
-        tags: content.tags,
-        autoTags: content.autoTags,
-      })
-      .from(content)
-      .where(eq(content.userId, session.user.id));
+    // Fetch all unique tags for the user using efficient SQL UNNEST
+    const tagsResult = await db.execute<{ tag: string }>(sql`
+      SELECT DISTINCT unnest(tags || auto_tags) as tag
+      FROM ${content}
+      WHERE user_id = ${session.user.id}
+      ORDER BY tag
+    `);
 
-    const allTagsSet = new Set<string>();
-    allContent.forEach((item) => {
-      item.tags.forEach((tag) => allTagsSet.add(tag));
-      item.autoTags.forEach((tag) => allTagsSet.add(tag));
-    });
-
-    const allTags = Array.from(allTagsSet).sort();
+    const allTags = (tagsResult as unknown as { tag: string }[])
+      .map((row) => row.tag)
+      .filter((tag) => tag !== null && tag !== '');
 
     return {
       success: true,
@@ -833,28 +824,19 @@ export async function bulkDeleteContentAction(
       };
     }
 
-    // Delete only content that belongs to the user
-    let successCount = 0;
-    let failedCount = 0;
+    // Delete all matching content in a single batch query
+    const result = await db
+      .delete(content)
+      .where(
+        and(
+          inArray(content.id, contentIds),
+          eq(content.userId, session.user.id)
+        )
+      )
+      .returning({ id: content.id });
 
-    for (const contentId of contentIds) {
-      try {
-        const result = await db
-          .delete(content)
-          .where(
-            and(eq(content.id, contentId), eq(content.userId, session.user.id))
-          )
-          .returning({ id: content.id });
-
-        if (result.length > 0) {
-          successCount++;
-        } else {
-          failedCount++;
-        }
-      } catch {
-        failedCount++;
-      }
-    }
+    const successCount = result.length;
+    const failedCount = contentIds.length - successCount;
 
     revalidatePath('/dashboard/library');
 
@@ -909,38 +891,41 @@ export async function bulkAddTagsAction(
       };
     }
 
+    // Batch fetch all items that belong to user
+    const existingItems = await db
+      .select({ id: content.id, tags: content.tags })
+      .from(content)
+      .where(
+        and(
+          inArray(content.id, contentIds),
+          eq(content.userId, session.user.id)
+        )
+      );
+
+    const existingIds = new Set(existingItems.map((item) => item.id));
+    let failedCount = contentIds.filter((id) => !existingIds.has(id)).length;
     let successCount = 0;
-    let failedCount = 0;
 
-    for (const contentId of contentIds) {
-      try {
-        // Get existing tags
-        const existing = await db
-          .select({ tags: content.tags })
-          .from(content)
-          .where(
-            and(eq(content.id, contentId), eq(content.userId, session.user.id))
-          )
-          .limit(1);
+    // Update tags in parallel
+    if (existingItems.length > 0) {
+      const updatePromises = existingItems.map(async (item) => {
+        try {
+          const existingTags = new Set(item.tags || []);
+          const newTags = [...existingTags, ...tags.filter((t) => !existingTags.has(t))];
 
-        if (existing.length === 0) {
-          failedCount++;
-          continue;
+          await db
+            .update(content)
+            .set({ tags: newTags, updatedAt: new Date() })
+            .where(eq(content.id, item.id));
+          return true;
+        } catch {
+          return false;
         }
+      });
 
-        // Merge tags (avoid duplicates)
-        const existingTags = new Set(existing[0].tags);
-        const newTags = [...existingTags, ...tags.filter((t) => !existingTags.has(t))];
-
-        await db
-          .update(content)
-          .set({ tags: newTags, updatedAt: new Date() })
-          .where(eq(content.id, contentId));
-
-        successCount++;
-      } catch {
-        failedCount++;
-      }
+      const results = await Promise.all(updatePromises);
+      successCount = results.filter(Boolean).length;
+      failedCount += results.filter((r) => !r).length;
     }
 
     revalidatePath('/dashboard/library');
@@ -988,42 +973,43 @@ export async function bulkShareContentAction(
       };
     }
 
-    let successCount = 0;
-    let failedCount = 0;
+    // Batch fetch all items that belong to user
+    const existingItems = await db
+      .select({ id: content.id, isShared: content.isShared })
+      .from(content)
+      .where(
+        and(
+          inArray(content.id, contentIds),
+          eq(content.userId, session.user.id)
+        )
+      );
 
-    for (const contentId of contentIds) {
-      try {
-        // Check ownership and if already shared
-        const existing = await db
-          .select({ isShared: content.isShared })
-          .from(content)
-          .where(
-            and(eq(content.id, contentId), eq(content.userId, session.user.id))
-          )
-          .limit(1);
+    const existingIds = new Set(existingItems.map((item) => item.id));
+    const alreadyShared = existingItems.filter((item) => item.isShared);
+    const toShare = existingItems.filter((item) => !item.isShared);
 
-        if (existing.length === 0) {
-          failedCount++;
-          continue;
+    // Count items not found as failed
+    let failedCount = contentIds.filter((id) => !existingIds.has(id)).length;
+    let successCount = alreadyShared.length;
+
+    // Share unshared items in parallel
+    if (toShare.length > 0) {
+      const sharePromises = toShare.map(async (item) => {
+        try {
+          const shareId = generateShareId();
+          await db
+            .update(content)
+            .set({ isShared: true, shareId, updatedAt: new Date() })
+            .where(eq(content.id, item.id));
+          return true;
+        } catch {
+          return false;
         }
+      });
 
-        if (existing[0].isShared) {
-          // Already shared, count as success
-          successCount++;
-          continue;
-        }
-
-        // Generate share ID and update
-        const shareId = generateShareId();
-        await db
-          .update(content)
-          .set({ isShared: true, shareId, updatedAt: new Date() })
-          .where(eq(content.id, contentId));
-
-        successCount++;
-      } catch {
-        failedCount++;
-      }
+      const results = await Promise.all(sharePromises);
+      successCount += results.filter(Boolean).length;
+      failedCount += results.filter((r) => !r).length;
     }
 
     revalidatePath('/dashboard/library');
@@ -1071,28 +1057,20 @@ export async function bulkUnshareContentAction(
       };
     }
 
-    let successCount = 0;
-    let failedCount = 0;
+    // Batch update all matching content in a single query
+    const result = await db
+      .update(content)
+      .set({ isShared: false, shareId: null, updatedAt: new Date() })
+      .where(
+        and(
+          inArray(content.id, contentIds),
+          eq(content.userId, session.user.id)
+        )
+      )
+      .returning({ id: content.id });
 
-    for (const contentId of contentIds) {
-      try {
-        const result = await db
-          .update(content)
-          .set({ isShared: false, shareId: null, updatedAt: new Date() })
-          .where(
-            and(eq(content.id, contentId), eq(content.userId, session.user.id))
-          )
-          .returning({ id: content.id });
-
-        if (result.length > 0) {
-          successCount++;
-        } else {
-          failedCount++;
-        }
-      } catch {
-        failedCount++;
-      }
-    }
+    const successCount = result.length;
+    const failedCount = contentIds.length - successCount;
 
     revalidatePath('/dashboard/library');
 

@@ -1,15 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
 import { EditableTags } from './EditableTags';
-import { DeleteConfirmDialog } from './DeleteConfirmDialog';
-import { ContentEditDialog } from './ContentEditDialog';
-import { ShareDialog } from './ShareDialog';
-import { CollectionSelector } from './CollectionSelector';
 import { toggleFavoriteAction } from '@/app/actions/content';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +16,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
+// Dynamic imports for dialogs to reduce initial bundle size
+const DeleteConfirmDialog = dynamic(
+  () => import('./DeleteConfirmDialog').then((mod) => mod.DeleteConfirmDialog),
+  { loading: () => null }
+);
+const ContentEditDialog = dynamic(
+  () => import('./ContentEditDialog').then((mod) => mod.ContentEditDialog),
+  { loading: () => null }
+);
+const ShareDialog = dynamic(
+  () => import('./ShareDialog').then((mod) => mod.ShareDialog),
+  { loading: () => null }
+);
+const CollectionSelector = dynamic(
+  () => import('./CollectionSelector').then((mod) => mod.CollectionSelector),
+  { loading: () => null }
+);
 
 export type ContentCardProps = {
   id: string;

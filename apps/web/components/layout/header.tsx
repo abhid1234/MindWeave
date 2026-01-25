@@ -28,6 +28,7 @@ export default function Header({ user }: HeaderProps) {
                 width={32}
                 height={32}
                 className="rounded-full"
+                priority
               />
             )}
             <div className="text-sm">
