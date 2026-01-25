@@ -103,11 +103,13 @@ export function ContentEditDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Edit Content</DialogTitle>
-            <DialogDescription className="flex items-center gap-2">
-              <span>Editing</span>
-              <Badge variant="secondary" className="capitalize">
-                {content.type}
-              </Badge>
+            <DialogDescription asChild>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Editing</span>
+                <Badge variant="secondary" className="capitalize">
+                  {content.type}
+                </Badge>
+              </div>
             </DialogDescription>
           </DialogHeader>
 
