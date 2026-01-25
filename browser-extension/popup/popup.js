@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://localhost:3000'; // Change to production URL when deploying
+const API_BASE_URL = 'http://localhost:3004'; // Change to production URL when deploying
 
 // DOM Elements
 const loadingState = document.getElementById('loading');
