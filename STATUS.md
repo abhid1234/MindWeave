@@ -1,7 +1,7 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-01-24
-**Current Phase**: Phase 2 Complete - All AI Features Implemented
+**Last Updated**: 2026-01-25
+**Current Phase**: Phase 2 Complete - Content Management Added
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
@@ -17,6 +17,7 @@
 - Vector Embeddings (Auto-generation via Google Gemini) - 38 tests, requires GOOGLE_AI_API_KEY
 - Semantic Search (Vector similarity with pgvector) - 40 new tests
 - Knowledge Q&A (Chat interface with RAG) - 25 new tests, 352 total tests
+- **Content Management (Edit + Delete)** - 389 total tests
 
 **Next Step**: All core features complete! Ready for deployment or additional features.
 
@@ -158,6 +159,7 @@ None - Ready for feature development
 - [x] **Vector Embeddings** - Generate and store embeddings for semantic search ✅
 - [x] **Semantic Search** - Similarity-based content discovery using pgvector ✅
 - [x] **Knowledge Q&A** - Chat interface for querying knowledge base ✅
+- [x] **Content Management** - Edit and delete content with dialogs ✅
 
 ## 🐛 Known Issues
 None - fresh scaffolding
@@ -359,6 +361,25 @@ None - fresh scaffolding
   - All 352 tests still passing
   - Commit: 4313fa8
   - **STATUS: All Phase 2 features complete and stable!**
+- **2026-01-25 03:28** - ✅ **CONTENT MANAGEMENT FEATURES COMPLETE**
+  - Implemented content deletion with confirmation dialog
+    - deleteContentAction server action with ownership verification
+    - DeleteConfirmDialog component with loading states and error handling
+    - Cascading deletion of embeddings via foreign key constraints
+  - Implemented content editing with form dialog
+    - updateContentAction server action with Zod validation
+    - ContentEditDialog component with form fields for title, body, URL
+    - Auto-regeneration of auto-tags and embeddings when body changes
+  - Created Dialog UI component (shadcn/ui pattern with Radix primitives)
+  - Created DropdownMenu UI component (shadcn/ui pattern)
+  - Updated ContentCard with actions dropdown menu (Edit, Delete)
+  - Comprehensive test coverage:
+    - 21 tests for ContentEditDialog
+    - 12 tests for DeleteConfirmDialog
+    - Updated ContentCard tests for actions dropdown
+    - Total: 389 tests passing
+  - All quality checks passing (tests, types, lint, build)
+  - **STATUS: Content management features complete!
 
 ## 📚 Tech Stack
 - **Framework**: Next.js 15 (App Router)

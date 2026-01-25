@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content, type ContentType } from '@/lib/db/schema';
-import { createContentSchema } from '@/lib/validations';
+import { createContentSchema, updateContentSchema } from '@/lib/validations';
 import { generateTags } from '@/lib/ai/claude';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
@@ -222,6 +222,198 @@ export async function updateContentTagsAction(
     return {
       success: false,
       message: 'Failed to update tags. Please try again.',
+    };
+  }
+}
+
+export type UpdateContentParams = {
+  contentId: string;
+  title?: string;
+  body?: string;
+  url?: string;
+};
+
+export async function updateContentAction(params: UpdateContentParams): Promise<ActionResult> {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    const { contentId, ...updateFields } = params;
+
+    // Validate content ID
+    if (!contentId || typeof contentId !== 'string') {
+      return {
+        success: false,
+        message: 'Invalid content ID.',
+      };
+    }
+
+    // Validate update fields with Zod
+    const validationResult = updateContentSchema.safeParse(updateFields);
+    if (!validationResult.success) {
+      const errors = validationResult.error.flatten().fieldErrors;
+      return {
+        success: false,
+        message: 'Validation failed. Please check your input.',
+        errors,
+      };
+    }
+
+    const validatedData = validationResult.data;
+
+    // Verify content exists and belongs to the user
+    const existingContent = await db
+      .select({
+        id: content.id,
+        body: content.body,
+        title: content.title,
+        url: content.url,
+        type: content.type,
+      })
+      .from(content)
+      .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
+      .limit(1);
+
+    if (existingContent.length === 0) {
+      return {
+        success: false,
+        message: 'Content not found or access denied.',
+      };
+    }
+
+    const currentContent = existingContent[0];
+
+    // Build update object with only provided fields
+    const updateData: Partial<{
+      title: string;
+      body: string | null;
+      url: string | null;
+      updatedAt: Date;
+    }> = {
+      updatedAt: new Date(),
+    };
+
+    if (validatedData.title !== undefined) {
+      updateData.title = validatedData.title;
+    }
+    if (validatedData.body !== undefined) {
+      updateData.body = validatedData.body || null;
+    }
+    if (validatedData.url !== undefined) {
+      updateData.url = validatedData.url || null;
+    }
+
+    // Update the content
+    await db.update(content).set(updateData).where(eq(content.id, contentId));
+
+    // Check if body changed significantly to regenerate auto-tags and embeddings
+    const bodyChanged =
+      validatedData.body !== undefined && validatedData.body !== currentContent.body;
+
+    if (bodyChanged) {
+      // Regenerate auto-tags asynchronously (non-blocking)
+      (async () => {
+        try {
+          const newAutoTags = await generateTags({
+            title: validatedData.title || currentContent.title,
+            body: validatedData.body,
+            url: validatedData.url || currentContent.url || undefined,
+            type: currentContent.type,
+          });
+          await db.update(content).set({ autoTags: newAutoTags }).where(eq(content.id, contentId));
+        } catch (error) {
+          console.error('Failed to regenerate auto-tags:', contentId, error);
+        }
+      })();
+
+      // Regenerate embedding asynchronously (non-blocking)
+      upsertContentEmbedding(contentId).catch((error) => {
+        console.error('Failed to regenerate embedding:', contentId, error);
+      });
+    }
+
+    // Revalidate relevant pages
+    revalidatePath('/dashboard/library');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      message: 'Content updated successfully!',
+      data: { id: contentId },
+    };
+  } catch (error) {
+    console.error('Error updating content:', error);
+
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        message: 'Validation error',
+        errors: error.flatten().fieldErrors,
+      };
+    }
+
+    return {
+      success: false,
+      message: 'Failed to update content. Please try again.',
+    };
+  }
+}
+
+export async function deleteContentAction(contentId: string): Promise<ActionResult> {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+      };
+    }
+
+    // Validate content ID
+    if (!contentId || typeof contentId !== 'string') {
+      return {
+        success: false,
+        message: 'Invalid content ID.',
+      };
+    }
+
+    // Verify content exists and belongs to the user
+    const existingContent = await db
+      .select({ id: content.id })
+      .from(content)
+      .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
+      .limit(1);
+
+    if (existingContent.length === 0) {
+      return {
+        success: false,
+        message: 'Content not found or access denied.',
+      };
+    }
+
+    // Delete the content (embeddings cascade automatically via FK)
+    await db.delete(content).where(eq(content.id, contentId));
+
+    // Revalidate relevant pages
+    revalidatePath('/dashboard/library');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      message: 'Content deleted successfully!',
+    };
+  } catch (error) {
+    console.error('Error deleting content:', error);
+    return {
+      success: false,
+      message: 'Failed to delete content. Please try again.',
     };
   }
 }

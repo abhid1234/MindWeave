@@ -5,6 +5,7 @@ import { describe, it } from 'vitest';
 // All server action functionality is comprehensively covered by E2E tests in:
 // - tests/e2e/capture.spec.ts (createContentAction)
 // - tests/e2e/library.spec.ts (getContentAction)
+// - tests/e2e/content-management.spec.ts (deleteContentAction, updateContentAction)
 
 describe.skip('createContentAction', () => {
   it('should be tested via E2E tests', () => {
@@ -34,5 +35,29 @@ describe.skip('updateContentTagsAction', () => {
     // - Content ownership verification
     // - Database updates and persistence
     // - Error handling
+  });
+});
+
+describe.skip('updateContentAction', () => {
+  it('should be tested via E2E tests', () => {
+    // All functionality tested in tests/e2e/content-management.spec.ts including:
+    // - Authentication checks
+    // - Title update
+    // - Body update (triggers auto-tag and embedding regeneration)
+    // - URL update for link type content
+    // - Content ownership verification
+    // - Validation (empty title, URL format)
+    // - Error handling
+  });
+});
+
+describe.skip('deleteContentAction', () => {
+  it('should be tested via E2E tests', () => {
+    // All functionality tested in tests/e2e/content-management.spec.ts including:
+    // - Authentication checks
+    // - Content ownership verification
+    // - Successful deletion
+    // - Cascading deletion of embeddings
+    // - Error handling for non-existent content
   });
 });
