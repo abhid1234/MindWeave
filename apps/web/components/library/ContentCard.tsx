@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star, Loader2 } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
@@ -140,7 +140,7 @@ export function ContentCard({
         {isFavoriteLoading && 'Updating favorite status...'}
       </div>
 
-      <article className="rounded-lg border bg-card p-4 hover:shadow-md transition-shadow" aria-labelledby={`content-title-${id}`}>
+      <article className="rounded-lg border bg-card p-4 hover:shadow-md hover:border-primary/20 transition-all duration-200" aria-labelledby={`content-title-${id}`}>
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium capitalize">
@@ -160,18 +160,22 @@ export function ContentCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 transition-transform hover:scale-110"
               onClick={handleToggleFavoriteWithAnnouncement}
               disabled={isFavoriteLoading}
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               aria-pressed={isFavorite}
             >
-              <Star
-                className={`h-4 w-4 ${
-                  isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
-                }`}
-                aria-hidden="true"
-              />
+              {isFavoriteLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+              ) : (
+                <Star
+                  className={`h-4 w-4 transition-colors ${
+                    isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground hover:text-yellow-400'
+                  }`}
+                  aria-hidden="true"
+                />
+              )}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

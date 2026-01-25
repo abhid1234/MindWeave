@@ -149,17 +149,18 @@ export function SemanticSearchForm({
           </p>
 
           {results.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-12 text-center">
+            <div className="rounded-lg border border-dashed p-12 text-center animate-in fade-in-50 duration-300">
               <p className="text-muted-foreground">
                 No results found. Try rephrasing your search or use keyword search.
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {results.map((item) => (
+              {results.map((item, index) => (
                 <div
                   key={item.id}
-                  className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors"
+                  className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
+                  style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">

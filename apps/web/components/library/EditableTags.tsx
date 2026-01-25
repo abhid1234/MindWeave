@@ -83,7 +83,7 @@ export function EditableTags({
 
   if (isEditing) {
     return (
-      <div className={cn('space-y-2', className)}>
+      <div className={cn('space-y-2 animate-in fade-in-50 duration-200', className)}>
         <TagInput
           tags={tags}
           suggestions={allTags}
@@ -115,7 +115,7 @@ export function EditableTags({
   }
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-2 animate-in fade-in-50 duration-200', className)}>
       <div className="flex flex-wrap gap-1">
         {tags.length > 0 ? (
           <>

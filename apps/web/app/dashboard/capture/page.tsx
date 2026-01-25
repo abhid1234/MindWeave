@@ -4,21 +4,19 @@ import { createContentAction } from '@/app/actions/content';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 import { FileUpload, type UploadedFile } from '@/components/capture/FileUpload';
+import { useToast } from '@/components/ui/toast';
 
 export default function CapturePage() {
   const [isPending, startTransition] = useTransition();
-  const [feedback, setFeedback] = useState<{
-    type: 'success' | 'error';
-    message: string;
-  } | null>(null);
   const [errors, setErrors] = useState<Partial<Record<string, string[]>>>({});
   const [contentType, setContentType] = useState<'note' | 'link' | 'file'>('note');
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const router = useRouter();
+  const { addToast } = useToast();
 
   async function handleSubmit(formData: FormData) {
-    setFeedback(null);
     setErrors({});
 
     // Add file metadata to form data if file is uploaded
@@ -42,13 +40,21 @@ export default function CapturePage() {
       const result = await createContentAction(formData);
 
       if (result.success) {
-        setFeedback({ type: 'success', message: result.message });
+        addToast({
+          variant: 'success',
+          title: 'Content saved',
+          description: result.message,
+        });
         // Reset form by redirecting to same page
         setTimeout(() => {
           router.push('/dashboard/library');
-        }, 1500);
+        }, 1000);
       } else {
-        setFeedback({ type: 'error', message: result.message });
+        addToast({
+          variant: 'error',
+          title: 'Failed to save',
+          description: result.message,
+        });
         if (result.errors) {
           setErrors(result.errors);
         }
@@ -69,20 +75,6 @@ export default function CapturePage() {
           Save a note, link, or file to your knowledge hub
         </p>
       </div>
-
-      {/* Feedback Messages */}
-      {feedback && (
-        <div
-          className={`mb-6 rounded-lg p-4 ${
-            feedback.type === 'success'
-              ? 'bg-green-50 text-green-800 border border-green-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
-          }`}
-          role="alert"
-        >
-          <p className="font-medium">{feedback.message}</p>
-        </div>
-      )}
 
       <form action={handleSubmit} className="space-y-6">
         {/* Type Selection */}
@@ -238,8 +230,9 @@ export default function CapturePage() {
           <button
             type="submit"
             disabled={isPending || (contentType === 'file' && !uploadedFile)}
-            className="rounded-lg bg-primary px-6 py-2.5 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
+            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             {isPending ? 'Saving...' : 'Save'}
           </button>
           <Link
