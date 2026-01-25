@@ -41,6 +41,8 @@
 
 **Next Step**: All core features complete! Ready for deployment or additional features (Firefox extension, mobile app, etc.).
 
+- [x] **Import Tools** - Import content from external sources (780 tests total)
+
 ## ✅ Completed Features
 
 ### Phase 1: Scaffolding ✅ COMPLETE
@@ -250,6 +252,46 @@ None - Ready for feature development
   - API endpoints: /api/extension/session, /api/extension/capture
   - 23 new tests for extension API
 - [x] **Total test coverage**: 684 tests passing
+- [x] All quality checks passing (tests, types, lint, build)
+
+### Phase 5: Import Tools ✅ COMPLETE
+- [x] **Import from Browser Bookmarks** - Chrome, Firefox, Safari, Edge HTML exports
+  - Parses Netscape bookmark file format
+  - Extracts folder hierarchy as tags
+  - Preserves creation dates
+- [x] **Import from Pocket** - HTML and CSV exports
+  - Parses Pocket HTML export with tags
+  - Supports CSV format with custom columns
+  - Preserves original tags
+- [x] **Import from Notion** - ZIP exports with HTML/Markdown
+  - Parses multi-page exports
+  - Extracts content from nested folders
+  - Converts folder structure to tags
+- [x] **Import from Evernote** - ENEX XML exports
+  - Parses ENEX format with ENML content
+  - Handles checkboxes and attachments
+  - Preserves Evernote tags
+- [x] **Import UI Wizard**
+  - Step-by-step import flow
+  - Source selection with format hints
+  - File upload with drag-and-drop
+  - Preview items before import
+  - Select/deselect individual items
+  - Progress indicator during import
+  - Summary with success/skipped/failed counts
+- [x] **Duplicate Detection**
+  - Skip URLs that already exist (for links)
+  - Skip titles that already exist (for notes)
+  - Option to override duplicate detection
+- [x] **AI Integration**
+  - Auto-tag generation for imported items
+  - Embedding generation for semantic search
+  - Both run asynchronously after import
+- [x] **Comprehensive test coverage**:
+  - 52 tests for utility functions
+  - 34 tests for parsers
+  - 10 tests for import API
+  - Total: 96 new tests
 - [x] All quality checks passing (tests, types, lint, build)
 
 ## 🐛 Known Issues
@@ -610,6 +652,42 @@ None - fresh scaffolding
   - All quality checks passing (tests, types, lint, build)
   - Commit: e33d3b4
   - **STATUS: Performance & optimization complete! App is production-ready.**
+- **2026-01-25 23:15** - ✅ **IMPORT TOOLS FEATURE COMPLETE**
+  - Implemented import functionality for external content sources:
+    - Browser Bookmarks (Chrome, Firefox, Safari, Edge) - HTML export
+    - Pocket - HTML and CSV exports
+    - Notion - ZIP exports with HTML/Markdown
+    - Evernote - ENEX XML exports
+  - Core library components:
+    - lib/import/types.ts - Type definitions and source configs
+    - lib/import/utils.ts - Sanitization, tag normalization, date parsing
+    - lib/import/parsers/ - Four parser modules
+  - API and server actions:
+    - POST /api/import - Parse uploaded files, return preview
+    - importContentAction - Batch import with duplicate detection
+  - UI components:
+    - ImportSourceSelector - Source type cards
+    - ImportFileUpload - Drag-and-drop file upload
+    - ImportPreview - Preview items with selection
+    - ImportProgress - Progress during import
+    - ImportSummary - Results summary
+  - Import page wizard:
+    - Step-by-step flow: Select Source → Upload → Preview → Import → Summary
+    - Navigation added to dashboard sidebar
+  - Features:
+    - Duplicate detection by URL (links) or title (notes)
+    - Folder path converted to tags
+    - Async AI tagging and embedding generation
+    - Preview with item selection before import
+    - Progress tracking and error reporting
+  - Test coverage:
+    - 52 tests for utilities
+    - 34 tests for parsers
+    - 10 tests for API route
+    - Total: 96 new tests (780 total)
+  - All quality checks passing (tests, types, lint, build)
+  - Commit: [pending]
+  - **STATUS: Import tools complete! Users can bulk import from external sources.**
 - **2026-01-25 22:10** - ✅ **UI REFINEMENTS COMPLETE**
   - Added new UI components:
     - Skeleton component for loading states

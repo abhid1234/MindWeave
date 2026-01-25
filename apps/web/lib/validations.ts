@@ -61,3 +61,47 @@ export const questionSchema = z.object({
 });
 
 export type QuestionInput = z.infer<typeof questionSchema>;
+
+/**
+ * Import source schema
+ */
+export const importSourceSchema = z.enum(['bookmarks', 'pocket', 'notion', 'evernote']);
+
+export type ImportSourceType = z.infer<typeof importSourceSchema>;
+
+/**
+ * Import item schema
+ */
+export const importItemSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(500, 'Title is too long'),
+  body: z.string().max(50000, 'Content is too long').optional(),
+  url: z.string().url('Invalid URL').optional().or(z.literal('')),
+  tags: z.array(z.string()).default([]),
+  type: z.enum(['note', 'link']),
+  createdAt: z.date().optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
+export type ImportItemInput = z.infer<typeof importItemSchema>;
+
+/**
+ * Import options schema
+ */
+export const importOptionsSchema = z.object({
+  skipDuplicates: z.boolean().default(true),
+  generateAutoTags: z.boolean().default(true),
+  generateEmbeddings: z.boolean().default(true),
+  additionalTags: z.array(z.string()).default([]),
+});
+
+export type ImportOptionsInput = z.infer<typeof importOptionsSchema>;
+
+/**
+ * Bulk import schema
+ */
+export const bulkImportSchema = z.object({
+  items: z.array(importItemSchema).min(1, 'At least one item is required').max(1000, 'Too many items'),
+  options: importOptionsSchema.optional(),
+});
+
+export type BulkImportInput = z.infer<typeof bulkImportSchema>;
