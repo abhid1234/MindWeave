@@ -7,10 +7,12 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 ## Features
 
 - **Quick Capture**: Save notes, links, and files instantly
+- **Browser Extension**: One-click save from any webpage (Chrome)
 - **AI Auto-Tagging**: Automatically organize your content
 - **Semantic Search**: Find content by meaning, not just keywords
 - **Knowledge Q&A**: Ask questions and get answers from your knowledge base
 - **Smart Library**: Browse and filter all your content in one place
+- **Dark Mode**: Light, dark, and system theme options
 - **Privacy First**: Your data stays yours - self-host or use our secure cloud
 
 ## Tech Stack
@@ -79,10 +81,33 @@ Mindweave/
 │   ├── components/       # React components
 │   ├── lib/              # Core libraries (DB, AI, auth)
 │   └── types/            # TypeScript types
+├── browser-extension/     # Chrome browser extension
 ├── docker/               # Docker Compose configuration
 ├── scripts/              # Development scripts
 └── STATUS.md             # Feature development tracker
 ```
+
+## Browser Extension
+
+Save any webpage to Mindweave with one click using our Chrome extension.
+
+### Installation
+
+1. Open Chrome and go to `chrome://extensions/`
+2. Enable **Developer mode** (toggle in top-right)
+3. Click **Load unpacked**
+4. Select the `browser-extension/` folder
+5. Pin the extension from the puzzle piece menu
+
+### Usage
+
+1. Navigate to any webpage
+2. Click the Mindweave extension icon
+3. Login if prompted (redirects to Mindweave)
+4. Edit title/add tags if desired
+5. Click **Save to Mindweave**
+
+See [browser-extension/README.md](browser-extension/README.md) for detailed documentation.
 
 ## Development
 
@@ -301,11 +326,12 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Error boundaries (global, dashboard, reusable)
 - [x] Accessibility improvements (skip nav, ARIA, keyboard support)
 
-### Phase 4: UI Enhancements ✅ In Progress
+### Phase 4: UI Enhancements ✅ Complete
 - [x] Dark mode (Light/Dark/System theme switching)
+- [x] Browser extension for quick capture (Chrome)
 
 ### Phase 5: Future Features
-- [ ] Browser extension for quick capture
+- [ ] Firefox browser extension
 - [ ] Mobile app (React Native)
 - [ ] Collaborative knowledge bases
 - [ ] Advanced analytics and insights
