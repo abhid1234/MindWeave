@@ -13,12 +13,13 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
       <div
         ref={ref}
         className={cn(
-          'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors',
+          'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+          'transition-all duration-200 ease-smooth',
           {
-            'bg-primary text-primary-foreground': variant === 'default',
-            'bg-secondary text-secondary-foreground': variant === 'secondary',
-            'bg-destructive text-destructive-foreground': variant === 'destructive',
-            'border border-input bg-background': variant === 'outline',
+            'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90': variant === 'default',
+            'bg-secondary text-secondary-foreground hover:bg-secondary/80': variant === 'secondary',
+            'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90': variant === 'destructive',
+            'border border-input bg-background hover:bg-accent hover:border-accent-foreground/20': variant === 'outline',
           },
           className
         )}
@@ -32,7 +33,12 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
               e.stopPropagation();
               onRemove?.();
             }}
-            className="ml-0.5 rounded-full hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            className={cn(
+              'ml-0.5 rounded-full p-0.5 transition-all duration-150',
+              'hover:bg-black/10 dark:hover:bg-white/10',
+              'focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-transparent',
+              'active:scale-90'
+            )}
             aria-label="Remove"
           >
             <svg

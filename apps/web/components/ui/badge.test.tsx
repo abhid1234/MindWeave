@@ -117,7 +117,7 @@ describe('Badge', () => {
     it('should have base styles', () => {
       const { container } = render(<Badge>Base</Badge>);
       const badge = container.firstChild as HTMLElement;
-      expect(badge).toHaveClass('inline-flex', 'items-center', 'gap-1', 'rounded-full', 'px-2.5', 'py-0.5', 'text-xs', 'font-medium', 'transition-colors');
+      expect(badge).toHaveClass('inline-flex', 'items-center', 'gap-1', 'rounded-full', 'px-2.5', 'py-0.5', 'text-xs', 'font-medium', 'transition-all');
     });
   });
 
