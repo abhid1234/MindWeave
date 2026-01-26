@@ -336,12 +336,19 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Stagger animations for content grid and search results
 - [x] Enhanced hover states and micro-interactions
 
-### Phase 5: Future Features
+### Phase 5: Import & PWA ✅ Complete
+- [x] Import tools (Browser bookmarks, Pocket, Notion, Evernote)
+- [x] PWA enhancements (mobile navigation, service worker, offline support)
+- [x] Installable app experience on desktop and mobile
+- [x] App icons for all platforms (72-512px)
+- [x] Mobile E2E tests (Pixel 5, iPhone 12)
+
+### Phase 6: Future Features
 - [ ] Firefox browser extension
 - [ ] Mobile app (React Native)
 - [ ] Collaborative knowledge bases
 - [ ] Advanced analytics and insights
-- [ ] Import from Notion, Evernote, etc.
+- [ ] Content recommendations
 
 ## Environment Variables
 
