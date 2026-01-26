@@ -11,6 +11,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **AI Auto-Tagging**: Automatically organize your content
 - **Semantic Search**: Find content by meaning, not just keywords
 - **Knowledge Q&A**: Ask questions and get answers from your knowledge base
+- **Content Recommendations**: "View Similar" and "Recommended for You" based on semantic similarity
 - **Smart Library**: Browse and filter all your content in one place
 - **Dark Mode**: Light, dark, and system theme options
 - **PWA Support**: Install as a native app on desktop and mobile
@@ -407,11 +408,11 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Safe area and status bar handling
 - [x] Device registration API for push tokens
 
-### Phase 7: Future Features
+### Phase 7: Enhancements ✅ In Progress
+- [x] Content recommendations ("View Similar" and dashboard widget)
 - [ ] Firefox browser extension
 - [ ] Collaborative knowledge bases
 - [ ] Advanced analytics and insights
-- [ ] Content recommendations
 
 ## Environment Variables
 
