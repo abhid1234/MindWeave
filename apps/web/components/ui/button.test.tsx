@@ -52,19 +52,19 @@ describe('Button', () => {
     it('should apply default size styles', () => {
       render(<Button size="default">Default Size</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('h-10', 'px-4', 'py-2');
+      expect(button).toHaveClass('h-10', 'px-4', 'py-2', 'text-sm');
     });
 
     it('should apply small size styles', () => {
       render(<Button size="sm">Small</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('h-9', 'px-3', 'text-sm');
+      expect(button).toHaveClass('h-8', 'px-3', 'text-xs');
     });
 
     it('should apply large size styles', () => {
       render(<Button size="lg">Large</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('h-11', 'px-8');
+      expect(button).toHaveClass('h-12', 'px-6', 'text-base');
     });
   });
 

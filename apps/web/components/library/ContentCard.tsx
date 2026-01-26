@@ -145,10 +145,27 @@ export function ContentCard({
         {isFavoriteLoading && 'Updating favorite status...'}
       </div>
 
-      <article className="rounded-lg border bg-card p-4 hover:shadow-md hover:border-primary/20 transition-all duration-200" aria-labelledby={`content-title-${id}`}>
-        <div className="flex items-start justify-between mb-2">
+      <article
+        className="group relative rounded-xl border bg-card p-4 shadow-soft transition-all duration-300 ease-smooth hover:shadow-soft-md hover:-translate-y-0.5 hover:border-primary/20 overflow-hidden"
+        aria-labelledby={`content-title-${id}`}
+      >
+        {/* Type indicator bar */}
+        <div
+          className={`absolute left-0 top-0 bottom-0 w-1 transition-all duration-300 group-hover:w-1.5 ${
+            type === 'note' ? 'bg-note' : type === 'link' ? 'bg-link' : 'bg-file'
+          }`}
+          aria-hidden="true"
+        />
+
+        <div className="flex items-start justify-between mb-2 pl-2">
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium capitalize">
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize transition-colors ${
+              type === 'note'
+                ? 'bg-note/10 text-note dark:bg-note/20'
+                : type === 'link'
+                  ? 'bg-link/10 text-link dark:bg-link/20'
+                  : 'bg-file/10 text-file dark:bg-file/20'
+            }`}>
               {type}
             </span>
             {isShared && (
@@ -223,11 +240,11 @@ export function ContentCard({
           </div>
         </div>
 
-        <h3 id={`content-title-${id}`} className="font-semibold line-clamp-2 mb-2">{title}</h3>
+        <h3 id={`content-title-${id}`} className="font-semibold line-clamp-2 mb-2 pl-2">{title}</h3>
 
         {/* File preview for file type */}
         {type === 'file' && metadata?.filePath && (
-          <div className="mb-3">
+          <div className="mb-3 pl-2">
             {metadata.fileType?.startsWith('image/') ? (
               <a
                 href={metadata.filePath}
@@ -270,7 +287,7 @@ export function ContentCard({
         )}
 
         {body && (
-          <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+          <p className="text-sm text-muted-foreground line-clamp-3 mb-3 pl-2 leading-relaxed">
             {body}
           </p>
         )}
@@ -280,18 +297,20 @@ export function ContentCard({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-xs text-primary hover:underline mb-3 truncate"
+            className="block text-xs text-primary hover:underline mb-3 pl-2 truncate transition-colors"
           >
             {url}
           </a>
         )}
 
-        <EditableTags
+        <div className="pl-2">
+          <EditableTags
           contentId={id}
           initialTags={tags}
           autoTags={autoTags}
           allTags={allTags}
         />
+        </div>
       </article>
 
       <DeleteConfirmDialog

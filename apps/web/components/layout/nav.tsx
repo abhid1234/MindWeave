@@ -32,14 +32,25 @@ export function NavLinks({ onNavigate }: NavLinksProps) {
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             }`}
           >
-            <Icon className="h-4 w-4" />
-            {item.label}
+            {/* Active indicator */}
+            <span
+              className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-primary transition-all duration-200 ${
+                isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+              }`}
+              aria-hidden="true"
+            />
+            <Icon
+              className={`h-4 w-4 transition-all duration-200 ${
+                isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground group-hover:scale-110'
+              }`}
+            />
+            <span className="transition-colors duration-200">{item.label}</span>
           </Link>
         );
       })}
@@ -49,7 +60,7 @@ export function NavLinks({ onNavigate }: NavLinksProps) {
 
 export default function Nav() {
   return (
-    <nav className="hidden w-64 border-r bg-muted/30 p-4 lg:block">
+    <nav className="hidden w-64 border-r bg-muted/20 p-4 lg:block">
       <NavLinks />
     </nav>
   );

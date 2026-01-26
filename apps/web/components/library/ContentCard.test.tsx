@@ -212,8 +212,8 @@ describe('ContentCard', () => {
   describe('Styling', () => {
     it('should have hover shadow effect', () => {
       const { container } = render(<ContentCard {...baseProps} />);
-      const card = container.querySelector('.rounded-lg.border');
-      expect(card?.className).toContain('hover:shadow-md');
+      const card = container.querySelector('article.rounded-xl');
+      expect(card?.className).toContain('hover:shadow-soft-md');
       expect(card?.className).toContain('transition-all');
     });
 
