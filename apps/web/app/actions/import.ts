@@ -45,10 +45,8 @@ export async function importContentAction(
     }
 
     // Validate input
-    console.log('Import action called with', items.length, 'items');
     const validationResult = bulkImportSchema.safeParse({ items, options });
     if (!validationResult.success) {
-      console.log('Validation errors:', validationResult.error.errors);
       const errorMessages = validationResult.error.errors.map((e) => e.message).join(', ');
       return {
         success: false,
@@ -63,7 +61,6 @@ export async function importContentAction(
 
     // Use validated data
     const validatedItems = validationResult.data.items;
-    console.log('Validated items:', validatedItems.length);
 
     const userId = session.user.id;
     const errors: ImportError[] = [];

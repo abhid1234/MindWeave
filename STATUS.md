@@ -686,7 +686,7 @@ None - fresh scaffolding
     - 10 tests for API route
     - Total: 96 new tests (780 total)
   - All quality checks passing (tests, types, lint, build)
-  - Commit: [pending]
+  - Commits: dbf7146, 1e872ee, 85dc8e7
   - **STATUS: Import tools complete! Users can bulk import from external sources.**
 - **2026-01-25 22:10** - ✅ **UI REFINEMENTS COMPLETE**
   - Added new UI components:
