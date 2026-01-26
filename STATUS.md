@@ -41,6 +41,9 @@
 
 **Next Step**: All core features complete! Ready for deployment or additional features (Firefox extension, collaborative features, etc.).
 
+**Latest Enhancement**:
+- [x] **Content Recommendations** - "View Similar" in ContentCard and "Recommended for You" dashboard widget (856 tests total)
+
 - [x] **Import Tools** - Import content from external sources (780 tests total)
 - [x] **PWA Enhancements** - Mobile navigation, service worker, offline support (780 tests total)
 - [x] **Capacitor Mobile App** - Native iOS and Android apps with push notifications, deep linking, and share intent
@@ -324,6 +327,20 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-26 06:30** - ✅ **CONTENT RECOMMENDATIONS FEATURE COMPLETE**
+  - Added "View Similar" option to ContentCard dropdown menu
+  - Created RecommendationsDialog showing similar content with similarity percentages
+  - Created "Recommended for You" widget on dashboard
+  - Fixed security issue: added userId filtering to getRecommendations
+  - New components:
+    - RecommendationCard (compact card with similarity %)
+    - RecommendationsDialog (modal with loading/empty/error states)
+    - DashboardRecommendations (dashboard widget)
+  - New server actions:
+    - Updated getRecommendationsAction with content ownership verification
+    - Added getDashboardRecommendationsAction for dashboard widget
+  - Comprehensive test coverage: ~45 new tests (856 total)
+  - Commit: ccd1d91
 - **2026-01-26 02:00** - ✅ **CAPACITOR MOBILE APP COMPLETE**
   - Created apps/mobile/ with Capacitor 6.x configuration
   - Added Android project with:
