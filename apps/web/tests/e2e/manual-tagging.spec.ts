@@ -511,16 +511,26 @@ test.describe('Manual Tagging Feature', () => {
       // Add and save tag
       await input.fill('persistent');
       await input.press('Enter');
+
+      // Verify tag was added before saving
+      await expect(firstCard.locator('text=persistent')).toBeVisible();
+
       await firstCard.locator('button:has-text("Save")').first().click();
 
       // Wait for save to complete and edit mode to exit
       await expect(input).not.toBeVisible({ timeout: 10000 });
 
-      // Wait longer for database write to complete
-      await page.waitForTimeout(2000);
+      // Wait for network to be idle (ensures API call completed)
+      await page.waitForLoadState('networkidle');
 
-      // Refresh page and wait for it to load
+      // Additional wait for database write to propagate
+      await page.waitForTimeout(3000);
+
+      // Refresh page and wait for it to fully load
       await page.reload({ waitUntil: 'networkidle' });
+
+      // Wait for the library page to render content
+      await expect(page.locator('text=Showing')).toBeVisible({ timeout: 10000 });
 
       // Tag should still be there (use .first() since it also appears in filter sidebar)
       await expect(page.locator('text=persistent').first()).toBeVisible({ timeout: 10000 });
