@@ -165,13 +165,28 @@ export async function searchSimilarContent(
   }
 }
 
+export type Recommendation = {
+  id: string;
+  title: string;
+  body: string | null;
+  type: 'note' | 'link' | 'file';
+  tags: string[];
+  autoTags: string[];
+  url: string | null;
+  createdAt: Date;
+  similarity: number;
+};
+
 /**
  * Get content recommendations based on a content item
+ * Only returns content from the same user for security
  */
 export async function getRecommendations(
   contentId: string,
-  limit: number = 5
-): Promise<Array<{ id: string; title: string; similarity: number }>> {
+  userId: string,
+  limit: number = 5,
+  minSimilarity: number = 0.5
+): Promise<Recommendation[]> {
   try {
     // Get the embedding for the content
     const embedding = await db.query.embeddings.findFirst({
@@ -185,24 +200,28 @@ export async function getRecommendations(
     // Convert embedding to pgvector string format
     const vectorString = `[${embedding.embedding.join(',')}]`;
 
-    // Find similar content
+    // Find similar content (filtered by userId for security)
     const results = await db.execute(sql`
       SELECT
         c.id,
         c.title,
+        c.body,
+        c.type,
+        c.tags,
+        c.auto_tags as "autoTags",
+        c.url,
+        c.created_at as "createdAt",
         1 - (e.embedding <=> ${vectorString}::vector) as similarity
       FROM ${content} c
       INNER JOIN ${embeddings} e ON c.id = e.content_id
       WHERE c.id != ${contentId}
+        AND c.user_id = ${userId}
+        AND 1 - (e.embedding <=> ${vectorString}::vector) >= ${minSimilarity}
       ORDER BY e.embedding <=> ${vectorString}::vector
       LIMIT ${limit}
     `);
 
-    return results as unknown as Array<{
-      id: string;
-      title: string;
-      similarity: number;
-    }>;
+    return results as unknown as Recommendation[];
   } catch (error) {
     console.error('Error getting recommendations:', error);
     return [];

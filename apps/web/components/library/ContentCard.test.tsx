@@ -85,6 +85,24 @@ vi.mock('./CollectionSelector', () => ({
   ),
 }));
 
+// Mock RecommendationsDialog component
+vi.mock('./RecommendationsDialog', () => ({
+  RecommendationsDialog: ({
+    open,
+    contentTitle,
+  }: {
+    open: boolean;
+    contentId: string;
+    contentTitle: string;
+  }) => (
+    open ? (
+      <div data-testid="recommendations-dialog">
+        Recommendations dialog for: {contentTitle}
+      </div>
+    ) : null
+  ),
+}));
+
 // Mock toggleFavoriteAction
 vi.mock('@/app/actions/content', () => ({
   toggleFavoriteAction: vi.fn().mockResolvedValue({ success: true, isFavorite: true }),
@@ -320,6 +338,32 @@ describe('ContentCard', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('collection-dialog')).toBeInTheDocument();
+      });
+    });
+
+    it('should show View Similar option in dropdown menu', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /View Similar/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should open recommendations dialog when View Similar is clicked', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      const viewSimilarButton = await screen.findByRole('menuitem', { name: /View Similar/i });
+      await user.click(viewSimilarButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('recommendations-dialog')).toBeInTheDocument();
+        expect(screen.getByText('Recommendations dialog for: Test Note')).toBeInTheDocument();
       });
     });
   });

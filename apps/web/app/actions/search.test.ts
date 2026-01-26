@@ -1,16 +1,36 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Use vi.hoisted for mock functions
-const { mockAuth, mockSearchSimilarContent, mockGetRecommendations, mockAnswerQuestion } = vi.hoisted(() => ({
+const { mockAuth, mockSearchSimilarContent, mockGetRecommendations, mockAnswerQuestion, mockDbQuery, mockDbSelect } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockSearchSimilarContent: vi.fn(),
   mockGetRecommendations: vi.fn(),
   mockAnswerQuestion: vi.fn(),
+  mockDbQuery: {
+    content: { findFirst: vi.fn() },
+  },
+  mockDbSelect: vi.fn(),
 }));
 
 // Mock the auth module
 vi.mock('@/lib/auth', () => ({
   auth: () => mockAuth(),
+}));
+
+// Mock the database client
+vi.mock('@/lib/db/client', () => ({
+  db: {
+    query: mockDbQuery,
+    select: () => ({
+      from: () => ({
+        where: () => ({
+          orderBy: () => ({
+            limit: () => mockDbSelect(),
+          }),
+        }),
+      }),
+    }),
+  },
 }));
 
 // Mock the embeddings module
@@ -25,7 +45,7 @@ vi.mock('@/lib/ai/claude', () => ({
 }));
 
 // Import after mocks are set up
-import { semanticSearchAction, getRecommendationsAction, askQuestionAction } from './search';
+import { semanticSearchAction, getRecommendationsAction, askQuestionAction, getDashboardRecommendationsAction } from './search';
 
 describe('Semantic Search Actions', () => {
   beforeEach(() => {
@@ -165,10 +185,19 @@ describe('Semantic Search Actions', () => {
   });
 
   describe('getRecommendationsAction', () => {
+    beforeEach(() => {
+      // Default: content exists and belongs to user
+      mockDbQuery.content.findFirst.mockResolvedValue({
+        id: 'content-1',
+        userId: 'user-123',
+        title: 'Test Content',
+      });
+    });
+
     it('should return recommendations on success', async () => {
       const mockRecommendations = [
-        { id: 'content-2', title: 'Related Note 1', similarity: 0.9 },
-        { id: 'content-3', title: 'Related Note 2', similarity: 0.8 },
+        { id: 'content-2', title: 'Related Note 1', body: 'Body 1', type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date(), similarity: 0.9 },
+        { id: 'content-3', title: 'Related Note 2', body: 'Body 2', type: 'link', tags: [], autoTags: [], url: null, createdAt: new Date(), similarity: 0.8 },
       ];
       mockGetRecommendations.mockResolvedValueOnce(mockRecommendations);
 
@@ -177,7 +206,7 @@ describe('Semantic Search Actions', () => {
       expect(result.success).toBe(true);
       expect(result.recommendations).toHaveLength(2);
       expect(result.recommendations[0].similarity).toBe(0.9);
-      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 5);
+      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 'user-123', 5, 0.5);
     });
 
     it('should return error when not authenticated', async () => {
@@ -199,12 +228,36 @@ describe('Semantic Search Actions', () => {
       expect(result.recommendations).toEqual([]);
     });
 
+    it('should return error when content not found', async () => {
+      mockDbQuery.content.findFirst.mockResolvedValueOnce(null);
+
+      const result = await getRecommendationsAction('nonexistent-id');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Content not found');
+      expect(result.recommendations).toEqual([]);
+    });
+
+    it('should return error when content belongs to another user', async () => {
+      mockDbQuery.content.findFirst.mockResolvedValueOnce({
+        id: 'content-1',
+        userId: 'different-user',
+        title: 'Test Content',
+      });
+
+      const result = await getRecommendationsAction('content-1');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('do not have permission');
+      expect(result.recommendations).toEqual([]);
+    });
+
     it('should use default limit of 5', async () => {
       mockGetRecommendations.mockResolvedValueOnce([]);
 
       await getRecommendationsAction('content-1');
 
-      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 5);
+      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 'user-123', 5, 0.5);
     });
 
     it('should cap limit at 20', async () => {
@@ -212,7 +265,7 @@ describe('Semantic Search Actions', () => {
 
       await getRecommendationsAction('content-1', 50);
 
-      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 20);
+      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 'user-123', 20, 0.5);
     });
 
     it('should ensure minimum limit of 1', async () => {
@@ -220,7 +273,23 @@ describe('Semantic Search Actions', () => {
 
       await getRecommendationsAction('content-1', -5);
 
-      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 1);
+      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 'user-123', 1, 0.5);
+    });
+
+    it('should accept custom minSimilarity', async () => {
+      mockGetRecommendations.mockResolvedValueOnce([]);
+
+      await getRecommendationsAction('content-1', 5, 0.7);
+
+      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 'user-123', 5, 0.7);
+    });
+
+    it('should clamp minSimilarity between 0 and 1', async () => {
+      mockGetRecommendations.mockResolvedValueOnce([]);
+
+      await getRecommendationsAction('content-1', 5, 1.5);
+
+      expect(mockGetRecommendations).toHaveBeenCalledWith('content-1', 'user-123', 5, 1);
     });
 
     it('should handle errors gracefully', async () => {
@@ -239,6 +308,133 @@ describe('Semantic Search Actions', () => {
       const result = await getRecommendationsAction('content-1');
 
       expect(result.success).toBe(true);
+      expect(result.recommendations).toEqual([]);
+    });
+  });
+
+  describe('getDashboardRecommendationsAction', () => {
+    it('should return recommendations from recent content', async () => {
+      mockDbSelect.mockResolvedValueOnce([
+        { id: 'content-1' },
+        { id: 'content-2' },
+        { id: 'content-3' },
+      ]);
+      mockGetRecommendations
+        .mockResolvedValueOnce([
+          { id: 'rec-1', title: 'Rec 1', similarity: 0.9, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+        ])
+        .mockResolvedValueOnce([
+          { id: 'rec-2', title: 'Rec 2', similarity: 0.85, body: null, type: 'link', tags: [], autoTags: [], url: null, createdAt: new Date() },
+        ])
+        .mockResolvedValueOnce([
+          { id: 'rec-3', title: 'Rec 3', similarity: 0.8, body: null, type: 'file', tags: [], autoTags: [], url: null, createdAt: new Date() },
+        ]);
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(true);
+      expect(result.recommendations).toHaveLength(3);
+      // Should be sorted by similarity
+      expect(result.recommendations[0].similarity).toBe(0.9);
+    });
+
+    it('should return error when not authenticated', async () => {
+      mockAuth.mockResolvedValueOnce(null);
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Unauthorized');
+      expect(result.recommendations).toEqual([]);
+    });
+
+    it('should return empty array when user has no content', async () => {
+      mockDbSelect.mockResolvedValueOnce([]);
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(true);
+      expect(result.recommendations).toEqual([]);
+    });
+
+    it('should deduplicate recommendations across sources', async () => {
+      mockDbSelect.mockResolvedValueOnce([
+        { id: 'content-1' },
+        { id: 'content-2' },
+      ]);
+      // Same recommendation from both sources
+      mockGetRecommendations
+        .mockResolvedValueOnce([
+          { id: 'rec-1', title: 'Rec 1', similarity: 0.9, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+        ])
+        .mockResolvedValueOnce([
+          { id: 'rec-1', title: 'Rec 1', similarity: 0.85, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+        ]);
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(true);
+      // Should only have one copy of rec-1
+      expect(result.recommendations).toHaveLength(1);
+    });
+
+    it('should not recommend source content items', async () => {
+      mockDbSelect.mockResolvedValueOnce([
+        { id: 'content-1' },
+      ]);
+      // Recommendation includes source content (shouldn't happen in real usage but testing the filter)
+      mockGetRecommendations.mockResolvedValueOnce([
+        { id: 'content-1', title: 'Source', similarity: 1.0, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+        { id: 'rec-1', title: 'Rec 1', similarity: 0.9, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+      ]);
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(true);
+      // Should only have rec-1, not content-1
+      expect(result.recommendations.map(r => r.id)).not.toContain('content-1');
+    });
+
+    it('should limit to top 6 recommendations', async () => {
+      mockDbSelect.mockResolvedValueOnce([
+        { id: 'content-1' },
+        { id: 'content-2' },
+        { id: 'content-3' },
+      ]);
+      // Many recommendations
+      const manyRecs = Array.from({ length: 4 }, (_, i) => ({
+        id: `rec-${i}`,
+        title: `Rec ${i}`,
+        similarity: 0.9 - i * 0.05,
+        body: null,
+        type: 'note' as const,
+        tags: [],
+        autoTags: [],
+        url: null,
+        createdAt: new Date(),
+      }));
+      mockGetRecommendations
+        .mockResolvedValueOnce(manyRecs.slice(0, 2))
+        .mockResolvedValueOnce(manyRecs.slice(2, 4))
+        .mockResolvedValueOnce([
+          { id: 'rec-4', title: 'Rec 4', similarity: 0.65, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+          { id: 'rec-5', title: 'Rec 5', similarity: 0.6, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+          { id: 'rec-6', title: 'Rec 6', similarity: 0.55, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
+        ]);
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(true);
+      expect(result.recommendations).toHaveLength(6);
+    });
+
+    it('should handle errors gracefully', async () => {
+      mockDbSelect.mockRejectedValueOnce(new Error('Database error'));
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Failed to get recommendations');
       expect(result.recommendations).toEqual([]);
     });
   });
