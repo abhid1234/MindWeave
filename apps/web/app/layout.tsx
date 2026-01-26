@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ToastProvider } from '@/components/ui/toast';
+import { OfflineIndicator, InstallPrompt, UpdatePrompt } from '@/components/pwa';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,6 +28,9 @@ export const metadata: Metadata = {
     initialScale: 1,
     maximumScale: 1,
   },
+  icons: {
+    apple: '/icons/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
@@ -47,6 +51,10 @@ export default function RootLayout({
               Skip to main content
             </a>
             {children}
+            {/* PWA Components */}
+            <OfflineIndicator />
+            <InstallPrompt />
+            <UpdatePrompt />
           </ToastProvider>
         </ThemeProvider>
       </body>

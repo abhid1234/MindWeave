@@ -1,6 +1,8 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { signOutAction } from '@/app/actions/auth';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { MobileNav } from './MobileNav';
 
 interface HeaderProps {
   user: {
@@ -13,14 +15,17 @@ interface HeaderProps {
 export default function Header({ user }: HeaderProps) {
   return (
     <header className="border-b">
-      <div className="flex h-16 items-center justify-between px-6">
-        <div className="flex items-center gap-8">
-          <h1 className="text-xl font-bold">Mindweave</h1>
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-2">
+          <MobileNav />
+          <Link href="/dashboard" className="text-xl font-bold">
+            Mindweave
+          </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <ThemeToggle />
-          <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 sm:flex">
             {user.image && (
               <Image
                 src={user.image}
@@ -36,13 +41,24 @@ export default function Header({ user }: HeaderProps) {
               <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
+          {user.image && (
+            <Image
+              src={user.image}
+              alt={user.name || 'User'}
+              width={32}
+              height={32}
+              className="rounded-full sm:hidden"
+              priority
+            />
+          )}
 
           <form action={signOutAction}>
             <button
               type="submit"
               className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-accent"
             >
-              Sign Out
+              <span className="hidden sm:inline">Sign Out</span>
+              <span className="sm:hidden">Exit</span>
             </button>
           </form>
         </div>
