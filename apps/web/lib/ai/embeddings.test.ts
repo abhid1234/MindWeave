@@ -259,7 +259,7 @@ describe('Embeddings Module', () => {
     it('should return empty array when content has no embedding', async () => {
       mockFindFirst.mockResolvedValueOnce(null);
 
-      const results = await getRecommendations('content-123', 5);
+      const results = await getRecommendations('content-123', 'user-123', 5);
 
       expect(results).toEqual([]);
     });
@@ -271,11 +271,11 @@ describe('Embeddings Module', () => {
         embedding: Array(768).fill(0.5),
       });
       mockExecute.mockResolvedValueOnce([
-        { id: 'content-456', title: 'Similar 1', similarity: 0.85 },
-        { id: 'content-789', title: 'Similar 2', similarity: 0.75 },
+        { id: 'content-456', title: 'Similar 1', body: 'Body 1', type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date(), similarity: 0.85 },
+        { id: 'content-789', title: 'Similar 2', body: 'Body 2', type: 'link', tags: [], autoTags: [], url: null, createdAt: new Date(), similarity: 0.75 },
       ]);
 
-      const results = await getRecommendations('content-123', 5);
+      const results = await getRecommendations('content-123', 'user-123', 5);
 
       expect(results).toHaveLength(2);
       // Verify source content is not in results
@@ -290,7 +290,7 @@ describe('Embeddings Module', () => {
       });
       mockExecute.mockResolvedValueOnce([]);
 
-      await getRecommendations('content-123', 3);
+      await getRecommendations('content-123', 'user-123', 3);
 
       // The limit is passed in the SQL query
       expect(mockExecute).toHaveBeenCalled();
@@ -299,7 +299,7 @@ describe('Embeddings Module', () => {
     it('should return empty array on error', async () => {
       mockFindFirst.mockRejectedValueOnce(new Error('Database error'));
 
-      const results = await getRecommendations('content-123', 5);
+      const results = await getRecommendations('content-123', 'user-123', 5);
 
       expect(results).toEqual([]);
     });
@@ -312,9 +312,69 @@ describe('Embeddings Module', () => {
       });
       mockExecute.mockResolvedValueOnce([]);
 
-      await getRecommendations('content-123');
+      await getRecommendations('content-123', 'user-123');
 
       expect(mockExecute).toHaveBeenCalled();
+    });
+
+    it('should require userId parameter for security filtering', async () => {
+      mockFindFirst.mockResolvedValueOnce({
+        id: 'embedding-123',
+        contentId: 'content-123',
+        embedding: Array(768).fill(0.5),
+      });
+      mockExecute.mockResolvedValueOnce([]);
+
+      await getRecommendations('content-123', 'user-456', 5, 0.5);
+
+      // userId is passed in the SQL query for filtering
+      expect(mockExecute).toHaveBeenCalled();
+    });
+
+    it('should respect minSimilarity parameter', async () => {
+      mockFindFirst.mockResolvedValueOnce({
+        id: 'embedding-123',
+        contentId: 'content-123',
+        embedding: Array(768).fill(0.5),
+      });
+      mockExecute.mockResolvedValueOnce([]);
+
+      await getRecommendations('content-123', 'user-123', 5, 0.7);
+
+      expect(mockExecute).toHaveBeenCalled();
+    });
+
+    it('should return expanded recommendation data', async () => {
+      mockFindFirst.mockResolvedValueOnce({
+        id: 'embedding-123',
+        contentId: 'content-123',
+        embedding: Array(768).fill(0.5),
+      });
+      const mockResult = {
+        id: 'content-456',
+        title: 'Test Title',
+        body: 'Test body content',
+        type: 'note',
+        tags: ['tag1', 'tag2'],
+        autoTags: ['auto1'],
+        url: null,
+        createdAt: new Date('2024-01-15'),
+        similarity: 0.85,
+      };
+      mockExecute.mockResolvedValueOnce([mockResult]);
+
+      const results = await getRecommendations('content-123', 'user-123', 5);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        id: 'content-456',
+        title: 'Test Title',
+        body: 'Test body content',
+        type: 'note',
+        tags: ['tag1', 'tag2'],
+        autoTags: ['auto1'],
+        similarity: 0.85,
+      });
     });
   });
 });

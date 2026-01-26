@@ -3,7 +3,10 @@
 import { auth } from '@/lib/auth';
 import { searchSimilarContent, getRecommendations } from '@/lib/ai/embeddings';
 import { answerQuestion } from '@/lib/ai/claude';
+import { db } from '@/lib/db/client';
+import { content } from '@/lib/db/schema';
 import type { ContentType } from '@/lib/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 export type SemanticSearchResult = {
   id: string;
@@ -23,14 +26,22 @@ export type SemanticSearchResponse = {
   results: SemanticSearchResult[];
 };
 
+export type RecommendationResult = {
+  id: string;
+  title: string;
+  body: string | null;
+  type: ContentType;
+  tags: string[];
+  autoTags: string[];
+  url: string | null;
+  createdAt: Date;
+  similarity: number;
+};
+
 export type RecommendationsResponse = {
   success: boolean;
   message?: string;
-  recommendations: Array<{
-    id: string;
-    title: string;
-    similarity: number;
-  }>;
+  recommendations: RecommendationResult[];
 };
 
 /**
@@ -105,10 +116,12 @@ export async function semanticSearchAction(
 /**
  * Get content recommendations based on a specific content item
  * Returns similar content ordered by relevance
+ * Only returns content owned by the authenticated user
  */
 export async function getRecommendationsAction(
   contentId: string,
-  limit: number = 5
+  limit: number = 5,
+  minSimilarity: number = 0.5
 ): Promise<RecommendationsResponse> {
   try {
     // Check authentication
@@ -130,15 +143,42 @@ export async function getRecommendationsAction(
       };
     }
 
-    // Validate limit
-    const validLimit = Math.min(Math.max(1, limit), 20);
+    // Verify content ownership
+    const contentItem = await db.query.content.findFirst({
+      where: eq(content.id, contentId),
+    });
 
-    // Get recommendations
-    const recommendations = await getRecommendations(contentId, validLimit);
+    if (!contentItem) {
+      return {
+        success: false,
+        message: 'Content not found.',
+        recommendations: [],
+      };
+    }
+
+    if (contentItem.userId !== session.user.id) {
+      return {
+        success: false,
+        message: 'You do not have permission to view recommendations for this content.',
+        recommendations: [],
+      };
+    }
+
+    // Validate limit and minSimilarity
+    const validLimit = Math.min(Math.max(1, limit), 20);
+    const validMinSimilarity = Math.min(Math.max(0, minSimilarity), 1);
+
+    // Get recommendations (with userId filtering for security)
+    const recommendations = await getRecommendations(
+      contentId,
+      session.user.id,
+      validLimit,
+      validMinSimilarity
+    );
 
     return {
       success: true,
-      recommendations,
+      recommendations: recommendations as RecommendationResult[],
     };
   } catch (error) {
     console.error('Error getting recommendations:', error);
@@ -249,6 +289,88 @@ export async function askQuestionAction(
     return {
       success: false,
       message: 'Failed to answer question. Please try again.',
+    };
+  }
+}
+
+export type DashboardRecommendationsResponse = {
+  success: boolean;
+  message?: string;
+  recommendations: RecommendationResult[];
+};
+
+/**
+ * Get recommendations for the dashboard widget
+ * Fetches recommendations from user's 3 most recent content items,
+ * deduplicates, and returns top 6
+ */
+export async function getDashboardRecommendationsAction(): Promise<DashboardRecommendationsResponse> {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: 'Unauthorized. Please log in.',
+        recommendations: [],
+      };
+    }
+
+    // Get user's 3 most recent content items
+    const recentContent = await db
+      .select({ id: content.id })
+      .from(content)
+      .where(eq(content.userId, session.user.id))
+      .orderBy(desc(content.createdAt))
+      .limit(3);
+
+    if (recentContent.length === 0) {
+      return {
+        success: true,
+        recommendations: [],
+      };
+    }
+
+    // Get recommendations for each recent content item
+    const allRecommendations: RecommendationResult[] = [];
+    const seenIds = new Set<string>();
+
+    // Include source content IDs so we don't recommend items that are source items
+    for (const item of recentContent) {
+      seenIds.add(item.id);
+    }
+
+    for (const item of recentContent) {
+      const recommendations = await getRecommendations(
+        item.id,
+        session.user.id,
+        4, // Get a few from each source
+        0.5
+      );
+
+      for (const rec of recommendations) {
+        if (!seenIds.has(rec.id)) {
+          seenIds.add(rec.id);
+          allRecommendations.push(rec as RecommendationResult);
+        }
+      }
+    }
+
+    // Sort by similarity and return top 6
+    const topRecommendations = allRecommendations
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 6);
+
+    return {
+      success: true,
+      recommendations: topRecommendations,
+    };
+  } catch (error) {
+    console.error('Error getting dashboard recommendations:', error);
+    return {
+      success: false,
+      message: 'Failed to get recommendations. Please try again.',
+      recommendations: [],
     };
   }
 }

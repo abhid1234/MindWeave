@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star, Loader2, Sparkles } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
@@ -32,6 +32,10 @@ const ShareDialog = dynamic(
 );
 const CollectionSelector = dynamic(
   () => import('./CollectionSelector').then((mod) => mod.CollectionSelector),
+  { loading: () => null }
+);
+const RecommendationsDialog = dynamic(
+  () => import('./RecommendationsDialog').then((mod) => mod.RecommendationsDialog),
   { loading: () => null }
 );
 
@@ -94,6 +98,7 @@ export function ContentCard({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
+  const [isRecommendationsDialogOpen, setIsRecommendationsDialogOpen] = useState(false);
   const [isShared, setIsShared] = useState(initialIsShared);
   const [shareId, setShareId] = useState(initialShareId);
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
@@ -200,6 +205,10 @@ export function ContentCard({
                 <DropdownMenuItem onClick={() => setIsCollectionDialogOpen(true)}>
                   <FolderPlus className="mr-2 h-4 w-4" />
                   Add to Collection
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsRecommendationsDialogOpen(true)}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  View Similar
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -312,6 +321,13 @@ export function ContentCard({
         contentId={id}
         open={isCollectionDialogOpen}
         onOpenChange={setIsCollectionDialogOpen}
+      />
+
+      <RecommendationsDialog
+        contentId={id}
+        contentTitle={title}
+        open={isRecommendationsDialogOpen}
+        onOpenChange={setIsRecommendationsDialogOpen}
       />
     </>
   );

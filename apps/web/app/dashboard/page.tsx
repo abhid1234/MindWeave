@@ -4,6 +4,7 @@ import { content } from '@/lib/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import Link from 'next/link';
 import { formatDateUTC } from '@/lib/utils';
+import { DashboardRecommendations } from '@/components/dashboard/DashboardRecommendations';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -111,6 +112,9 @@ export default async function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Recommendations */}
+      <DashboardRecommendations />
 
       {/* Quick Actions */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
