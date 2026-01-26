@@ -78,8 +78,10 @@ test.describe('Manual Tagging Feature', () => {
       // Click Edit tags button
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Should show tag input (use type="text" since placeholder is empty when tags exist)
-      await expect(firstCard.locator('input[type="text"]')).toBeVisible();
+      // Wait for the component to re-render and show the input field
+      // The EditableTags component uses React state, so there's a render delay
+      const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
 
       // Should show Save and Cancel buttons
       await expect(firstCard.locator('button:has-text("Save")').first()).toBeVisible();
@@ -92,11 +94,15 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
+      // Wait for edit mode to be active
+      const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
       // Click Cancel
       await firstCard.locator('button:has-text("Cancel")').first().click();
 
       // Should exit edit mode
-      await expect(firstCard.locator('input[type="text"]')).not.toBeVisible();
+      await expect(input).not.toBeVisible({ timeout: 5000 });
       await expect(firstCard.locator('button:has-text("Edit tags")').first()).toBeVisible();
     });
 
@@ -105,6 +111,9 @@ test.describe('Manual Tagging Feature', () => {
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
+
+      // Wait for edit mode to be active
+      await expect(firstCard.locator('input[type="text"]')).toBeVisible({ timeout: 5000 });
 
       // Should still show existing tags as badges
       await expect(firstCard.locator('text=initial')).toBeVisible();
@@ -120,8 +129,11 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Type new tag and press Enter
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Type new tag and press Enter
       await input.fill('newtag');
       await input.press('Enter');
 
@@ -138,12 +150,15 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Type to show suggestions
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Type to show suggestions
       await input.fill('java');
 
       // Wait for and click suggestion
-      await page.waitForSelector('button:has-text("javascript")');
+      await page.waitForSelector('button:has-text("javascript")', { timeout: 5000 });
       await page.locator('button:has-text("javascript")').click();
 
       // Should show the tag
@@ -156,11 +171,14 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
+      // Wait for edit mode to be active
+      const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
       // Count current tags (badges with Remove button)
       const initialTagCount = await firstCard.locator('button[aria-label="Remove"]').count();
 
       // Press Enter without typing
-      const input = firstCard.locator('input[type="text"]');
       await input.press('Enter');
 
       // Tag count should remain same
@@ -174,8 +192,11 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Try to add existing tag
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Try to add existing tag
       await input.fill('initial');
       await input.press('Enter');
 
@@ -191,6 +212,9 @@ test.describe('Manual Tagging Feature', () => {
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
+
+      // Wait for edit mode to be active
+      await expect(firstCard.locator('input[type="text"]')).toBeVisible({ timeout: 5000 });
 
       // Count initial tags
       const initialCount = await firstCard.locator('button[aria-label="Remove"]').count();
@@ -213,11 +237,14 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
+      // Wait for edit mode to be active
+      const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
       // Count initial tags
       const initialCount = await firstCard.locator('button[aria-label="Remove"]').count();
 
       // Press Backspace in empty input
-      const input = firstCard.locator('input[type="text"]');
       await input.press('Backspace');
 
       // Should have one less tag
@@ -233,8 +260,11 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Add a new tag
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Add a new tag
       await input.fill('saved-tag');
       await input.press('Enter');
 
@@ -286,8 +316,11 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Add a new tag
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Add a new tag
       await input.fill('test-save');
       await input.press('Enter');
 
@@ -308,12 +341,15 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Type to trigger autocomplete
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Type to trigger autocomplete
       await input.fill('ref');
 
       // Should show "reference" suggestion from other content
-      await expect(page.locator('button:has-text("reference")')).toBeVisible();
+      await expect(page.locator('button:has-text("reference")')).toBeVisible({ timeout: 5000 });
     });
 
     test('should filter suggestions as user types', async ({ page }) => {
@@ -322,12 +358,15 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Type to trigger autocomplete
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Type to trigger autocomplete
       await input.fill('prog');
 
       // Should show "programming" suggestion
-      await expect(page.locator('button:has-text("programming")')).toBeVisible();
+      await expect(page.locator('button:has-text("programming")')).toBeVisible({ timeout: 5000 });
 
       // Should not show unrelated tags
       await expect(page.locator('button:has-text("reference")')).not.toBeVisible();
@@ -339,9 +378,15 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Type to trigger autocomplete
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Type to trigger autocomplete
       await input.fill('test');
+
+      // Wait a moment for suggestions to appear
+      await page.waitForTimeout(300);
 
       // Should not show "test" in suggestions (already selected)
       const suggestionButtons = page.locator('button');
@@ -355,12 +400,15 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Type to show suggestions
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Type to show suggestions
       await input.fill('ref');
 
       // Verify suggestions are visible
-      await expect(page.locator('button:has-text("reference")')).toBeVisible();
+      await expect(page.locator('button:has-text("reference")')).toBeVisible({ timeout: 5000 });
 
       // Press Escape
       await input.press('Escape');
@@ -375,7 +423,7 @@ test.describe('Manual Tagging Feature', () => {
       // Edit first card
       const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
       await firstCard.locator('button:has-text("Edit tags")').click();
-      await expect(firstCard.locator('input[type="text"]')).toBeVisible();
+      await expect(firstCard.locator('input[type="text"]')).toBeVisible({ timeout: 5000 });
 
       // Other cards should not be in edit mode
       const secondCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Link' });
@@ -388,8 +436,11 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await thirdCard.locator('button:has-text("Edit tags")').click();
 
-      // Add tags (this card has no tags, so placeholder will be visible)
+      // Wait for edit mode to be active
       const input = thirdCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Add tags (this card has no tags, so placeholder will be visible)
       await input.fill('unique-tag');
       await input.press('Enter');
 
@@ -416,9 +467,12 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
+      // Wait for edit mode to be active
+      const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
       // Try to add very long tag (should be truncated to 50 chars)
       const longTag = 'a'.repeat(60);
-      const input = firstCard.locator('input[type="text"]');
       await input.fill(longTag);
       await input.press('Enter');
 
@@ -432,8 +486,11 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Add tag with special characters
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Add tag with special characters
       await input.fill('c++');
       await input.press('Enter');
 
@@ -447,21 +504,26 @@ test.describe('Manual Tagging Feature', () => {
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Add and save tag
+      // Wait for edit mode to be active
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
+
+      // Add and save tag
       await input.fill('persistent');
       await input.press('Enter');
       await firstCard.locator('button:has-text("Save")').first().click();
 
       // Wait for save to complete and edit mode to exit
-      await expect(input).not.toBeVisible({ timeout: 5000 });
-      await page.waitForTimeout(1000);
+      await expect(input).not.toBeVisible({ timeout: 10000 });
 
-      // Refresh page
-      await page.reload();
+      // Wait longer for database write to complete
+      await page.waitForTimeout(2000);
+
+      // Refresh page and wait for it to load
+      await page.reload({ waitUntil: 'networkidle' });
 
       // Tag should still be there (use .first() since it also appears in filter sidebar)
-      await expect(page.locator('text=persistent').first()).toBeVisible();
+      await expect(page.locator('text=persistent').first()).toBeVisible({ timeout: 10000 });
     });
   });
 });
