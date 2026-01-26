@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client';
-import { users, content, embeddings, accounts, sessions } from '@/lib/db/schema';
+import { users, content, embeddings, accounts, sessions, devices } from '@/lib/db/schema';
 
 /**
  * Clean all data from the test database
@@ -7,6 +7,7 @@ import { users, content, embeddings, accounts, sessions } from '@/lib/db/schema'
 export async function cleanDatabase() {
   await db.delete(embeddings);
   await db.delete(content);
+  await db.delete(devices);
   await db.delete(sessions);
   await db.delete(accounts);
   await db.delete(users);
@@ -70,4 +71,25 @@ export async function createTestEmbedding(
     .returning();
 
   return embedding;
+}
+
+/**
+ * Create test device for push notifications
+ */
+export async function createTestDevice(
+  userId: string,
+  data?: Partial<typeof devices.$inferInsert>
+) {
+  const [device] = await db
+    .insert(devices)
+    .values({
+      userId,
+      token: `test-token-${Date.now()}`,
+      platform: 'android',
+      isActive: true,
+      ...data,
+    })
+    .returning();
+
+  return device;
 }
