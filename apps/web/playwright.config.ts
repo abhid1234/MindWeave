@@ -49,8 +49,7 @@ export default defineConfig({
     },
     */
 
-    /* Test against mobile viewports. */
-    /* Uncomment to test on mobile
+    /* Mobile viewport testing */
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
@@ -59,7 +58,6 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
     },
-    */
   ],
 
   /* Run your local dev server before starting the tests */

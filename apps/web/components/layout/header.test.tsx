@@ -47,9 +47,10 @@ describe('Header Component', () => {
 
     it('should render user avatar when image is provided', () => {
       render(<Header user={mockUser} />);
-      const avatar = screen.getByAltText('John Doe');
-      expect(avatar).toBeInTheDocument();
-      expect(avatar).toHaveAttribute('src', 'https://example.com/avatar.jpg');
+      // There are two avatars - one for desktop, one for mobile
+      const avatars = screen.getAllByAltText('John Doe');
+      expect(avatars.length).toBeGreaterThanOrEqual(1);
+      expect(avatars[0]).toHaveAttribute('src', 'https://example.com/avatar.jpg');
     });
 
     it('should render sign out button', () => {
@@ -112,8 +113,9 @@ describe('Header Component', () => {
 
     it('should have rounded avatar', () => {
       render(<Header user={mockUser} />);
-      const avatar = screen.getByAltText('John Doe');
-      expect(avatar).toHaveClass('rounded-full');
+      // There are two avatars - one for desktop, one for mobile
+      const avatars = screen.getAllByAltText('John Doe');
+      expect(avatars[0]).toHaveClass('rounded-full');
     });
 
     it('should have styled sign out button', () => {
@@ -137,8 +139,9 @@ describe('Header Component', () => {
 
     it('should have alt text for avatar image', () => {
       render(<Header user={mockUser} />);
-      const avatar = screen.getByAltText('John Doe');
-      expect(avatar).toHaveAccessibleName();
+      // There are two avatars - one for desktop, one for mobile
+      const avatars = screen.getAllByAltText('John Doe');
+      expect(avatars[0]).toHaveAccessibleName();
     });
   });
 });
