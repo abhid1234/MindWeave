@@ -66,8 +66,7 @@ Thumbs.db
 public/uploads/*
 !public/uploads/.gitkeep
 
-# Drizzle
-drizzle/
+# Drizzle (track migrations for consistent deployments)
 .drizzle/
 
 # Docker
