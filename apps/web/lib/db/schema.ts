@@ -149,6 +149,28 @@ export const contentCollections = pgTable(
   })
 );
 
+// Devices table (for push notifications)
+export const devices = pgTable(
+  'devices',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    token: text('token').notNull(),
+    platform: varchar('platform', { length: 20 }).notNull().$type<'ios' | 'android' | 'web'>(),
+    isActive: boolean('is_active').notNull().default(true),
+    lastUsed: timestamp('last_used').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('devices_user_id_idx').on(table.userId),
+    tokenIdx: index('devices_token_idx').on(table.token),
+    platformIdx: index('devices_platform_idx').on(table.platform),
+  })
+);
+
 // Embeddings table (for semantic search)
 export const embeddings = pgTable(
   'embeddings',
@@ -172,6 +194,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
   collections: many(collections),
+  devices: many(devices),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -196,6 +219,13 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const devicesRelations = relations(devices, ({ one }) => ({
+  user: one(users, {
+    fields: [devices.userId],
+    references: [users.id],
+  }),
 }));
 
 export const collectionsRelations = relations(collections, ({ one, many }) => ({
@@ -232,3 +262,6 @@ export type NewCollection = typeof collections.$inferInsert;
 
 export type ContentCollection = typeof contentCollections.$inferSelect;
 export type NewContentCollection = typeof contentCollections.$inferInsert;
+
+export type Device = typeof devices.$inferSelect;
+export type NewDevice = typeof devices.$inferInsert;
