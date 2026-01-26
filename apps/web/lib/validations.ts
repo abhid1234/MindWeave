@@ -78,7 +78,7 @@ export const importItemSchema = z.object({
   url: z.string().url('Invalid URL').optional().or(z.literal('')),
   tags: z.array(z.string()).default([]),
   type: z.enum(['note', 'link']),
-  createdAt: z.date().optional(),
+  createdAt: z.coerce.date().optional(),
   metadata: z.record(z.any()).optional(),
 });
 
