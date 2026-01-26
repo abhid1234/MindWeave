@@ -16,8 +16,11 @@ export default function CapturePage() {
   const router = useRouter();
   const { addToast } = useToast();
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setErrors({});
+
+    const formData = new FormData(e.currentTarget);
 
     // Add file metadata to form data if file is uploaded
     if (contentType === 'file' && uploadedFile) {
@@ -76,7 +79,7 @@ export default function CapturePage() {
         </p>
       </div>
 
-      <form action={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Type Selection */}
         <div>
           <label htmlFor="type" className="block text-sm font-medium">
