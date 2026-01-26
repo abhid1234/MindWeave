@@ -14,7 +14,8 @@
     "add:ios": "cap add ios",
     "add:android": "cap add android",
     "live": "cap run android --livereload --external",
-    "live:ios": "cap run ios --livereload --external"
+    "live:ios": "cap run ios --livereload --external",
+    "icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.0",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.5.0"
   }
 }
