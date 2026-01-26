@@ -45,6 +45,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
+      recharts: path.resolve(__dirname, './tests/__mocks__/recharts.tsx'),
     },
   },
 });
