@@ -308,18 +308,21 @@ test.describe('Full-text Search', () => {
     await page.goto('/dashboard/library');
 
     // Search for something
-    await page.fill('input[placeholder*="Search"]', 'Test');
-    await page.waitForTimeout(500);
+    const searchInput = page.locator('input[placeholder*="Search"]');
+    await searchInput.fill('Test');
 
-    // Clear button should be visible
-    const clearButton = page.locator('button[aria-label="Clear search"], button:has-text("Clear")').or(page.locator('button:has(svg) >> nth=1'));
-    await expect(clearButton.first()).toBeVisible();
+    // Wait for URL to update with query (confirming search is active)
+    await expect(page).toHaveURL(/query=Test/);
+
+    // Clear button should be visible - use specific aria-label selector
+    const clearButton = page.getByRole('button', { name: 'Clear search' });
+    await expect(clearButton).toBeVisible();
 
     // Click clear
-    await clearButton.first().click();
+    await clearButton.click();
 
-    // Search input should be empty
-    await expect(page.locator('input[placeholder*="Search"]')).toHaveValue('');
+    // Search input should be empty (wait for React state update)
+    await expect(searchInput).toHaveValue('', { timeout: 5000 });
   });
 
   test('shows no results message when search has no matches', async ({ page }) => {
