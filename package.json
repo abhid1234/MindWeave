@@ -20,7 +20,11 @@
     "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
     "gcp:setup-secrets": "./scripts/setup-gcp-secrets.sh",
     "gcp:deploy": "./scripts/deploy-gcp.sh",
-    "gcp:build": "gcloud builds submit --config=cloudbuild.yaml"
+    "gcp:build": "gcloud builds submit --config=cloudbuild.yaml",
+    "mobile:build": "npm run build --prefix apps/mobile",
+    "mobile:sync": "npm run sync --prefix apps/mobile",
+    "mobile:ios": "npm run ios --prefix apps/mobile",
+    "mobile:android": "npm run android --prefix apps/mobile"
   },
   "devDependencies": {
     "@types/node": "^20.11.5",

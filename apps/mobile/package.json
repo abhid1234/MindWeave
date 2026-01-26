@@ -1,0 +1,33 @@
+{
+  "name": "@mindweave/mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mindweave mobile app - Native wrapper for iOS and Android",
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "cp -r src/index.html dist/ && cp -r resources dist/ 2>/dev/null || true",
+    "sync": "cap sync",
+    "ios": "cap open ios",
+    "android": "cap open android",
+    "ios:build": "npm run build && cap sync ios",
+    "android:build": "npm run build && cap sync android",
+    "add:ios": "cap add ios",
+    "add:android": "cap add android",
+    "live": "cap run android --livereload --external",
+    "live:ios": "cap run ios --livereload --external"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/ios": "^6.1.0",
+    "@capacitor/push-notifications": "^6.0.0",
+    "@capacitor/share": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.0",
+    "typescript": "^5.5.0"
+  }
+}

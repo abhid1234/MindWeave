@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
-import { bulkImportSchema } from '@/lib/validations';
+import { bulkImportSchema, ImportItemInput } from '@/lib/validations';
 import { generateTags } from '@/lib/ai/claude';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
@@ -114,7 +114,7 @@ export async function importContentAction(
 
     for (const batch of batches) {
       const batchInserts: Array<{
-        item: ImportItem;
+        item: (typeof validatedItems)[number];
         insertData: typeof content.$inferInsert;
       }> = [];
 
@@ -261,7 +261,7 @@ export async function importContentAction(
 /**
  * Generate auto-tags for imported content asynchronously
  */
-async function generateTagsAsync(contentId: string, item: ImportItem): Promise<void> {
+async function generateTagsAsync(contentId: string, item: ImportItemInput): Promise<void> {
   try {
     const autoTags = await generateTags({
       title: item.title,
