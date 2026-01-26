@@ -45,8 +45,10 @@ export async function importContentAction(
     }
 
     // Validate input
+    console.log('Import action called with', items.length, 'items');
     const validationResult = bulkImportSchema.safeParse({ items, options });
     if (!validationResult.success) {
+      console.log('Validation errors:', validationResult.error.errors);
       const errorMessages = validationResult.error.errors.map((e) => e.message).join(', ');
       return {
         success: false,
@@ -59,6 +61,10 @@ export async function importContentAction(
       };
     }
 
+    // Use validated data
+    const validatedItems = validationResult.data.items;
+    console.log('Validated items:', validatedItems.length);
+
     const userId = session.user.id;
     const errors: ImportError[] = [];
     const createdIds: string[] = [];
@@ -70,12 +76,12 @@ export async function importContentAction(
 
     if (skipDuplicates) {
       // Get URLs for link items
-      const linkUrls = items
+      const linkUrls = validatedItems
         .filter((item) => item.type === 'link' && item.url)
         .map((item) => item.url as string);
 
       // Get titles for note items
-      const noteTitles = items
+      const noteTitles = validatedItems
         .filter((item) => item.type === 'note')
         .map((item) => item.title.toLowerCase().trim());
 
@@ -107,7 +113,7 @@ export async function importContentAction(
     }
 
     // Process items in batches
-    const batches = batchArray(items, BATCH_SIZE);
+    const batches = batchArray(validatedItems, BATCH_SIZE);
 
     for (const batch of batches) {
       const batchInserts: Array<{
@@ -134,7 +140,21 @@ export async function importContentAction(
         // Merge tags with additional tags
         const mergedTags = normalizeTags([...item.tags, ...additionalTags]);
 
-        // Prepare insert data
+        // Prepare insert data - ensure createdAt is a valid Date
+        let itemCreatedAt: Date;
+        if (item.createdAt) {
+          // Handle both Date objects and ISO strings
+          itemCreatedAt = item.createdAt instanceof Date
+            ? item.createdAt
+            : new Date(item.createdAt);
+          // Validate the date
+          if (isNaN(itemCreatedAt.getTime())) {
+            itemCreatedAt = new Date();
+          }
+        } else {
+          itemCreatedAt = new Date();
+        }
+
         const insertData: typeof content.$inferInsert = {
           userId,
           type: item.type,
@@ -147,7 +167,7 @@ export async function importContentAction(
             ...item.metadata,
             importedAt: new Date().toISOString(),
           },
-          createdAt: item.createdAt || new Date(),
+          createdAt: itemCreatedAt,
         };
 
         batchInserts.push({ item, insertData });
@@ -212,7 +232,7 @@ export async function importContentAction(
     const failed = errors.length;
 
     return {
-      success: imported > 0 || (items.length === 0),
+      success: imported > 0 || (validatedItems.length === 0),
       message: imported > 0
         ? `Successfully imported ${imported} item${imported === 1 ? '' : 's'}${skipped > 0 ? `. ${skipped} duplicate${skipped === 1 ? '' : 's'} skipped.` : ''}`
         : skipped > 0
@@ -232,7 +252,7 @@ export async function importContentAction(
       imported: 0,
       skipped: 0,
       failed: items.length,
-      errors: items.map((item) => ({
+      errors: items.slice(0, 10).map((item) => ({
         item: item.title,
         reason: 'Unexpected error during import',
       })),
