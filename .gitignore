@@ -16,7 +16,7 @@ build/
 dist/
 
 # PWA Service Worker (auto-generated)
-public/sw.js
+**/public/sw.js
 
 # Production
 /build
