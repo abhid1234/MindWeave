@@ -14,6 +14,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Smart Library**: Browse and filter all your content in one place
 - **Dark Mode**: Light, dark, and system theme options
 - **PWA Support**: Install as a native app on desktop and mobile
+- **Mobile Apps**: Native iOS and Android apps via Capacitor
 - **SEO Optimized**: Open Graph and Twitter Card metadata for shared content
 - **Privacy First**: Your data stays yours - self-host or use our secure cloud
 
@@ -78,11 +79,16 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 
 ```
 Mindweave/
-├── apps/web/              # Next.js application
-│   ├── app/              # App router pages
-│   ├── components/       # React components
-│   ├── lib/              # Core libraries (DB, AI, auth)
-│   └── types/            # TypeScript types
+├── apps/
+│   ├── web/              # Next.js application
+│   │   ├── app/          # App router pages
+│   │   ├── components/   # React components
+│   │   ├── lib/          # Core libraries (DB, AI, auth)
+│   │   └── types/        # TypeScript types
+│   └── mobile/           # Capacitor mobile app
+│       ├── android/      # Android native project
+│       ├── ios/          # iOS native project
+│       └── src/          # Capacitor bridge code
 ├── browser-extension/     # Chrome browser extension
 ├── docker/               # Docker Compose configuration
 ├── scripts/              # Development scripts
@@ -110,6 +116,50 @@ Save any webpage to Mindweave with one click using our Chrome extension.
 5. Click **Save to Mindweave**
 
 See [browser-extension/README.md](browser-extension/README.md) for detailed documentation.
+
+## Mobile App
+
+Mindweave is available as a native mobile app for iOS and Android using Capacitor.
+
+### Features
+
+- Native app store distribution
+- Push notifications
+- Deep linking (`mindweave://` and universal links)
+- Share intent (receive shared content from other apps)
+- Native status bar and safe area handling
+
+### Development
+
+```bash
+# Install dependencies
+cd apps/mobile
+npm install
+
+# Build the project
+npm run build
+
+# Add platforms (first time only)
+npm run add:ios
+npm run add:android
+
+# Open in IDE
+npm run ios      # Opens Xcode
+npm run android  # Opens Android Studio
+```
+
+### Building for Release
+
+**Android:**
+1. Generate a keystore for signing
+2. Build signed AAB in Android Studio
+3. Upload to Google Play Console
+
+**iOS:**
+1. Configure code signing in Xcode
+2. Archive and upload to App Store Connect
+
+See [apps/mobile/README.md](apps/mobile/README.md) for detailed documentation.
 
 ## Development
 
@@ -247,6 +297,12 @@ npm run db:migrate       # Apply migrations
 npm run db:push          # Push schema changes
 npm run db:studio        # Open Drizzle Studio (GUI)
 
+# Mobile App
+npm run mobile:build     # Build mobile app
+npm run mobile:sync      # Sync web assets to native projects
+npm run mobile:ios       # Open iOS project in Xcode
+npm run mobile:android   # Open Android project in Android Studio
+
 # Development Tools
 ./scripts/setup-dev.sh              # Initial setup
 tsx scripts/seed-db.ts              # Seed sample data
@@ -343,9 +399,16 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] App icons for all platforms (72-512px)
 - [x] Mobile E2E tests (Pixel 5, iPhone 12)
 
-### Phase 6: Future Features
+### Phase 6: Mobile App ✅ Complete
+- [x] Capacitor project setup for iOS and Android
+- [x] Native push notification support
+- [x] Deep linking (mindweave:// and universal links)
+- [x] Share intent for receiving content from other apps
+- [x] Safe area and status bar handling
+- [x] Device registration API for push tokens
+
+### Phase 7: Future Features
 - [ ] Firefox browser extension
-- [ ] Mobile app (React Native)
 - [ ] Collaborative knowledge bases
 - [ ] Advanced analytics and insights
 - [ ] Content recommendations
