@@ -5,7 +5,18 @@ import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db } from './db/client';
 import { users, accounts, sessions, verificationTokens } from './db/schema';
 
+// SECURITY: Strict environment check for dev-only features
+// Dev login is ONLY allowed when ALL of these conditions are true:
+// 1. NODE_ENV is explicitly 'development'
+// 2. ALLOW_DEV_LOGIN is explicitly set to 'true'
+// 3. We're not running in a production-like environment
 const isDevelopment = process.env.NODE_ENV === 'development';
+const isProductionBuild = process.env.VERCEL_ENV === 'production' ||
+                          process.env.RAILWAY_ENVIRONMENT === 'production' ||
+                          process.env.GOOGLE_CLOUD_PROJECT !== undefined;
+const allowDevLogin = isDevelopment &&
+                      process.env.ALLOW_DEV_LOGIN === 'true' &&
+                      !isProductionBuild;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // Using JWT sessions for Edge Runtime compatibility
@@ -23,10 +34,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      allowDangerousEmailAccountLinking: true,
+      // SECURITY: Disabled dangerous email linking to prevent account takeover
+      // If a user signs up with Google, they must continue using Google
+      allowDangerousEmailAccountLinking: false,
     }),
     // Development-only test login (bypasses OAuth)
-    ...(isDevelopment
+    // SECURITY: Only enabled when ALLOW_DEV_LOGIN=true AND NODE_ENV=development
+    // This will NEVER be enabled in production builds
+    ...(allowDevLogin
       ? [
           Credentials({
             id: 'dev-login',
@@ -35,8 +50,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email: { label: 'Email', type: 'email', placeholder: 'test@example.com' },
             },
             async authorize(credentials) {
-              // WARNING: This is for development only!
+              // SECURITY WARNING: This is for local development only!
               // It creates/returns a test user without password verification
+              // Protected by allowDevLogin guard above
               if (!credentials?.email) return null;
 
               // Check if user exists
