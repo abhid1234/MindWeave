@@ -5,7 +5,11 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ToastProvider } from '@/components/ui/toast';
 import { OfflineIndicator, InstallPrompt, UpdatePrompt } from '@/components/pwa';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap', // Use font-display: swap for better LCP
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
@@ -27,7 +31,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // Note: maximumScale removed to allow zooming (accessibility requirement)
+  // Users with low vision need to zoom to at least 5x
   viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },

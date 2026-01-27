@@ -10,7 +10,7 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
@@ -104,6 +104,6 @@ export default async function LoginPage() {
           By continuing, you agree to Mindweave&apos;s Terms of Service and Privacy Policy
         </p>
       </div>
-    </div>
+    </main>
   );
 }
