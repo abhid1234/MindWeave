@@ -3,10 +3,12 @@ import { NextRequest } from 'next/server';
 import { POST, DELETE, GET } from './route';
 
 // Mock the auth module
-const mockAuth = vi.fn();
 vi.mock('@/lib/auth', () => ({
-  auth: mockAuth,
+  auth: vi.fn(),
 }));
+
+import { auth } from '@/lib/auth';
+const mockAuth = vi.mocked(auth);
 
 // Mock the db module
 vi.mock('@/lib/db/client', () => ({
