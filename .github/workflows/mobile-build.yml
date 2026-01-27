@@ -1,0 +1,286 @@
+# Mobile App Build Workflow
+# Builds Android APK and iOS IPA for Mindweave mobile app
+
+name: Mobile Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-build.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+  workflow_dispatch:
+    inputs:
+      build_android:
+        description: 'Build Android APK'
+        required: true
+        default: true
+        type: boolean
+      build_ios:
+        description: 'Build iOS IPA'
+        required: true
+        default: true
+        type: boolean
+      release:
+        description: 'Create release build'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+  JAVA_VERSION: '17'
+  XCODE_VERSION: '15.0'
+
+jobs:
+  # Build TypeScript and generate icons
+  prepare:
+    name: Prepare Mobile Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: npm ci
+
+      - name: Build TypeScript
+        working-directory: apps/mobile
+        run: npm run build
+
+      - name: Generate Icons
+        working-directory: apps/mobile
+        run: npm run icons
+
+      - name: Upload prepared assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-assets
+          path: |
+            apps/mobile/dist
+            apps/mobile/android
+            apps/mobile/ios
+          retention-days: 1
+
+  # Build Android APK
+  android:
+    name: Build Android
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || inputs.build_android
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download prepared assets
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-assets
+          path: apps/mobile
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: npm ci
+
+      - name: Sync Capacitor
+        working-directory: apps/mobile
+        run: npx cap sync android
+
+      - name: Build Debug APK
+        if: "!inputs.release"
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug
+
+      - name: Build Release APK
+        if: inputs.release
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Upload Debug APK
+        if: "!inputs.release"
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: apps/mobile/android/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+      - name: Upload Release APK
+        if: inputs.release
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-apk
+          path: apps/mobile/android/app/build/outputs/apk/release/*.apk
+          retention-days: 90
+
+  # Build iOS IPA (requires macOS runner)
+  ios:
+    name: Build iOS
+    needs: prepare
+    runs-on: macos-14
+    if: github.event_name != 'workflow_dispatch' || inputs.build_ios
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download prepared assets
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-assets
+          path: apps/mobile
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: npm ci
+
+      - name: Sync Capacitor
+        working-directory: apps/mobile
+        run: npx cap sync ios
+
+      - name: Install CocoaPods dependencies
+        working-directory: apps/mobile/ios/App
+        run: pod install
+
+      - name: Build iOS (Debug)
+        if: "!inputs.release"
+        working-directory: apps/mobile/ios
+        run: |
+          xcodebuild \
+            -workspace App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            build
+
+      - name: Build iOS (Release)
+        if: inputs.release
+        working-directory: apps/mobile/ios
+        run: |
+          xcodebuild \
+            -workspace App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/App.xcarchive \
+            archive
+        env:
+          CODE_SIGN_IDENTITY: ${{ secrets.IOS_CODE_SIGN_IDENTITY }}
+          DEVELOPMENT_TEAM: ${{ secrets.IOS_DEVELOPMENT_TEAM }}
+
+      - name: Export IPA
+        if: inputs.release
+        working-directory: apps/mobile/ios
+        run: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportPath build/ipa \
+            -exportOptionsPlist exportOptions.plist
+        env:
+          EXPORT_OPTIONS_PLIST: ${{ secrets.IOS_EXPORT_OPTIONS_PLIST }}
+
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: |
+            apps/mobile/ios/build/Build/Products/Debug-iphonesimulator/*.app
+            apps/mobile/ios/build/ipa/*.ipa
+          retention-days: 30
+
+  # Create GitHub Release (manual trigger only)
+  release:
+    name: Create Release
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    if: inputs.release && github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release-apk
+          path: artifacts/android
+
+      - name: Download iOS IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-build
+          path: artifacts/ios
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(cat apps/mobile/package.json | jq -r '.version')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: mobile-v${{ steps.version.outputs.version }}
+          name: Mobile App v${{ steps.version.outputs.version }}
+          draft: true
+          files: |
+            artifacts/android/*.apk
+            artifacts/ios/*.ipa
+          body: |
+            ## Mindweave Mobile App v${{ steps.version.outputs.version }}
+
+            ### Downloads
+            - **Android**: Download the APK and install directly
+            - **iOS**: Requires TestFlight or enterprise distribution
+
+            ### What's New
+            - See [CHANGELOG.md](CHANGELOG.md) for details
+
+            ### Installation
+            #### Android
+            1. Enable "Install from unknown sources" in settings
+            2. Download and open the APK
+            3. Follow installation prompts
+
+            #### iOS
+            - TestFlight: Join the beta program
+            - Enterprise: Install via MDM
