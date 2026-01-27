@@ -4,6 +4,7 @@ import { SearchBar } from '@/components/library/SearchBar';
 import { LibraryContent } from '@/components/library/LibraryContent';
 import { CollectionFilter } from '@/components/library/CollectionFilter';
 import { FavoritesToggle } from '@/components/library/FavoritesToggle';
+import { ContentClusters } from '@/components/library/ContentClusters';
 import type { ContentType } from '@/lib/db/schema';
 
 export default async function LibraryPage({
@@ -42,7 +43,7 @@ export default async function LibraryPage({
   const hasFilters = !!(params.type || params.tag || params.query || params.collectionId || favoritesOnly);
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Library</h1>
@@ -51,27 +52,39 @@ export default async function LibraryPage({
         </p>
       </div>
 
-      {/* Search and Collection Filter */}
-      <div className="mb-6 flex flex-wrap items-center gap-4">
-        <div className="flex-1 min-w-[200px]">
-          <SearchBar />
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          {/* Search and Collection Filter */}
+          <div className="mb-6 flex flex-wrap items-center gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <SearchBar />
+            </div>
+            <FavoritesToggle />
+            <CollectionFilter />
+          </div>
+
+          {/* Filters and Sorting */}
+          <FilterBar allTags={allTags} />
+
+          {/* Content Grid with Bulk Selection and Infinite Scroll */}
+          <LibraryContent
+            items={items}
+            allTags={allTags}
+            hasFilters={hasFilters}
+            initialCursor={nextCursor}
+            initialHasMore={hasMore}
+            filterParams={filterParams}
+          />
         </div>
-        <FavoritesToggle />
-        <CollectionFilter />
+
+        {/* Sidebar with Clusters */}
+        <aside className="lg:w-72 shrink-0">
+          <div className="sticky top-4">
+            <ContentClusters />
+          </div>
+        </aside>
       </div>
-
-      {/* Filters and Sorting */}
-      <FilterBar allTags={allTags} />
-
-      {/* Content Grid with Bulk Selection and Infinite Scroll */}
-      <LibraryContent
-        items={items}
-        allTags={allTags}
-        hasFilters={hasFilters}
-        initialCursor={nextCursor}
-        initialHasMore={hasMore}
-        filterParams={filterParams}
-      />
     </div>
   );
 }

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { semanticSearchAction, type SemanticSearchResult } from '@/app/actions/search';
 import { Input } from '@/components/ui/input';
 import { formatDateUTC } from '@/lib/utils';
+import { SearchSuggestions } from './SearchSuggestions';
 
 type SearchMode = 'keyword' | 'semantic';
 
@@ -26,6 +27,39 @@ export function SemanticSearchForm({
   const [results, setResults] = useState<SemanticSearchResult[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load recent searches from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('mindweave-recent-searches');
+    if (stored) {
+      try {
+        setRecentSearches(JSON.parse(stored).slice(0, 5));
+      } catch {
+        // Ignore parsing errors
+      }
+    }
+  }, []);
+
+  // Save search to recent searches
+  const saveRecentSearch = (searchQuery: string) => {
+    const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
+    setRecentSearches(updated);
+    localStorage.setItem('mindweave-recent-searches', JSON.stringify(updated));
+  };
+
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (inputContainerRef.current && !inputContainerRef.current.contains(event.target as Node)) {
+        setIsFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +68,8 @@ export function SemanticSearchForm({
 
     setError(null);
     setHasSearched(true);
+    setIsFocused(false);
+    saveRecentSearch(query.trim());
 
     if (mode === 'keyword') {
       // For keyword search, update URL and let server handle it
@@ -68,6 +104,38 @@ export function SemanticSearchForm({
     setResults([]);
     setHasSearched(false);
     setError(null);
+  };
+
+  const handleSuggestionSelect = (suggestion: string) => {
+    setQuery(suggestion);
+    setIsFocused(false);
+    // Auto-submit the search
+    saveRecentSearch(suggestion);
+    setHasSearched(true);
+    setError(null);
+
+    if (mode === 'keyword') {
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('q', suggestion);
+        params.set('mode', 'keyword');
+        router.push(`/dashboard/search?${params.toString()}`);
+      });
+    } else {
+      startTransition(async () => {
+        const response = await semanticSearchAction(suggestion, 20);
+        if (!response.success) {
+          setError(response.message || 'Search failed');
+          setResults([]);
+        } else {
+          setResults(response.results);
+          const params = new URLSearchParams();
+          params.set('q', suggestion);
+          params.set('mode', 'semantic');
+          router.replace(`/dashboard/search?${params.toString()}`, { scroll: false });
+        }
+      });
+    }
   };
 
   const formatSimilarity = (similarity: number) => {
@@ -105,18 +173,27 @@ export function SemanticSearchForm({
       {/* Search Form */}
       <form onSubmit={handleSubmit} className="mb-6">
         <div className="flex gap-2">
-          <Input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={
-              mode === 'keyword'
-                ? 'Search by keywords...'
-                : 'Describe what you\'re looking for...'
-            }
-            className="flex-1"
-            autoFocus
-          />
+          <div className="relative flex-1" ref={inputContainerRef}>
+            <Input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              placeholder={
+                mode === 'keyword'
+                  ? 'Search by keywords...'
+                  : 'Describe what you\'re looking for...'
+              }
+              className="w-full"
+              autoFocus
+            />
+            <SearchSuggestions
+              query={query}
+              onSelect={handleSuggestionSelect}
+              isVisible={isFocused && !hasSearched}
+              recentSearches={recentSearches}
+            />
+          </div>
           <button
             type="submit"
             disabled={isPending || !query.trim()}
