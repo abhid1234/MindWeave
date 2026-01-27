@@ -15,9 +15,18 @@ interface RateLimitEntry {
 // For production, use Redis or a similar distributed cache
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
+/**
+ * Reset the rate limit store - FOR TESTING ONLY
+ * This clears all rate limit entries
+ */
+export function resetRateLimitStore(): void {
+  rateLimitStore.clear();
+}
+
 // Clean up expired entries periodically (every 5 minutes)
+// Use unref() to prevent the timer from keeping the process alive
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
+  const cleanupInterval = setInterval(() => {
     const now = Date.now();
     for (const [key, entry] of rateLimitStore.entries()) {
       if (now > entry.resetTime) {
@@ -25,6 +34,10 @@ if (typeof setInterval !== 'undefined') {
       }
     }
   }, 5 * 60 * 1000);
+  // Prevent this timer from keeping Node.js processes (including test workers) alive
+  if (cleanupInterval && typeof cleanupInterval === 'object' && 'unref' in cleanupInterval) {
+    cleanupInterval.unref();
+  }
 }
 
 export interface RateLimitConfig {

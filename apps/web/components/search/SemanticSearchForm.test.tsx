@@ -21,6 +21,11 @@ vi.mock('@/app/actions/search', () => ({
   semanticSearchAction: (...args: any[]) => mockSemanticSearchAction(...args),
 }));
 
+// Mock search-suggestions action to prevent next-auth import chain
+vi.mock('@/app/actions/search-suggestions', () => ({
+  getSearchSuggestionsAction: vi.fn().mockResolvedValue([]),
+}));
+
 describe('SemanticSearchForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -11,6 +11,11 @@ vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn(),
 }));
 
+// Mock search-suggestions action to prevent next-auth import chain
+vi.mock('@/app/actions/search-suggestions', () => ({
+  getSearchSuggestionsAction: vi.fn().mockResolvedValue([]),
+}));
+
 describe('SearchBar', () => {
   const mockPush = vi.fn();
   let mockSearchParams: URLSearchParams;

@@ -7,6 +7,20 @@ vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
 }));
 
+// Mock rate limiter to always allow requests in tests
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(() => ({
+    success: true,
+    remaining: 99,
+    resetTime: Date.now() + 3600000,
+  })),
+  rateLimitHeaders: vi.fn(() => ({})),
+  rateLimitExceededResponse: vi.fn(),
+  RATE_LIMITS: {
+    import: { maxRequests: 5, windowMs: 3600000 },
+  },
+}));
+
 // Mock parsers
 vi.mock('@/lib/import/parsers', () => ({
   parseBookmarks: vi.fn(),

@@ -23,6 +23,26 @@ vi.mock('@/lib/auth', () => ({
 // Mock next/cache
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+  unstable_cache: vi.fn((fn) => fn),
+}));
+
+// Mock @/lib/cache
+vi.mock('@/lib/cache', () => ({
+  createCachedFn: vi.fn((fn) => fn),
+  CacheTags: {
+    ANALYTICS: 'analytics',
+    CONTENT: 'content',
+    COLLECTIONS: 'collections',
+    USER: 'user',
+  },
+  CacheDuration: {
+    SHORT: 30,
+    MEDIUM: 60,
+    LONG: 300,
+    EXTRA_LONG: 600,
+    INFINITE: false,
+  },
 }));
 
 // Mock the database client
@@ -57,6 +77,12 @@ vi.mock('@/lib/db/client', () => ({
 // Mock Claude AI (auto-tagging)
 vi.mock('@/lib/ai/claude', () => ({
   generateTags: vi.fn().mockResolvedValue(['auto-tag-1', 'auto-tag-2']),
+}));
+
+// Mock summarization module (Anthropic SDK doesn't work in test environment)
+vi.mock('@/lib/ai/summarization', () => ({
+  generateSummary: vi.fn().mockResolvedValue(null),
+  regenerateSummary: vi.fn().mockResolvedValue(null),
 }));
 
 // Mock the embeddings module - this is what we want to test
