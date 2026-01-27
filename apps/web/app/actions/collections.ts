@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { collections, contentCollections } from '@/lib/db/schema';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Validation schemas
@@ -100,7 +100,8 @@ export async function getCollectionsAction(): Promise<GetCollectionsResult> {
       return { success: false, collections: [], message: 'Unauthorized' };
     }
 
-    const userCollections = await db
+    // Single query with LEFT JOIN and COUNT to avoid N+1 query problem
+    const collectionsWithCounts = await db
       .select({
         id: collections.id,
         name: collections.name,
@@ -108,25 +109,16 @@ export async function getCollectionsAction(): Promise<GetCollectionsResult> {
         color: collections.color,
         createdAt: collections.createdAt,
         updatedAt: collections.updatedAt,
+        contentCount: sql<number>`cast(count(${contentCollections.contentId}) as int)`,
       })
       .from(collections)
+      .leftJoin(
+        contentCollections,
+        eq(collections.id, contentCollections.collectionId)
+      )
       .where(eq(collections.userId, session.user.id))
+      .groupBy(collections.id)
       .orderBy(collections.name);
-
-    // Get content counts for each collection
-    const collectionsWithCounts = await Promise.all(
-      userCollections.map(async (collection) => {
-        const countResult = await db
-          .select({ contentId: contentCollections.contentId })
-          .from(contentCollections)
-          .where(eq(contentCollections.collectionId, collection.id));
-
-        return {
-          ...collection,
-          contentCount: countResult.length,
-        };
-      })
-    );
 
     return {
       success: true,

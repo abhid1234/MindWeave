@@ -22,8 +22,8 @@ export default async function LibraryPage({
   const params = await searchParams;
   const favoritesOnly = params.favorites === 'true';
 
-  // Fetch content with filters and sorting
-  const { items, allTags } = await getContentAction({
+  // Build filter params for infinite scroll
+  const filterParams = {
     type: params.type,
     tag: params.tag,
     query: params.query,
@@ -31,6 +31,12 @@ export default async function LibraryPage({
     sortOrder: params.sortOrder,
     collectionId: params.collectionId,
     favoritesOnly,
+  };
+
+  // Fetch initial content with filters and sorting
+  const { items, allTags, nextCursor, hasMore } = await getContentAction({
+    ...filterParams,
+    limit: 20,
   });
 
   const hasFilters = !!(params.type || params.tag || params.query || params.collectionId || favoritesOnly);
@@ -57,8 +63,15 @@ export default async function LibraryPage({
       {/* Filters and Sorting */}
       <FilterBar allTags={allTags} />
 
-      {/* Content Grid with Bulk Selection */}
-      <LibraryContent items={items} allTags={allTags} hasFilters={hasFilters} />
+      {/* Content Grid with Bulk Selection and Infinite Scroll */}
+      <LibraryContent
+        items={items}
+        allTags={allTags}
+        hasFilters={hasFilters}
+        initialCursor={nextCursor}
+        initialHasMore={hasMore}
+        filterParams={filterParams}
+      />
     </div>
   );
 }

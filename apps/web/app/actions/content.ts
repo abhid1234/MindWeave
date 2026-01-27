@@ -5,10 +5,13 @@ import { db } from '@/lib/db/client';
 import { content, contentCollections, type ContentType } from '@/lib/db/schema';
 import { createContentSchema, updateContentSchema } from '@/lib/validations';
 import { generateTags } from '@/lib/ai/claude';
+import { generateSummary } from '@/lib/ai/summarization';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { eq, desc, asc, and, or, sql, inArray, type SQL } from 'drizzle-orm';
+import { revalidateTag } from 'next/cache';
+import { CacheTags } from '@/lib/cache';
 
 export type ActionResult = {
   success: boolean;
@@ -54,18 +57,35 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
 
     const validatedData = validationResult.data;
 
-    // Generate auto-tags using Claude AI
+    // Generate auto-tags and summary using Claude AI in parallel
     let autoTags: string[] = [];
+    let summary: string | null = null;
+
     try {
-      autoTags = await generateTags({
+      const aiInput = {
         title: validatedData.title,
         body: validatedData.body,
         url: validatedData.url,
         type: validatedData.type,
-      });
+      };
+
+      // Run both in parallel for better performance
+      const [tagsResult, summaryResult] = await Promise.all([
+        generateTags(aiInput).catch((error) => {
+          console.error('Auto-tagging failed:', error);
+          return [];
+        }),
+        generateSummary(aiInput).catch((error) => {
+          console.error('Summarization failed:', error);
+          return null;
+        }),
+      ]);
+
+      autoTags = tagsResult;
+      summary = summaryResult;
     } catch (error) {
-      // Don't fail content creation if auto-tagging fails
-      console.error('Auto-tagging failed:', error);
+      // Don't fail content creation if AI features fail
+      console.error('AI processing failed:', error);
     }
 
     // Insert into database
@@ -79,6 +99,7 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
         url: validatedData.url || null,
         tags: validatedData.tags,
         autoTags,
+        summary,
         metadata: validatedData.metadata || {},
       })
       .returning({ id: content.id });
@@ -88,9 +109,11 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
       console.error('Failed to generate embedding for content:', newContent.id, error);
     });
 
-    // Revalidate relevant pages
+    // Revalidate relevant pages and cache tags
     revalidatePath('/dashboard/library');
-    
+    revalidateTag(CacheTags.ANALYTICS);
+    revalidateTag(CacheTags.CONTENT);
+
     return {
       success: true,
       message: 'Content saved successfully!',
@@ -127,31 +150,38 @@ export type GetContentParams = {
   sortOrder?: 'asc' | 'desc';
   collectionId?: string;
   favoritesOnly?: boolean;
+  cursor?: string; // ISO date string for cursor-based pagination
+  limit?: number; // Number of items to fetch
+};
+
+export type ContentItem = {
+  id: string;
+  type: ContentType;
+  title: string;
+  body: string | null;
+  url: string | null;
+  tags: string[];
+  autoTags: string[];
+  createdAt: Date;
+  metadata: {
+    fileType?: string;
+    fileSize?: number;
+    filePath?: string;
+    fileName?: string;
+    [key: string]: unknown;
+  } | null;
+  isShared: boolean;
+  shareId: string | null;
+  isFavorite: boolean;
+  summary?: string | null;
 };
 
 export type GetContentResult = {
   success: boolean;
-  items: Array<{
-    id: string;
-    type: ContentType;
-    title: string;
-    body: string | null;
-    url: string | null;
-    tags: string[];
-    autoTags: string[];
-    createdAt: Date;
-    metadata: {
-      fileType?: string;
-      fileSize?: number;
-      filePath?: string;
-      fileName?: string;
-      [key: string]: unknown;
-    } | null;
-    isShared: boolean;
-    shareId: string | null;
-    isFavorite: boolean;
-  }>;
+  items: ContentItem[];
   allTags: string[];
+  nextCursor?: string | null; // ISO date string of last item for pagination
+  hasMore?: boolean;
 };
 
 export type UpdateTagsParams = {
@@ -220,8 +250,9 @@ export async function updateContentTagsAction(
       console.error('Failed to refresh embedding after tag update:', contentId, error);
     });
 
-    // Revalidate relevant pages
+    // Revalidate relevant pages and cache tags
     revalidatePath('/dashboard/library');
+    revalidateTag(CacheTags.ANALYTICS);
     
     return {
       success: true,
@@ -327,18 +358,40 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
       validatedData.body !== undefined && validatedData.body !== currentContent.body;
 
     if (bodyChanged) {
-      // Regenerate auto-tags asynchronously (non-blocking)
+      // Regenerate auto-tags and summary asynchronously (non-blocking)
       (async () => {
         try {
-          const newAutoTags = await generateTags({
+          const aiInput = {
             title: validatedData.title || currentContent.title,
             body: validatedData.body,
             url: validatedData.url || currentContent.url || undefined,
             type: currentContent.type,
-          });
-          await db.update(content).set({ autoTags: newAutoTags }).where(eq(content.id, contentId));
+          };
+
+          const [newAutoTags, newSummary] = await Promise.all([
+            generateTags(aiInput).catch((err) => {
+              console.error('Failed to regenerate auto-tags:', contentId, err);
+              return null;
+            }),
+            generateSummary(aiInput).catch((err) => {
+              console.error('Failed to regenerate summary:', contentId, err);
+              return undefined; // Use undefined to distinguish from "no summary"
+            }),
+          ]);
+
+          const updateData: { autoTags?: string[]; summary?: string | null } = {};
+          if (newAutoTags !== null) {
+            updateData.autoTags = newAutoTags;
+          }
+          if (newSummary !== undefined) {
+            updateData.summary = newSummary;
+          }
+
+          if (Object.keys(updateData).length > 0) {
+            await db.update(content).set(updateData).where(eq(content.id, contentId));
+          }
         } catch (error) {
-          console.error('Failed to regenerate auto-tags:', contentId, error);
+          console.error('Failed to regenerate AI content:', contentId, error);
         }
       })();
 
@@ -348,8 +401,9 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
       });
     }
 
-    // Revalidate relevant pages
+    // Revalidate relevant pages and cache tags
     revalidatePath('/dashboard/library');
+    revalidateTag(CacheTags.ANALYTICS);
     
     return {
       success: true,
@@ -410,9 +464,11 @@ export async function deleteContentAction(contentId: string): Promise<ActionResu
     // Delete the content (embeddings cascade automatically via FK)
     await db.delete(content).where(eq(content.id, contentId));
 
-    // Revalidate relevant pages
+    // Revalidate relevant pages and cache tags
     revalidatePath('/dashboard/library');
-    
+    revalidateTag(CacheTags.ANALYTICS);
+    revalidateTag(CacheTags.CONTENT);
+
     return {
       success: true,
       message: 'Content deleted successfully!',
@@ -448,7 +504,11 @@ export async function getContentAction(
       sortOrder = 'desc',
       collectionId,
       favoritesOnly,
+      cursor,
+      limit = 20, // Default page size
     } = params;
+
+    const pageLimit = Math.min(Math.max(limit, 1), 100); // Clamp between 1 and 100
 
     // Build where conditions
     const conditions: SQL[] = [eq(content.userId, session.user.id)];
@@ -491,6 +551,18 @@ export async function getContentAction(
       conditions.push(eq(content.isFavorite, true));
     }
 
+    // Cursor-based pagination (only for createdAt sorting)
+    if (cursor && sortBy === 'createdAt') {
+      const cursorDate = new Date(cursor);
+      if (!isNaN(cursorDate.getTime())) {
+        if (sortOrder === 'desc') {
+          conditions.push(sql`${content.createdAt} < ${cursorDate}`);
+        } else {
+          conditions.push(sql`${content.createdAt} > ${cursorDate}`);
+        }
+      }
+    }
+
     // Filter by collection if specified
     if (collectionId) {
       const collectionContentIds = await db
@@ -523,7 +595,7 @@ export async function getContentAction(
           ? asc(content.createdAt)
           : desc(content.createdAt);
 
-    // Fetch content with filters and sorting
+    // Fetch content with filters and sorting (fetch one extra to check if there are more)
     const items = await db
       .select({
         id: content.id,
@@ -538,10 +610,20 @@ export async function getContentAction(
         isShared: content.isShared,
         shareId: content.shareId,
         isFavorite: content.isFavorite,
+        summary: content.summary,
       })
       .from(content)
       .where(whereClause)
-      .orderBy(orderByClause);
+      .orderBy(orderByClause)
+      .limit(pageLimit + 1); // Fetch one extra to check hasMore
+
+    // Check if there are more items
+    const hasMore = items.length > pageLimit;
+    const paginatedItems = hasMore ? items.slice(0, pageLimit) : items;
+
+    // Get next cursor from last item
+    const lastItem = paginatedItems[paginatedItems.length - 1];
+    const nextCursor = lastItem && hasMore ? lastItem.createdAt.toISOString() : null;
 
     // Fetch all unique tags for the user using efficient SQL UNNEST
     const tagsResult = await db.execute<{ tag: string }>(sql`
@@ -557,8 +639,10 @@ export async function getContentAction(
 
     return {
       success: true,
-      items,
+      items: paginatedItems,
       allTags,
+      nextCursor,
+      hasMore,
     };
   } catch (error) {
     console.error('Error fetching content:', error);
@@ -566,6 +650,8 @@ export async function getContentAction(
       success: false,
       items: [],
       allTags: [],
+      nextCursor: null,
+      hasMore: false,
     };
   }
 }

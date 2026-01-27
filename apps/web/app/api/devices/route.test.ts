@@ -3,8 +3,9 @@ import { NextRequest } from 'next/server';
 import { POST, DELETE, GET } from './route';
 
 // Mock the auth module
+const mockAuth = vi.fn();
 vi.mock('@/lib/auth', () => ({
-  auth: vi.fn(),
+  auth: mockAuth,
 }));
 
 // Mock the db module
@@ -21,7 +22,6 @@ vi.mock('@/lib/db/client', () => ({
   },
 }));
 
-import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 
 // Helper to create a mock NextRequest
@@ -46,7 +46,7 @@ describe('/api/devices', () => {
 
   describe('POST - Register device', () => {
     it('should return 401 if not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      mockAuth.mockResolvedValue(null);
 
       const request = createMockRequest({
         token: 'test-push-token',
@@ -61,7 +61,7 @@ describe('/api/devices', () => {
     });
 
     it('should return 400 for missing token', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -78,7 +78,7 @@ describe('/api/devices', () => {
     });
 
     it('should return 400 for invalid platform', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -96,7 +96,7 @@ describe('/api/devices', () => {
     });
 
     it('should create a new device registration', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -131,7 +131,7 @@ describe('/api/devices', () => {
     });
 
     it('should update an existing device registration', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -177,7 +177,7 @@ describe('/api/devices', () => {
     });
 
     it('should accept all valid platforms', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -217,7 +217,7 @@ describe('/api/devices', () => {
 
   describe('DELETE - Unregister device', () => {
     it('should return 401 if not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      mockAuth.mockResolvedValue(null);
 
       const request = createMockRequest({ token: 'test-push-token' }, 'DELETE');
 
@@ -229,7 +229,7 @@ describe('/api/devices', () => {
     });
 
     it('should return 400 for missing token', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -244,7 +244,7 @@ describe('/api/devices', () => {
     });
 
     it('should return 404 if device not found', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -267,7 +267,7 @@ describe('/api/devices', () => {
     });
 
     it('should soft delete (deactivate) the device', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -300,7 +300,7 @@ describe('/api/devices', () => {
 
   describe('GET - List devices', () => {
     it('should return 401 if not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      mockAuth.mockResolvedValue(null);
 
       const response = await GET();
       const data = await response.json();
@@ -310,7 +310,7 @@ describe('/api/devices', () => {
     });
 
     it('should return empty array when no devices', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -325,7 +325,7 @@ describe('/api/devices', () => {
     });
 
     it('should return list of active devices', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -345,7 +345,7 @@ describe('/api/devices', () => {
         },
       ];
 
-      vi.mocked(db.query.devices.findMany).mockResolvedValue(mockDevices);
+      vi.mocked(db.query.devices.findMany).mockResolvedValue(mockDevices as never);
 
       const response = await GET();
       const data = await response.json();
@@ -357,7 +357,7 @@ describe('/api/devices', () => {
     });
 
     it('should not include token in response for security', async () => {
-      vi.mocked(auth).mockResolvedValue({
+      mockAuth.mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
       });
@@ -371,7 +371,7 @@ describe('/api/devices', () => {
         },
       ];
 
-      vi.mocked(db.query.devices.findMany).mockResolvedValue(mockDevices);
+      vi.mocked(db.query.devices.findMany).mockResolvedValue(mockDevices as never);
 
       const response = await GET();
       const data = await response.json();
