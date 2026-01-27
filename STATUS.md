@@ -42,9 +42,10 @@
 **Next Step**: All core features complete! Ready for deployment or additional features (Firefox extension, collaborative features, etc.).
 
 **Latest Enhancement**:
+- [x] **Security Audit & Hardening** - Rate limiting, file upload security, auth hardening, security headers, secure share IDs
 - [x] **AI Performance Optimizations** - Database indexes, N+1 query fixes, infinite scroll, response caching
 - [x] **AI-Powered Features** - Auto-summarization, content clustering, key insights extraction, smart search suggestions
-- [x] **E2E Test Coverage** - 22 new E2E tests for AI features (931 total tests)
+- [x] **E2E Test Coverage** - 22 new E2E tests for AI features (946 total tests)
 
 **Previous Enhancements**:
 - [x] **Advanced Analytics** - Analytics dashboard with visualizations and AI insights (901 tests total)
@@ -365,10 +366,69 @@ None - Ready for feature development
   - 909 total tests passing
   - All quality checks passing (types, lint, build)
 
+### Phase 8: Security Hardening ✅ COMPLETE
+- [x] **Rate Limiting**
+  - lib/rate-limit.ts with in-memory store
+  - Configurable limits per endpoint type
+  - Automatic cleanup of expired entries
+  - Applied to upload, import, export, extension APIs
+  - Returns 429 Too Many Requests with Retry-After header
+- [x] **File Upload Security**
+  - Magic bytes verification prevents MIME type spoofing
+  - Validates actual file content matches claimed type
+  - UTF-8 validation for text files
+  - Supports PDF, images, Office docs, plain text
+- [x] **Authentication Hardening**
+  - Multi-environment production detection
+  - Disabled dangerous email account linking
+  - Strict dev login guards (multiple conditions required)
+- [x] **Security Headers**
+  - Content-Security-Policy (CSP) with strict directives
+  - X-Frame-Options: DENY
+  - X-Content-Type-Options: nosniff
+  - X-XSS-Protection: 1; mode=block
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - HSTS in production (max-age=31536000)
+  - Permissions-Policy to disable unused features
+- [x] **Secure Random IDs**
+  - crypto.randomBytes() for share link generation
+  - 96 bits of entropy per ID
+- [x] **Test Coverage**
+  - 15 new tests for rate limiting
+  - 946 total tests passing
+
 ## 🐛 Known Issues
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-27 16:00** - ✅ **SECURITY AUDIT & HARDENING COMPLETE**
+  - Rate Limiting:
+    - Created lib/rate-limit.ts with configurable rate limiting
+    - Applied to all API routes (upload, import, export, extension)
+    - Preset limits: Upload (20/hr), Import (5/hr), Export (10/hr), API (100/min)
+    - Returns 429 with Retry-After headers when exceeded
+    - 15 new unit tests for rate limiting module
+  - File Upload Security:
+    - Added magic bytes verification to prevent MIME type spoofing
+    - Validates actual file content matches claimed extension
+    - Supports PDF, JPEG, PNG, GIF, WebP, DOC, DOCX, TXT, MD
+  - Authentication Hardening:
+    - Added multi-environment production detection guards
+    - Disabled allowDangerousEmailAccountLinking in Google OAuth
+    - Dev login requires NODE_ENV=development AND ALLOW_DEV_LOGIN=true AND not in production environment
+  - Security Headers (next.config.js):
+    - Content-Security-Policy with strict directives
+    - X-Frame-Options: DENY (prevent clickjacking)
+    - X-Content-Type-Options: nosniff (prevent MIME sniffing)
+    - X-XSS-Protection: 1; mode=block
+    - Referrer-Policy: strict-origin-when-cross-origin
+    - HSTS (production only): max-age=31536000; includeSubDomains; preload
+    - Permissions-Policy: disable camera, microphone, geolocation
+  - Secure Share IDs:
+    - Replaced Math.random() with crypto.randomBytes(12)
+    - 96 bits of entropy for unpredictable share links
+  - Total: 946 tests passing (15 new tests)
+  - Commit: 3037b3b
 - **2026-01-27 14:00** - ✅ **E2E TESTS FOR AI FEATURES ADDED**
   - Created apps/web/tests/e2e/ai-features.spec.ts
   - 22 new E2E tests covering:
