@@ -2,6 +2,7 @@
  * Import API Route
  *
  * POST /api/import - Parse an uploaded file and return preview items
+ * SECURITY: Rate limited to prevent abuse
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,17 +22,29 @@ import {
   parseEvernote,
   isEvernoteFile,
 } from '@/lib/import/parsers';
+import {
+  checkRateLimit,
+  rateLimitHeaders,
+  rateLimitExceededResponse,
+  RATE_LIMITS,
+} from '@/lib/rate-limit';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Check rate limit first to prevent DoS
+    const rateLimitResult = checkRateLimit(request, 'import', RATE_LIMITS.import);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     // Auth check
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized. Please log in.' },
-        { status: 401 }
+        { status: 401, headers: rateLimitHeaders(rateLimitResult) }
       );
     }
 
@@ -143,13 +156,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Return parse result
-    return NextResponse.json({
-      success: result.success,
-      items: result.items,
-      errors: result.errors,
-      warnings: result.warnings,
-      stats: result.stats,
-    });
+    return NextResponse.json(
+      {
+        success: result.success,
+        items: result.items,
+        errors: result.errors,
+        warnings: result.warnings,
+        stats: result.stats,
+      },
+      { headers: rateLimitHeaders(rateLimitResult) }
+    );
   } catch (error) {
     console.error('Import API error:', error);
     return NextResponse.json(

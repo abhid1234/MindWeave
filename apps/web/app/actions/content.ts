@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { eq, desc, asc, and, or, sql, inArray, type SQL } from 'drizzle-orm';
 import { revalidateTag } from 'next/cache';
 import { CacheTags } from '@/lib/cache';
+import { randomBytes } from 'crypto';
 
 export type ActionResult = {
   success: boolean;
@@ -656,14 +657,12 @@ export async function getContentAction(
   }
 }
 
-// Generate a unique share ID
+// Generate a cryptographically secure share ID
+// SECURITY: Uses crypto.randomBytes instead of Math.random for unpredictable IDs
 function generateShareId(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 16; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  // Generate 12 random bytes (96 bits of entropy) and encode as base64url
+  // This gives us a 16-character URL-safe string
+  return randomBytes(12).toString('base64url');
 }
 
 export type ShareContentResult = {

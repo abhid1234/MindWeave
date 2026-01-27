@@ -3,16 +3,28 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
+import {
+  checkRateLimit,
+  rateLimitHeaders,
+  rateLimitExceededResponse,
+  RATE_LIMITS,
+} from '@/lib/rate-limit';
 
 type ExportFormat = 'json' | 'markdown' | 'csv';
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Check rate limit first to prevent DoS
+    const rateLimitResult = checkRateLimit(request, 'export', RATE_LIMITS.export);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
-        { status: 401 }
+        { status: 401, headers: rateLimitHeaders(rateLimitResult) }
       );
     }
 
@@ -80,6 +92,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,
+        ...rateLimitHeaders(rateLimitResult),
       },
     });
   } catch (error) {

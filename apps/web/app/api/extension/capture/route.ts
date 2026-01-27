@@ -6,6 +6,12 @@ import { generateTags } from '@/lib/ai/claude';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import {
+  checkRateLimit,
+  rateLimitHeaders,
+  rateLimitExceededResponse,
+  RATE_LIMITS,
+} from '@/lib/rate-limit';
 
 // Schema for extension capture (slightly modified from createContentSchema)
 const extensionCaptureSchema = z.object({
@@ -19,9 +25,22 @@ const extensionCaptureSchema = z.object({
 /**
  * POST /api/extension/capture
  * Save content from browser extension
+ * SECURITY: Rate limited to prevent abuse
  */
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Check rate limit first to prevent DoS
+    const rateLimitResult = checkRateLimit(request, 'extension-capture', RATE_LIMITS.api);
+    if (!rateLimitResult.success) {
+      const response = rateLimitExceededResponse(rateLimitResult);
+      // Add CORS headers to rate limit response
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders()).forEach(([key, value]) => {
+        headers.set(key, value);
+      });
+      return new NextResponse(response.body, { status: 429, headers });
+    }
+
     const session = await auth();
 
     if (!session?.user?.id) {
@@ -29,7 +48,7 @@ export async function POST(request: NextRequest) {
         { success: false, message: 'Unauthorized' },
         {
           status: 401,
-          headers: getCorsHeaders(),
+          headers: { ...getCorsHeaders(), ...rateLimitHeaders(rateLimitResult) },
         }
       );
     }
@@ -113,7 +132,7 @@ export async function POST(request: NextRequest) {
       },
       {
         status: 201,
-        headers: getCorsHeaders(),
+        headers: { ...getCorsHeaders(), ...rateLimitHeaders(rateLimitResult) },
       }
     );
   } catch (error) {
