@@ -8,6 +8,8 @@ import {
   Calendar,
   Tag,
   Zap,
+  Link as LinkIcon,
+  PieChart,
   type LucideIcon,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +23,8 @@ const ICON_MAP: Record<KnowledgeInsight['icon'], LucideIcon> = {
   calendar: Calendar,
   tag: Tag,
   zap: Zap,
+  link: LinkIcon,
+  'pie-chart': PieChart,
 };
 
 const TYPE_STYLES: Record<KnowledgeInsight['type'], { bg: string; border: string; icon: string }> = {
@@ -38,6 +42,16 @@ const TYPE_STYLES: Record<KnowledgeInsight['type'], { bg: string; border: string
     bg: 'bg-green-50 dark:bg-green-950',
     border: 'border-green-200 dark:border-green-800',
     icon: 'text-green-600 dark:text-green-400',
+  },
+  connection: {
+    bg: 'bg-purple-50 dark:bg-purple-950',
+    border: 'border-purple-200 dark:border-purple-800',
+    icon: 'text-purple-600 dark:text-purple-400',
+  },
+  gap: {
+    bg: 'bg-orange-50 dark:bg-orange-950',
+    border: 'border-orange-200 dark:border-orange-800',
+    icon: 'text-orange-600 dark:text-orange-400',
   },
 };
 

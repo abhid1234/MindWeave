@@ -4,7 +4,8 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content, collections, contentCollections } from '@/lib/db/schema';
 import { eq, sql, gte, and, count } from 'drizzle-orm';
-import Anthropic from '@anthropic-ai/sdk';
+import { revalidateTag } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 import type {
   OverviewStats,
   ContentGrowthData,
@@ -14,26 +15,24 @@ import type {
   GrowthPeriod,
   AnalyticsActionResult,
 } from '@/types/analytics';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+import { CacheDuration, CacheTags } from '@/lib/cache';
+import { extractInsights } from '@/lib/ai/insights';
 
 /**
- * Get overview stats for the analytics dashboard
+ * Invalidate analytics cache - call this when content changes
  */
-export async function getOverviewStatsAction(): Promise<AnalyticsActionResult<OverviewStats>> {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return { success: false, message: 'Unauthorized' };
-    }
+export async function invalidateAnalyticsCache() {
+  revalidateTag(CacheTags.ANALYTICS);
+}
 
+// Cached internal function for overview stats
+const getCachedOverviewStats = unstable_cache(
+  async (userId: string): Promise<OverviewStats> => {
     // Get total items count
     const [totalResult] = await db
       .select({ count: count() })
       .from(content)
-      .where(eq(content.userId, session.user.id));
+      .where(eq(content.userId, userId));
 
     // Get items created this month
     const startOfMonth = new Date();
@@ -45,7 +44,7 @@ export async function getOverviewStatsAction(): Promise<AnalyticsActionResult<Ov
       .from(content)
       .where(
         and(
-          eq(content.userId, session.user.id),
+          eq(content.userId, userId),
           gte(content.createdAt, startOfMonth)
         )
       );
@@ -54,7 +53,7 @@ export async function getOverviewStatsAction(): Promise<AnalyticsActionResult<Ov
     const [collectionsResult] = await db
       .select({ count: count() })
       .from(collections)
-      .where(eq(collections.userId, session.user.id));
+      .where(eq(collections.userId, userId));
 
     // Get unique tags count using subquery
     const tagsResult = await db.execute<{ tag_count: string }>(sql`
@@ -62,7 +61,7 @@ export async function getOverviewStatsAction(): Promise<AnalyticsActionResult<Ov
       FROM (
         SELECT UNNEST(tags || auto_tags) as tag
         FROM ${content}
-        WHERE user_id = ${session.user.id}
+        WHERE user_id = ${userId}
       ) as all_tags
       WHERE tag IS NOT NULL AND tag != ''
     `);
@@ -71,14 +70,29 @@ export async function getOverviewStatsAction(): Promise<AnalyticsActionResult<Ov
     const uniqueTagCount = tagCountRow ? parseInt(tagCountRow.tag_count, 10) : 0;
 
     return {
-      success: true,
-      data: {
-        totalItems: totalResult.count,
-        itemsThisMonth: thisMonthResult.count,
-        totalCollections: collectionsResult.count,
-        totalTags: uniqueTagCount,
-      },
+      totalItems: totalResult.count,
+      itemsThisMonth: thisMonthResult.count,
+      totalCollections: collectionsResult.count,
+      totalTags: uniqueTagCount,
     };
+  },
+  ['analytics', 'overview'],
+  { revalidate: CacheDuration.MEDIUM, tags: [CacheTags.ANALYTICS] }
+);
+
+/**
+ * Get overview stats for the analytics dashboard
+ */
+export async function getOverviewStatsAction(): Promise<AnalyticsActionResult<OverviewStats>> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const data = await getCachedOverviewStats(session.user.id);
+
+    return { success: true, data };
   } catch (error) {
     console.error('Error getting overview stats:', error);
     return { success: false, message: 'Failed to fetch overview stats' };
@@ -225,25 +239,16 @@ export async function getContentGrowthAction(
   }
 }
 
-/**
- * Get tag distribution data for pie charts
- */
-export async function getTagDistributionAction(): Promise<
-  AnalyticsActionResult<TagDistributionData[]>
-> {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return { success: false, message: 'Unauthorized' };
-    }
-
+// Cached internal function for tag distribution
+const getCachedTagDistribution = unstable_cache(
+  async (userId: string): Promise<TagDistributionData[]> => {
     // Get tag counts using SQL
     const result = await db.execute<{ tag: string; count: string }>(sql`
       SELECT tag, COUNT(*) as count
       FROM (
         SELECT UNNEST(tags || auto_tags) as tag
         FROM ${content}
-        WHERE user_id = ${session.user.id}
+        WHERE user_id = ${userId}
       ) as all_tags
       WHERE tag IS NOT NULL AND tag != ''
       GROUP BY tag
@@ -256,11 +261,29 @@ export async function getTagDistributionAction(): Promise<
     // Calculate total for percentages
     const total = rows.reduce((sum, row) => sum + parseInt(row.count, 10), 0);
 
-    const data: TagDistributionData[] = rows.map((row) => ({
+    return rows.map((row) => ({
       tag: row.tag,
       count: parseInt(row.count, 10),
       percentage: total > 0 ? Math.round((parseInt(row.count, 10) / total) * 100) : 0,
     }));
+  },
+  ['analytics', 'tags'],
+  { revalidate: CacheDuration.LONG, tags: [CacheTags.ANALYTICS] }
+);
+
+/**
+ * Get tag distribution data for pie charts
+ */
+export async function getTagDistributionAction(): Promise<
+  AnalyticsActionResult<TagDistributionData[]>
+> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const data = await getCachedTagDistribution(session.user.id);
 
     return { success: true, data };
   } catch (error) {
@@ -268,6 +291,32 @@ export async function getTagDistributionAction(): Promise<
     return { success: false, message: 'Failed to fetch tag distribution' };
   }
 }
+
+// Cached internal function for collection usage (with N+1 fix using JOIN)
+const getCachedCollectionUsage = unstable_cache(
+  async (userId: string): Promise<CollectionUsageData[]> => {
+    // Single query with LEFT JOIN and COUNT to avoid N+1 problem
+    const result = await db
+      .select({
+        id: collections.id,
+        name: collections.name,
+        color: collections.color,
+        itemCount: sql<number>`cast(count(${contentCollections.contentId}) as int)`,
+      })
+      .from(collections)
+      .leftJoin(
+        contentCollections,
+        eq(collections.id, contentCollections.collectionId)
+      )
+      .where(eq(collections.userId, userId))
+      .groupBy(collections.id)
+      .orderBy(sql`count(${contentCollections.contentId}) DESC`);
+
+    return result;
+  },
+  ['analytics', 'collections'],
+  { revalidate: CacheDuration.LONG, tags: [CacheTags.ANALYTICS] }
+);
 
 /**
  * Get collection usage data for bar charts
@@ -281,36 +330,7 @@ export async function getCollectionUsageAction(): Promise<
       return { success: false, message: 'Unauthorized' };
     }
 
-    // Get all collections for the user
-    const userCollections = await db
-      .select({
-        id: collections.id,
-        name: collections.name,
-        color: collections.color,
-      })
-      .from(collections)
-      .where(eq(collections.userId, session.user.id))
-      .orderBy(collections.name);
-
-    // Get content counts for each collection
-    const data: CollectionUsageData[] = await Promise.all(
-      userCollections.map(async (collection) => {
-        const [countResult] = await db
-          .select({ count: count() })
-          .from(contentCollections)
-          .where(eq(contentCollections.collectionId, collection.id));
-
-        return {
-          id: collection.id,
-          name: collection.name,
-          color: collection.color,
-          itemCount: countResult.count,
-        };
-      })
-    );
-
-    // Sort by item count descending
-    data.sort((a, b) => b.itemCount - a.itemCount);
+    const data = await getCachedCollectionUsage(session.user.id);
 
     return { success: true, data };
   } catch (error) {
@@ -321,6 +341,7 @@ export async function getCollectionUsageAction(): Promise<
 
 /**
  * Get AI-generated knowledge insights
+ * Combines basic statistics insights with advanced AI analysis
  */
 export async function getKnowledgeInsightsAction(): Promise<
   AnalyticsActionResult<KnowledgeInsight[]>
@@ -331,16 +352,16 @@ export async function getKnowledgeInsightsAction(): Promise<
       return { success: false, message: 'Unauthorized' };
     }
 
-    // Gather data for insights
-    const [overviewResult, tagResult, growthResult] = await Promise.all([
+    // Gather basic stats and advanced insights in parallel
+    const [overviewResult, tagResult, advancedInsights] = await Promise.all([
       getOverviewStatsAction(),
       getTagDistributionAction(),
-      getContentGrowthAction('month'),
+      extractInsights(session.user.id),
     ]);
 
     const insights: KnowledgeInsight[] = [];
 
-    // Generate insights based on data
+    // Generate basic insights from stats
     if (overviewResult.success && overviewResult.data) {
       const stats = overviewResult.data;
 
@@ -361,13 +382,14 @@ export async function getKnowledgeInsightsAction(): Promise<
         });
       }
 
-      // Monthly activity insight
-      if (stats.itemsThisMonth > 0) {
+      // Add a suggestion if user has no collections
+      if (stats.totalCollections === 0 && stats.totalItems >= 5) {
         insights.push({
-          type: 'pattern',
-          title: 'Active This Month',
-          description: `You've added ${stats.itemsThisMonth} item${stats.itemsThisMonth !== 1 ? 's' : ''} this month. Great progress!`,
-          icon: 'calendar',
+          type: 'suggestion',
+          title: 'Organize with Collections',
+          description:
+            'Create collections to group related items together and find them faster.',
+          icon: 'lightbulb',
         });
       }
     }
@@ -383,60 +405,16 @@ export async function getKnowledgeInsightsAction(): Promise<
       });
     }
 
-    // Growth pattern insight
-    if (growthResult.success && growthResult.data && growthResult.data.length >= 7) {
-      const recentData = growthResult.data.slice(-7);
-      const totalRecent = recentData.reduce((sum, d) => sum + d.total, 0);
-      const previousData = growthResult.data.slice(-14, -7);
-      const totalPrevious = previousData.reduce((sum, d) => sum + d.total, 0);
-
-      if (totalRecent > totalPrevious) {
-        insights.push({
-          type: 'pattern',
-          title: 'Momentum Building',
-          description: 'Your activity is increasing! You added more content this week than last week.',
-          icon: 'trending-up',
-        });
-      }
-    }
-
-    // Generate AI insight if we have enough content
-    if (
-      process.env.ANTHROPIC_API_KEY &&
-      overviewResult.success &&
-      overviewResult.data &&
-      overviewResult.data.totalItems >= 10 &&
-      tagResult.success &&
-      tagResult.data &&
-      tagResult.data.length >= 3
-    ) {
-      try {
-        const topTags = tagResult.data.slice(0, 5).map((t) => t.tag);
-        const aiInsight = await generateAIInsight(
-          overviewResult.data.totalItems,
-          topTags
-        );
-        if (aiInsight) {
-          insights.push(aiInsight);
-        }
-      } catch {
-        // AI insight is optional, don't fail if it errors
-      }
-    }
-
-    // Add a suggestion if user has no collections
-    if (
-      overviewResult.success &&
-      overviewResult.data &&
-      overviewResult.data.totalCollections === 0 &&
-      overviewResult.data.totalItems >= 5
-    ) {
+    // Add advanced AI-powered insights
+    for (const insight of advancedInsights) {
+      // Convert advanced insight format to KnowledgeInsight
       insights.push({
-        type: 'suggestion',
-        title: 'Organize with Collections',
-        description:
-          'Create collections to group related items together and find them faster.',
-        icon: 'lightbulb',
+        type: insight.type,
+        title: insight.title,
+        description: insight.description,
+        icon: insight.icon as KnowledgeInsight['icon'],
+        relatedContentIds: insight.relatedContentIds,
+        confidence: insight.confidence,
       });
     }
 
@@ -451,46 +429,11 @@ export async function getKnowledgeInsightsAction(): Promise<
       });
     }
 
-    return { success: true, data: insights.slice(0, 5) }; // Limit to 5 insights
+    // Sort by confidence (if available) and limit to 5
+    insights.sort((a, b) => (b.confidence ?? 0.5) - (a.confidence ?? 0.5));
+    return { success: true, data: insights.slice(0, 5) };
   } catch (error) {
     console.error('Error getting knowledge insights:', error);
     return { success: false, message: 'Failed to generate insights' };
-  }
-}
-
-/**
- * Generate an AI-powered insight using Claude
- */
-async function generateAIInsight(
-  totalItems: number,
-  topTags: string[]
-): Promise<KnowledgeInsight | null> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return null;
-  }
-
-  try {
-    const prompt = `Based on a user's knowledge base with ${totalItems} items and top topics: ${topTags.join(', ')}, suggest one brief, actionable insight about their learning patterns or a way to get more value from their knowledge base. Keep it to 1-2 sentences max. Be encouraging and specific.`;
-
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: 100,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const textContent = message.content[0];
-    if (textContent.type === 'text' && textContent.text.trim()) {
-      return {
-        type: 'suggestion',
-        title: 'AI Insight',
-        description: textContent.text.trim(),
-        icon: 'lightbulb',
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error generating AI insight:', error);
-    return null;
   }
 }

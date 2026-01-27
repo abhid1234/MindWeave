@@ -99,6 +99,7 @@ export const content = pgTable(
     isShared: boolean('is_shared').notNull().default(false),
     shareId: varchar('share_id', { length: 32 }).unique(),
     isFavorite: boolean('is_favorite').notNull().default(false),
+    summary: varchar('summary', { length: 500 }), // AI-generated summary
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -107,6 +108,10 @@ export const content = pgTable(
     typeIdx: index('content_type_idx').on(table.type),
     createdAtIdx: index('content_created_at_idx').on(table.createdAt),
     shareIdIdx: index('content_share_id_idx').on(table.shareId),
+    // Composite indexes for common query patterns
+    userCreatedAtIdx: index('content_user_created_at_idx').on(table.userId, table.createdAt),
+    userTypeIdx: index('content_user_type_idx').on(table.userId, table.type),
+    userFavoriteIdx: index('content_user_favorite_idx').on(table.userId, table.isFavorite),
   })
 );
 

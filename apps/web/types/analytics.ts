@@ -46,10 +46,12 @@ export interface CollectionUsageData {
  * AI-generated knowledge insight
  */
 export interface KnowledgeInsight {
-  type: 'pattern' | 'suggestion' | 'achievement';
+  type: 'pattern' | 'suggestion' | 'achievement' | 'connection' | 'gap';
   title: string;
   description: string;
-  icon: 'trending-up' | 'lightbulb' | 'trophy' | 'calendar' | 'tag' | 'zap';
+  icon: 'trending-up' | 'lightbulb' | 'trophy' | 'calendar' | 'tag' | 'zap' | 'link' | 'pie-chart';
+  relatedContentIds?: string[];
+  confidence?: number;
 }
 
 /**
