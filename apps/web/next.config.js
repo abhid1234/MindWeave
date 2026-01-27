@@ -13,6 +13,34 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    // Optimize package imports for better tree-shaking
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      'recharts',
+    ],
+  },
+  // Compiler optimizations
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
+  // Reduce bundle size by excluding server-only modules from client
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't bundle server-only packages on client
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      };
+    }
+    return config;
   },
   images: {
     remotePatterns: [
