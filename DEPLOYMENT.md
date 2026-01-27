@@ -421,10 +421,150 @@ gcloud run domain-mappings create \
 5. **Use VPC connectors** for private Cloud SQL access
 6. **Implement rate limiting** in application code
 
+## Security Configuration
+
+Mindweave includes comprehensive security features that are automatically configured.
+
+### Security Headers
+
+The application automatically sets these security headers via `next.config.js`:
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| `X-Frame-Options` | `DENY` | Prevent clickjacking |
+| `X-Content-Type-Options` | `nosniff` | Prevent MIME sniffing |
+| `X-XSS-Protection` | `1; mode=block` | XSS filter |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Control referrer info |
+| `Content-Security-Policy` | Strict directives | Restrict resource loading |
+| `Permissions-Policy` | Disabled features | Block unused APIs |
+
+**Production-only**:
+| Header | Value |
+|--------|-------|
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` |
+
+### Content Security Policy
+
+The CSP restricts resource loading:
+
+```
+default-src 'self';
+script-src 'self' 'unsafe-inline' 'unsafe-eval';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data: https: blob:;
+font-src 'self' data:;
+connect-src 'self' https://api.anthropic.com https://generativelanguage.googleapis.com;
+frame-ancestors 'none';
+base-uri 'self';
+form-action 'self';
+```
+
+### Rate Limiting
+
+Built-in rate limiting protects against abuse:
+
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| General API | 100 requests | 1 minute |
+| File Upload | 20 requests | 1 hour |
+| Import | 5 requests | 1 hour |
+| Export | 10 requests | 1 hour |
+| Authentication | 10 attempts | 15 minutes |
+
+Rate limits return `429 Too Many Requests` with `Retry-After` header.
+
+### File Upload Security
+
+- **Magic bytes verification**: Validates actual file content matches claimed type
+- **Extension whitelist**: Only allowed file types accepted
+- **Size limits**: 10MB max for uploads, 100MB max for imports
+- **User isolation**: Files stored in user-specific directories
+
+### Authentication Security
+
+- **JWT sessions**: Stateless, Edge Runtime compatible
+- **Disabled dangerous email linking**: Prevents account takeover
+- **Production guards**: Dev login disabled in production environments
+- **Secure cookies**: HttpOnly, Secure, SameSite=Lax
+
+### Database Security
+
+- **Parameterized queries**: Drizzle ORM prevents SQL injection
+- **User isolation**: All queries filter by authenticated user ID
+- **Ownership verification**: Actions verify user owns resources
+- **Cascading deletes**: Clean up related data properly
+
+### Recommended Cloud Armor Rules
+
+If using Cloud Armor, consider these rules:
+
+```bash
+# Create security policy
+gcloud compute security-policies create mindweave-policy \
+  --description="Mindweave security policy"
+
+# Rate limit rule
+gcloud compute security-policies rules create 1000 \
+  --security-policy=mindweave-policy \
+  --expression="true" \
+  --action=rate-based-ban \
+  --rate-limit-threshold-count=1000 \
+  --rate-limit-threshold-interval-sec=60 \
+  --ban-duration-sec=600
+
+# Block common attack patterns
+gcloud compute security-policies rules create 2000 \
+  --security-policy=mindweave-policy \
+  --expression="evaluatePreconfiguredExpr('xss-stable')" \
+  --action=deny-403
+
+gcloud compute security-policies rules create 2001 \
+  --security-policy=mindweave-policy \
+  --expression="evaluatePreconfiguredExpr('sqli-stable')" \
+  --action=deny-403
+```
+
+### Environment Variables Reference
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `AUTH_SECRET` | Yes | JWT signing secret (32+ chars) |
+| `AUTH_URL` | Yes | Application URL for OAuth callbacks |
+| `ANTHROPIC_API_KEY` | No | Claude API for AI features |
+| `GOOGLE_AI_API_KEY` | No | Gemini API for embeddings |
+| `AUTH_GOOGLE_ID` | No | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | No | Google OAuth client secret |
+| `NEXT_PUBLIC_APP_URL` | Yes | Public app URL |
+| `NODE_ENV` | Yes | `production` for deployments |
+| `ALLOW_DEV_LOGIN` | No | `true` only in development |
+
+### Security Checklist for Production
+
+- [ ] All secrets stored in Secret Manager (not in code/env files)
+- [ ] `AUTH_SECRET` is unique, 32+ characters
+- [ ] `ALLOW_DEV_LOGIN` is NOT set or set to `false`
+- [ ] `NODE_ENV=production` is set
+- [ ] OAuth redirect URLs configured correctly
+- [ ] Database user has minimal required permissions
+- [ ] Cloud SQL uses private IP (via VPC connector)
+- [ ] HTTPS enforced (Cloud Run does this automatically)
+- [ ] Audit logging enabled
+- [ ] Monitoring alerts configured
+
 ## Additional Resources
+
+### Mindweave Documentation
+
+- [API Documentation](API.md) - Complete API reference
+- [Project Status](STATUS.md) - Current features and progress
+- [Development Guide](CLAUDE.md) - Local development setup
+
+### Google Cloud Documentation
 
 - [Cloud Run Documentation](https://cloud.google.com/run/docs)
 - [Cloud SQL for PostgreSQL](https://cloud.google.com/sql/docs/postgres)
 - [Cloud Build Documentation](https://cloud.google.com/build/docs)
 - [Secret Manager Guide](https://cloud.google.com/secret-manager/docs)
 - [Next.js on Cloud Run](https://cloud.google.com/run/docs/quickstarts/build-and-deploy/deploy-nodejs-service)
+- [Cloud Armor WAF](https://cloud.google.com/armor/docs)

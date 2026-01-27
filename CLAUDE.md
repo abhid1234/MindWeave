@@ -260,9 +260,10 @@ NODE_ENV=development
 ## Documentation
 
 - **[STATUS.md](STATUS.md)** - Current feature development status and progress
+- **[API.md](API.md)** - Complete API reference (endpoints, server actions, rate limits)
 - **[TESTING.md](TESTING.md)** - Comprehensive testing strategy and best practices
 - **[WORKFLOW_CHECKLIST.md](WORKFLOW_CHECKLIST.md)** - Step-by-step checklist for each feature
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - GCP deployment guide
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - GCP deployment guide with security configuration
 
 ## Key Features
 
