@@ -42,8 +42,9 @@
 **Next Step**: All core features complete! Ready for deployment or additional features (Firefox extension, collaborative features, etc.).
 
 **Latest Enhancement**:
-- [x] **AI Performance Optimizations** - Database indexes, N+1 query fixes, infinite scroll, response caching (909 tests total)
+- [x] **AI Performance Optimizations** - Database indexes, N+1 query fixes, infinite scroll, response caching
 - [x] **AI-Powered Features** - Auto-summarization, content clustering, key insights extraction, smart search suggestions
+- [x] **E2E Test Coverage** - 22 new E2E tests for AI features (931 total tests)
 
 **Previous Enhancements**:
 - [x] **Advanced Analytics** - Analytics dashboard with visualizations and AI insights (901 tests total)
@@ -368,6 +369,18 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-27 14:00** - ✅ **E2E TESTS FOR AI FEATURES ADDED**
+  - Created apps/web/tests/e2e/ai-features.spec.ts
+  - 22 new E2E tests covering:
+    - Analytics page (insights card, overview stats, charts)
+    - Dashboard recommendations widget
+    - Search suggestions and mode toggle
+    - Library infinite scroll and content loading
+    - Navigation to AI feature pages
+    - Content card with tags (manual and auto)
+  - All tests pass with Chromium browser
+  - Fixed database schema (added summary column via drizzle-kit push)
+  - Commit: 4c21aec
 - **2026-01-27 12:00** - ✅ **AI ENHANCEMENTS & PERFORMANCE OPTIMIZATIONS COMPLETE**
   - Database Performance:
     - Added composite indexes for content queries (user_id + created_at, user_id + type)
