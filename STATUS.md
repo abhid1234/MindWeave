@@ -42,6 +42,7 @@
 **Next Step**: All core features complete! Ready for deployment or additional features (Firefox extension, collaborative features, etc.).
 
 **Latest Enhancement**:
+- [x] **E2E Test Expansion** - Added 29 new Playwright E2E tests for semantic search, knowledge Q&A, search suggestions, and analytics (51 total in 4 files)
 - [x] **Test Suite Fixes** - Fixed 15 pre-existing test failures (rate limiting mocks, Anthropic SDK, next-auth import chains). 955 tests passing, 0 failures
 - [x] **Lighthouse Performance Audit** - Accessibility 100, Performance optimizations, font/bundle improvements
 - [x] **AI Features UI Integration** - SearchSuggestions in search form, ContentClusters in library sidebar
@@ -431,6 +432,15 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-27 22:00** - ✅ **E2E TEST EXPANSION COMPLETE**
+  - Added 29 new Playwright E2E tests across 4 files:
+    - `semantic-search.spec.ts` (8 tests) - mode switching, placeholder updates, search submission, no-results, type badges, URL persistence
+    - `knowledge-qa.spec.ts` (7 tests) - page layout, tips section, submit button states, sidebar navigation, chat interface, submission handling
+    - `search-suggestions.spec.ts` (6 tests) - dropdown appearance, type labels, suggestion selection, blur behavior, empty results, library search bar
+    - `ai-features.spec.ts` (8 new tests) - tag distribution details, content growth chart switching, overview stats counts, content clusters sidebar
+  - Fixed environment issue: added ALLOW_DEV_LOGIN=true for Dev Login E2E auth flow
+  - All 51 tests passing (chromium)
+  - Commit: c2eeb6b
 - **2026-01-27 21:00** - ✅ **AI FEATURES UI INTEGRATION COMPLETE**
   - Integrated SearchSuggestions into SemanticSearchForm:
     - Shows AI-powered suggestions as users type
