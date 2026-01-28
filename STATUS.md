@@ -1,7 +1,7 @@
 # Mindweave Project Status
 
 **Last Updated**: 2026-01-28
-**Current Phase**: Phase 9 - Polish & Performance
+**Current Phase**: Phase 10 - Onboarding & Public Profiles
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
@@ -41,7 +41,11 @@
 
 **Next Step**: All core features complete! Ready for deployment or additional features (Firefox extension, collaborative features, etc.).
 
+- [x] **Onboarding Flow** - 3-step onboarding for new users (Welcome, Create Content, Explore Features)
+- [x] **Public User Profiles** - Username, bio, public profile pages with shareable collections
+
 **Latest Enhancement**:
+- [x] **Onboarding Flow + Public Profiles** - 3-step onboarding, public user profiles with username/bio, shareable collections, SEO metadata. 24 new tests (1174 total). Migration sets existing users as onboarding-complete.
 - [x] **Full Test Suite Verification** - 1,257 tests passing with 0 failures (955 unit/integration via Vitest + 302 E2E via Playwright). Zero regressions confirmed across all test suites.
 - [x] **E2E Test Fixes** - Fixed 26 pre-existing E2E failures: updated manual-tagging card selectors from `.rounded-lg.border` to `article` (22 fixes), updated search locators to `getByRole('heading')` to avoid SearchSuggestions strict mode violations (4 fixes)
 - [x] **E2E Test Expansion** - Added 29 new Playwright E2E tests for semantic search, knowledge Q&A, search suggestions, and analytics (51 total in 4 files)
@@ -430,10 +434,48 @@ None - Ready for feature development
   - App icon generation script (all sizes for both platforms)
   - Artifact upload for build outputs
 
+### Phase 10: Onboarding & Public Profiles ✅ COMPLETE
+- [x] **Onboarding Flow** - 3-step guided onboarding for new users
+  - Step 1: Welcome overview of Mindweave features
+  - Step 2: Create first content (inline note/link capture form)
+  - Step 3: Explore features (Search, Ask AI, Library, Analytics cards)
+  - Progress bar, Next/Back/Skip buttons
+  - Dashboard redirects to /onboarding if not completed
+  - Server actions: get/update/complete/skip onboarding
+  - Existing users auto-marked as onboarding-complete via migration
+- [x] **Public User Profiles** - Shareable profile pages
+  - Username (unique, 3-50 chars, `^[a-z0-9_-]+$`)
+  - Bio (up to 500 chars)
+  - Profile visibility toggle (private by default)
+  - Public profile page at /profile/[username] with SEO metadata
+  - Public collection view at /profile/[username]/[collectionId]
+  - Collection public toggle (private by default)
+  - Only shared content visible in public collections
+  - Profile settings page at /dashboard/profile
+  - "Profile" nav item added to sidebar
+- [x] **Database Migration**
+  - Users: onboardingCompleted, onboardingStep, onboardingSkippedAt, onboardingCompletedAt, username (unique), bio, isProfilePublic
+  - Collections: isPublic
+- [x] **Test Coverage**: 24 new tests (10 onboarding + 14 profile), 1174 total passing
+- [x] All quality checks passing (tests, types, lint, build)
+- [x] Commit: 467e5a2
+
 ## 🐛 Known Issues
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-28 18:00** - ✅ **ONBOARDING FLOW + PUBLIC USER PROFILES COMPLETE**
+  - Implemented 3-step onboarding flow (Welcome, Create Content, Explore Features)
+  - New users redirected to /onboarding from dashboard; existing users auto-completed via migration
+  - Public user profiles with username, bio, and visibility toggle
+  - Public profile pages at /profile/[username] with OpenGraph/Twitter SEO metadata
+  - Public collection pages at /profile/[username]/[collectionId] showing shared content
+  - Profile settings page at /dashboard/profile with username/bio/visibility form
+  - Collection public toggle via toggleCollectionPublic server action
+  - "Profile" nav item added to dashboard sidebar
+  - Schema changes: 7 new user columns, 1 new collection column, username unique constraint
+  - 24 new tests (10 onboarding, 14 profile), 1174 total tests passing
+  - Commit: 467e5a2
 - **2026-01-27 22:00** - ✅ **E2E TEST EXPANSION COMPLETE**
   - Added 29 new Playwright E2E tests across 4 files:
     - `semantic-search.spec.ts` (8 tests) - mode switching, placeholder updates, search submission, no-results, type badges, URL persistence
