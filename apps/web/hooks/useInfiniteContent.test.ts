@@ -173,4 +173,234 @@ describe('useInfiniteContent', () => {
       expect(result.current.items).toHaveLength(3);
     });
   });
+
+  it('should handle loadMore when no more items', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+
+    // Initial load returns no more
+    vi.mocked(getContentAction).mockResolvedValueOnce({
+      success: true,
+      items: [
+        {
+          id: '1',
+          title: 'Only Item',
+          type: 'note',
+          body: null,
+          tags: [],
+          autoTags: [],
+          createdAt: new Date(),
+          url: null,
+          metadata: null,
+          isShared: false,
+          shareId: null,
+          isFavorite: false,
+        },
+      ],
+      allTags: [],
+      nextCursor: null,
+      hasMore: false,
+    });
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.hasMore).toBe(false);
+
+    // loadMore should be a no-op
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    expect(result.current.items).toHaveLength(1);
+  });
+
+  it('should handle error during initial load', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+    vi.mocked(getContentAction).mockRejectedValueOnce(new Error('Network fail'));
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('An error occurred while loading content');
+  });
+
+  it('should handle error during loadMore', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Mock error for loadMore
+    vi.mocked(getContentAction).mockRejectedValueOnce(new Error('Load more fail'));
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    expect(result.current.error).toBe('An error occurred while loading more content');
+  });
+
+  it('should refresh and reload from beginning', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Mock refresh response
+    vi.mocked(getContentAction).mockResolvedValueOnce({
+      success: true,
+      items: [
+        {
+          id: '10',
+          title: 'Refreshed Item',
+          type: 'note',
+          body: null,
+          tags: [],
+          autoTags: [],
+          createdAt: new Date(),
+          url: null,
+          metadata: null,
+          isShared: false,
+          shareId: null,
+          isFavorite: false,
+        },
+      ],
+      allTags: ['new-tag'],
+      nextCursor: null,
+      hasMore: false,
+    });
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0].title).toBe('Refreshed Item');
+    expect(result.current.allTags).toEqual(['new-tag']);
+  });
+
+  it('should handle loadMore returning success false', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    vi.mocked(getContentAction).mockResolvedValueOnce({
+      success: false,
+      items: [],
+      allTags: [],
+      nextCursor: null,
+      hasMore: false,
+    });
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    expect(result.current.error).toBe('Failed to load more content');
+  });
+
+  it('should handle initial load returning success false', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+    vi.mocked(getContentAction).mockResolvedValueOnce({
+      success: false,
+      items: [],
+      allTags: [],
+      nextCursor: null,
+      hasMore: false,
+    });
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('Failed to load content');
+  });
+
+  it('should handle refresh returning success false', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    vi.mocked(getContentAction).mockResolvedValueOnce({
+      success: false,
+      items: [],
+      allTags: [],
+      nextCursor: null,
+      hasMore: false,
+    });
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.error).toBe('Failed to refresh content');
+  });
+
+  it('should handle refresh throwing error', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    vi.mocked(getContentAction).mockRejectedValueOnce(new Error('Refresh fail'));
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    expect(result.current.error).toBe('An error occurred while refreshing content');
+  });
+
+  it('should update allTags when loadMore returns new tags', async () => {
+    const { getContentAction } = await import('@/app/actions/content');
+
+    const { result } = renderHook(() => useInfiniteContent());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    vi.mocked(getContentAction).mockResolvedValueOnce({
+      success: true,
+      items: [{
+        id: '3', title: 'Item 3', type: 'note', body: null, tags: [],
+        autoTags: [], createdAt: new Date(), url: null, metadata: null,
+        isShared: false, shareId: null, isFavorite: false,
+      }],
+      allTags: ['tag1', 'tag2', 'tag3'],
+      nextCursor: null,
+      hasMore: false,
+    });
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    expect(result.current.allTags).toEqual(['tag1', 'tag2', 'tag3']);
+  });
 });

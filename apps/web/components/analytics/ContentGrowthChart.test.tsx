@@ -172,6 +172,108 @@ describe('ContentGrowthChart', () => {
     });
   });
 
+  describe('Chart rendering details', () => {
+    const mockData = [
+      { date: '2024-01-01', notes: 2, links: 1, files: 0, total: 3 },
+      { date: '2024-01-02', notes: 3, links: 2, files: 1, total: 6 },
+    ];
+
+    beforeEach(() => {
+      mockedGetContentGrowth.mockResolvedValue({
+        success: true,
+        data: mockData,
+      });
+    });
+
+    it('should render 3 Line components for notes, links, files', async () => {
+      render(<ContentGrowthChart />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('chart-content')).toBeInTheDocument();
+      });
+
+      const lines = screen.getAllByTestId('line');
+      expect(lines).toHaveLength(3);
+    });
+
+    it('should render legend', async () => {
+      render(<ContentGrowthChart />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('chart-content')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('legend')).toBeInTheDocument();
+    });
+
+    it('should render axes and grid', async () => {
+      render(<ContentGrowthChart />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('chart-content')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('x-axis')).toBeInTheDocument();
+      expect(screen.getByTestId('y-axis')).toBeInTheDocument();
+      expect(screen.getByTestId('cartesian-grid')).toBeInTheDocument();
+    });
+  });
+
+  describe('Sequential period changes', () => {
+    beforeEach(() => {
+      mockedGetContentGrowth.mockResolvedValue({
+        success: true,
+        data: [{ date: '2024-01-01', notes: 1, links: 1, files: 1, total: 3 }],
+      });
+    });
+
+    it('should fetch data for each period when switching week → month → year', async () => {
+      const user = userEvent.setup();
+      render(<ContentGrowthChart initialPeriod="week" />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('chart-content')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('period-month'));
+      await waitFor(() => {
+        expect(mockedGetContentGrowth).toHaveBeenCalledWith('month');
+      });
+
+      await user.click(screen.getByTestId('period-year'));
+      await waitFor(() => {
+        expect(mockedGetContentGrowth).toHaveBeenCalledWith('year');
+      });
+    });
+  });
+
+  describe('Error handling', () => {
+    it('should show error when fetch throws', async () => {
+      mockedGetContentGrowth.mockRejectedValue(new Error('Network error'));
+
+      render(<ContentGrowthChart />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('chart-error')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Failed to load data')).toBeInTheDocument();
+    });
+
+    it('should show error message from server', async () => {
+      mockedGetContentGrowth.mockResolvedValue({
+        success: false,
+        message: 'Server overloaded',
+      });
+
+      render(<ContentGrowthChart />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Server overloaded')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('Chart title', () => {
     it('should render chart title', async () => {
       mockedGetContentGrowth.mockResolvedValue({

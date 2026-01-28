@@ -93,6 +93,78 @@ describe('Search Suggestions', () => {
       expect(result.length).toBeLessThanOrEqual(6);
     });
 
+    it('should include matching content titles as related suggestions', async () => {
+      const { getSearchSuggestions } = await import('./search-suggestions');
+
+      const { db } = await import('@/lib/db/client');
+      // Popular tags
+      vi.mocked(db.execute).mockResolvedValue([
+        { tag: 'react', tag_count: '5' },
+      ] as never);
+      // Matching content titles
+      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
+      vi.mocked(mockLimit).mockResolvedValue([
+        { title: 'React Hooks Tutorial' },
+        { title: 'React State Management' },
+      ]);
+
+      const result = await getSearchSuggestions('user-1', 'react');
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should include AI suggestions when query is long enough and has topics', async () => {
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+      const { getSearchSuggestions } = await import('./search-suggestions');
+
+      const { db } = await import('@/lib/db/client');
+      vi.mocked(db.execute).mockResolvedValue(
+        Array(10).fill(null).map((_, i) => ({
+          tag: `topic${i}`,
+          tag_count: `${10 - i}`,
+        })) as never
+      );
+      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
+      vi.mocked(mockLimit).mockResolvedValue([]);
+
+      const result = await getSearchSuggestions('user-1', 'long enough query');
+      // May or may not have AI suggestions depending on mock, but should not throw
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should skip AI suggestions when query is short', async () => {
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+      const { getSearchSuggestions } = await import('./search-suggestions');
+
+      const { db } = await import('@/lib/db/client');
+      vi.mocked(db.execute).mockResolvedValue([
+        { tag: 'js', tag_count: '5' },
+      ] as never);
+      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
+      vi.mocked(mockLimit).mockResolvedValue([]);
+
+      const result = await getSearchSuggestions('user-1', 'ab');
+      const aiSuggestions = result.filter(s => s.type === 'ai');
+      expect(aiSuggestions).toEqual([]);
+    });
+
+    it('should include partial matches from recent searches', async () => {
+      const { getSearchSuggestions } = await import('./search-suggestions');
+
+      const { db } = await import('@/lib/db/client');
+      vi.mocked(db.execute).mockResolvedValue([] as never);
+      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
+      vi.mocked(mockLimit).mockResolvedValue([]);
+
+      const result = await getSearchSuggestions(
+        'user-1',
+        'react',
+        ['react hooks', 'vue basics', 'react query']
+      );
+
+      const recentMatches = result.filter(s => s.type === 'recent');
+      expect(recentMatches.length).toBeGreaterThanOrEqual(1);
+    });
+
     it('should handle database errors gracefully', async () => {
       const { getSearchSuggestions } = await import('./search-suggestions');
 

@@ -1,9 +1,18 @@
+// @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 // Mock auth
 vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
+}));
+
+// Mock rate limiter
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockReturnValue({ success: true, remaining: 10, limit: 10, reset: Date.now() + 60000 }),
+  rateLimitHeaders: vi.fn().mockReturnValue({}),
+  rateLimitExceededResponse: vi.fn(),
+  RATE_LIMITS: { upload: { maxRequests: 10, windowMs: 60000 } },
 }));
 
 // Mock fs functions
@@ -110,37 +119,145 @@ describe('Upload API Route', () => {
       expect(data.message).toBe('File size exceeds 10MB limit');
     });
 
-    // Note: File extension and MIME type validation tests are skipped because
-    // the test environment's FormData/Blob doesn't perfectly simulate browser behavior.
-    // These are covered by E2E tests.
-    it.skip('should return 400 for disallowed file extension', async () => {
-      // Covered by E2E tests
+    it('should return 400 for disallowed file extension', async () => {
+      const formData = new FormData();
+      formData.append('file', new File(['test'], 'evil.exe', { type: 'application/javascript' }));
+
+      const request = new NextRequest('http://localhost/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.message).toContain('not allowed');
     });
 
-    it.skip('should return 400 for disallowed MIME type', async () => {
-      // Covered by E2E tests
+    it('should return 400 for disallowed MIME type', async () => {
+      const formData = new FormData();
+      formData.append('file', new File(['test'], 'test.pdf', { type: 'application/x-executable' }));
+
+      const request = new NextRequest('http://localhost/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.message).toContain('not allowed');
+    });
+
+    it('should return 400 for mismatched file signature', async () => {
+      // A .pdf file with non-PDF content
+      const formData = new FormData();
+      formData.append(
+        'file',
+        new File(['not a real pdf'], 'fake.pdf', { type: 'application/pdf' })
+      );
+
+      const request = new NextRequest('http://localhost/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.message).toContain('does not match');
     });
   });
 
   describe('successful upload', () => {
-    // Note: Successful upload tests are skipped because the test environment's
-    // fs mocking and FormData handling doesn't work correctly with NextRequest.
-    // These scenarios are thoroughly tested via E2E tests.
-
-    it.skip('should upload PDF file successfully', async () => {
-      // Covered by E2E tests
+    beforeEach(() => {
+      vi.mocked(auth).mockResolvedValue({ user: { id: 'user123' } } as never);
     });
 
-    it.skip('should upload image file successfully', async () => {
-      // Covered by E2E tests
+    it('should upload text file successfully', async () => {
+      const formData = new FormData();
+      formData.append(
+        'file',
+        new File(['Hello world text file'], 'notes.txt', { type: 'text/plain' })
+      );
+
+      const request = new NextRequest('http://localhost/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.data.fileName).toBe('notes.txt');
+      expect(data.data.filePath).toContain('/uploads/');
     });
 
-    it.skip('should upload text file successfully', async () => {
-      // Covered by E2E tests
+    it('should upload markdown file successfully', async () => {
+      const formData = new FormData();
+      formData.append(
+        'file',
+        new File(['# Heading\n\nContent'], 'readme.md', { type: 'text/markdown' })
+      );
+
+      const request = new NextRequest('http://localhost/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
     });
 
-    it.skip('should sanitize filename with special characters', async () => {
-      // Covered by E2E tests
+    it('should upload PNG with valid magic bytes', async () => {
+      // PNG magic bytes: 89 50 4e 47 0d 0a 1a 0a
+      const pngHeader = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
+      const formData = new FormData();
+      formData.append(
+        'file',
+        new File([pngHeader], 'image.png', { type: 'image/png' })
+      );
+
+      const request = new NextRequest('http://localhost/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+    });
+
+    it('should create upload directory if not exists', async () => {
+      const { existsSync } = await import('fs');
+      vi.mocked(existsSync).mockReturnValueOnce(false);
+
+      const formData = new FormData();
+      formData.append(
+        'file',
+        new File(['text content'], 'file.txt', { type: 'text/plain' })
+      );
+
+      const request = new NextRequest('http://localhost/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const { mkdir } = await import('fs/promises');
+      expect(mkdir).toHaveBeenCalled();
     });
   });
 });
