@@ -22,6 +22,8 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **PWA Support**: Install as a native app on desktop and mobile
 - **Mobile Apps**: Native iOS and Android apps via Capacitor
 - **SEO Optimized**: Open Graph and Twitter Card metadata for shared content
+- **Onboarding Flow**: Guided 3-step onboarding for new users
+- **Public Profiles**: Shareable user profiles with public collections
 - **Privacy First**: Your data stays yours - self-host or use our secure cloud
 
 ## Tech Stack
@@ -431,6 +433,14 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] AI features UI integration (SearchSuggestions, ContentClusters)
 - [x] Mobile CI/CD pipeline (GitHub Actions for Android/iOS builds)
 - [x] API documentation (comprehensive API.md)
+
+### Phase 10: Onboarding & Public Profiles ✅ Complete
+- [x] 3-step onboarding flow (Welcome, Create Content, Explore Features)
+- [x] Public user profiles with username, bio, and visibility toggle
+- [x] Public profile pages with SEO metadata (OpenGraph, Twitter Cards)
+- [x] Public collection pages showing shared content
+- [x] Profile settings page in dashboard
+- [x] Collection public/private toggle
 
 ### Future Enhancements (Planned)
 - [ ] Firefox browser extension
