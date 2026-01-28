@@ -138,6 +138,38 @@ describe('Collection Actions', () => {
       expect(result.collections).toEqual([]);
       expect(result.message).toBe('Unauthorized');
     });
+
+    it('should return collections when authenticated', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockCollections = [{ id: 'c1', name: 'Col1', description: null, color: null, createdAt: new Date(), updatedAt: new Date(), contentCount: 3 }];
+      const mockOrderBy = vi.fn().mockResolvedValue(mockCollections);
+      const mockGroupBy = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
+      const mockWhere = vi.fn().mockReturnValue({ groupBy: mockGroupBy });
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere });
+      const mockFrom = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await getCollectionsAction();
+      expect(result.success).toBe(true);
+      expect(result.collections).toHaveLength(1);
+    });
+
+    it('should handle database error', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      vi.mocked(db.select).mockImplementation(() => { throw new Error('DB error'); });
+
+      const result = await getCollectionsAction();
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Failed');
+    });
   });
 
   describe('deleteCollectionAction', () => {
@@ -148,6 +180,36 @@ describe('Collection Actions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Unauthorized');
+    });
+
+    it('should return not found for non-existent collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await deleteCollectionAction('nonexistent');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Collection not found');
+    });
+
+    it('should delete collection successfully', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([{ id: 'col-1', userId: 'user-1' }]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+      vi.mocked(db.delete).mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) } as never);
+
+      const result = await deleteCollectionAction('col-1');
+      expect(result.success).toBe(true);
     });
   });
 
@@ -160,6 +222,59 @@ describe('Collection Actions', () => {
       expect(result.success).toBe(false);
       expect(result.message).toBe('Unauthorized');
     });
+
+    it('should return not found for non-existent collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await addToCollectionAction('c1', 'nonexistent');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Collection not found');
+    });
+
+    it('should return error if already in collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      // First call: collection ownership check
+      // Second call: check existing membership
+      const mockWhere = vi.fn()
+        .mockResolvedValueOnce([{ id: 'col-1' }])
+        .mockResolvedValueOnce([{ contentId: 'c1', collectionId: 'col-1' }]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await addToCollectionAction('c1', 'col-1');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Content already in collection');
+    });
+
+    it('should add to collection successfully', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn()
+        .mockResolvedValueOnce([{ id: 'col-1' }])
+        .mockResolvedValueOnce([]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const mockValues = vi.fn().mockResolvedValue(undefined);
+      vi.mocked(db.insert).mockReturnValue({ values: mockValues } as never);
+
+      const result = await addToCollectionAction('c1', 'col-1');
+      expect(result.success).toBe(true);
+    });
   });
 
   describe('removeFromCollectionAction', () => {
@@ -170,6 +285,36 @@ describe('Collection Actions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Unauthorized');
+    });
+
+    it('should return not found for non-existent collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await removeFromCollectionAction('c1', 'nonexistent');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Collection not found');
+    });
+
+    it('should remove from collection successfully', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([{ id: 'col-1' }]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+      vi.mocked(db.delete).mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) } as never);
+
+      const result = await removeFromCollectionAction('c1', 'col-1');
+      expect(result.success).toBe(true);
     });
   });
 
@@ -183,6 +328,21 @@ describe('Collection Actions', () => {
       expect(result.collectionIds).toEqual([]);
       expect(result.message).toBe('Unauthorized');
     });
+
+    it('should return collection IDs', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([{ collectionId: 'col-1' }, { collectionId: 'col-2' }]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await getContentCollectionsAction('c1');
+      expect(result.success).toBe(true);
+      expect(result.collectionIds).toEqual(['col-1', 'col-2']);
+    });
   });
 
   describe('bulkAddToCollectionAction', () => {
@@ -194,6 +354,58 @@ describe('Collection Actions', () => {
       expect(result.success).toBe(false);
       expect(result.message).toBe('Unauthorized');
     });
+
+    it('should return not found for non-existent collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await bulkAddToCollectionAction(['c1'], 'nonexistent');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Collection not found');
+    });
+
+    it('should return message when all items already in collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn()
+        .mockResolvedValueOnce([{ id: 'col-1' }])
+        .mockResolvedValueOnce([{ contentId: 'c1' }]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await bulkAddToCollectionAction(['c1'], 'col-1');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('already');
+    });
+
+    it('should add new items to collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn()
+        .mockResolvedValueOnce([{ id: 'col-1' }])
+        .mockResolvedValueOnce([]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const mockValues = vi.fn().mockResolvedValue(undefined);
+      vi.mocked(db.insert).mockReturnValue({ values: mockValues } as never);
+
+      const result = await bulkAddToCollectionAction(['c1', 'c2'], 'col-1');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('2 items');
+    });
   });
 
   describe('updateCollectionAction', () => {
@@ -204,6 +416,57 @@ describe('Collection Actions', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Unauthorized');
+    });
+
+    it('should return not found for non-existent collection', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await updateCollectionAction('nonexistent', { name: 'Updated' });
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Collection not found');
+    });
+
+    it('should update collection successfully', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([{ id: 'col-1', userId: 'user-1' }]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const updatedCol = { id: 'col-1', name: 'Updated', description: null, color: null, createdAt: new Date(), updatedAt: new Date() };
+      const mockReturningFn = vi.fn().mockResolvedValue([updatedCol]);
+      const mockSetWhere = vi.fn().mockReturnValue({ returning: mockReturningFn });
+      const mockSetFn = vi.fn().mockReturnValue({ where: mockSetWhere });
+      vi.mocked(db.update).mockReturnValue({ set: mockSetFn } as never);
+
+      const result = await updateCollectionAction('col-1', { name: 'Updated' });
+      expect(result.success).toBe(true);
+      expect(result.collection?.name).toBe('Updated');
+    });
+
+    it('should return error for invalid update data', async () => {
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: 'user-1', email: 'test@example.com' },
+        expires: '',
+      } as never);
+
+      const mockWhere = vi.fn().mockResolvedValue([{ id: 'col-1', userId: 'user-1' }]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+
+      const result = await updateCollectionAction('col-1', { color: 'invalid' });
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Invalid color format');
     });
   });
 });

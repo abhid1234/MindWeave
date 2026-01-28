@@ -368,6 +368,95 @@ describe('ContentCard', () => {
     });
   });
 
+  describe('File type content', () => {
+    const fileProps: ContentCardProps = {
+      ...baseProps,
+      type: 'file',
+      title: 'Document.pdf',
+      metadata: {
+        fileType: 'application/pdf',
+        fileSize: 1048576,
+        filePath: '/uploads/doc.pdf',
+        fileName: 'Document.pdf',
+      },
+    };
+
+    it('should render file info with size and download link', () => {
+      render(<ContentCard {...fileProps} />);
+
+      expect(screen.getAllByText('Document.pdf').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('1.0 MB')).toBeInTheDocument();
+      expect(screen.getByLabelText('Download file')).toBeInTheDocument();
+    });
+
+    it('should render image preview for image files', () => {
+      render(
+        <ContentCard
+          {...fileProps}
+          metadata={{
+            fileType: 'image/png',
+            filePath: '/uploads/photo.png',
+          }}
+        />
+      );
+
+      const img = document.querySelector('img');
+      expect(img).toBeInTheDocument();
+    });
+
+    it('should not render file section when no filePath', () => {
+      render(
+        <ContentCard
+          {...baseProps}
+          type="file"
+          metadata={{ fileType: 'application/pdf' }}
+        />
+      );
+
+      expect(screen.queryByLabelText('Download file')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Favorite toggle', () => {
+    it('should render favorite button with correct initial state', () => {
+      render(<ContentCard {...baseProps} isFavorite={false} />);
+      expect(screen.getByLabelText('Add to favorites')).toBeInTheDocument();
+    });
+
+    it('should render favorite button as pressed when favorited', () => {
+      render(<ContentCard {...baseProps} isFavorite={true} />);
+      const btn = screen.getByLabelText('Remove from favorites');
+      expect(btn).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('should call toggleFavoriteAction on click', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} isFavorite={false} />);
+
+      const btn = screen.getByLabelText('Add to favorites');
+      await user.click(btn);
+
+      const { toggleFavoriteAction } = await import('@/app/actions/content');
+      await waitFor(() => {
+        expect(toggleFavoriteAction).toHaveBeenCalledWith('1');
+      });
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have article with aria-labelledby', () => {
+      const { container } = render(<ContentCard {...baseProps} />);
+      const article = container.querySelector('article');
+      expect(article).toHaveAttribute('aria-labelledby', 'content-title-1');
+    });
+
+    it('should have screen reader announcement region', () => {
+      render(<ContentCard {...baseProps} />);
+      const srRegion = screen.getByRole('status');
+      expect(srRegion).toBeInTheDocument();
+    });
+  });
+
   describe('Sharing indicator', () => {
     it('should show Shared badge when content is shared', () => {
       render(<ContentCard {...baseProps} isShared={true} shareId="abc123" />);

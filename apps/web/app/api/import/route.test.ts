@@ -39,6 +39,7 @@ import {
   isBookmarksFile,
   parsePocket,
   isPocketFile,
+  parseNotion,
   parseEvernote,
   isEvernoteFile,
 } from '@/lib/import/parsers';
@@ -48,6 +49,7 @@ const mockParseBookmarks = parseBookmarks as ReturnType<typeof vi.fn>;
 const mockIsBookmarksFile = isBookmarksFile as ReturnType<typeof vi.fn>;
 const mockParsePocket = parsePocket as ReturnType<typeof vi.fn>;
 const mockIsPocketFile = isPocketFile as ReturnType<typeof vi.fn>;
+const mockParseNotion = parseNotion as ReturnType<typeof vi.fn>;
 const mockParseEvernote = parseEvernote as ReturnType<typeof vi.fn>;
 const mockIsEvernoteFile = isEvernoteFile as ReturnType<typeof vi.fn>;
 
@@ -235,6 +237,44 @@ describe('Import API Route', () => {
       expect(data.errors).toHaveLength(1);
       expect(data.warnings).toHaveLength(1);
       expect(data.stats.skipped).toBe(2);
+    });
+
+    it('should parse Notion ZIP file successfully', async () => {
+      mockAuth.mockResolvedValue({ user: { id: 'user-1' } });
+      mockParseNotion.mockResolvedValue({
+        success: true,
+        items: [
+          { title: 'Notion Page', body: 'Content', type: 'note', tags: [] },
+        ],
+        errors: [],
+        warnings: [],
+        stats: { total: 1, parsed: 1, skipped: 0 },
+      });
+
+      const file = new File(['zip content'], 'export.zip', { type: 'application/zip' });
+      const request = createRequest(file, 'notion');
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.items).toHaveLength(1);
+    });
+
+    it('should return 400 for invalid Evernote file', async () => {
+      mockAuth.mockResolvedValue({ user: { id: 'user-1' } });
+      mockIsEvernoteFile.mockReturnValue(false);
+
+      const file = new File(['not enex'], 'notes.enex', { type: 'application/xml' });
+      const request = createRequest(file, 'evernote');
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.message).toContain('valid Evernote');
     });
 
     it('should handle parsing errors gracefully', async () => {
