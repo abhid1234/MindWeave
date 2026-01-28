@@ -18,7 +18,7 @@ vi.mock('next/link', () => ({
 }));
 
 describe('NavLinks', () => {
-  it('should render all 7 nav items', () => {
+  it('should render all 8 nav items', () => {
     render(<NavLinks />);
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
@@ -28,6 +28,7 @@ describe('NavLinks', () => {
     expect(screen.getByText('Ask AI')).toBeInTheDocument();
     expect(screen.getByText('Library')).toBeInTheDocument();
     expect(screen.getByText('Analytics')).toBeInTheDocument();
+    expect(screen.getByText('Profile')).toBeInTheDocument();
   });
 
   it('should render correct hrefs', () => {
@@ -43,6 +44,7 @@ describe('NavLinks', () => {
     expect(hrefs).toContain('/dashboard/ask');
     expect(hrefs).toContain('/dashboard/library');
     expect(hrefs).toContain('/dashboard/analytics');
+    expect(hrefs).toContain('/dashboard/profile');
   });
 
   it('should apply active styling to current path', () => {
@@ -74,6 +76,6 @@ describe('NavLinks', () => {
 
   it('should render without onNavigate prop', () => {
     render(<NavLinks />);
-    expect(screen.getAllByRole('link')).toHaveLength(7);
+    expect(screen.getAllByRole('link')).toHaveLength(8);
   });
 });

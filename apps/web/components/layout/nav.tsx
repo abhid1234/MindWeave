@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PlusCircle, Search, Library, MessageCircleQuestion, Upload, BarChart3 } from 'lucide-react';
+import { Home, PlusCircle, Search, Library, MessageCircleQuestion, Upload, BarChart3, User } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/dashboard/ask', label: 'Ask AI', icon: MessageCircleQuestion },
   { href: '/dashboard/library', label: 'Library', icon: Library },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/dashboard/profile', label: 'Profile', icon: User },
 ];
 
 interface NavLinksProps {

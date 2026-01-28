@@ -105,3 +105,29 @@ export const bulkImportSchema = z.object({
 });
 
 export type BulkImportInput = z.infer<typeof bulkImportSchema>;
+
+/**
+ * Onboarding step validation schema
+ */
+export const onboardingStepSchema = z.object({
+  step: z.number().min(0).max(4),
+});
+
+export type OnboardingStepInput = z.infer<typeof onboardingStepSchema>;
+
+/**
+ * Profile update validation schema
+ */
+export const updateProfileSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(50, 'Username must be at most 50 characters')
+    .regex(/^[a-z0-9_-]+$/, 'Username must contain only lowercase letters, numbers, hyphens, and underscores')
+    .optional()
+    .nullable(),
+  bio: z.string().max(500, 'Bio must be at most 500 characters').optional().nullable(),
+  isProfilePublic: z.boolean().optional(),
+});
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

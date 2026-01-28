@@ -1,5 +1,8 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { users } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import Header from '@/components/layout/header';
 import Nav from '@/components/layout/nav';
 
@@ -12,6 +15,17 @@ export default async function DashboardLayout({
 
   if (!session?.user) {
     redirect('/login');
+  }
+
+  // Check onboarding status
+  if (session.user.id) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, session.user.id),
+      columns: { onboardingCompleted: true },
+    });
+    if (user && !user.onboardingCompleted) {
+      redirect('/onboarding');
+    }
   }
 
   return (
