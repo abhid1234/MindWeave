@@ -22,6 +22,7 @@ export async function createTestUser(data?: Partial<typeof users.$inferInsert>) 
     .values({
       name: 'Test User',
       email: `test-${Date.now()}@example.com`,
+      onboardingCompleted: true,
       ...data,
     })
     .returning();
