@@ -457,13 +457,19 @@ None - Ready for feature development
   - Users: onboardingCompleted, onboardingStep, onboardingSkippedAt, onboardingCompletedAt, username (unique), bio, isProfilePublic
   - Collections: isPublic
 - [x] **Test Coverage**: 24 new tests (10 onboarding + 14 profile), 1174 total passing
-- [x] All quality checks passing (tests, types, lint, build)
-- [x] Commit: 467e5a2
+- [x] **E2E Fix**: Updated createTestUser helper to set onboardingCompleted=true, preventing redirect breakage
+- [x] All quality checks passing (tests, types, lint, build, E2E)
+- [x] Commits: 467e5a2, b66d9b7
 
 ## 🐛 Known Issues
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-28 19:00** - ✅ **E2E TEST FIX FOR ONBOARDING**
+  - Fixed createTestUser helper to set onboardingCompleted=true by default
+  - Prevented dashboard→onboarding redirect from breaking all authenticated E2E tests
+  - E2E results: 68 passed, 0 failed, 49 pre-existing skips
+  - Commit: b66d9b7
 - **2026-01-28 18:00** - ✅ **ONBOARDING FLOW + PUBLIC USER PROFILES COMPLETE**
   - Implemented 3-step onboarding flow (Welcome, Create Content, Explore Features)
   - New users redirected to /onboarding from dashboard; existing users auto-completed via migration
