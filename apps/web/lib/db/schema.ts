@@ -21,6 +21,15 @@ export const users = pgTable('users', {
   email: text('email').unique().notNull(),
   emailVerified: timestamp('emailVerified', { mode: 'date' }),
   image: text('image'),
+  // Onboarding fields
+  onboardingCompleted: boolean('onboarding_completed').notNull().default(false),
+  onboardingStep: integer('onboarding_step').notNull().default(0),
+  onboardingSkippedAt: timestamp('onboarding_skipped_at', { mode: 'date' }),
+  onboardingCompletedAt: timestamp('onboarding_completed_at', { mode: 'date' }),
+  // Profile fields
+  username: varchar('username', { length: 50 }).unique(),
+  bio: text('bio'),
+  isProfilePublic: boolean('is_profile_public').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -126,6 +135,7 @@ export const collections = pgTable(
     name: varchar('name', { length: 100 }).notNull(),
     description: text('description'),
     color: varchar('color', { length: 7 }), // Hex color like #FF5733
+    isPublic: boolean('is_public').notNull().default(false),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },

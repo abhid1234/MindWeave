@@ -43,6 +43,13 @@
       "when": 1769392213911,
       "tag": "0005_first_proteus",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1769621520640,
+      "tag": "0006_omniscient_thundra",
+      "breakpoints": true
     }
   ]
 }
