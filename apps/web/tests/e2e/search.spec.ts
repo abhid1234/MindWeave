@@ -52,8 +52,8 @@ test.describe('Full-text Search', () => {
     await page.waitForTimeout(500); // Wait for debounce
 
     // Should show only React content
-    await expect(page.locator('text=React Hooks Tutorial')).toBeVisible();
-    await expect(page.locator('text=Vue Composition API')).not.toBeVisible();
+    await expect(page.getByRole('heading', { name: 'React Hooks Tutorial' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Vue Composition API' })).not.toBeVisible();
   });
 
   test('searches content by body text', async ({ page }) => {
@@ -162,17 +162,17 @@ test.describe('Full-text Search', () => {
     // Search with lowercase
     await page.fill('input[placeholder*="Search"]', 'javascript');
     await page.waitForTimeout(500);
-    await expect(page.locator('text=JavaScript Basics')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'JavaScript Basics' })).toBeVisible();
 
     // Search with uppercase
     await page.fill('input[placeholder*="Search"]', 'JAVASCRIPT');
     await page.waitForTimeout(500);
-    await expect(page.locator('text=JavaScript Basics')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'JavaScript Basics' })).toBeVisible();
 
     // Search with mixed case
     await page.fill('input[placeholder*="Search"]', 'JaVaScRiPt');
     await page.waitForTimeout(500);
-    await expect(page.locator('text=JavaScript Basics')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'JavaScript Basics' })).toBeVisible();
   });
 
   test('combines search with type filter', async ({ page }) => {
@@ -205,7 +205,8 @@ test.describe('Full-text Search', () => {
     await expect(page.getByRole('heading', { name: 'React Note' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'React Link' })).toBeVisible();
 
-    // Filter by note type and wait for URL
+    // Dismiss suggestions dropdown by pressing Escape, then filter by note type
+    await page.locator('input[placeholder*="Search"]').press('Escape');
     await page.click('a:has-text("Notes")');
     await expect(page).toHaveURL(/type=note/);
 
@@ -378,8 +379,8 @@ test.describe('Full-text Search', () => {
     await page.waitForTimeout(500);
 
     // Should only see user1's content
-    await expect(page.locator('text=User1 React Content')).toBeVisible();
-    await expect(page.locator('text=User2 React Content')).not.toBeVisible();
+    await expect(page.getByRole('heading', { name: 'User1 React Content' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'User2 React Content' })).not.toBeVisible();
   });
 
   test('handles special characters in search query', async ({ page }) => {

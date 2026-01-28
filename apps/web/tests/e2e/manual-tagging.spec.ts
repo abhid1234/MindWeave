@@ -54,14 +54,14 @@ test.describe('Manual Tagging Feature', () => {
   test.describe('Tag Display', () => {
     test('should display existing tags on content cards', async ({ page }) => {
       // Check card with "Test Note for Tagging" has initial tags
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
       await expect(firstCard.locator('text=initial')).toBeVisible();
       // Use span selector to avoid matching "test" in other text
       await expect(firstCard.locator('span:text-is("test")')).toBeVisible();
     });
 
     test('should display "No tags" when content has no tags', async ({ page }) => {
-      const thirdCard = page.locator('.rounded-lg.border').filter({ hasText: 'Another Note' });
+      const thirdCard = page.locator('article').filter({ hasText: 'Another Note' });
       await expect(thirdCard.locator('text=No tags')).toBeVisible();
     });
 
@@ -73,7 +73,7 @@ test.describe('Manual Tagging Feature', () => {
 
   test.describe('Edit Mode', () => {
     test('should enter edit mode when clicking "Edit tags"', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Click Edit tags button
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -89,7 +89,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should exit edit mode when clicking Cancel', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -107,7 +107,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should show existing tags in edit mode', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -124,7 +124,7 @@ test.describe('Manual Tagging Feature', () => {
 
   test.describe('Adding Tags', () => {
     test('should add new tag when typing and pressing Enter', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -145,7 +145,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should add tag by clicking suggestion', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -166,7 +166,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should not add empty tag', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -187,7 +187,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should not add duplicate tag', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -208,7 +208,7 @@ test.describe('Manual Tagging Feature', () => {
 
   test.describe('Removing Tags', () => {
     test('should remove tag when clicking remove button', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -232,7 +232,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should remove last tag with Backspace on empty input', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -255,7 +255,7 @@ test.describe('Manual Tagging Feature', () => {
 
   test.describe('Saving Tags', () => {
     test('should save tags when clicking Save button', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -286,7 +286,7 @@ test.describe('Manual Tagging Feature', () => {
 
     // Skip: Auto-save timing is flaky in E2E tests. Manual save is tested by other tests.
     test.skip('should auto-save after 1 second of inactivity', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -311,7 +311,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should show "Saving..." during save', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -336,7 +336,7 @@ test.describe('Manual Tagging Feature', () => {
 
   test.describe('Tag Autocomplete', () => {
     test('should show suggestions from existing tags', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -353,7 +353,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should filter suggestions as user types', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -373,7 +373,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should not show already selected tags in suggestions', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -395,7 +395,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should close suggestions on Escape', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -421,17 +421,17 @@ test.describe('Manual Tagging Feature', () => {
   test.describe('Multiple Content Items', () => {
     test('should edit tags on different items independently', async ({ page }) => {
       // Edit first card
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
       await firstCard.locator('button:has-text("Edit tags")').click();
       await expect(firstCard.locator('input[type="text"]')).toBeVisible({ timeout: 5000 });
 
       // Other cards should not be in edit mode
-      const secondCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Link' });
+      const secondCard = page.locator('article').filter({ hasText: 'Test Link' });
       await expect(secondCard.locator('input[type="text"]')).not.toBeVisible();
     });
 
     test('should save tags for specific content item only', async ({ page }) => {
-      const thirdCard = page.locator('.rounded-lg.border').filter({ hasText: 'Another Note' });
+      const thirdCard = page.locator('article').filter({ hasText: 'Another Note' });
 
       // Enter edit mode
       await thirdCard.locator('button:has-text("Edit tags")').click();
@@ -462,7 +462,7 @@ test.describe('Manual Tagging Feature', () => {
 
   test.describe('Edge Cases', () => {
     test('should handle very long tag names', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -481,7 +481,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should handle special characters in tags', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
@@ -499,7 +499,7 @@ test.describe('Manual Tagging Feature', () => {
     });
 
     test('should persist tags after page refresh', async ({ page }) => {
-      const firstCard = page.locator('.rounded-lg.border').filter({ hasText: 'Test Note for Tagging' });
+      const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
       // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
