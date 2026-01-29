@@ -477,7 +477,11 @@ Mindweave is deployed on Google Cloud Platform:
 | **Secret Manager** | 6 secrets (DB, auth, API keys, OAuth) |
 | **Cloud Build** | Docker image builds via `cloudbuild.yaml` |
 
-### Deploy a New Version
+### CI/CD
+
+Every push to `main` automatically triggers a Cloud Build that builds the Docker image and deploys to Cloud Run.
+
+### Deploy Manually
 
 ```bash
 # From the project root:
