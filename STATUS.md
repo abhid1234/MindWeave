@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-01-28
+**Last Updated**: 2026-01-29
 **Current Phase**: Phase 10 - Onboarding & Public Profiles
 **Active Ralph Loop**: No
 
@@ -45,6 +45,7 @@
 - [x] **Public User Profiles** - Username, bio, public profile pages with shareable collections
 
 **Latest Enhancement**:
+- [x] **E2E Test Unskip** - Unskipped 12 of 17 previously-skipped E2E tests by replacing sequential click navigation with `page.goto()` URL params to avoid Next.js Link soft-navigation timing issues. Fixed across library.spec.ts (7), search.spec.ts (3), capture.spec.ts (1), authentication.spec.ts (1). 4 tests remain skipped due to genuine app behavior issues (clear tag filter, file upload, browser URL validation, auto-save exit). Final: 96 chromium tests passing, 0 failures.
 - [x] **Onboarding Flow + Public Profiles** - 3-step onboarding, public user profiles with username/bio, shareable collections, SEO metadata. 24 new tests (1174 total). Migration sets existing users as onboarding-complete.
 - [x] **Full Test Suite Verification** - 1,257 tests passing with 0 failures (955 unit/integration via Vitest + 302 E2E via Playwright). Zero regressions confirmed across all test suites.
 - [x] **E2E Test Fixes** - Fixed 26 pre-existing E2E failures: updated manual-tagging card selectors from `.rounded-lg.border` to `article` (22 fixes), updated search locators to `getByRole('heading')` to avoid SearchSuggestions strict mode violations (4 fixes)
