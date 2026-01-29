@@ -45,6 +45,7 @@
 - [x] **Public User Profiles** - Username, bio, public profile pages with shareable collections
 
 **Latest Enhancement**:
+- [x] **E2E Test Unskip (Round 2)** - Unskipped 3 more E2E tests with app code fixes: (1) clear tag filter — replaced `<Link>` with `<button>` using `window.location.href` for reliable navigation; (2) file upload — added `data-testid` to hidden input + fixed Zod URL validation to only enforce URL format for link type (file type uses relative paths); (3) invalid URL — changed `type="url"` to `type="text" inputMode="url"` so Zod errors render. 1 test remains skipped (auto-save debounce timing is inherently flaky in E2E). Final: 68 passed, 0 failures, 1 skip in these 3 spec files.
 - [x] **E2E Test Unskip** - Unskipped 12 of 17 previously-skipped E2E tests by replacing sequential click navigation with `page.goto()` URL params to avoid Next.js Link soft-navigation timing issues. Fixed across library.spec.ts (7), search.spec.ts (3), capture.spec.ts (1), authentication.spec.ts (1). 4 tests remain skipped due to genuine app behavior issues (clear tag filter, file upload, browser URL validation, auto-save exit). Final: 96 chromium tests passing, 0 failures.
 - [x] **Onboarding Flow + Public Profiles** - 3-step onboarding, public user profiles with username/bio, shareable collections, SEO metadata. 24 new tests (1174 total). Migration sets existing users as onboarding-complete.
 - [x] **Full Test Suite Verification** - 1,257 tests passing with 0 failures (955 unit/integration via Vitest + 302 E2E via Playwright). Zero regressions confirmed across all test suites.
@@ -466,6 +467,15 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-29 12:00** - ✅ **E2E TEST UNSKIP ROUND 2**
+  - Unskipped 3 of 4 remaining skipped E2E tests with app code fixes:
+  - Fix 1: "clear tag filter" (library.spec.ts) — replaced `<Link>` with `<button>` using `window.location.href` for reliable full-page navigation
+  - Fix 2: "create file entry" (capture.spec.ts) — added `data-testid="file-input"` to FileUpload, fixed Zod `createContentSchema` to only validate URL format for link type (file uploads use relative paths via `superRefine`)
+  - Fix 3: "invalid URL" (capture.spec.ts) — changed URL input from `type="url"` to `type="text" inputMode="url"` so form submits and Zod validation error renders
+  - Fix 4: "auto-save" (manual-tagging.spec.ts) — kept skipped; auto-save debounce + server action timing is inherently flaky in E2E (manual Save tests cover persistence)
+  - Files modified: FilterBar.tsx, FileUpload.tsx, capture/page.tsx, validations.ts, 3 test files
+  - Results: 68 passed, 0 failures, 1 skip across library/capture/manual-tagging specs
+  - Commit: 95e3fa5
 - **2026-01-28 19:00** - ✅ **E2E TEST FIX FOR ONBOARDING**
   - Fixed createTestUser helper to set onboardingCompleted=true by default
   - Prevented dashboard→onboarding redirect from breaking all authenticated E2E tests
