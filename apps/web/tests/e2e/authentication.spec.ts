@@ -139,20 +139,16 @@ test.describe('Authentication Flow', () => {
       await expect(focusedElement).toBeVisible();
     });
 
-    // Skip: Tab order depends on page structure and can vary
-    test.skip('should be keyboard navigable', async ({ page }) => {
+    test('should be keyboard navigable', async ({ page }) => {
       await page.goto('/login');
+      await page.waitForLoadState('networkidle');
 
-      // Tab to the Google button
+      // Tab once from body — verify something received focus
       await page.keyboard.press('Tab');
 
-      // The button should be focusable
-      const googleButton = page.locator('button:has-text("Continue with Google")');
-      const isFocused = await googleButton.evaluate(
-        (el) => el === document.activeElement
-      );
-
-      expect(isFocused).toBeTruthy();
+      const tagName = await page.evaluate(() => document.activeElement?.tagName);
+      // Something focusable should have received focus (not stuck on BODY)
+      expect(tagName).not.toBe('BODY');
     });
   });
 
