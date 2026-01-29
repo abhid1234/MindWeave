@@ -22,7 +22,7 @@ steps:
       - '--build-arg'
       - 'DATABASE_URL=${_DATABASE_URL}'
       - '--build-arg'
-      - 'NEXT_PUBLIC_APP_URL=https://${_SERVICE_NAME}-${_REGION}.run.app'
+      - 'NEXT_PUBLIC_APP_URL=${_APP_URL}'
       - '-t'
       - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:$SHORT_SHA'
       - '-t'
@@ -52,7 +52,7 @@ steps:
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_APP_URL=https://${_SERVICE_NAME}-${_REGION}.run.app'
+      - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_APP_URL=${_APP_URL},AUTH_URL=${_APP_URL}'
       - '--set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest'
       - '--min-instances=0'
       - '--max-instances=10'
@@ -71,6 +71,7 @@ substitutions:
   _SERVICE_NAME: 'mindweave'
   _REGION: 'us-central1'
   _DATABASE_URL: 'postgresql://user:password@host:5432/db'
+  _APP_URL: 'https://mindweave-a2ysp2ppfq-uc.a.run.app'
 
 # Images to be pushed to GCR
 images:
