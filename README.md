@@ -516,7 +516,6 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for the full guide covering:
 - **Docker**: `docker build -t mindweave . && docker run -p 3000:3000 mindweave`
 - **Vercel**: Deploy directly, use Neon or Supabase for database
 - **Railway**: One-click deployment
-- **AWS**: ECS with RDS PostgreSQL
 
 ## Troubleshooting
 
