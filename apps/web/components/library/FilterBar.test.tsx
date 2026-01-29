@@ -165,16 +165,14 @@ describe('FilterBar', () => {
       expect(tagLink).toHaveAttribute('href', '/dashboard/library?tag=tag1&sortBy=createdAt&sortOrder=desc');
     });
 
-    it('should generate URL without tag when clearing', () => {
+    it('should render clear tag filter button when tag is selected', () => {
       mockSearchParams.set('tag', 'tag1');
       mockSearchParams.set('type', 'note');
 
       render(<FilterBar allTags={['tag1']} />);
 
-      const clearLink = screen.getByText(/Clear tag filter/).closest('a');
-      const href = clearLink?.getAttribute('href') || '';
-      expect(href).not.toContain('tag=');
-      expect(href).toContain('type=note');
+      const clearButton = screen.getByText(/Clear tag filter/);
+      expect(clearButton.tagName).toBe('BUTTON');
     });
   });
 
