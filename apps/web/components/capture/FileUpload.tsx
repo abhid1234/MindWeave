@@ -196,6 +196,7 @@ export function FileUpload({
           className="hidden"
           disabled={disabled || isUploading}
           aria-hidden="true"
+          data-testid="file-input"
         />
 
         {isUploading ? (

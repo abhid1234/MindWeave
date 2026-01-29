@@ -194,7 +194,8 @@ export default function CapturePage() {
             </label>
             <input
               id="url"
-              type="url"
+              type="text"
+              inputMode="url"
               name="url"
               placeholder="https://example.com"
               className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"

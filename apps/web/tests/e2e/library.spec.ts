@@ -300,12 +300,14 @@ test.describe('Library Feature', () => {
       await expect(page.locator('text=Clear tag filter')).toBeVisible({ timeout: 10000 });
     });
 
-    // Skip: Clear tag filter Link click doesn't trigger client-side navigation reliably
-    test.skip('should clear tag filter when clicking clear button', async ({ page }) => {
+    test('should clear tag filter when clicking clear button', async ({ page }) => {
       await page.goto('/dashboard/library?tag=work');
       await expect(page.locator('text=Showing 2 items')).toBeVisible({ timeout: 10000 });
 
       await page.click('text=Clear tag filter');
+
+      // window.location.href triggers full navigation
+      await page.waitForLoadState('networkidle');
 
       await expect(page.locator('text=Showing 4 items')).toBeVisible({ timeout: 10000 });
     });

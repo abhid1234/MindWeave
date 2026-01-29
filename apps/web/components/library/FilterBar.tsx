@@ -97,12 +97,13 @@ export function FilterBar({ allTags }: FilterBarProps) {
           <label className="block text-sm font-medium mb-2">Filter by Tag</label>
           <div className="flex flex-wrap gap-2">
             {tagFilter && (
-              <Link
-                href={buildUrl({ tag: null })}
+              <button
+                type="button"
+                onClick={() => { window.location.href = buildUrl({ tag: null }); }}
                 className="rounded-full border px-3 py-1 text-xs bg-muted hover:bg-muted/80"
               >
                 Clear tag filter ✕
-              </Link>
+              </button>
             )}
             {allTags.slice(0, 10).map((tag) => (
               <Link
