@@ -284,30 +284,21 @@ test.describe('Manual Tagging Feature', () => {
       await expect(page.locator('text=saved-tag').first()).toBeVisible();
     });
 
-    // Skip: Auto-save timing is flaky in E2E tests. Manual save is tested by other tests.
+    // Skip: Auto-save doesn't exit edit mode automatically — only manual Save does
     test.skip('should auto-save after 1 second of inactivity', async ({ page }) => {
       const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
-      // Enter edit mode
       await firstCard.locator('button:has-text("Edit tags")').click();
 
-      // Add a new tag
       const input = firstCard.locator('input[type="text"]');
+      await expect(input).toBeVisible({ timeout: 5000 });
       await input.fill('auto-saved');
       await input.press('Enter');
 
-      // Wait for auto-save: 1 second debounce + API call time + buffer
-      // Also wait for edit mode to exit (successful save exits edit mode)
-      await expect(input).not.toBeVisible({ timeout: 10000 });
+      await expect(input).not.toBeVisible({ timeout: 15000 });
 
-      // Extra wait for database write
-      await page.waitForTimeout(1000);
-
-      // Refresh page to verify persistence
-      await page.reload();
-
-      // Tag should be saved (use .first() since it also appears in filter sidebar)
-      await expect(page.locator('text=auto-saved').first()).toBeVisible();
+      await page.reload({ waitUntil: 'networkidle' });
+      await expect(page.locator('text=auto-saved').first()).toBeVisible({ timeout: 10000 });
     });
 
     test('should show "Saving..." during save', async ({ page }) => {

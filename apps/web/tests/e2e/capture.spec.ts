@@ -165,7 +165,7 @@ test.describe('Capture Feature', () => {
       await page.goto('/dashboard/capture');
     });
 
-    // Skip: File entry requires file upload, which requires special handling
+    // Skip: File type requires file upload - Save button stays disabled without a file
     test.skip('should create a file entry', async ({ page }) => {
       await page.selectOption('select[name="type"]', 'file');
       await page.fill('input[name="title"]', 'Important Document.pdf');
@@ -174,9 +174,8 @@ test.describe('Capture Feature', () => {
 
       await page.click('button[type="submit"]:has-text("Save")');
 
-      // Wait for toast notification
       const toast = page.getByRole('region', { name: 'Notifications' }).locator('[role="alert"]');
-      await expect(toast).toBeVisible({ timeout: 15000 });
+      await expect(toast).toBeVisible({ timeout: 20000 });
       await expect(toast).toContainText('Content saved');
     });
   });
@@ -195,7 +194,8 @@ test.describe('Capture Feature', () => {
       await expect(titleInput).toHaveAttribute('required');
     });
 
-    // Skip: Server-side validation error display is timing-dependent
+    // Skip: Browser's built-in type="url" validation prevents form submission,
+    // so Zod "Invalid URL" error never renders
     test.skip('should show error for invalid URL', async ({ page }) => {
       await page.selectOption('select[name="type"]', 'link');
       await page.fill('input[name="title"]', 'Bad Link');
@@ -204,7 +204,7 @@ test.describe('Capture Feature', () => {
       await page.click('button[type="submit"]:has-text("Save")');
 
       // Should show validation error
-      await expect(page.locator('text=Invalid URL')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('text=Invalid URL')).toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -231,18 +231,16 @@ test.describe('Capture Feature', () => {
       await page.goto('/dashboard/capture');
     });
 
-    // Skip: Loading state is too brief to reliably capture in E2E tests
-    test.skip('should show loading state during submission', async ({ page }) => {
+    test('should show loading state during submission', async ({ page }) => {
       await page.fill('input[name="title"]', 'Test Note');
 
       // Start submission
       await page.click('button[type="submit"]:has-text("Save")');
 
-      // Should see "Saving..." text (briefly)
-      const submitButton = page.locator('button[type="submit"]:has-text("Save")');
-
-      // Check for disabled state and loading text
-      await expect(submitButton).toBeDisabled();
+      // Check for disabled submit button (brief window)
+      const disabledButton = page.locator('button[type="submit"]:disabled');
+      // Use a short timeout — the loading state is brief but should exist
+      await expect(disabledButton).toBeVisible({ timeout: 5000 });
     });
   });
 

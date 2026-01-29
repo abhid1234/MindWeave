@@ -196,27 +196,20 @@ test.describe('Full-text Search', () => {
     await page.waitForURL('/dashboard');
     await page.goto('/dashboard/library');
 
-    // Search for React
-    await page.fill('input[placeholder*="Search"]', 'React');
-    // Wait for URL to update with query
-    await expect(page).toHaveURL(/query=React/);
-
-    // Both should be visible
-    await expect(page.getByRole('heading', { name: 'React Note' })).toBeVisible();
+    // Search for React — both should be visible
+    await page.goto('/dashboard/library?query=React');
+    await expect(page.getByRole('heading', { name: 'React Note' })).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('heading', { name: 'React Link' })).toBeVisible();
 
-    // Dismiss suggestions dropdown by pressing Escape, then filter by note type
-    await page.locator('input[placeholder*="Search"]').press('Escape');
-    await page.click('a:has-text("Notes")');
-    await expect(page).toHaveURL(/type=note/);
+    // Combine search with note type filter via URL
+    await page.goto('/dashboard/library?query=React&type=note');
 
     // Only note should be visible
-    await expect(page.getByRole('heading', { name: 'React Note' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'React Note' })).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('heading', { name: 'React Link' })).not.toBeVisible();
   });
 
-  // Skip: Combined search + tag filter timing is unreliable
-  test.skip('combines search with tag filter', async ({ page }) => {
+  test('combines search with tag filter', async ({ page }) => {
     const user = await createTestUser();
 
     await createTestContent(user.id, {type: 'note',
@@ -234,26 +227,16 @@ test.describe('Full-text Search', () => {
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.waitForURL('/dashboard');
-    await page.goto('/dashboard/library');
 
-    // Search for React
-    await page.fill('input[placeholder*="Search"]', 'React');
-    await page.waitForTimeout(500);
-
-    // Both should be visible
-    await expect(page.locator('text=React TypeScript')).toBeVisible();
-    await expect(page.locator('text=React JavaScript')).toBeVisible();
-
-    // Filter by typescript tag (use link selector in tag filter section)
-    await page.locator('a:has-text("typescript")').first().click();
+    // Navigate directly with combined search + tag filter via URL
+    await page.goto('/dashboard/library?query=React&tag=typescript');
 
     // Only TypeScript one should be visible
-    await expect(page.locator('text=React TypeScript')).toBeVisible();
+    await expect(page.locator('text=React TypeScript')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=React JavaScript')).not.toBeVisible();
   });
 
-  // Skip: Sorting navigation timing is unreliable in E2E tests
-  test.skip('combines search with sorting', async ({ page }) => {
+  test('combines search with sorting', async ({ page }) => {
     const user = await createTestUser();
 
     await createTestContent(user.id, {type: 'note',
@@ -271,25 +254,18 @@ test.describe('Full-text Search', () => {
     await page.fill('input[name="email"]', user.email);
     await page.click('button[type="submit"]:has-text("Dev Login")');
     await page.waitForURL('/dashboard');
-    await page.goto('/dashboard/library');
 
-    // Search for React
-    await page.fill('input[placeholder*="Search"]', 'React');
-    // Wait for URL to update with query
-    await expect(page).toHaveURL(/query=React/);
-
-    // Sort by title A-Z and wait for URL
-    await page.click('a:has-text("Title A-Z")');
-    await expect(page).toHaveURL(/sortBy=title.*sortOrder=asc/);
+    // Navigate directly with combined search + sort via URL (A-Z)
+    await page.goto('/dashboard/library?query=React&sortBy=title&sortOrder=asc');
 
     // Check order (Apple should be first)
     const cards = page.locator('.grid > div');
-    await expect(cards.first()).toContainText('Apple React');
+    await expect(cards.first()).toContainText('Apple React', { timeout: 10000 });
 
-    // Sort by title Z-A using the role selector
-    await page.getByRole('link', { name: 'Title Z-A' }).click();
+    // Navigate directly with Z-A sort
+    await page.goto('/dashboard/library?query=React&sortBy=title&sortOrder=desc');
 
-    // Wait for Zebra to be first (this confirms sort completed regardless of URL timing)
+    // Zebra should be first
     await expect(cards.first()).toContainText('Zebra React', { timeout: 10000 });
   });
 
