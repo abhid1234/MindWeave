@@ -390,7 +390,6 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete guide including:
 - **Docker**: Use provided Dockerfile for self-hosting
 - **Vercel**: Deploy directly with Neon/Supabase database
 - **Railway**: One-click deployment
-- **AWS**: ECS with RDS PostgreSQL
 
 ## Contributing
 
