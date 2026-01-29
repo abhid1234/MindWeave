@@ -463,46 +463,60 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 
 ## Deployment
 
-### Google Cloud Platform (Production-Ready)
+### Production (Live)
 
-Mindweave is optimized for deployment on Google Cloud Platform using Cloud Run, Cloud Build, and Cloud SQL.
+Mindweave is deployed on Google Cloud Platform:
 
-#### Quick Deploy
+- **URL**: https://mindweave-a2ysp2ppfq-uc.a.run.app
+- **Project**: `mindweave-prod` | **Region**: `us-central1`
+
+| Service | Details |
+|---------|---------|
+| **Cloud Run** | Next.js app (512Mi, 1 CPU, 0–10 instances) |
+| **Cloud SQL** | PostgreSQL 16 + pgvector (db-f1-micro) |
+| **Secret Manager** | 6 secrets (DB, auth, API keys, OAuth) |
+| **Cloud Build** | Docker image builds via `cloudbuild.yaml` |
+
+### Deploy a New Version
 
 ```bash
-# 1. Setup secrets
-npm run gcp:setup-secrets
-
-# 2. Deploy to Cloud Run
-npm run gcp:deploy
+# From the project root:
+cd Mindweave
+gcloud builds submit \
+  --config=cloudbuild.yaml \
+  --substitutions="_SERVICE_NAME=mindweave,_REGION=us-central1,_DATABASE_URL=postgresql://user:pass@localhost:5432/mindweave,_APP_URL=https://mindweave-a2ysp2ppfq-uc.a.run.app,SHORT_SHA=manual-$(date +%s)" \
+  --project=mindweave-prod
 ```
 
-**See [DEPLOYMENT.md](DEPLOYMENT.md) for complete GCP deployment guide including:**
+### Run Database Migrations
+
+```bash
+# Authorize your IP temporarily
+MY_IP=$(curl -4 -s ifconfig.me)
+gcloud sql instances patch mindweave-db --authorized-networks="${MY_IP}/32" --project=mindweave-prod
+
+# Push schema
+DATABASE_URL="postgresql://mindweave:PASSWORD@34.27.185.36:5432/mindweave_prod" npx drizzle-kit push --force
+
+# Remove authorized network when done
+gcloud sql instances patch mindweave-db --clear-authorized-networks --project=mindweave-prod
+```
+
+### GCP Setup from Scratch
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full guide covering:
 - Cloud SQL setup with pgvector
 - Secret Manager configuration
 - CI/CD with Cloud Build triggers
 - Custom domains and SSL
-- Monitoring and logging
-- Cost optimization
+- Monitoring and cost optimization
 
-#### Alternative: Docker Self-Hosting
+### Alternative Platforms
 
-1. **Build Docker image**
-   ```bash
-   docker build -t mindweave .
-   ```
-
-2. **Run with Docker Compose**
-   ```bash
-   docker-compose -f docker-compose.prod.yml up -d
-   ```
-
-#### Alternative: Other Platforms
-
+- **Docker**: `docker build -t mindweave . && docker run -p 3000:3000 mindweave`
 - **Vercel**: Deploy directly, use Neon or Supabase for database
-- **Railway**: Simple one-click deployment
-- **AWS**: Use ECS with RDS PostgreSQL
-- **DigitalOcean**: App Platform with managed PostgreSQL
+- **Railway**: One-click deployment
+- **AWS**: ECS with RDS PostgreSQL
 
 ## Troubleshooting
 
