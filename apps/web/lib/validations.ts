@@ -7,9 +7,22 @@ export const createContentSchema = z.object({
   type: z.enum(['note', 'link', 'file']),
   title: z.string().min(1, 'Title is required').max(500, 'Title is too long'),
   body: z.string().max(50000, 'Content is too long').optional(),
-  url: z.string().url('Invalid URL').optional().or(z.literal('')),
+  url: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).default([]),
   metadata: z.record(z.any()).optional(),
+}).superRefine((data, ctx) => {
+  // Only validate URL format for link type
+  if (data.type === 'link' && data.url && data.url !== '') {
+    try {
+      new URL(data.url);
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Invalid URL',
+        path: ['url'],
+      });
+    }
+  }
 });
 
 export type CreateContentInput = z.infer<typeof createContentSchema>;

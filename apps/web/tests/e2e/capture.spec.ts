@@ -165,12 +165,23 @@ test.describe('Capture Feature', () => {
       await page.goto('/dashboard/capture');
     });
 
-    // Skip: File type requires file upload - Save button stays disabled without a file
-    test.skip('should create a file entry', async ({ page }) => {
+    test('should create a file entry', async ({ page }) => {
       await page.selectOption('select[name="type"]', 'file');
-      await page.fill('input[name="title"]', 'Important Document.pdf');
+
+      // Upload a synthetic text file via the hidden file input
+      const fileInput = page.locator('[data-testid="file-input"]');
+      await fileInput.setInputFiles({
+        name: 'Important Document.txt',
+        mimeType: 'text/plain',
+        buffer: Buffer.from('This is the content of the important document.'),
+      });
+
+      // Wait for upload to complete (file preview appears)
+      await expect(page.locator('text=Important Document.txt')).toBeVisible({ timeout: 10000 });
+
+      await page.fill('input[name="title"]', 'Important Document');
       await page.fill('textarea[name="body"]', 'Summary of the document contents');
-      await page.fill('input[name="tags"]', 'document, pdf, reference');
+      await page.fill('input[name="tags"]', 'document, text, reference');
 
       await page.click('button[type="submit"]:has-text("Save")');
 
@@ -194,9 +205,7 @@ test.describe('Capture Feature', () => {
       await expect(titleInput).toHaveAttribute('required');
     });
 
-    // Skip: Browser's built-in type="url" validation prevents form submission,
-    // so Zod "Invalid URL" error never renders
-    test.skip('should show error for invalid URL', async ({ page }) => {
+    test('should show error for invalid URL', async ({ page }) => {
       await page.selectOption('select[name="type"]', 'link');
       await page.fill('input[name="title"]', 'Bad Link');
       await page.fill('input[name="url"]', 'not-a-valid-url');
