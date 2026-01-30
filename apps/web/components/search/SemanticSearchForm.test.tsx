@@ -194,7 +194,7 @@ describe('SemanticSearchForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Programming Notes')).toBeInTheDocument();
+        expect(screen.getByText((_content, element) => element?.tagName === 'H3' && element?.textContent === 'Programming Notes')).toBeInTheDocument();
         expect(screen.getByText('95% match')).toBeInTheDocument();
       });
     });

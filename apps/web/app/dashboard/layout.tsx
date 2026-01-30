@@ -8,6 +8,8 @@ import Nav from '@/components/layout/nav';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { CommandPalette } from '@/components/ui/command-palette';
 import { ViewTransition } from '@/components/layout/ViewTransition';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
+import { ScrollToTop } from '@/components/layout/ScrollToTop';
 
 export default async function DashboardLayout({
   children,
@@ -43,10 +45,12 @@ export default async function DashboardLayout({
         </div>
         <Nav />
         <main id="main-content" className="flex-1 overflow-y-auto p-4 pb-20 sm:p-6 lg:pb-6" tabIndex={-1}>
+          <Breadcrumbs />
           {children}
         </main>
       </div>
       <BottomNav />
+      <ScrollToTop />
       <CommandPalette />
       <ViewTransition />
     </div>
