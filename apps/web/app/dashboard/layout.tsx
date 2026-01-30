@@ -5,6 +5,7 @@ import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import Header from '@/components/layout/header';
 import Nav from '@/components/layout/nav';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 export default async function DashboardLayout({
   children,
@@ -33,10 +34,11 @@ export default async function DashboardLayout({
       <Header user={session.user} />
       <div className="flex flex-1">
         <Nav />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6" tabIndex={-1}>
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 pb-20 sm:p-6 lg:pb-6" tabIndex={-1}>
           {children}
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 }

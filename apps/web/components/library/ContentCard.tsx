@@ -8,6 +8,7 @@ import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
 import { EditableTags } from './EditableTags';
 import { toggleFavoriteAction } from '@/app/actions/content';
+import { useToast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -103,6 +104,7 @@ export function ContentCard({
   const [shareId, setShareId] = useState(initialShareId);
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+  const { addToast } = useToast();
 
   const handleShareStatusChange = (newIsShared: boolean, newShareId: string | null) => {
     setIsShared(newIsShared);
@@ -127,8 +129,11 @@ export function ContentCard({
   const [announcement, setAnnouncement] = useState<string | null>(null);
 
   const handleToggleFavoriteWithAnnouncement = async () => {
+    const wasFavorite = isFavorite;
     await handleToggleFavorite();
-    setAnnouncement(isFavorite ? 'Removed from favorites' : 'Added to favorites');
+    const msg = wasFavorite ? 'Removed from favorites' : 'Added to favorites';
+    setAnnouncement(msg);
+    addToast({ variant: 'success', title: msg });
     setTimeout(() => setAnnouncement(null), 1000);
   };
 
