@@ -3,6 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DeleteConfirmDialog, type DeleteConfirmDialogProps } from './DeleteConfirmDialog';
 
+// Mock useToast
+vi.mock('@/components/ui/toast', () => ({
+  useToast: () => ({ addToast: vi.fn(), toasts: [], removeToast: vi.fn() }),
+}));
+
 // Mock the deleteContentAction
 vi.mock('@/app/actions/content', () => ({
   deleteContentAction: vi.fn(),

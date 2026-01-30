@@ -4,6 +4,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ContentCard, type ContentCardProps } from './ContentCard';
 
+// Mock useToast
+vi.mock('@/components/ui/toast', () => ({
+  useToast: () => ({ addToast: vi.fn(), toasts: [], removeToast: vi.fn() }),
+}));
+
 // Mock EditableTags component
 vi.mock('./EditableTags', () => ({
   EditableTags: ({ initialTags, autoTags }: { initialTags: string[]; autoTags: string[] }) => (
