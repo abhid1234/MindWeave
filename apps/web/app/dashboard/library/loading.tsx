@@ -58,7 +58,9 @@ export default function LibraryLoading() {
       {/* Content Grid Skeleton */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <ContentCardSkeleton key={i} />
+          <div key={i} className={`animate-fade-up stagger-${i + 1}`} style={{ animationFillMode: 'backwards' }}>
+            <ContentCardSkeleton />
+          </div>
         ))}
       </div>
     </div>

@@ -5,6 +5,7 @@ import { eq, desc, sql } from 'drizzle-orm';
 import Link from 'next/link';
 import { formatDateUTC } from '@/lib/utils';
 import { DashboardRecommendations } from '@/components/dashboard/DashboardRecommendations';
+import { DashboardStats } from '@/components/dashboard/DashboardStats';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -40,24 +41,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{totalCount}</div>
-          <p className="text-sm text-muted-foreground">Total Items</p>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">0</div>
-          <p className="text-sm text-muted-foreground">Tags</p>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">0</div>
-          <p className="text-sm text-muted-foreground">This Week</p>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">0</div>
-          <p className="text-sm text-muted-foreground">Searches</p>
-        </div>
-      </div>
+      <DashboardStats totalCount={totalCount} />
 
       {/* Recent Items */}
       <div className="mt-8">

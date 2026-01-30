@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star, Loader2, Sparkles } from 'lucide-react';
 import NextImage from 'next/image';
@@ -137,6 +137,23 @@ export function ContentCard({
     setTimeout(() => setAnnouncement(null), 1000);
   };
 
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty('--spotlight-x', `${e.clientX - rect.left}px`);
+    el.style.setProperty('--spotlight-y', `${e.clientY - rect.top}px`);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.removeProperty('--spotlight-x');
+    el.style.removeProperty('--spotlight-y');
+  }, []);
+
   return (
     <>
       {/* Screen reader announcement */}
@@ -151,7 +168,10 @@ export function ContentCard({
       </div>
 
       <article
-        className="group relative rounded-xl border bg-card p-4 shadow-soft transition-all duration-300 ease-smooth hover:shadow-soft-md hover:-translate-y-0.5 hover:border-primary/20 overflow-hidden"
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="spotlight-card group relative rounded-xl border bg-card p-4 shadow-soft transition-all duration-300 ease-smooth hover:shadow-soft-md hover:-translate-y-0.5 hover:border-primary/20 overflow-hidden"
         aria-labelledby={`content-title-${id}`}
       >
         {/* Type indicator bar */}

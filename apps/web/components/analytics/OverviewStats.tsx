@@ -5,6 +5,7 @@ import { FileText, Calendar, FolderOpen, Tag } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getOverviewStatsAction } from '@/app/actions/analytics';
 import type { OverviewStats as OverviewStatsType } from '@/types/analytics';
+import { useCountUp } from '@/hooks/useCountUp';
 
 interface StatCardProps {
   title: string;
@@ -14,6 +15,7 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, icon, description }: StatCardProps) {
+  const animatedValue = useCountUp(value);
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between">
@@ -21,7 +23,7 @@ function StatCard({ title, value, icon, description }: StatCardProps) {
         <div className="text-muted-foreground">{icon}</div>
       </div>
       <div className="mt-2">
-        <p className="text-3xl font-bold">{value.toLocaleString()}</p>
+        <p className="text-3xl font-bold">{animatedValue.toLocaleString()}</p>
         {description && (
           <p className="mt-1 text-xs text-muted-foreground">{description}</p>
         )}

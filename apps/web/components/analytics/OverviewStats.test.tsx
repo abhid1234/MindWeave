@@ -3,6 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { OverviewStats } from './OverviewStats';
 
+// Mock useCountUp to return target value immediately
+vi.mock('@/hooks/useCountUp', () => ({
+  useCountUp: (target: number) => target,
+}));
+
 // Mock the server action
 vi.mock('@/app/actions/analytics', () => ({
   getOverviewStatsAction: vi.fn(),
