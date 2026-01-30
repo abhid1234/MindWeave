@@ -241,6 +241,40 @@
   .stagger-6 { animation-delay: 300ms; }
   .stagger-7 { animation-delay: 350ms; }
   .stagger-8 { animation-delay: 400ms; }
+
+  /* Spotlight card effect */
+  .spotlight-card {
+    position: relative;
+  }
+
+  .spotlight-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    background: radial-gradient(
+      600px circle at var(--spotlight-x) var(--spotlight-y),
+      hsl(var(--primary) / 0.06),
+      transparent 40%
+    );
+    z-index: 0;
+  }
+
+  .spotlight-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Drift animation delays for gradient mesh */
+  .drift-delay-1 {
+    animation-delay: -7s;
+  }
+
+  .drift-delay-2 {
+    animation-delay: -14s;
+  }
 }
 
 @layer utilities {

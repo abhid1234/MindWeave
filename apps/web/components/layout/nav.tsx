@@ -61,7 +61,7 @@ export function NavLinks({ onNavigate }: NavLinksProps) {
 
 export default function Nav() {
   return (
-    <nav className="hidden w-64 border-r bg-muted/20 p-4 lg:block">
+    <nav className="hidden w-64 border-r border-border/50 bg-background/60 backdrop-blur-xl p-4 lg:block">
       <NavLinks />
     </nav>
   );

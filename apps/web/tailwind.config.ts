@@ -129,6 +129,12 @@ const config: Config = {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-3px)' },
         },
+        'drift': {
+          '0%, 100%': { transform: 'translate(0, 0)' },
+          '25%': { transform: 'translate(30px, -20px)' },
+          '50%': { transform: 'translate(-20px, 30px)' },
+          '75%': { transform: 'translate(20px, 20px)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -143,6 +149,7 @@ const config: Config = {
         'shimmer': 'shimmer 2s linear infinite',
         'float': 'float 3s ease-in-out infinite',
         'bounce-soft': 'bounce-soft 1s ease-in-out infinite',
+        'drift': 'drift 20s ease-in-out infinite',
       },
       transitionTimingFunction: {
         'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',

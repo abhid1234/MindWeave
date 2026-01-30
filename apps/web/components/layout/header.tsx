@@ -30,6 +30,9 @@ export default function Header({ user }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
+          <kbd className="pointer-events-none hidden h-7 select-none items-center gap-1 rounded border bg-muted px-2 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+            <span className="text-xs">⌘</span>K
+          </kbd>
           <ThemeToggle />
 
           {/* User info - desktop */}
