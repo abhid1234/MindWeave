@@ -467,6 +467,20 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-30 05:30** - ✅ **BREADCRUMBS, SCROLL-TO-TOP & SEARCH HIGHLIGHTING COMPLETE**
+  - **Breadcrumbs** - Client component using `usePathname()` with Home icon → ChevronRight → page name
+    - Path segment mapping for all dashboard sub-pages (Capture, Library, Search, Ask AI, Analytics, Import, Profile)
+    - Hidden on `/dashboard` home page
+  - **Scroll-to-Top Button** - Floating button appears after scrolling 300px on main content
+    - Smooth scroll animation, fade in/out transitions
+    - Positioned above BottomNav on mobile (`bottom-24`), normal position on desktop (`lg:bottom-8`)
+  - **Search Highlighting** - Query term highlighting in search results
+    - `highlightText()` utility wraps matches in `<mark>` with `bg-primary/20` styling
+    - Applied to title and body in both keyword and semantic search results
+    - Safe regex escaping for special characters
+  - Files: 3 created (`Breadcrumbs.tsx`, `ScrollToTop.tsx`, `highlight.tsx`), 4 modified
+  - All 1146 tests passing, 0 regressions
+  - Commit: 6c373ec
 - **2026-01-30 04:55** - ✅ **DEPLOYED TO CLOUD RUN** (build 539ba979, commit bd3f5fe)
   - Page transitions, display font, and avatar menu dropdown live
   - Image: `gcr.io/mindweave-prod/mindweave:bd3f5fe`
