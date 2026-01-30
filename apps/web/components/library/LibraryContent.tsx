@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Search, Library } from 'lucide-react';
 import { BulkSelectionProvider } from './BulkSelectionContext';
 import { BulkActionsBar } from './BulkActionsBar';
 import { SelectableContentCard } from './SelectableContentCard';
@@ -165,17 +165,27 @@ export function LibraryContent({
 
       {/* Content Grid */}
       {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-12 text-center animate-in fade-in-50 duration-300">
-          <p className="text-muted-foreground">
+        <div className="rounded-xl border border-dashed p-16 text-center animate-in fade-in-50 duration-300">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            {hasFilters ? (
+              <Search className="h-7 w-7 text-muted-foreground" />
+            ) : (
+              <Library className="h-7 w-7 text-muted-foreground" />
+            )}
+          </div>
+          <h3 className="text-lg font-semibold mb-1">
+            {hasFilters ? 'No results found' : 'Your library is empty'}
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
             {hasFilters
-              ? 'No content matches your filters.'
-              : 'No content yet. Start capturing your ideas!'}
+              ? 'Try adjusting your filters or search terms to find what you are looking for.'
+              : 'Start capturing your ideas, links, and files to build your knowledge base.'}
           </p>
           <Link
             href="/dashboard/capture"
-            className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="mt-6 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            Create Content
+            {hasFilters ? 'Clear Filters' : 'Create Your First Item'}
           </Link>
         </div>
       ) : (

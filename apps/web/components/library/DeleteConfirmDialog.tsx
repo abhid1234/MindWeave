@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { deleteContentAction } from '@/app/actions/content';
+import { useToast } from '@/components/ui/toast';
 
 export type DeleteConfirmDialogProps = {
   contentId: string;
@@ -29,6 +30,7 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { addToast } = useToast();
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -40,8 +42,10 @@ export function DeleteConfirmDialog({
       if (result.success) {
         onOpenChange(false);
         onDeleted?.();
+        addToast({ variant: 'success', title: 'Deleted', description: 'Content deleted successfully.' });
       } else {
         setError(result.message);
+        addToast({ variant: 'error', title: 'Delete failed', description: result.message });
       }
     } catch {
       setError('An unexpected error occurred. Please try again.');
