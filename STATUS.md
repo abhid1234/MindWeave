@@ -467,6 +467,10 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-30 06:00** - ✅ **DEPLOYED TO CLOUD RUN** (build f19f5f37, commit 279fb00)
+  - Breadcrumbs, scroll-to-top button, and search highlighting live
+  - Image: `gcr.io/mindweave-prod/mindweave:279fb00`
+  - URL: https://mindweave-a2ysp2ppfq-uc.a.run.app
 - **2026-01-30 05:30** - ✅ **BREADCRUMBS, SCROLL-TO-TOP & SEARCH HIGHLIGHTING COMPLETE**
   - **Breadcrumbs** - Client component using `usePathname()` with Home icon → ChevronRight → page name
     - Path segment mapping for all dashboard sub-pages (Capture, Library, Search, Ask AI, Analytics, Import, Profile)
