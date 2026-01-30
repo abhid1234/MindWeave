@@ -467,6 +467,26 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-30 04:30** - ✅ **PAGE TRANSITIONS, TYPOGRAPHY & AVATAR MENU COMPLETE**
+  - **Page Transitions** - CSS View Transitions API for smooth dashboard navigation
+    - `ViewTransition.tsx` client component detects route changes via `usePathname()`
+    - Fade + slide animation (200ms ease-out) with `prefers-reduced-motion` support
+    - Progressive enhancement — instant navigation in unsupported browsers
+  - **Typography Upgrade** - Plus Jakarta Sans display font for headings
+    - Added via `next/font/google` with CSS variable `--font-display`
+    - Applied to all `h1-h6` elements via `globals.css`
+    - Inter retained as body font via `--font-sans` variable
+    - Tailwind `fontFamily.display` and `fontFamily.sans` configured
+  - **Avatar Menu Dropdown** - Unified user menu replacing inline controls
+    - `UserMenu.tsx` with Radix DropdownMenu
+    - Avatar trigger with online indicator
+    - Dropdown sections: user info, profile link, keyboard shortcuts, theme switcher (Light/Dark/System), sign out
+    - Replaced separate ThemeToggle, user info display, and Sign Out button in header
+    - Fallback icon when no user image
+  - Files: 2 created (`ViewTransition.tsx`, `UserMenu.tsx`), 6 modified
+  - Header tests updated (10 tests passing)
+  - All 1146 tests passing, 0 regressions
+  - Commit: e293755
 - **2026-01-30 03:20** - ✅ **5 PREMIUM UI POLISH FEATURES COMPLETE**
   - **Command Palette (Cmd+K)** - cmdk-powered palette with navigation, actions, and theme switching
     - Opens with Cmd+K / Ctrl+K, closes with Escape
