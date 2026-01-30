@@ -467,6 +467,10 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-01-30 04:55** - ✅ **DEPLOYED TO CLOUD RUN** (build 539ba979, commit bd3f5fe)
+  - Page transitions, display font, and avatar menu dropdown live
+  - Image: `gcr.io/mindweave-prod/mindweave:bd3f5fe`
+  - URL: https://mindweave-a2ysp2ppfq-uc.a.run.app
 - **2026-01-30 04:30** - ✅ **PAGE TRANSITIONS, TYPOGRAPHY & AVATAR MENU COMPLETE**
   - **Page Transitions** - CSS View Transitions API for smooth dashboard navigation
     - `ViewTransition.tsx` client component detects route changes via `usePathname()`
