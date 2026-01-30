@@ -492,6 +492,10 @@ None - fresh scaffolding
   - All 1153 tests passing, 0 regressions
   - Deployed to Cloud Run (build 729284bd, commit c31d33e)
   - Commits: 53900ad, fcb17d6, c31d33e
+- **2026-01-30 03:40** - ✅ **FAVICON ADDED**
+  - Generated multi-size favicon.ico (16/32/48px) from existing icon.png
+  - Placed at `app/favicon.ico` (Next.js auto-serves at `/favicon.ico`)
+  - Deployed to Cloud Run (build 8b21b296, commit 200c30c)
 - **2026-01-30 02:00** - ✅ **PRODUCTION POLISH COMPLETE**
   - **Phase 1: GCP Monitoring & Alerting**
     - Enhanced `/api/health` endpoint with DB connectivity check, latency measurement, uptime counter, and version info
