@@ -490,7 +490,8 @@ None - fresh scaffolding
     - Extracted `DashboardStats` client component from server-rendered dashboard page
   - Files: 4 created, 12 modified (including test mock for useCountUp)
   - All 1153 tests passing, 0 regressions
-  - Commit: 53900ad
+  - Deployed to Cloud Run (build 729284bd, commit c31d33e)
+  - Commits: 53900ad, fcb17d6, c31d33e
 - **2026-01-30 02:00** - ✅ **PRODUCTION POLISH COMPLETE**
   - **Phase 1: GCP Monitoring & Alerting**
     - Enhanced `/api/health` endpoint with DB connectivity check, latency measurement, uptime counter, and version info
