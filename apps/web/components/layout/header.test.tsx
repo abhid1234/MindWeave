@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 // Mock Next.js Image component
 vi.mock('next/image', () => ({
@@ -9,9 +9,31 @@ vi.mock('next/image', () => ({
   ),
 }));
 
+// Mock next/link
+vi.mock('next/link', () => ({
+  default: ({ children, href, className }: any) => (
+    <a href={href} className={className}>{children}</a>
+  ),
+}));
+
 // Mock signOut function
 vi.mock('@/lib/auth', () => ({
   signOut: vi.fn(),
+}));
+
+// Mock next-themes
+vi.mock('next-themes', () => ({
+  useTheme: () => ({ theme: 'system', setTheme: vi.fn(), resolvedTheme: 'light' }),
+}));
+
+// Mock auth action
+vi.mock('@/app/actions/auth', () => ({
+  signOutAction: vi.fn(),
+}));
+
+// Mock MobileNav
+vi.mock('./MobileNav', () => ({
+  MobileNav: () => <div data-testid="mobile-nav" />,
 }));
 
 // Import the actual component after mocks
@@ -35,27 +57,15 @@ describe('Header Component', () => {
       expect(screen.getByText('Mindweave')).toBeInTheDocument();
     });
 
-    it('should render user name', () => {
+    it('should render user menu button', () => {
       render(<Header user={mockUser} />);
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /user menu/i })).toBeInTheDocument();
     });
 
-    it('should render user email', () => {
+    it('should render user avatar in the menu trigger', () => {
       render(<Header user={mockUser} />);
-      expect(screen.getByText('john@example.com')).toBeInTheDocument();
-    });
-
-    it('should render user avatar when image is provided', () => {
-      render(<Header user={mockUser} />);
-      // There are two avatars - one for desktop, one for mobile
-      const avatars = screen.getAllByAltText('John Doe');
-      expect(avatars.length).toBeGreaterThanOrEqual(1);
-      expect(avatars[0]).toHaveAttribute('src', 'https://example.com/avatar.jpg');
-    });
-
-    it('should render sign out button', () => {
-      render(<Header user={mockUser} />);
-      expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();
+      const avatar = screen.getByAltText('John Doe');
+      expect(avatar).toHaveAttribute('src', 'https://example.com/avatar.jpg');
     });
   });
 
@@ -67,40 +77,8 @@ describe('Header Component', () => {
         image: null,
       };
       render(<Header user={userWithoutImage} />);
-      expect(screen.queryByRole('img')).not.toBeInTheDocument();
-      expect(screen.getByText('Jane Doe')).toBeInTheDocument();
-    });
-
-    it('should handle user without name', () => {
-      const userWithoutName = {
-        name: null,
-        email: 'user@example.com',
-        image: 'https://example.com/avatar.jpg',
-      };
-      render(<Header user={userWithoutName} />);
-      expect(screen.getByText('user@example.com')).toBeInTheDocument();
-    });
-  });
-
-  describe('Sign Out Functionality', () => {
-    it('should have sign out form', () => {
-      render(<Header user={mockUser} />);
-      const button = screen.getByRole('button', { name: /sign out/i });
-      expect(button.closest('form')).toBeInTheDocument();
-    });
-
-    it('should have submit button type', () => {
-      render(<Header user={mockUser} />);
-      const button = screen.getByRole('button', { name: /sign out/i });
-      expect(button).toHaveAttribute('type', 'submit');
-    });
-
-    it('should be clickable', () => {
-      render(<Header user={mockUser} />);
-      const button = screen.getByRole('button', { name: /sign out/i });
-      fireEvent.click(button);
-      // Button click should trigger form submission
-      expect(button).toBeInTheDocument();
+      // Should still render the menu button (with fallback icon)
+      expect(screen.getByRole('button', { name: /user menu/i })).toBeInTheDocument();
     });
   });
 
@@ -113,15 +91,8 @@ describe('Header Component', () => {
 
     it('should have rounded avatar', () => {
       render(<Header user={mockUser} />);
-      // There are two avatars - one for desktop, one for mobile
-      const avatars = screen.getAllByAltText('John Doe');
-      expect(avatars[0]).toHaveClass('rounded-full');
-    });
-
-    it('should have styled sign out button', () => {
-      render(<Header user={mockUser} />);
-      const button = screen.getByRole('button', { name: /sign out/i });
-      expect(button).toHaveClass('rounded-lg');
+      const avatar = screen.getByAltText('John Doe');
+      expect(avatar).toHaveClass('rounded-full');
     });
   });
 
@@ -131,17 +102,16 @@ describe('Header Component', () => {
       expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
-    it('should have accessible button', () => {
+    it('should have accessible user menu button', () => {
       render(<Header user={mockUser} />);
-      const button = screen.getByRole('button', { name: /sign out/i });
+      const button = screen.getByRole('button', { name: /user menu/i });
       expect(button).toBeVisible();
     });
 
     it('should have alt text for avatar image', () => {
       render(<Header user={mockUser} />);
-      // There are two avatars - one for desktop, one for mobile
-      const avatars = screen.getAllByAltText('John Doe');
-      expect(avatars[0]).toHaveAccessibleName();
+      const avatar = screen.getByAltText('John Doe');
+      expect(avatar).toHaveAccessibleName();
     });
   });
 });

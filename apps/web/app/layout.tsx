@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ToastProvider } from '@/components/ui/toast';
@@ -7,8 +7,15 @@ import { OfflineIndicator, InstallPrompt, UpdatePrompt } from '@/components/pwa'
 
 const inter = Inter({
   subsets: ['latin'],
-  display: 'swap', // Use font-display: swap for better LCP
+  display: 'swap',
   preload: true,
+  variable: '--font-sans',
+});
+
+const displayFont = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-display',
 });
 
 export const metadata: Metadata = {
@@ -47,7 +54,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${displayFont.variable} ${inter.className}`}>
         <ThemeProvider>
           <ToastProvider>
             {/* Skip navigation link for keyboard users */}

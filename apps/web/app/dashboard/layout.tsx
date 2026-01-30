@@ -7,6 +7,7 @@ import Header from '@/components/layout/header';
 import Nav from '@/components/layout/nav';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { CommandPalette } from '@/components/ui/command-palette';
+import { ViewTransition } from '@/components/layout/ViewTransition';
 
 export default async function DashboardLayout({
   children,
@@ -47,6 +48,7 @@ export default async function DashboardLayout({
       </div>
       <BottomNav />
       <CommandPalette />
+      <ViewTransition />
     </div>
   );
 }
