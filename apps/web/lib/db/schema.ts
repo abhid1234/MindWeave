@@ -186,6 +186,31 @@ export const devices = pgTable(
   })
 );
 
+// Tasks table
+export const tasks = pgTable(
+  'tasks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description'),
+    status: varchar('status', { length: 20 }).notNull().default('todo'),
+    priority: varchar('priority', { length: 20 }).notNull().default('medium'),
+    dueDate: timestamp('due_date', { mode: 'date' }),
+    completedAt: timestamp('completed_at', { mode: 'date' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('tasks_user_id_idx').on(table.userId),
+    statusIdx: index('tasks_status_idx').on(table.status),
+    priorityIdx: index('tasks_priority_idx').on(table.priority),
+    userCreatedAtIdx: index('tasks_user_created_at_idx').on(table.userId, table.createdAt),
+  })
+);
+
 // Embeddings table (for semantic search)
 export const embeddings = pgTable(
   'embeddings',
@@ -210,6 +235,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   collections: many(collections),
   devices: many(devices),
+  tasks: many(tasks),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -251,6 +277,13 @@ export const collectionsRelations = relations(collections, ({ one, many }) => ({
   contentCollections: many(contentCollections),
 }));
 
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  user: one(users, {
+    fields: [tasks.userId],
+    references: [users.id],
+  }),
+}));
+
 export const contentCollectionsRelations = relations(contentCollections, ({ one }) => ({
   content: one(content, {
     fields: [contentCollections.contentId],
@@ -280,3 +313,6 @@ export type NewContentCollection = typeof contentCollections.$inferInsert;
 
 export type Device = typeof devices.$inferSelect;
 export type NewDevice = typeof devices.$inferInsert;
+
+export type Task = typeof tasks.$inferSelect;
+export type NewTask = typeof tasks.$inferInsert;

@@ -144,3 +144,43 @@ export const updateProfileSchema = z.object({
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+/**
+ * Task creation validation schema
+ */
+export const createTaskSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(500, 'Title is too long'),
+  description: z.string().max(2000, 'Description is too long').optional(),
+  status: z.enum(['todo', 'in_progress', 'done']).default('todo'),
+  priority: z.enum(['low', 'medium', 'high']).default('medium'),
+  dueDate: z.coerce.date().optional(),
+});
+
+export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+
+/**
+ * Task update validation schema
+ */
+export const updateTaskSchema = z.object({
+  title: z.string().min(1).max(500).optional(),
+  description: z.string().max(2000).optional(),
+  status: z.enum(['todo', 'in_progress', 'done']).optional(),
+  priority: z.enum(['low', 'medium', 'high']).optional(),
+  dueDate: z.coerce.date().optional(),
+});
+
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
+
+/**
+ * Task query validation schema
+ */
+export const taskQuerySchema = z.object({
+  status: z.enum(['todo', 'in_progress', 'done']).optional(),
+  priority: z.enum(['low', 'medium', 'high']).optional(),
+  sort: z.enum(['createdAt', 'dueDate', 'priority', 'title']).default('createdAt'),
+  order: z.enum(['asc', 'desc']).default('desc'),
+  page: z.coerce.number().min(1).default(1),
+  perPage: z.coerce.number().min(1).max(100).default(20),
+});
+
+export type TaskQueryInput = z.infer<typeof taskQuerySchema>;
