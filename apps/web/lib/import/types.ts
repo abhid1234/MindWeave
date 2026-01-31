@@ -2,7 +2,7 @@
  * Import feature type definitions
  */
 
-export type ImportSource = 'bookmarks' | 'pocket' | 'notion' | 'evernote';
+export type ImportSource = 'bookmarks' | 'pocket' | 'notion' | 'evernote' | 'twitter';
 
 export type ContentType = 'note' | 'link';
 
@@ -167,6 +167,15 @@ export const IMPORT_SOURCES: ImportSourceConfig[] = [
     acceptedMimeTypes: ['application/xml', 'text/xml'],
     maxFileSize: 100 * 1024 * 1024, // 100MB
     icon: 'StickyNote',
+  },
+  {
+    id: 'twitter',
+    name: 'X (Twitter) Bookmarks',
+    description: 'Import bookmarks from your X/Twitter data archive (bookmarks.js)',
+    acceptedExtensions: ['.js'],
+    acceptedMimeTypes: ['text/javascript', 'application/javascript'],
+    maxFileSize: 50 * 1024 * 1024, // 50MB
+    icon: 'Twitter',
   },
 ];
 

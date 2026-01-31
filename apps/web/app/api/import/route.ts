@@ -21,6 +21,8 @@ import {
   parseNotion,
   parseEvernote,
   isEvernoteFile,
+  parseTwitterBookmarks,
+  isTwitterBookmarksFile,
 } from '@/lib/import/parsers';
 import {
   checkRateLimit,
@@ -145,6 +147,21 @@ export async function POST(request: NextRequest) {
           );
         }
         result = parseEvernote(content);
+        break;
+      }
+
+      case 'twitter': {
+        const content = await file.text();
+        if (!isTwitterBookmarksFile(content)) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: 'This does not appear to be a valid X/Twitter bookmarks.js file.',
+            },
+            { status: 400 }
+          );
+        }
+        result = parseTwitterBookmarks(content);
         break;
       }
 
