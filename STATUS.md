@@ -296,6 +296,11 @@ None - Ready for feature development
   - Parses ENEX format with ENML content
   - Handles checkboxes and attachments
   - Preserves Evernote tags
+- [x] **Import from X (Twitter)** - Data archive bookmarks.js
+  - Parses `window.YTD.bookmarks.part0` format
+  - Creates link entries pointing to tweet URLs
+  - Extracts fullText as body/title when available
+  - Tags with `twitter-bookmark`, stores tweetId in metadata
 - [x] **Import UI Wizard**
   - Step-by-step import flow
   - Source selection with format hints
@@ -469,6 +474,16 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-01** - ✅ **X/TWITTER ARCHIVE BOOKMARK IMPORT**
+  - Added Twitter parser (`lib/import/parsers/twitter.ts`) for X data archive `bookmarks.js` files
+  - Strips `window.YTD.bookmarks.part0 =` prefix, parses JSON array of bookmark entries
+  - Each bookmark imported as `link` type with URL `https://x.com/i/status/{tweetId}`
+  - Uses fullText as title (truncated to 100 chars) or falls back to "Tweet {tweetId}"
+  - Added `'twitter'` to ImportSource type and IMPORT_SOURCES config
+  - Added `case 'twitter'` to import API route
+  - 22 new tests (17 for parseTwitterBookmarks, 5 for isTwitterBookmarksFile)
+  - 1254 total tests passing, 0 failures
+  - Commits: 24d4710
 - **2026-01-31** - ✅ **TASKS DASHBOARD FEATURE COMPLETE**
   - Full Tasks page at /dashboard/tasks with CRUD operations
   - Server actions: getTasksAction, createTaskAction, updateTaskAction, deleteTaskAction, toggleTaskDoneAction

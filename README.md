@@ -401,7 +401,7 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Enhanced hover states and micro-interactions
 
 ### Phase 5: Import & PWA ✅ Complete
-- [x] Import tools (Browser bookmarks, Pocket, Notion, Evernote)
+- [x] Import tools (Browser bookmarks, Pocket, Notion, Evernote, X/Twitter)
 - [x] PWA enhancements (mobile navigation, service worker, offline support)
 - [x] Installable app experience on desktop and mobile
 - [x] App icons for all platforms (72-512px)

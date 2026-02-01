@@ -9,6 +9,8 @@ import {
   isPocketFile,
   parseEvernote,
   isEvernoteFile,
+  parseTwitterBookmarks,
+  isTwitterBookmarksFile,
 } from '../parsers';
 
 const fixturesPath = path.join(__dirname, '../../../tests/fixtures/import');
@@ -290,6 +292,175 @@ describe('Evernote Parser', () => {
 
     it('rejects non-ENEX content', () => {
       expect(isEvernoteFile('<html><body>Hello</body></html>')).toBe(false);
+    });
+  });
+});
+
+describe('Twitter Bookmarks Parser', () => {
+  const validBookmarksJs = `window.YTD.bookmarks.part0 = [
+  { "bookmark": { "tweetId": "1234567890" } },
+  { "bookmark": { "tweetId": "9876543210", "fullText": "This is a great tweet about programming" } }
+]`;
+
+  describe('parseTwitterBookmarks', () => {
+    it('parses bookmarks.js successfully', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      expect(result.success).toBe(true);
+      expect(result.items).toHaveLength(2);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('generates correct tweet URLs', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      expect(result.items[0].url).toBe('https://x.com/i/status/1234567890');
+      expect(result.items[1].url).toBe('https://x.com/i/status/9876543210');
+    });
+
+    it('uses fullText as title when available', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      expect(result.items[1].title).toBe('This is a great tweet about programming');
+    });
+
+    it('falls back to Tweet ID for title when no fullText', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      expect(result.items[0].title).toBe('Tweet 1234567890');
+    });
+
+    it('truncates long fullText in title', () => {
+      const longText = 'A'.repeat(150);
+      const content = `window.YTD.bookmarks.part0 = [{ "bookmark": { "tweetId": "111", "fullText": "${longText}" } }]`;
+      const result = parseTwitterBookmarks(content);
+
+      expect(result.items[0].title).toHaveLength(101); // 100 chars + ellipsis
+      expect(result.items[0].title.endsWith('…')).toBe(true);
+    });
+
+    it('stores fullText in body', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      expect(result.items[0].body).toBeUndefined();
+      expect(result.items[1].body).toBe('This is a great tweet about programming');
+    });
+
+    it('sets type to link', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      for (const item of result.items) {
+        expect(item.type).toBe('link');
+      }
+    });
+
+    it('adds twitter-bookmark tag', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      for (const item of result.items) {
+        expect(item.tags).toContain('twitter-bookmark');
+      }
+    });
+
+    it('sets metadata source to twitter', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      for (const item of result.items) {
+        expect(item.metadata?.source).toBe('twitter');
+      }
+    });
+
+    it('sets originalId in metadata', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      expect(result.items[0].metadata?.originalId).toBe('1234567890');
+      expect(result.items[1].metadata?.originalId).toBe('9876543210');
+    });
+
+    it('reports correct stats', () => {
+      const result = parseTwitterBookmarks(validBookmarksJs);
+
+      expect(result.stats.total).toBe(2);
+      expect(result.stats.parsed).toBe(2);
+      expect(result.stats.skipped).toBe(0);
+    });
+
+    it('skips entries without tweetId', () => {
+      const content = `window.YTD.bookmarks.part0 = [
+        { "bookmark": { "tweetId": "123" } },
+        { "bookmark": {} },
+        { "other": "data" }
+      ]`;
+      const result = parseTwitterBookmarks(content);
+
+      expect(result.success).toBe(true);
+      expect(result.items).toHaveLength(1);
+      expect(result.stats.total).toBe(3);
+      expect(result.stats.parsed).toBe(1);
+      expect(result.stats.skipped).toBe(2);
+      expect(result.errors).toHaveLength(2);
+    });
+
+    it('handles empty array', () => {
+      const content = 'window.YTD.bookmarks.part0 = []';
+      const result = parseTwitterBookmarks(content);
+
+      expect(result.success).toBe(true);
+      expect(result.items).toHaveLength(0);
+      expect(result.stats.total).toBe(0);
+    });
+
+    it('handles invalid JSON', () => {
+      const content = 'window.YTD.bookmarks.part0 = not json';
+      const result = parseTwitterBookmarks(content);
+
+      expect(result.success).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('handles non-array JSON', () => {
+      const content = 'window.YTD.bookmarks.part0 = { "not": "array" }';
+      const result = parseTwitterBookmarks(content);
+
+      expect(result.success).toBe(false);
+      expect(result.errors[0].message).toBe('Expected an array of bookmark entries.');
+    });
+
+    it('handles content without equals sign', () => {
+      const result = parseTwitterBookmarks('no equals sign here');
+
+      expect(result.success).toBe(false);
+      expect(result.errors[0].message).toBe('Invalid Twitter bookmarks file format.');
+    });
+
+    it('handles leading whitespace', () => {
+      const content = `  \n  window.YTD.bookmarks.part0 = [{ "bookmark": { "tweetId": "456" } }]`;
+      const result = parseTwitterBookmarks(content);
+
+      expect(result.success).toBe(true);
+      expect(result.items).toHaveLength(1);
+    });
+  });
+
+  describe('isTwitterBookmarksFile', () => {
+    it('detects Twitter bookmarks format', () => {
+      expect(isTwitterBookmarksFile(validBookmarksJs)).toBe(true);
+    });
+
+    it('detects with leading whitespace', () => {
+      expect(isTwitterBookmarksFile('  \n  window.YTD.bookmarks.part0 = []')).toBe(true);
+    });
+
+    it('rejects non-Twitter content', () => {
+      expect(isTwitterBookmarksFile('var data = []')).toBe(false);
+    });
+
+    it('rejects empty string', () => {
+      expect(isTwitterBookmarksFile('')).toBe(false);
+    });
+
+    it('rejects HTML content', () => {
+      expect(isTwitterBookmarksFile('<html><body>Hello</body></html>')).toBe(false);
     });
   });
 });
