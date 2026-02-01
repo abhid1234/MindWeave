@@ -63,12 +63,6 @@ export function RecommendationCard({
             </span>
           </div>
 
-          {body && (
-            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-              {body}
-            </p>
-          )}
-
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {tags.slice(0, 3).map((tag) => (

@@ -68,7 +68,7 @@ export default async function DashboardPage() {
               <div key={item.id} className="rounded-lg border bg-card p-4 hover:bg-accent">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold">{item.title}</h3>
+                    <h3 className="font-semibold">{item.title.split(/\s+/).slice(0, 10).join(' ')}{item.title.split(/\s+/).length > 10 ? '...' : ''}</h3>
                     {item.body && (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                         {item.body}

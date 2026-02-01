@@ -101,12 +101,7 @@ export default async function PublicCollectionPage({ params }: Props) {
                     {getTypeIcon(item.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium">{item.title}</h3>
-                    {item.body && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-3">
-                        {item.body}
-                      </p>
-                    )}
+                    <h3 className="font-medium line-clamp-1">{item.title}</h3>
                     {item.url && (
                       <a
                         href={item.url}

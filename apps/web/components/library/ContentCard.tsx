@@ -265,7 +265,7 @@ export function ContentCard({
           </div>
         </div>
 
-        <h3 id={`content-title-${id}`} className="font-semibold line-clamp-2 mb-2 pl-2">{title}</h3>
+        <h3 id={`content-title-${id}`} className="font-semibold line-clamp-1 mb-2 pl-2">{title}</h3>
 
         {/* File preview for file type */}
         {type === 'file' && metadata?.filePath && (
@@ -309,12 +309,6 @@ export function ContentCard({
               </div>
             )}
           </div>
-        )}
-
-        {body && (
-          <p className="text-sm text-muted-foreground line-clamp-3 mb-3 pl-2 leading-relaxed">
-            {body}
-          </p>
         )}
 
         {url && type !== 'file' && (

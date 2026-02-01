@@ -79,16 +79,11 @@ export default async function SearchPage({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{highlightText(item.title, query)}</h3>
+                        <h3 className="font-semibold line-clamp-1">{highlightText(item.title, query)}</h3>
                         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs">
                           {item.type}
                         </span>
                       </div>
-                      {item.body && (
-                        <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-                          {highlightText(item.body, query)}
-                        </p>
-                      )}
                       {item.url && (
                         <a
                           href={item.url}
