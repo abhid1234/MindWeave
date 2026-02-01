@@ -104,7 +104,7 @@ describe('Summarization', () => {
       const instance = new Anthropic();
       vi.mocked(instance.messages.create).mockRejectedValueOnce(new Error('API down'));
 
-      const result = await generateSummary({
+      await generateSummary({
         title: 'Test',
         body: 'A'.repeat(200),
         type: 'note',

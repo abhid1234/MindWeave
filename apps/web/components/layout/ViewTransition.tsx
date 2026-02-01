@@ -13,7 +13,7 @@ export function ViewTransition() {
 
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
       // The transition is triggered; CSS handles the animation
-      (document as any).startViewTransition(() => {
+      (document as unknown as { startViewTransition: (cb: () => Promise<void>) => void }).startViewTransition(() => {
         // Navigation already happened via Next.js router
         return Promise.resolve();
       });

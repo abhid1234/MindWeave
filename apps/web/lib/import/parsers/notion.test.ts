@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock JSZip
-const mockFiles: Record<string, { dir: boolean; async: (type: string) => Promise<string> }> = {};
 const mockLoadAsync = vi.fn();
 
 vi.mock('jszip', () => ({

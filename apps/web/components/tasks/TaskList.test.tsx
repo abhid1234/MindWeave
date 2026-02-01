@@ -32,25 +32,31 @@ vi.mock('./DeleteTaskDialog', () => ({
 }));
 
 // Mock radix dropdown menu
-vi.mock('@radix-ui/react-dropdown-menu', () => ({
-  Root: ({ children }: any) => <div>{children}</div>,
-  Trigger: ({ children, asChild }: any) => asChild ? children : <button>{children}</button>,
-  Portal: ({ children }: any) => <div>{children}</div>,
-  Content: React.forwardRef(({ children, ...props }: any, ref: any) => <div ref={ref} {...props}>{children}</div>),
-  Item: React.forwardRef(({ children, onSelect, ...props }: any, ref: any) => (
-    <div ref={ref} role="menuitem" onClick={onSelect} {...props}>{children}</div>
-  )),
-  Separator: () => <hr />,
-  Sub: ({ children }: any) => <div>{children}</div>,
-  SubTrigger: ({ children }: any) => <div>{children}</div>,
-  SubContent: ({ children }: any) => <div>{children}</div>,
-  Group: ({ children }: any) => <div>{children}</div>,
-  Label: ({ children }: any) => <div>{children}</div>,
-  CheckboxItem: ({ children }: any) => <div>{children}</div>,
-  RadioGroup: ({ children }: any) => <div>{children}</div>,
-  RadioItem: ({ children }: any) => <div>{children}</div>,
-  ItemIndicator: ({ children }: any) => <div>{children}</div>,
-}));
+vi.mock('@radix-ui/react-dropdown-menu', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const ReactMock = require('react');
+  const MockContent = ReactMock.forwardRef(({ children, ...props }: any, ref: any) => ReactMock.createElement('div', { ref, ...props }, children));
+  MockContent.displayName = 'Content';
+  const MockItem = ReactMock.forwardRef(({ children, onSelect, ...props }: any, ref: any) => ReactMock.createElement('div', { ref, role: 'menuitem', onClick: onSelect, ...props }, children));
+  MockItem.displayName = 'Item';
+  return {
+  Root: ({ children }: any) => ReactMock.createElement('div', null, children),
+  Trigger: ({ children, asChild }: any) => asChild ? children : ReactMock.createElement('button', null, children),
+  Portal: ({ children }: any) => ReactMock.createElement('div', null, children),
+  Content: MockContent,
+  Item: MockItem,
+  Separator: () => ReactMock.createElement('hr'),
+  Sub: ({ children }: any) => ReactMock.createElement('div', null, children),
+  SubTrigger: ({ children }: any) => ReactMock.createElement('div', null, children),
+  SubContent: ({ children }: any) => ReactMock.createElement('div', null, children),
+  Group: ({ children }: any) => ReactMock.createElement('div', null, children),
+  Label: ({ children }: any) => ReactMock.createElement('div', null, children),
+  CheckboxItem: ({ children }: any) => ReactMock.createElement('div', null, children),
+  RadioGroup: ({ children }: any) => ReactMock.createElement('div', null, children),
+  RadioItem: ({ children }: any) => ReactMock.createElement('div', null, children),
+  ItemIndicator: ({ children }: any) => ReactMock.createElement('div', null, children),
+  };
+});
 
 import { TaskList } from './TaskList';
 

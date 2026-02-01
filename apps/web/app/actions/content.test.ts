@@ -10,7 +10,6 @@ vi.mock('@/lib/auth', () => ({
 const mockReturning = vi.fn();
 const mockLimit = vi.fn();
 const mockDelete = vi.fn();
-const mockSet = vi.fn();
 const mockUpdate = vi.fn();
 const mockOrderBy = vi.fn();
 const mockWhere = vi.fn();

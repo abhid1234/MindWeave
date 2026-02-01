@@ -3,7 +3,7 @@ import { createCachedFn, CacheDuration, CacheTags } from './cache';
 
 // Mock next/cache
 vi.mock('next/cache', () => ({
-  unstable_cache: vi.fn((fn: Function, _keyParts: string[], _options: object) => fn),
+  unstable_cache: vi.fn((fn: (...args: unknown[]) => unknown, _keyParts: string[], _options: object) => fn),
   revalidateTag: vi.fn(),
 }));
 
@@ -17,7 +17,7 @@ describe('Cache utilities', () => {
   describe('createCachedFn', () => {
     it('should call unstable_cache with default revalidate of 60', () => {
       const fn = async () => 'result';
-      createCachedFn(fn, ['test-key']);
+      createCachedFn(fn as any, ['test-key']);
 
       expect(unstable_cache).toHaveBeenCalledWith(fn, ['test-key'], {
         revalidate: 60,
@@ -27,7 +27,7 @@ describe('Cache utilities', () => {
 
     it('should pass custom options to unstable_cache', () => {
       const fn = async () => 'result';
-      createCachedFn(fn, ['key'], { revalidate: 300, tags: ['analytics'] });
+      createCachedFn(fn as any, ['key'], { revalidate: 300, tags: ['analytics'] });
 
       expect(unstable_cache).toHaveBeenCalledWith(fn, ['key'], {
         revalidate: 300,
@@ -37,7 +37,7 @@ describe('Cache utilities', () => {
 
     it('should return a callable function', async () => {
       const fn = async (x: number) => x * 2;
-      const cached = createCachedFn(fn, ['math']);
+      const cached = createCachedFn(fn as any, ['math']);
       const result = await cached(5);
       expect(result).toBe(10);
     });

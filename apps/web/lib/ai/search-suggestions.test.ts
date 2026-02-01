@@ -102,8 +102,7 @@ describe('Search Suggestions', () => {
         { tag: 'react', tag_count: '5' },
       ] as never);
       // Matching content titles
-      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
-      vi.mocked(mockLimit).mockResolvedValue([
+      (db as any).limit.mockResolvedValue([
         { title: 'React Hooks Tutorial' },
         { title: 'React State Management' },
       ]);
@@ -123,8 +122,7 @@ describe('Search Suggestions', () => {
           tag_count: `${10 - i}`,
         })) as never
       );
-      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
-      vi.mocked(mockLimit).mockResolvedValue([]);
+      (db as any).limit.mockResolvedValue([]);
 
       const result = await getSearchSuggestions('user-1', 'long enough query');
       // May or may not have AI suggestions depending on mock, but should not throw
@@ -139,8 +137,7 @@ describe('Search Suggestions', () => {
       vi.mocked(db.execute).mockResolvedValue([
         { tag: 'js', tag_count: '5' },
       ] as never);
-      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
-      vi.mocked(mockLimit).mockResolvedValue([]);
+      (db as any).limit.mockResolvedValue([]);
 
       const result = await getSearchSuggestions('user-1', 'ab');
       const aiSuggestions = result.filter(s => s.type === 'ai');
@@ -152,8 +149,7 @@ describe('Search Suggestions', () => {
 
       const { db } = await import('@/lib/db/client');
       vi.mocked(db.execute).mockResolvedValue([] as never);
-      const mockLimit = db.limit as ReturnType<typeof vi.fn>;
-      vi.mocked(mockLimit).mockResolvedValue([]);
+      (db as any).limit.mockResolvedValue([]);
 
       const result = await getSearchSuggestions(
         'user-1',

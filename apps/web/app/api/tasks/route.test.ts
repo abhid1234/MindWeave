@@ -13,13 +13,7 @@ const {
   mockReturning,
   mockValues,
   mockOffset,
-  mockLimit,
-  mockOrderBy,
-  mockWhere,
-  mockFrom,
   mockSelect,
-  mockQueryFindFirst,
-  mockQueryFindMany,
 } = vi.hoisted(() => {
   const mockReturning = vi.fn();
   const mockValues = vi.fn(() => ({ returning: mockReturning }));

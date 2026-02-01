@@ -8,7 +8,7 @@ vi.mock('@/lib/auth', () => ({
 }));
 
 import { auth } from '@/lib/auth';
-const mockAuth = vi.mocked(auth);
+const mockAuth = auth as unknown as ReturnType<typeof vi.fn>;
 
 // Mock the db module
 vi.mock('@/lib/db/client', () => ({

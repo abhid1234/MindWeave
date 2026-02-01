@@ -42,7 +42,7 @@ vi.mock('drizzle-orm', () => ({
 }));
 
 function createRequest(url: string, options?: RequestInit): NextRequest {
-  return new NextRequest(`http://localhost:3000${url}`, options);
+  return new NextRequest(`http://localhost:3000${url}`, options as never);
 }
 
 const mockParams = (id: string) => ({ params: Promise.resolve({ id }) });
