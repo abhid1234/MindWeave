@@ -196,7 +196,7 @@ export default async function Home() {
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <a
-                  href="https://github.com/AshGw/mindweave"
+                  href="https://github.com/abhid1234/MindWeave"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group inline-flex items-center gap-2 rounded-lg border border-border px-8 py-3.5 text-base font-semibold hover:bg-accent transition-colors"
@@ -373,7 +373,7 @@ export default async function Home() {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a
-                  href="https://github.com/AshGw/mindweave"
+                  href="https://github.com/abhid1234/MindWeave"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-base font-semibold hover:bg-accent transition-colors"
@@ -425,7 +425,7 @@ export default async function Home() {
             <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
             <span>&middot;</span>
             <a
-              href="https://github.com/AshGw/mindweave"
+              href="https://github.com/abhid1234/MindWeave"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-foreground transition-colors inline-flex items-center gap-1"
