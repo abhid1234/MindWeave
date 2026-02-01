@@ -467,7 +467,7 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 
 Mindweave is deployed on Google Cloud Platform:
 
-- **URL**: https://mindweave-a2ysp2ppfq-uc.a.run.app
+- **URL**: https://mindweave.space
 - **Project**: `mindweave-prod` | **Region**: `us-central1`
 
 | Service | Details |
@@ -488,7 +488,7 @@ Every push to `main` automatically triggers a Cloud Build that builds the Docker
 cd Mindweave
 gcloud builds submit \
   --config=cloudbuild.yaml \
-  --substitutions="_SERVICE_NAME=mindweave,_REGION=us-central1,_DATABASE_URL=postgresql://user:pass@localhost:5432/mindweave,_APP_URL=https://mindweave-a2ysp2ppfq-uc.a.run.app,SHORT_SHA=manual-$(date +%s)" \
+  --substitutions="_SERVICE_NAME=mindweave,_REGION=us-central1,_DATABASE_URL=postgresql://user:pass@localhost:5432/mindweave,_APP_URL=https://mindweave.space,SHORT_SHA=manual-$(date +%s)" \
   --project=mindweave-prod
 ```
 

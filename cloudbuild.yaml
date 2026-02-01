@@ -72,7 +72,7 @@ substitutions:
   _SERVICE_NAME: 'mindweave'
   _REGION: 'us-central1'
   _DATABASE_URL: 'postgresql://user:password@host:5432/db'
-  _APP_URL: 'https://mindweave-a2ysp2ppfq-uc.a.run.app'
+  _APP_URL: 'https://mindweave.space'
   _CLOUD_SQL_INSTANCE: 'mindweave-prod:us-central1:mindweave-db'
 
 # Images to be pushed to GCR
