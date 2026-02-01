@@ -25,13 +25,8 @@ describe('RecommendationCard', () => {
       expect(screen.getByText('85%')).toBeInTheDocument();
     });
 
-    it('should render the body when provided', () => {
+    it('should not render body in card (body previews removed)', () => {
       render(<RecommendationCard {...baseProps} />);
-      expect(screen.getByText('This is a test recommendation body')).toBeInTheDocument();
-    });
-
-    it('should not render body when null', () => {
-      render(<RecommendationCard {...baseProps} body={null} />);
       expect(screen.queryByText('This is a test recommendation body')).not.toBeInTheDocument();
     });
 

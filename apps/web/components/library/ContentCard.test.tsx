@@ -137,14 +137,9 @@ describe('ContentCard', () => {
       expect(screen.getByText('Test Note')).toBeInTheDocument();
     });
 
-    it('should render body when provided', () => {
+    it('should not render body in card (body previews removed)', () => {
       render(<ContentCard {...baseProps} />);
-      expect(screen.getByText('This is a test note body')).toBeInTheDocument();
-    });
-
-    it('should not render body when null', () => {
-      render(<ContentCard {...baseProps} body={null} />);
-      expect(screen.queryByText(/test note body/i)).not.toBeInTheDocument();
+      expect(screen.queryByText('This is a test note body')).not.toBeInTheDocument();
     });
 
     it('should render URL when provided', () => {
@@ -222,16 +217,10 @@ describe('ContentCard', () => {
       expect(card?.className).toContain('transition-all');
     });
 
-    it('should apply line-clamp to title', () => {
+    it('should apply line-clamp-1 to title', () => {
       render(<ContentCard {...baseProps} />);
       const title = screen.getByText('Test Note');
-      expect(title.className).toContain('line-clamp-2');
-    });
-
-    it('should apply line-clamp to body', () => {
-      render(<ContentCard {...baseProps} />);
-      const body = screen.getByText('This is a test note body');
-      expect(body.className).toContain('line-clamp-3');
+      expect(title.className).toContain('line-clamp-1');
     });
   });
 

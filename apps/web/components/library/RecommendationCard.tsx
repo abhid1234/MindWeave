@@ -34,7 +34,6 @@ export function RecommendationCard({
   id,
   title,
   type,
-  body,
   tags,
   similarity,
   onClick,

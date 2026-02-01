@@ -86,21 +86,21 @@ describe('DashboardRecommendations', () => {
         recommendations: [],
       });
 
-      render(<DashboardRecommendations />);
+      const { container } = render(<DashboardRecommendations />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('dashboard-recommendations-error')).toBeInTheDocument();
+        // Component returns null on error (hides section)
+        expect(container.innerHTML).toBe('');
       });
-      expect(screen.getByText('Failed to load recommendations')).toBeInTheDocument();
     });
 
-    it('should show error state when fetch throws', async () => {
+    it('should hide section when fetch throws', async () => {
       mockGetDashboardRecommendationsAction.mockRejectedValue(new Error('Network error'));
 
-      render(<DashboardRecommendations />);
+      const { container } = render(<DashboardRecommendations />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('dashboard-recommendations-error')).toBeInTheDocument();
+        expect(container.innerHTML).toBe('');
       });
     });
   });
@@ -178,10 +178,11 @@ describe('DashboardRecommendations', () => {
         recommendations: [],
       });
 
-      render(<DashboardRecommendations />);
+      const { container } = render(<DashboardRecommendations />);
 
       await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+        // Component returns null on error (hides section instead of showing alert)
+        expect(container.innerHTML).toBe('');
       });
     });
   });
