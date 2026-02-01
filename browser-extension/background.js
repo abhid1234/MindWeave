@@ -3,7 +3,7 @@
  * Handles API calls and cookie-based authentication
  */
 
-const API_BASE_URL = 'http://localhost:3004'; // Change to production URL when deploying
+const API_BASE_URL = 'https://mindweave.space';
 
 /**
  * Check if user is authenticated with Mindweave

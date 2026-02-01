@@ -5,9 +5,7 @@
   "description": "Save webpages to your Mindweave knowledge hub with one click",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
-    "http://localhost:3000/*",
-    "http://localhost:3004/*",
-    "https://mindweave.app/*"
+    "https://mindweave.space/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",

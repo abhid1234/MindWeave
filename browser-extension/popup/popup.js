@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://localhost:3004'; // Change to production URL when deploying
+const API_BASE_URL = 'https://mindweave.space';
 
 // DOM Elements
 const loadingState = document.getElementById('loading');
