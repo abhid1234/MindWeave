@@ -32,7 +32,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Backend**: Next.js Server Actions, Drizzle ORM
 - **Database**: PostgreSQL 16 + pgvector
 - **Auth**: Auth.js v5 with Google OAuth
-- **AI**: Claude API (Anthropic) + Google Gemini (embeddings)
+- **AI**: Google Gemini (tagging, Q&A, embeddings)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Tooling**: npm, Turborepo, Docker Compose
 
@@ -339,12 +339,12 @@ tsx ../../scripts/seed-db.ts
 
 ### Required APIs
 
-1. **Anthropic API** (Required for AI features)
-   - Sign up: https://console.anthropic.com/
+1. **Google Gemini API** (Required for AI features)
+   - Sign up: https://aistudio.google.com/app/apikey
    - Create API key
-   - Add to `.env.local` as `ANTHROPIC_API_KEY`
-   - Used for: Auto-tagging, Q&A, content summarization
-   - Cost: Pay-as-you-go pricing
+   - Add to `.env.local` as `GOOGLE_AI_API_KEY`
+   - Used for: Auto-tagging, Q&A, content summarization, embeddings
+   - Cost: Free tier available, pay-as-you-go pricing
 
 2. **Google AI API** (Required for embeddings)
    - Sign up: https://aistudio.google.com/app/apikey
@@ -373,10 +373,10 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Manual tagging
 
 ### Phase 2: AI Features ✅ Complete
-- [x] AI auto-tagging (Claude API)
+- [x] AI auto-tagging (Gemini API)
 - [x] Vector embeddings (Google Gemini)
 - [x] Semantic search (pgvector similarity)
-- [x] Knowledge Q&A chat interface (RAG with Claude)
+- [x] Knowledge Q&A chat interface (RAG with Gemini)
 - [x] Content editing and deletion
 
 ### Phase 3: Advanced Content Management ✅ Complete
@@ -456,7 +456,7 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 | `AUTH_SECRET` | NextAuth secret (generate with `openssl rand -base64 32`) | Yes |
 | `AUTH_URL` | App URL (http://localhost:3000) | Yes |
-| `ANTHROPIC_API_KEY` | Claude API key for AI features | Yes |
+| `GOOGLE_AI_API_KEY` | Gemini API key for AI features | Yes |
 | `GOOGLE_AI_API_KEY` | Google Gemini API key for embeddings | Yes |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID | No |
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret | No |

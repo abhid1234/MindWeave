@@ -13,7 +13,7 @@
 - Content Library (Filtering + sorting + components) - 164 tests total, 87.5% coverage
 - Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
 - Manual Tagging (Inline editing + autocomplete) - 241 tests total, 92.22% coverage
-- Claude Auto-Tagging (AI tag generation on content creation) - Requires ANTHROPIC_API_KEY
+- AI Auto-Tagging (AI tag generation on content creation) - Requires GOOGLE_AI_API_KEY
 - Vector Embeddings (Auto-generation via Google Gemini) - 38 tests, requires GOOGLE_AI_API_KEY
 - Semantic Search (Vector similarity with pgvector) - 40 new tests
 - Knowledge Q&A (Chat interface with RAG) - 25 new tests, 352 total tests
@@ -53,7 +53,7 @@
 - [x] **Full Test Suite Verification** - 1,257 tests passing with 0 failures (955 unit/integration via Vitest + 302 E2E via Playwright). Zero regressions confirmed across all test suites.
 - [x] **E2E Test Fixes** - Fixed 26 pre-existing E2E failures: updated manual-tagging card selectors from `.rounded-lg.border` to `article` (22 fixes), updated search locators to `getByRole('heading')` to avoid SearchSuggestions strict mode violations (4 fixes)
 - [x] **E2E Test Expansion** - Added 29 new Playwright E2E tests for semantic search, knowledge Q&A, search suggestions, and analytics (51 total in 4 files)
-- [x] **Test Suite Fixes** - Fixed 15 pre-existing test failures (rate limiting mocks, Anthropic SDK, next-auth import chains). 955 tests passing, 0 failures
+- [x] **Test Suite Fixes** - Fixed 15 pre-existing test failures (rate limiting mocks, AI SDK, next-auth import chains). 955 tests passing, 0 failures
 - [x] **Lighthouse Performance Audit** - Accessibility 100, Performance optimizations, font/bundle improvements
 - [x] **AI Features UI Integration** - SearchSuggestions in search form, ContentClusters in library sidebar
 - [x] **Mobile CI/CD Pipeline** - GitHub Actions workflow for Android/iOS builds, app icon generation
@@ -79,7 +79,7 @@
 - [x] Next.js configuration files (package.json, next.config.js, tsconfig.json, tailwind.config.ts, etc.)
 - [x] Database schema with Drizzle ORM (users, content, embeddings tables)
 - [x] Auth.js v5 authentication setup with Google OAuth
-- [x] AI integration layer (Claude API wrapper and embeddings utilities)
+- [x] AI integration layer (Gemini API wrapper and embeddings utilities)
 - [x] Core UI components and layouts (landing page, dashboard, header, nav)
 - [x] Initial feature pages (capture, search, library - placeholder implementations)
 - [x] Utility functions and type definitions
@@ -202,7 +202,7 @@ None - Ready for feature development
 - [x] **Content Library** - Display saved content with filtering and sorting ✅
 - [x] **Full-text Search** - Basic keyword search implementation ✅
 - [x] **Manual Tagging** - Tag creation, editing, and association ✅
-- [x] **Claude Auto-Tagging** - AI-powered tag generation for all content ✅
+- [x] **AI Auto-Tagging** - AI-powered tag generation for all content ✅
 - [x] **Vector Embeddings** - Generate and store embeddings for semantic search ✅
 - [x] **Semantic Search** - Similarity-based content discovery using pgvector ✅
 - [x] **Knowledge Q&A** - Chat interface for querying knowledge base ✅
@@ -366,13 +366,13 @@ None - Ready for feature development
   - Cache invalidation on content changes
   - Configurable cache durations (60s-300s)
 - [x] **Auto-Summarization**
-  - lib/ai/summarization.ts with Claude API
+  - lib/ai/summarization.ts with Gemini API
   - Generates 1-2 sentence summaries for content
   - Integrated into content creation flow
 - [x] **Content Clustering**
   - lib/ai/clustering.ts with k-means algorithm
   - Groups similar content using embeddings
-  - AI-generated cluster names via Claude
+  - AI-generated cluster names via Gemini
 - [x] **Key Insights Extraction**
   - lib/ai/insights.ts for pattern recognition
   - Identifies connections, patterns, gaps, and suggestions
@@ -616,7 +616,7 @@ None - fresh scaffolding
   - **Infrastructure provisioned:**
     - Cloud Run service (`mindweave`) — Next.js app (512Mi, 1 CPU, 0-10 instances)
     - Cloud SQL PostgreSQL 16 + pgvector (`mindweave-db`, db-f1-micro tier)
-    - Secret Manager — 6 secrets (database-url, auth-secret, anthropic-api-key, google-ai-api-key, google-oauth-client-id, google-oauth-client-secret)
+    - Secret Manager — 6 secrets (database-url, auth-secret, google-ai-api-key, google-oauth-client-id, google-oauth-client-secret)
     - IAM — compute service account granted secretmanager.secretAccessor role
   - **Code changes for production compatibility:**
     - Split `lib/auth.ts` into edge-compatible `lib/auth.config.ts` for middleware (fixes Edge Runtime + postgres driver incompatibility)
@@ -810,7 +810,7 @@ None - fresh scaffolding
     - getContentGrowthAction - Time-series data by period
     - getTagDistributionAction - Top tags with percentages
     - getCollectionUsageAction - Collection item counts
-    - getKnowledgeInsightsAction - AI insights with Claude
+    - getKnowledgeInsightsAction - AI insights with Gemini
   - Added Analytics link to dashboard navigation with BarChart3 icon
   - Comprehensive test coverage: 45 new tests (901 total)
   - Created Recharts mock for Vitest testing
@@ -854,7 +854,7 @@ None - fresh scaffolding
   - Updated web app with safe area CSS utilities
   - Added mobile scripts to root package.json
   - Commits: da41731, f162d51
-- **2026-01-19 16:00** - Project initialized under /ClaudeCode/Mindweave/
+- **2026-01-19 16:00** - Project initialized under /Mindweave/
 - **2026-01-19 16:05** - Completed all scaffolding tasks
 - **2026-01-19 16:05** - Created 50+ files including configs, schemas, components, and docs
 - **2026-01-19 16:05** - ✅ **SCAFFOLDING COMPLETE** - Ready for feature development
@@ -873,7 +873,7 @@ None - fresh scaffolding
   - Modified deployment scripts to use google-ai-api-key secret
   - Updated all documentation (CLAUDE.md, DEPLOYMENT.md)
   - Added @google/generative-ai package dependency
-  - Tech stack now: Claude AI for tagging/Q&A + Gemini for embeddings
+  - Tech stack now: Gemini AI for tagging/Q&A + embeddings
 - **2026-01-20 00:06** - ✅ **DOCKER DEVELOPMENT ENVIRONMENT SETUP COMPLETE**
   - Fixed Podman user namespace configuration (subuid/subgid)
   - PostgreSQL 16 container running successfully
@@ -952,7 +952,7 @@ None - fresh scaffolding
   - All quality checks passing (tests, types, lint, build)
   - Fixed Auth.ts TypeScript errors for JWT session compatibility
   - Created comprehensive AGENTS.md documentation (553 lines)
-  - Documented Claude AI and Google Gemini agent architecture
+  - Documented Google Gemini AI agent architecture
   - Manual testing verified on localhost
   - **STATUS: Feature #3 complete, ready for Feature #4 (Full-text Search)**
 - **2026-01-22 03:24** - ✅ **FULL-TEXT SEARCH FEATURE COMPLETE**
@@ -1029,7 +1029,7 @@ None - fresh scaffolding
   - **STATUS: Feature #8 complete, ready for Feature #9 (Knowledge Q&A)**
 - **2026-01-23 23:36** - ✅ **KNOWLEDGE Q&A FEATURE COMPLETE**
   - Created askQuestionAction server action with RAG (Retrieval-Augmented Generation)
-  - Semantic search finds relevant content, Claude AI generates answers with citations
+  - Semantic search finds relevant content, Gemini AI generates answers with citations
   - Built KnowledgeQA chat component with message history
   - Created Ask AI page (/dashboard/ask) with navigation link
   - Display citations with source titles and similarity percentages
@@ -1301,7 +1301,7 @@ None - fresh scaffolding
 - **Database**: PostgreSQL 16 + pgvector (Docker container for local dev)
 - **ORM**: Drizzle ORM
 - **Auth**: Auth.js v5
-- **AI**: Claude API (tagging, Q&A, summarization) + Google Gemini (embeddings)
+- **AI**: Google Gemini (tagging, Q&A, summarization, embeddings)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Package Manager**: npm (using npm instead of pnpm in corp environment)
 - **Build System**: Turborepo 2.0
@@ -1411,7 +1411,7 @@ None - fresh scaffolding
 3. Content Library (display + filtering)
 4. Full-text Search
 5. Manual Tagging
-6. Claude Auto-Tagging
+6. AI Auto-Tagging
 7. Vector Embeddings
 8. Semantic Search
 9. Knowledge Q&A
