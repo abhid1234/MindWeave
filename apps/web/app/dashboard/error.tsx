@@ -53,7 +53,7 @@ export default function DashboardError({
         <p className="mt-8 text-sm text-muted-foreground">
           If this problem persists, try refreshing the page or{' '}
           <a
-            href="https://github.com/anthropics/claude-code/issues"
+            href="https://github.com/abhid1234/MindWeave/issues"
             className="text-primary underline hover:no-underline"
             target="_blank"
             rel="noopener noreferrer"

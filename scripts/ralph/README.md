@@ -11,7 +11,7 @@ Ralph is an autonomous AI agent that implements product requirements iteratively
 # Run with more iterations
 ./scripts/ralph/ralph.sh 20
 
-# Or use Claude Code skill
+# Or use skill command
 /ralph-loop
 ```
 
@@ -413,9 +413,9 @@ rm scripts/ralph/.last-branch
 5. ✅ Always include quality checks requirement
 6. ✅ Prioritize properly (don't make everything priority 1)
 
-## Skills (Claude Code Commands)
+## Skills (Commands)
 
-Ralph provides these skills for use in Claude Code:
+Ralph provides these skill commands:
 
 - `/ralph-loop` - Start Ralph autonomous loop
 - `/ralph-status` - Check progress and completed stories
@@ -483,7 +483,7 @@ See `AGENTS.md` for complete Ralph documentation and patterns.
 # Iteration 1 of 10
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-# Running Claude Code...
+# Running claude CLI...
 # [Ralph implements feature-4]
 # [All tests pass, coverage 85%]
 # [Merged to main, no regressions]
@@ -532,7 +532,7 @@ cat scripts/ralph/progress.txt
 
 ### Cost Management
 
-Ralph uses Claude API through Claude Code:
+Ralph uses AI API calls:
 - Monitor API usage in Anthropic console
 - Adjust max iterations to control costs
 - Use manual development for simple features

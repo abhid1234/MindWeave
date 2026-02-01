@@ -241,7 +241,7 @@ LIMIT 10;
 
 **Type**: Development automation agent
 
-**Implementation**: Bash script loop with Claude Code integration
+**Implementation**: Bash script loop with AI assistant integration
 
 ### Overview
 
@@ -519,7 +519,7 @@ Ralph enforces these standards for every story:
 
 **Tool Selection**:
 ```bash
-# Default: Claude Code
+# Default: claude
 ./scripts/ralph/ralph.sh
 
 # Use Amp CLI instead
@@ -539,7 +539,7 @@ Ralph enforces these standards for every story:
 # From project root
 ./scripts/ralph/ralph.sh
 
-# Or using Claude Code skill
+# Or using skill command
 /ralph-loop
 ```
 

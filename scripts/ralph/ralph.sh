@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Ralph: Autonomous AI Agent Loop
-# Repeatedly runs Claude Code until all product requirements are complete
+# Repeatedly runs AI assistant until all product requirements are complete
 # Each iteration operates with fresh context, preserving memory through:
 # - Git history (commits from previous iterations)
 # - progress.txt (learnings and context)
@@ -11,7 +11,7 @@ set -euo pipefail
 
 # Configuration
 MAX_ITERATIONS=10
-TOOL="claude"  # Default to Claude Code
+TOOL="claude"  # Default to claude CLI
 PRD_FILE="scripts/ralph/prd.json"
 PROGRESS_FILE="scripts/ralph/progress.txt"
 CLAUDE_PROMPT="scripts/ralph/CLAUDE.md"
@@ -133,9 +133,9 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
   # Log iteration start
   echo "## Iteration $i - $(date -Iseconds)" >> "$PROGRESS_FILE"
 
-  # Run Claude Code or Amp with permissions
+  # Run claude or Amp with permissions
   if [[ "$TOOL" == "claude" ]]; then
-    echo -e "${YELLOW}Running Claude Code...${NC}"
+    echo -e "${YELLOW}Running claude CLI...${NC}"
 
     # Run Claude with the CLAUDE.md prompt
     # The prompt will read prd.json and progress.txt
