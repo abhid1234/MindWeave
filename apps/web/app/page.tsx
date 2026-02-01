@@ -226,6 +226,13 @@ export default async function Home() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <span>&middot;</span>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+            <span>&middot;</span>
+            <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
+          </div>
           <p>&copy; 2026 Mindweave. Built with Next.js, Claude AI, and pgvector.</p>
         </div>
       </footer>
