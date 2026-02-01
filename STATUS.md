@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-01-31
+**Last Updated**: 2026-02-01
 **Current Phase**: UI Polish Complete
 **Active Ralph Loop**: No
 
@@ -321,7 +321,8 @@ None - Ready for feature development
   - 52 tests for utility functions
   - 34 tests for parsers
   - 10 tests for import API
-  - Total: 96 new tests
+  - 20 E2E tests for import wizard flow
+  - Total: 116 new tests
 - [x] All quality checks passing (tests, types, lint, build)
 
 ### Phase 6: Mobile App ✅ COMPLETE
@@ -474,6 +475,13 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-01** - ✅ **IMPORT E2E TESTS**
+  - Added 20 Playwright E2E tests for the import wizard flow (`tests/e2e/import.spec.ts`)
+  - Covers: navigation, source selection, file upload, parse & preview, import & completion, error handling
+  - Uses `page.route()` API mocking to avoid import rate limit (5/hr) during tests
+  - Test fixtures: `bookmarks.html` (valid 3-bookmark file), `invalid.exe` (empty)
+  - 1293 unit tests + 20 new E2E tests passing, 0 regressions
+  - Commit: f99cdfa
 - **2026-02-01** - ✅ **X/TWITTER ARCHIVE BOOKMARK IMPORT**
   - Added Twitter parser (`lib/import/parsers/twitter.ts`) for X data archive `bookmarks.js` files
   - Strips `window.YTD.bookmarks.part0 =` prefix, parses JSON array of bookmark entries
