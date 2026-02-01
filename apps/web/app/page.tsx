@@ -9,6 +9,16 @@ import {
   Library,
   Shield,
   ArrowRight,
+  Github,
+  BookOpen,
+  Brain,
+  Sparkles,
+  Database,
+  Lock,
+  Palette,
+  Code2,
+  Layers,
+  Play,
 } from 'lucide-react';
 
 const features = [
@@ -18,6 +28,7 @@ const features = [
     description: 'Save notes, links, and files instantly. Your ideas are just a click away.',
     color: 'text-yellow-500',
     bg: 'bg-yellow-500/10',
+    border: 'border-yellow-500/20',
   },
   {
     icon: Tags,
@@ -25,6 +36,7 @@ const features = [
     description: 'Claude automatically tags your content, making it easy to organize and find.',
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
+    border: 'border-blue-500/20',
   },
   {
     icon: Search,
@@ -32,6 +44,7 @@ const features = [
     description: 'Search by meaning, not just keywords. Find related ideas you forgot you had.',
     color: 'text-green-500',
     bg: 'bg-green-500/10',
+    border: 'border-green-500/20',
   },
   {
     icon: MessageCircleQuestion,
@@ -39,6 +52,7 @@ const features = [
     description: 'Ask questions and get answers from your personal knowledge base.',
     color: 'text-purple-500',
     bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
   },
   {
     icon: Library,
@@ -46,6 +60,7 @@ const features = [
     description: 'Browse, filter, and rediscover your content in one beautiful interface.',
     color: 'text-orange-500',
     bg: 'bg-orange-500/10',
+    border: 'border-orange-500/20',
   },
   {
     icon: Shield,
@@ -53,13 +68,48 @@ const features = [
     description: 'Your data stays yours. Self-host or use our secure cloud.',
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
   },
 ];
 
 const steps = [
-  { number: '1', title: 'Capture', description: 'Save notes, links, or upload files in seconds.' },
-  { number: '2', title: 'Organize', description: 'AI auto-tags and embeds your content for you.' },
-  { number: '3', title: 'Rediscover', description: 'Search semantically or ask questions to find anything.' },
+  {
+    number: '1',
+    title: 'Capture',
+    description: 'Save notes, links, or upload files in seconds.',
+    icon: BookOpen,
+  },
+  {
+    number: '2',
+    title: 'Organize',
+    description: 'AI auto-tags and embeds your content for you.',
+    icon: Brain,
+  },
+  {
+    number: '3',
+    title: 'Rediscover',
+    description: 'Search semantically or ask questions to find anything.',
+    icon: Sparkles,
+  },
+];
+
+const techStack = [
+  { name: 'Next.js 15', icon: Layers, color: 'text-foreground' },
+  { name: 'TypeScript', icon: Code2, color: 'text-blue-500' },
+  { name: 'PostgreSQL', icon: Database, color: 'text-sky-600' },
+  { name: 'pgvector', icon: Search, color: 'text-violet-500' },
+  { name: 'Tailwind CSS', icon: Palette, color: 'text-cyan-500' },
+  { name: 'Auth.js', icon: Lock, color: 'text-emerald-500' },
+  { name: 'Drizzle ORM', icon: Database, color: 'text-lime-500' },
+  { name: 'Claude AI', icon: Brain, color: 'text-orange-500' },
+];
+
+const heroPills = [
+  'AI Tagging',
+  'Semantic Search',
+  'Knowledge Q&A',
+  'Vector Embeddings',
+  'Smart Library',
 ];
 
 export default async function Home() {
@@ -72,12 +122,12 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 glass glass-dark border-b border-border/50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <span className="text-2xl font-bold text-gradient">
             Mindweave
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             <a
               href="#features"
               className="hidden text-sm font-medium text-muted-foreground hover:text-foreground transition-colors sm:inline-block"
@@ -90,9 +140,15 @@ export default async function Home() {
             >
               How It Works
             </a>
+            <a
+              href="#tech-stack"
+              className="hidden text-sm font-medium text-muted-foreground hover:text-foreground transition-colors md:inline-block"
+            >
+              Tech Stack
+            </a>
             <Link
               href="/login"
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors btn-press"
             >
               Sign In
             </Link>
@@ -100,40 +156,66 @@ export default async function Home() {
         </div>
       </header>
 
-      {/* Hero */}
       <main id="main-content" className="flex-1" tabIndex={-1}>
+        {/* Hero */}
         <section className="relative overflow-hidden">
-          {/* Background gradient */}
+          {/* Background effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          {/* Dot grid pattern */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.15]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
+            }}
+          />
 
           <div className="container relative mx-auto px-4 py-24 sm:py-32 lg:py-40">
-            <div className="mx-auto max-w-3xl text-center animate-fade-up">
-              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+            <div className="mx-auto max-w-4xl text-center animate-fade-up">
+              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">
                 Your AI-Powered
                 <br />
-                <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
                   Knowledge Hub
                 </span>
               </h1>
-              <p className="mt-6 text-lg leading-8 text-muted-foreground sm:text-xl max-w-2xl mx-auto">
-                Capture ideas, save bookmarks, and organize notes. Let AI help you
-                rediscover and connect your knowledge when you need it most.
+              <p className="mt-6 text-lg leading-8 text-muted-foreground sm:text-xl lg:text-2xl max-w-2xl mx-auto">
+                You read 100 articles a week.{' '}
+                <span className="text-foreground font-medium">How many can you recall?</span>
+                <br className="hidden sm:block" />
+                Capture, organize, and rediscover everything with AI.
               </p>
-              <div className="mt-10 flex items-center justify-center gap-4">
+
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/login"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-md hover:shadow-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Get Started
+                  Get Started Free
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <a
-                  href="#features"
-                  className="rounded-lg border border-border px-6 py-3 text-base font-semibold hover:bg-accent transition-colors"
+                  href="https://github.com/AshGw/mindweave"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 rounded-lg border border-border px-8 py-3.5 text-base font-semibold hover:bg-accent transition-colors"
                 >
-                  Learn More
+                  <Github className="h-4 w-4" />
+                  View on GitHub
                 </a>
+              </div>
+
+              {/* Floating feature pills */}
+              <div className="mt-16 flex flex-wrap items-center justify-center gap-3">
+                {heroPills.map((pill) => (
+                  <span
+                    key={pill}
+                    className="inline-flex items-center rounded-full border border-border/60 bg-background/80 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-muted-foreground"
+                  >
+                    {pill}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
@@ -144,11 +226,11 @@ export default async function Home() {
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-5xl">
               <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold sm:text-4xl">
+                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
                   Everything you need to{' '}
                   <span className="text-gradient">remember</span>
                 </h2>
-                <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+                <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
                   Powered by Claude AI and semantic search to help you capture, organize,
                   and rediscover your knowledge effortlessly.
                 </p>
@@ -159,10 +241,10 @@ export default async function Home() {
                   return (
                     <div
                       key={feature.title}
-                      className="group rounded-xl border bg-card p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20"
+                      className="group spotlight-card rounded-xl border bg-card p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20"
                     >
-                      <div className={`inline-flex rounded-lg p-2.5 ${feature.bg} mb-4`}>
-                        <Icon className={`h-5 w-5 ${feature.color}`} />
+                      <div className={`inline-flex rounded-xl p-3 ${feature.bg} ${feature.border} border mb-4`}>
+                        <Icon className={`h-6 w-6 ${feature.color}`} />
                       </div>
                       <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
@@ -179,45 +261,154 @@ export default async function Home() {
         {/* How It Works */}
         <section id="how-it-works" className="py-24">
           <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-3xl">
+            <div className="mx-auto max-w-4xl">
               <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold sm:text-4xl">
+                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
                   How it works
                 </h2>
-                <p className="mt-4 text-muted-foreground">
+                <p className="mt-4 text-lg text-muted-foreground">
                   Three simple steps to build your personal knowledge base.
                 </p>
               </div>
-              <div className="grid gap-8 sm:grid-cols-3">
-                {steps.map((step) => (
-                  <div key={step.number} className="text-center">
-                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold">
-                      {step.number}
+              <div className="relative grid gap-8 sm:grid-cols-3">
+                {/* Connecting line */}
+                <div className="absolute top-10 left-[16.67%] right-[16.67%] hidden h-[2px] bg-gradient-to-r from-primary/30 via-primary/50 to-primary/30 sm:block" />
+                {steps.map((step) => {
+                  const StepIcon = step.icon;
+                  return (
+                    <div key={step.number} className="relative text-center">
+                      <div className="relative mx-auto mb-4 flex h-20 w-20 items-center justify-center">
+                        <div className="absolute inset-0 rounded-full bg-primary/10" />
+                        <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
+                          <StepIcon className="h-5 w-5" />
+                        </div>
+                        <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground ring-2 ring-background">
+                          {step.number}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                      <p className="text-sm text-muted-foreground">{step.description}</p>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">{step.description}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="bg-muted/50 py-20">
+        {/* Demo Video */}
+        <section id="demo" className="bg-muted/50 py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-4xl">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-sm font-medium text-muted-foreground mb-6">
+                  <Play className="h-3.5 w-3.5" />
+                  60-Second Demo
+                </div>
+                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                  See it in action
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                  Watch how Mindweave captures, organizes, and resurfaces your knowledge.
+                </p>
+              </div>
+              <div className="relative rounded-2xl border bg-card overflow-hidden shadow-lg">
+                <video
+                  className="w-full aspect-video"
+                  controls
+                  preload="metadata"
+                  poster="/demo-poster.png"
+                >
+                  <source src="/demo.mp4" type="video/mp4" />
+                  Your browser does not support the video element.
+                </video>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tech Stack */}
+        <section id="tech-stack" className="py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-4xl">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                  Built with modern tech
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                  Production-grade stack for reliability and performance.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {techStack.map((tech) => {
+                  const TechIcon = tech.icon;
+                  return (
+                    <div
+                      key={tech.name}
+                      className="group flex flex-col items-center gap-3 rounded-xl border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20"
+                    >
+                      <TechIcon className={`h-8 w-8 ${tech.color} transition-transform group-hover:scale-110`} />
+                      <span className="text-sm font-semibold">{tech.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Open Source CTA */}
+        <section className="py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-sm font-medium text-muted-foreground mb-8">
+                <Github className="h-4 w-4" />
+                Open Source
+              </div>
+              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl mb-4">
+                Built in the open
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+                Mindweave is fully open source. Explore the code, contribute, or self-host your own instance.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a
+                  href="https://github.com/AshGw/mindweave"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-base font-semibold hover:bg-accent transition-colors"
+                >
+                  <Github className="h-5 w-5" />
+                  Star on GitHub
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </a>
+              </div>
+              <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                <span>350+ tests passing</span>
+                <span className="text-border">|</span>
+                <span>TypeScript strict</span>
+                <span className="text-border">|</span>
+                <span>MIT License</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-24">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold sm:text-4xl mb-4">
-              Ready to get started?
+            <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl mb-4">
+              Stop losing your best ideas
             </h2>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              Start capturing your ideas and let AI help you build a connected knowledge base.
+            <p className="text-lg text-muted-foreground mb-10 max-w-lg mx-auto">
+              Start building your AI-powered knowledge base today. Free and open source.
             </p>
             <Link
               href="/login"
-              className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-md hover:shadow-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 rounded-lg bg-primary px-10 py-4 text-lg font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Get Started Free
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
         </section>
@@ -232,6 +423,16 @@ export default async function Home() {
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
             <span>&middot;</span>
             <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
+            <span>&middot;</span>
+            <a
+              href="https://github.com/AshGw/mindweave"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors inline-flex items-center gap-1"
+            >
+              <Github className="h-3.5 w-3.5" />
+              GitHub
+            </a>
           </div>
           <p>&copy; 2026 Mindweave. Built with Next.js, Claude AI, and pgvector.</p>
         </div>
