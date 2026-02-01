@@ -19,6 +19,9 @@ import {
   Code2,
   Layers,
   Play,
+  Smartphone,
+  Chrome,
+  Globe,
 } from 'lucide-react';
 
 const features = [
@@ -110,6 +113,8 @@ const heroPills = [
   'Knowledge Q&A',
   'Vector Embeddings',
   'Smart Library',
+  'Chrome Extension',
+  'Android App',
 ];
 
 export default async function Home() {
@@ -327,8 +332,56 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Available Everywhere */}
+        <section className="py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-5xl">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                  Available everywhere
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                  Capture knowledge from any device, any browser, anywhere.
+                </p>
+              </div>
+              <div className="grid gap-6 sm:grid-cols-3">
+                {/* Web App */}
+                <div className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
+                  <div className="inline-flex rounded-xl p-4 bg-blue-500/10 border border-blue-500/20 mb-5">
+                    <Globe className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Web App</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Full-featured dashboard for capturing, searching, and managing your knowledge base from any browser.
+                  </p>
+                </div>
+                {/* Chrome Extension */}
+                <div className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
+                  <div className="inline-flex rounded-xl p-4 bg-green-500/10 border border-green-500/20 mb-5">
+                    <Chrome className="h-8 w-8 text-green-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Chrome Extension</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Save any webpage with one click. Auto-captures title, URL, and content — AI tags it instantly.
+                  </p>
+                </div>
+                {/* Android App */}
+                <div className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
+                  <div className="inline-flex rounded-xl p-4 bg-purple-500/10 border border-purple-500/20 mb-5">
+                    <Smartphone className="h-8 w-8 text-purple-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Android App</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Capture ideas on the go. Share links and notes directly from any app to your Mindweave knowledge base.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Tech Stack */}
-        <section id="tech-stack" className="py-24">
+        <section id="tech-stack" className="bg-muted/50 py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl">
               <div className="text-center mb-16">
