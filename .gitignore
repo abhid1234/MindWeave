@@ -68,6 +68,14 @@ Thumbs.db
 # Uploads
 public/uploads/*
 !public/uploads/.gitkeep
+**/public/uploads/*
+!**/public/uploads/.gitkeep
+
+# Lighthouse reports
+lighthouse-reports/
+
+# Test artifacts
+test-bookmarks.js
 
 # Drizzle (track migrations for consistent deployments)
 .drizzle/
