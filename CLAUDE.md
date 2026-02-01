@@ -4,7 +4,7 @@ This file provides guidance for AI assistants when working with code in this rep
 
 ## Project Overview
 
-**Mindweave** is an AI-powered personal knowledge hub that helps users capture, organize, and rediscover their ideas, notes, bookmarks, and learnings. Built with Next.js 15, PostgreSQL with pgvector, and Claude AI.
+**Mindweave** is an AI-powered personal knowledge hub that helps users capture, organize, and rediscover their ideas, notes, bookmarks, and learnings. Built with Next.js 15, PostgreSQL with pgvector, and Google Gemini AI.
 
 ## Tech Stack
 
@@ -13,8 +13,7 @@ This file provides guidance for AI assistants when working with code in this rep
 - **Database**: PostgreSQL 16 + pgvector extension
 - **ORM**: Drizzle ORM
 - **Auth**: Auth.js v5 (NextAuth)
-- **AI**: Claude API (Anthropic)
-- **Embeddings**: Google Gemini (text-embedding-004)
+- **AI**: Google Gemini (tagging, Q&A, embeddings)
 - **Styling**: Tailwind CSS + shadcn/ui components
 - **Package Manager**: pnpm 9.5
 - **Build System**: Turborepo 2.0
@@ -43,7 +42,7 @@ Mindweave/
 │       │   └── search/         # Search components (SemanticSearchForm, KnowledgeQA)
 │       ├── lib/
 │       │   ├── db/             # Database schema and client
-│       │   ├── ai/             # Claude API and embeddings
+│       │   ├── ai/             # Gemini API and embeddings
 │       │   ├── auth.ts         # Auth.js configuration
 │       │   ├── utils.ts        # Utility functions
 │       │   └── validations.ts  # Zod validation schemas
@@ -249,7 +248,6 @@ AUTH_GOOGLE_ID=<optional>
 AUTH_GOOGLE_SECRET=<optional>
 
 # AI
-ANTHROPIC_API_KEY=<get from console.anthropic.com>
 GOOGLE_AI_API_KEY=<get from aistudio.google.com/app/apikey>
 
 # App
@@ -275,10 +273,10 @@ NODE_ENV=development
 - [x] Manual tagging
 
 ### Phase 2: AI Features ✅ Complete
-- [x] Claude auto-tagging
+- [x] AI auto-tagging (Gemini)
 - [x] Vector embeddings (Google Gemini)
 - [x] Semantic search (pgvector)
-- [x] Knowledge Q&A (RAG with Claude)
+- [x] Knowledge Q&A (RAG with Gemini)
 
 ## Database Schema
 
@@ -302,17 +300,12 @@ NODE_ENV=development
 
 ## AI Integration
 
-### Claude API
+### Google Gemini API
 Used for:
 - Auto-tagging content
 - Answering questions about knowledge base
 - Content summarization
-
-Files: `lib/ai/claude.ts`
-
-### Embeddings
-Used for:
-- Semantic search
+- Semantic search embeddings
 - Content recommendations
 
 Files: `lib/ai/embeddings.ts`
@@ -427,6 +420,6 @@ When making changes:
 - [Next.js Docs](https://nextjs.org/docs)
 - [Drizzle ORM](https://orm.drizzle.team/)
 - [Auth.js](https://authjs.dev/)
-- [Claude API](https://docs.anthropic.com/)
+- [Google Gemini API](https://ai.google.dev/docs)
 - [pgvector](https://github.com/pgvector/pgvector)
 - [Tailwind CSS](https://tailwindcss.com/)
