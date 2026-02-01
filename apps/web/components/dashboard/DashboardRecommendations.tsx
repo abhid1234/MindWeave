@@ -100,8 +100,8 @@ export function DashboardRecommendations() {
     window.location.href = `/dashboard/library?highlight=${id}`;
   };
 
-  // Don't render the section if there's nothing to show
-  if (!isLoading && !error && recommendations.length === 0) {
+  // Don't render the section if there's nothing to show or on error
+  if (!isLoading && (error || recommendations.length === 0)) {
     return null;
   }
 

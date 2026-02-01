@@ -229,12 +229,14 @@ export async function importContentAction(
     const failed = errors.length;
 
     return {
-      success: imported > 0 || (validatedItems.length === 0),
+      success: imported > 0 || skipped > 0,
       message: imported > 0
         ? `Successfully imported ${imported} item${imported === 1 ? '' : 's'}${skipped > 0 ? `. ${skipped} duplicate${skipped === 1 ? '' : 's'} skipped.` : ''}`
         : skipped > 0
-          ? `No new items imported. ${skipped} duplicate${skipped === 1 ? '' : 's'} skipped.`
-          : 'No items to import.',
+          ? `All ${skipped} item${skipped === 1 ? '' : 's'} already exist in your library. No duplicates were imported.`
+          : failed > 0
+            ? `Failed to import ${failed} item${failed === 1 ? '' : 's'}. ${errors.map((e) => e.reason).filter((v, i, a) => a.indexOf(v) === i).join('; ')}`
+            : 'No items to import.',
       imported,
       skipped,
       failed,

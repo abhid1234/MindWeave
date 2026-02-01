@@ -345,7 +345,7 @@ export async function getDashboardRecommendationsAction(): Promise<DashboardReco
         item.id,
         session.user.id,
         4, // Get a few from each source
-        0.5
+        0.3
       );
 
       for (const rec of recommendations) {
