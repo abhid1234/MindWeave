@@ -82,3 +82,10 @@ test-bookmarks.js
 
 # Docker
 docker/data/
+
+# Screenshots
+*.png
+!**/icons/*.png
+
+# Extension builds
+*.zip
