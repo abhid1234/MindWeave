@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { MobileNav } from './MobileNav';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { UserMenu } from './UserMenu';
 
 interface HeaderProps {
@@ -30,6 +31,7 @@ export default function Header({ user }: HeaderProps) {
           <kbd className="pointer-events-none hidden h-7 select-none items-center gap-1 rounded border bg-muted px-2 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
             <span className="text-xs">⌘</span>K
           </kbd>
+          <ThemeToggle />
           <UserMenu user={user} />
         </div>
       </div>

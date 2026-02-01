@@ -1,10 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { User, Keyboard, Sun, Moon, Monitor, LogOut } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { User, Keyboard, LogOut } from 'lucide-react';
 import { signOutAction } from '@/app/actions/auth';
 import {
   DropdownMenu,
@@ -12,8 +10,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -28,12 +24,6 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ user }: UserMenuProps) {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <DropdownMenu>
@@ -108,23 +98,6 @@ export function UserMenu({ user }: UserMenuProps) {
             </button>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        {mounted && (
-          <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-            <DropdownMenuRadioItem value="light">
-              <Sun className="mr-2 h-4 w-4" />
-              Light
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="dark">
-              <Moon className="mr-2 h-4 w-4" />
-              Dark
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="system">
-              <Monitor className="mr-2 h-4 w-4" />
-              System
-            </DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
-        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <form action={signOutAction} className="w-full">
