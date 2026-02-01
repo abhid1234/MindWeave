@@ -6,7 +6,7 @@ This document describes the AI agents integrated into Mindweave and how they enh
 
 Mindweave uses a multi-agent AI architecture to provide intelligent features:
 
-1. **Claude AI** (Anthropic) - Content understanding, tagging, and Q&A
+1. **Gemini AI** (Google) - Content understanding, tagging, and Q&A
 2. **Google Gemini** - Vector embeddings for semantic search
 3. **Future Agents** - Planned capabilities for enhanced knowledge management
 
@@ -18,7 +18,7 @@ Mindweave uses a multi-agent AI architecture to provide intelligent features:
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Claude AI  │  │Google Gemini │  │Future Agents │      │
+│  │  Gemini AI   │  │Google Gemini │  │Future Agents │      │
 │  │              │  │              │  │              │      │
 │  │ • Tagging    │  │ • Embeddings │  │ • Analytics  │      │
 │  │ • Q&A        │  │ • Semantic   │  │ • Insights   │      │
@@ -32,13 +32,13 @@ Mindweave uses a multi-agent AI architecture to provide intelligent features:
 
 ---
 
-## 1. Claude AI Agent
+## 1. Gemini AI Agent
 
 **Purpose**: Natural language understanding and content intelligence
 
-**Model**: Claude 3.5 Sonnet (claude-3-5-sonnet-20241022)
+**Model**: Gemini 1.5 Pro
 
-**API Provider**: Anthropic
+**API Provider**: Google
 
 ### Capabilities
 
@@ -50,7 +50,7 @@ Automatically generates relevant tags for captured content.
 
 **Process**:
 1. User captures note/link/file
-2. Claude analyzes title, body, and URL
+2. Gemini analyzes title, body, and URL
 3. Returns 3-7 relevant tags
 4. Stored in `content.autoTags` column
 
@@ -65,7 +65,7 @@ const tags = await generateTags({
 ```
 
 **Prompt Strategy**:
-- Instructs Claude to return tags as lowercase, hyphenated strings
+- Instructs Gemini to return tags as lowercase, hyphenated strings
 - Focuses on extracting key topics, technologies, and concepts
 - Avoids generic tags like "information" or "content"
 
@@ -78,7 +78,7 @@ Interactive chat interface to query your knowledge base.
 **Process**:
 1. User asks a question
 2. Relevant content retrieved via semantic search
-3. Claude analyzes content and generates answer
+3. Gemini analyzes content and generates answer
 4. Citations provided with source content
 
 **Example Use Cases**:
@@ -88,7 +88,7 @@ Interactive chat interface to query your knowledge base.
 
 **Prompt Strategy**:
 - Provides relevant content as context
-- Instructs Claude to cite sources
+- Instructs Gemini to cite sources
 - Handles "I don't know" gracefully when content doesn't contain the answer
 
 #### C. Content Summarization (Implemented in Feature #6)
@@ -113,12 +113,12 @@ const summary = await summarizeContent({
 
 ### Configuration
 
-**Environment Variable**: `ANTHROPIC_API_KEY`
+**Environment Variable**: `GOOGLE_AI_API_KEY`
 
 **API Settings**:
 ```typescript
 {
-  model: 'claude-3-5-sonnet-20241022',
+  model: 'gemini-1.5-pro',
   max_tokens: 1024,
   temperature: 0.7
 }
@@ -706,15 +706,15 @@ const items = await db
 Ralph is a **development agent** that builds features that use the **AI agents**:
 
 **Example Flow**:
-1. Ralph implements Feature #6 (Claude Auto-Tagging)
-2. Creates server action that calls Claude AI agent
-3. Tests the integration with mocked Claude API
+1. Ralph implements Feature #6 (AI Auto-Tagging)
+2. Creates server action that calls Gemini AI agent
+3. Tests the integration with mocked Gemini API
 4. Deploys to production
-5. Users capture content → Claude agent generates tags
+5. Users capture content → Gemini agent generates tags
 
 **Clear Separation**:
 - **Ralph**: Develops features (autonomous developer)
-- **Claude AI**: Processes user content (tagging, Q&A)
+- **Gemini AI**: Processes user content (tagging, Q&A)
 - **Gemini**: Generates embeddings (semantic search)
 
 ---
@@ -795,7 +795,7 @@ Semantic search with Q&A:
 User Query
     ↓
     ├─→ Gemini Embedding → Vector Search → Relevant Content
-    └─→ Claude Q&A ←────────────────────────┘
+    └─→ Gemini Q&A ←────────────────────────┘
                     ↓
                 User Response
 ```
@@ -810,7 +810,7 @@ Knowledge Q&A flow:
 3. Vector Search (pgvector)
 4. Retrieve Top N Results
 5. Build Context (Relevant Content)
-6. Generate Answer (Claude)
+6. Generate Answer (Gemini)
 7. Return with Citations
 ```
 
@@ -823,31 +823,18 @@ Knowledge Q&A flow:
 **Development**:
 ```bash
 # .env.local
-ANTHROPIC_API_KEY=sk-ant-...
 GOOGLE_AI_API_KEY=AIzaSy...
 ```
 
 **Production** (GCP Secret Manager):
 ```bash
 # Secret names
-anthropic-api-key
 google-ai-api-key
 ```
 
 ### Getting API Keys
 
-#### 1. Anthropic API Key
-
-1. Sign up at https://console.anthropic.com/
-2. Navigate to API Keys section
-3. Create new API key
-4. Copy and save securely
-
-**Pricing**: Pay-as-you-go
-- Input: $3 / million tokens
-- Output: $15 / million tokens
-
-#### 2. Google AI API Key
+#### 1. Google AI API Key
 
 1. Visit https://aistudio.google.com/app/apikey
 2. Create or select project
@@ -867,7 +854,7 @@ google-ai-api-key
 All agent interactions are logged:
 
 ```typescript
-console.log('[Claude] Generating tags for content:', contentId);
+console.log('[Gemini] Generating tags for content:', contentId);
 console.log('[Gemini] Creating embedding, dimensions:', 768);
 console.log('[Search] Found', results.length, 'similar items');
 ```
@@ -1023,7 +1010,7 @@ node -e "
 ## Related Documentation
 
 - [CLAUDE.md](CLAUDE.md) - Development guide with AI integration details
-- [lib/ai/claude.ts](apps/web/lib/ai/claude.ts) - Claude API wrapper
+- [lib/ai/claude.ts](apps/web/lib/ai/claude.ts) - AI API wrapper
 - [lib/ai/embeddings.ts](apps/web/lib/ai/embeddings.ts) - Gemini embeddings
 - [STATUS.md](STATUS.md) - Feature implementation status
 
@@ -1032,6 +1019,6 @@ node -e "
 ## Questions?
 
 For AI agent-related questions:
-- Review API documentation: [Anthropic](https://docs.anthropic.com/) | [Google AI](https://ai.google.dev/)
+- Review API documentation: [Google AI](https://ai.google.dev/docs)
 - Check implementation: `apps/web/lib/ai/`
 - Report issues: [GitHub Issues](https://github.com/abhid1234/MindWeave/issues)

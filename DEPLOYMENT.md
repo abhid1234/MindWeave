@@ -106,8 +106,7 @@ pnpm gcp:setup-secrets
 # Or manually create each secret:
 echo -n "your-database-url" | gcloud secrets create database-url --data-file=-
 echo -n "$(openssl rand -base64 32)" | gcloud secrets create auth-secret --data-file=-
-echo -n "your-anthropic-key" | gcloud secrets create anthropic-api-key --data-file=-
-echo -n "your-gemini-key" | gcloud secrets create google-ai-api-key --data-file=-
+echo -n "your-google-ai-key" | gcloud secrets create google-ai-api-key --data-file=-
 echo -n "your-google-oauth-id" | gcloud secrets create google-oauth-client-id --data-file=-
 echo -n "your-google-oauth-secret" | gcloud secrets create google-oauth-client-secret --data-file=-
 ```
@@ -177,7 +176,7 @@ gcloud run deploy mindweave \
   --region=us-central1 \
   --platform=managed \
   --allow-unauthenticated \
-  --set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest
+  --set-secrets=DATABASE_URL=database-url:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest
 ```
 
 ### Option 3: Deploy with Service YAML
@@ -453,7 +452,7 @@ script-src 'self' 'unsafe-inline' 'unsafe-eval';
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: https: blob:;
 font-src 'self' data:;
-connect-src 'self' https://api.anthropic.com https://generativelanguage.googleapis.com;
+connect-src 'self' https://generativelanguage.googleapis.com;
 frame-ancestors 'none';
 base-uri 'self';
 form-action 'self';
@@ -531,8 +530,7 @@ gcloud compute security-policies rules create 2001 \
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
 | `AUTH_SECRET` | Yes | JWT signing secret (32+ chars) |
 | `AUTH_URL` | Yes | Application URL for OAuth callbacks |
-| `ANTHROPIC_API_KEY` | No | Claude API for AI features |
-| `GOOGLE_AI_API_KEY` | No | Gemini API for embeddings |
+| `GOOGLE_AI_API_KEY` | No | Gemini API for AI features and embeddings |
 | `AUTH_GOOGLE_ID` | No | Google OAuth client ID |
 | `AUTH_GOOGLE_SECRET` | No | Google OAuth client secret |
 | `NEXT_PUBLIC_APP_URL` | Yes | Public app URL |

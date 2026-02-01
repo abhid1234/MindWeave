@@ -533,7 +533,7 @@ cat scripts/ralph/progress.txt
 ### Cost Management
 
 Ralph uses AI API calls:
-- Monitor API usage in Anthropic console
+- Monitor API usage in Google AI console
 - Adjust max iterations to control costs
 - Use manual development for simple features
 - Let Ralph handle complex, test-heavy features

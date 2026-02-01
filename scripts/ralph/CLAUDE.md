@@ -168,7 +168,7 @@ apps/web/
 │   └── [feature]/       # Feature-specific components
 ├── lib/
 │   ├── db/              # Database (schema, client)
-│   ├── ai/              # AI integration (Claude, Gemini)
+│   ├── ai/              # AI integration (Gemini)
 │   ├── auth.ts          # Auth.js configuration
 │   ├── utils.ts         # Utility functions
 │   └── validations.ts   # Zod schemas
@@ -183,7 +183,7 @@ apps/web/
 - **Database**: PostgreSQL 16 + pgvector
 - **ORM**: Drizzle ORM
 - **Auth**: Auth.js v5 (JWT sessions)
-- **AI**: Claude API (Anthropic) + Google Gemini (embeddings)
+- **AI**: Google Gemini (tagging, Q&A, embeddings)
 - **Testing**: Vitest + React Testing Library + Playwright
 - **Styling**: Tailwind CSS + shadcn/ui
 

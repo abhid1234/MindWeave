@@ -423,8 +423,8 @@ Create new content (note, link, or file).
 ```
 
 **Side Effects**:
-- Auto-generates tags via Claude AI (if `ANTHROPIC_API_KEY` set)
-- Generates summary via Claude AI
+- Auto-generates tags via Gemini AI (if `GOOGLE_AI_API_KEY` set)
+- Generates summary via Gemini AI
 - Creates embedding via Google Gemini (if `GOOGLE_AI_API_KEY` set)
 
 ---
@@ -604,7 +604,7 @@ Ask a question about your knowledge base (RAG).
 **Process**:
 1. Generates embedding for question
 2. Finds similar content via vector search
-3. Sends context + question to Claude AI
+3. Sends context + question to Gemini AI
 4. Returns answer with citations
 
 **Returns**:

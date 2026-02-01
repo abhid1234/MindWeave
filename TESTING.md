@@ -451,7 +451,7 @@ vi.mock('@/lib/ai/claude', () => ({
 ### Environment Variables
 
 ```typescript
-vi.stubEnv('ANTHROPIC_API_KEY', 'test-api-key');
+vi.stubEnv('GOOGLE_AI_API_KEY', 'test-api-key');
 vi.stubEnv('DATABASE_URL', 'postgresql://test-db-url');
 ```
 
