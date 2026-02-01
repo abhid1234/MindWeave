@@ -2,13 +2,14 @@
 
 import { IMPORT_SOURCES, ImportSource, ImportSourceConfig } from '@/lib/import/types';
 import { cn } from '@/lib/utils';
-import { Bookmark, BookmarkCheck, FileText, StickyNote, LucideIcon } from 'lucide-react';
+import { Bookmark, BookmarkCheck, FileText, StickyNote, Twitter, LucideIcon } from 'lucide-react';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Bookmark: Bookmark,
   BookmarkCheck: BookmarkCheck,
   FileText: FileText,
   StickyNote: StickyNote,
+  Twitter: Twitter,
 };
 
 interface ImportSourceSelectorProps {
