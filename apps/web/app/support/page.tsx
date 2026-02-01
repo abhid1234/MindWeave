@@ -11,7 +11,7 @@ const faqs = [
   },
   {
     question: 'How does AI tagging work?',
-    answer: 'When you save content, Claude AI automatically analyzes it and suggests relevant tags. You can also add your own tags manually.',
+    answer: 'When you save content, Gemini AI automatically analyzes it and suggests relevant tags. You can also add your own tags manually.',
   },
   {
     question: 'What is semantic search?',
@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     question: 'Is my data shared with anyone?',
-    answer: 'Your content is only sent to AI services (Anthropic Claude and Google Gemini) to provide tagging, search, and Q&A features. We never sell your data.',
+    answer: 'Your content is only sent to Google Gemini AI to provide tagging, search, and Q&A features. We never sell your data.',
   },
 ];
 

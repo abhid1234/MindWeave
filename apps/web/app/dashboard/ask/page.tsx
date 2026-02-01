@@ -14,7 +14,7 @@ export default async function AskPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Ask Your Knowledge Base</h1>
         <p className="mt-2 text-muted-foreground">
-          Ask questions about your saved notes, links, and files. Claude AI will search through your knowledge base and provide answers with citations.
+          Ask questions about your saved notes, links, and files. Gemini AI will search through your knowledge base and provide answers with citations.
         </p>
       </div>
 

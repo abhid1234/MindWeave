@@ -23,8 +23,8 @@ export default function PrivacyPolicy() {
             <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
               <li>To provide and maintain the Mindweave service.</li>
               <li>To authenticate your identity via Google OAuth.</li>
-              <li>To process your content with AI services for auto-tagging (Anthropic Claude API) and semantic search (Google Gemini text-embedding-004).</li>
-              <li>To answer questions about your knowledge base using AI (Anthropic Claude API).</li>
+              <li>To process your content with Google Gemini AI for auto-tagging and semantic search.</li>
+              <li>To answer questions about your knowledge base using Google Gemini AI.</li>
             </ul>
           </section>
 
@@ -34,12 +34,10 @@ export default function PrivacyPolicy() {
               Your content is sent to the following third-party AI services for processing:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-              <li><strong>Anthropic Claude API:</strong> Used for auto-tagging content and answering questions about your knowledge base.</li>
-              <li><strong>Google Gemini API:</strong> Used to generate text embeddings for semantic search functionality.</li>
+              <li><strong>Google Gemini API:</strong> Used for auto-tagging content, answering questions about your knowledge base, and generating text embeddings for semantic search.</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-2">
-              These services process your content only as needed to provide the features described above. Please refer to{' '}
-              <a href="https://www.anthropic.com/privacy" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Anthropic&apos;s Privacy Policy</a> and{' '}
+              This service processes your content only as needed to provide the features described above. Please refer to{' '}
               <a href="https://policies.google.com/privacy" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Google&apos;s Privacy Policy</a> for details on how they handle data.
             </p>
           </section>

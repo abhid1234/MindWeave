@@ -33,7 +33,7 @@ const features = [
   {
     icon: Tags,
     title: 'AI Auto-Tagging',
-    description: 'Claude automatically tags your content, making it easy to organize and find.',
+    description: 'AI automatically tags your content, making it easy to organize and find.',
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/20',
@@ -101,7 +101,7 @@ const techStack = [
   { name: 'Tailwind CSS', icon: Palette, color: 'text-cyan-500' },
   { name: 'Auth.js', icon: Lock, color: 'text-emerald-500' },
   { name: 'Drizzle ORM', icon: Database, color: 'text-lime-500' },
-  { name: 'Claude AI', icon: Brain, color: 'text-orange-500' },
+  { name: 'Gemini AI', icon: Brain, color: 'text-orange-500' },
 ];
 
 const heroPills = [
@@ -231,7 +231,7 @@ export default async function Home() {
                   <span className="text-gradient">remember</span>
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Powered by Claude AI and semantic search to help you capture, organize,
+                  Powered by Gemini AI and semantic search to help you capture, organize,
                   and rediscover your knowledge effortlessly.
                 </p>
               </div>
@@ -434,7 +434,7 @@ export default async function Home() {
               GitHub
             </a>
           </div>
-          <p>&copy; 2026 Mindweave. Built with Next.js, Claude AI, and pgvector.</p>
+          <p>&copy; 2026 Mindweave. Built with Next.js, Gemini AI, and pgvector.</p>
         </div>
       </footer>
     </div>
