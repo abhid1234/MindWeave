@@ -489,7 +489,11 @@ None - fresh scaffolding
   - Auto sign-in after successful password reset
   - Added "Forgot password?" link to login page
   - Requires `RESEND_API_KEY` environment variable
-  - Commit: 58feb50
+  - Added `RESEND_API_KEY` to Secret Manager and Cloud Run deployment config
+  - Deployed to Cloud Run (build b6b56c60, commit f699b82)
+  - Image: `gcr.io/mindweave-prod/mindweave:f699b82`
+  - URL: https://mindweave.space
+  - Commits: 58feb50, fa59d27, 0e6ea1d, f699b82
 - **2026-02-02** - ✅ **EMAIL/PASSWORD AUTHENTICATION + DEPLOYMENT**
   - Added Credentials provider (id: `credentials`) with bcryptjs password hashing (cost 12)
   - Added `password` (nullable text) column to users table for credential-based accounts
