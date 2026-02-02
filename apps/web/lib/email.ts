@@ -39,7 +39,7 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
 
   const resetUrl = `${APP_URL}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
 
-  await getResend().emails.send({
+  const { data, error } = await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
     to: email,
     subject: 'Reset your Mindweave password',
@@ -50,6 +50,12 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
       <p>This link expires in 1 hour. If you didn't request this, ignore this email.</p>
     `,
   });
+
+  if (error) {
+    console.error('[Password Reset] Resend API error:', JSON.stringify(error));
+  } else {
+    console.log('[Password Reset] Email sent successfully, id:', data?.id);
+  }
 }
 
 export async function verifyResetToken(
