@@ -8,7 +8,7 @@
 ✅ **All Phase 2, 3, 4, 5, 6 & 7 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, and comprehensive AI enhancements.
 
 **Completed Features**:
-- Authentication (Google OAuth + Email/Password with JWT sessions) - 97 tests, 94.73% coverage
+- Authentication (Google OAuth + Email/Password + Password Reset with JWT sessions) - 97 tests, 94.73% coverage
 - Note Capture (Form + validation + database) - 124 tests, 81.03% coverage
 - Content Library (Filtering + sorting + components) - 164 tests total, 87.5% coverage
 - Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
@@ -39,12 +39,14 @@
   - API endpoints for session check and content capture
   - Dark mode support in popup UI
 
-**Next Step**: All core features complete! Ready for deployment or additional features (password reset, email verification, Firefox extension, collaborative features, etc.).
+**Next Step**: All core features complete! Ready for deployment or additional features (email verification, Firefox extension, collaborative features, etc.).
 
 - [x] **Tasks Dashboard** - Full task management UI with CRUD, filtering, and 57 tests
 
 - [x] **Onboarding Flow** - 3-step onboarding for new users (Welcome, Create Content, Explore Features)
 - [x] **Public User Profiles** - Username, bio, public profile pages with shareable collections
+
+- [x] **Password Reset Flow** - Forgot/reset password via Resend email with tokenized links
 
 **Latest Enhancement**:
 - [x] **E2E Test Unskip (Round 2)** - Unskipped 3 more E2E tests with app code fixes: (1) clear tag filter — replaced `<Link>` with `<button>` using `window.location.href` for reliable navigation; (2) file upload — added `data-testid` to hidden input + fixed Zod URL validation to only enforce URL format for link type (file type uses relative paths); (3) invalid URL — changed `type="url"` to `type="text" inputMode="url"` so Zod errors render. 1 test remains skipped (auto-save debounce timing is inherently flaky in E2E). Final: 68 passed, 0 failures, 1 skip in these 3 spec files.
@@ -477,6 +479,17 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-02** - ✅ **PASSWORD RESET FLOW VIA RESEND EMAIL**
+  - Added forgot-password page (`/forgot-password`) with email input form
+  - Added reset-password page (`/reset-password`) with token validation and new password form
+  - Created `lib/email.ts` with Resend client, `sendPasswordResetEmail()`, `verifyResetToken()`, `consumeResetToken()`
+  - Tokens hashed with SHA-256 before storage in `verificationTokens` table
+  - 1-hour expiry, single-use (deleted after consumption)
+  - No email enumeration (always shows "check your email" regardless of account existence)
+  - Auto sign-in after successful password reset
+  - Added "Forgot password?" link to login page
+  - Requires `RESEND_API_KEY` environment variable
+  - Commit: 58feb50
 - **2026-02-02** - ✅ **EMAIL/PASSWORD AUTHENTICATION + DEPLOYMENT**
   - Added Credentials provider (id: `credentials`) with bcryptjs password hashing (cost 12)
   - Added `password` (nullable text) column to users table for credential-based accounts
