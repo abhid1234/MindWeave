@@ -8,7 +8,7 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const APP_URL = process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export function hashToken(token: string): string {
   return crypto.createHash('sha256').update(token).digest('hex');
