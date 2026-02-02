@@ -31,7 +31,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Frontend**: Next.js 15 (App Router), React 18, TypeScript 5.5
 - **Backend**: Next.js Server Actions, Drizzle ORM
 - **Database**: PostgreSQL 16 + pgvector
-- **Auth**: Auth.js v5 with Google OAuth
+- **Auth**: Auth.js v5 with Google OAuth + Email/Password + Password Reset (Resend)
 - **AI**: Google Gemini (tagging, Q&A, embeddings)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Tooling**: npm, Turborepo, Docker Compose
@@ -366,7 +366,7 @@ See [STATUS.md](STATUS.md) for current development status.
 ### Phase 1: Core Features ✅ Complete
 - [x] Project scaffolding
 - [x] Docker PostgreSQL setup
-- [x] Authentication (Google OAuth + JWT sessions)
+- [x] Authentication (Google OAuth + Email/Password + Password Reset)
 - [x] Content capture (notes, links, files)
 - [x] Content library with filtering and sorting
 - [x] Full-text search
@@ -442,6 +442,11 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Profile settings page in dashboard
 - [x] Collection public/private toggle
 
+### Phase 11: Auth Enhancements ✅ Complete
+- [x] Email/password registration and login
+- [x] Password reset flow via Resend email (forgot-password, tokenized reset links)
+- [x] OAuth account linking (Google can link to existing email accounts)
+
 ### Future Enhancements (Planned)
 - [ ] Firefox browser extension
 - [ ] Collaborative knowledge bases
@@ -458,6 +463,7 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 | `AUTH_URL` | App URL (http://localhost:3000) | Yes |
 | `GOOGLE_AI_API_KEY` | Gemini API key for AI features | Yes |
 | `GOOGLE_AI_API_KEY` | Google Gemini API key for embeddings | Yes |
+| `RESEND_API_KEY` | Resend API key for password reset emails | No |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID | No |
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret | No |
 
