@@ -54,7 +54,7 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
   if (error) {
     console.error('[Password Reset] Resend API error:', JSON.stringify(error));
   } else {
-    console.log('[Password Reset] Email sent successfully, id:', data?.id);
+    console.warn('[Password Reset] Email sent successfully, id:', data?.id);
   }
 }
 
