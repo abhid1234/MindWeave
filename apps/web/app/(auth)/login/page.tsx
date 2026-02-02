@@ -1,9 +1,15 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { auth, signIn } from '@/lib/auth';
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await auth();
   const isDevelopment = process.env.NODE_ENV === 'development';
+  const params = await searchParams;
 
   if (session?.user) {
     redirect('/dashboard');
@@ -65,6 +71,66 @@ export default async function LoginPage() {
               </div>
             </>
           )}
+
+          {/* Email/Password Login */}
+          {params.error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-700">
+              {params.error === 'CredentialsSignin'
+                ? 'Invalid email or password.'
+                : 'An error occurred. Please try again.'}
+            </div>
+          )}
+
+          <form
+            action={async (formData: FormData) => {
+              'use server';
+              const email = formData.get('email') as string;
+              const password = formData.get('password') as string;
+              await signIn('credentials', {
+                email,
+                password,
+                redirectTo: '/dashboard',
+              });
+            }}
+            className="space-y-3"
+          >
+            <input
+              type="email"
+              name="email"
+              placeholder="Email address"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              required
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700"
+            >
+              Sign in
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-slate-600">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Sign up
+            </Link>
+          </p>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-slate-500">or</span>
+            </div>
+          </div>
 
           {/* Google OAuth */}
           <form

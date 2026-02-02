@@ -21,6 +21,7 @@ export const users = pgTable('users', {
   email: text('email').unique().notNull(),
   emailVerified: timestamp('emailVerified', { mode: 'date' }),
   image: text('image'),
+  password: text('password'), // Nullable — OAuth users won't have one
   // Onboarding fields
   onboardingCompleted: boolean('onboarding_completed').notNull().default(false),
   onboardingStep: integer('onboarding_step').notNull().default(0),

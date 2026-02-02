@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import bcrypt from 'bcryptjs';
 import { db } from './db/client';
 import { users, accounts, sessions, verificationTokens } from './db/schema';
 
@@ -37,6 +38,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // SECURITY: Disabled dangerous email linking to prevent account takeover
       // If a user signs up with Google, they must continue using Google
       allowDangerousEmailAccountLinking: false,
+    }),
+    // Email/password credentials login
+    Credentials({
+      id: 'credentials',
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await db.query.users.findFirst({
+          where: (users, { eq }) => eq(users.email, credentials.email as string),
+        });
+
+        if (!user || !user.password) return null;
+
+        const isValid = await bcrypt.compare(
+          credentials.password as string,
+          user.password
+        );
+        if (!isValid) return null;
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
+      },
     }),
     // Development-only test login (bypasses OAuth)
     // SECURITY: Only enabled when ALLOW_DEV_LOGIN=true AND NODE_ENV=development
