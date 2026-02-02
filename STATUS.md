@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-01
+**Last Updated**: 2026-02-02
 **Current Phase**: UI Polish Complete
 **Active Ralph Loop**: No
 
@@ -8,7 +8,7 @@
 ✅ **All Phase 2, 3, 4, 5, 6 & 7 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, and comprehensive AI enhancements.
 
 **Completed Features**:
-- Authentication (Google OAuth with JWT sessions) - 97 tests, 94.73% coverage
+- Authentication (Google OAuth + Email/Password with JWT sessions) - 97 tests, 94.73% coverage
 - Note Capture (Form + validation + database) - 124 tests, 81.03% coverage
 - Content Library (Filtering + sorting + components) - 164 tests total, 87.5% coverage
 - Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
@@ -39,7 +39,7 @@
   - API endpoints for session check and content capture
   - Dark mode support in popup UI
 
-**Next Step**: All core features complete! Ready for deployment or additional features (Firefox extension, collaborative features, etc.).
+**Next Step**: All core features complete! Ready for deployment or additional features (password reset, email verification, Firefox extension, collaborative features, etc.).
 
 - [x] **Tasks Dashboard** - Full task management UI with CRUD, filtering, and 57 tests
 
@@ -88,6 +88,8 @@
 
 ### Phase 2: Feature #1 - Authentication Flow ✅ COMPLETE
 - [x] Login page with Google OAuth integration
+- [x] Email/password registration and login with bcryptjs
+- [x] OAuth account linking (Google can link to existing email accounts)
 - [x] Development-only Credentials provider for local testing
 - [x] JWT sessions for Edge Runtime compatibility
 - [x] Logout functionality with Sign Out button
@@ -475,6 +477,18 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-02** - ✅ **EMAIL/PASSWORD AUTHENTICATION + DEPLOYMENT**
+  - Added Credentials provider (id: `credentials`) with bcryptjs password hashing (cost 12)
+  - Added `password` (nullable text) column to users table for credential-based accounts
+  - Registration page (`/register`) with name, email, password, confirm password fields
+  - Server-side validation: minimum 8 chars, password match, duplicate email check
+  - Auto sign-in after registration
+  - Login page (`/login`) updated with email/password form + error messages
+  - Divider between credentials form and Google OAuth button
+  - Enabled `allowDangerousEmailAccountLinking` so Google OAuth links to existing email accounts
+  - Schema pushed to both local and production (Cloud SQL) databases
+  - Deployed to Cloud Run (build dfbb4a47, commit 90d9127)
+  - Commits: 3715b80, 90d9127
 - **2026-02-01** - ✅ **IMPORT E2E TESTS**
   - Added 20 Playwright E2E tests for the import wizard flow (`tests/e2e/import.spec.ts`)
   - Covers: navigation, source selection, file upload, parse & preview, import & completion, error handling
