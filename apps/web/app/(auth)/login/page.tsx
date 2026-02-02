@@ -116,12 +116,17 @@ export default async function LoginPage({
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-600">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign up
+          <div className="flex items-center justify-between text-sm text-slate-600">
+            <p>
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Sign up
+              </Link>
+            </p>
+            <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Forgot password?
             </Link>
-          </p>
+          </div>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
