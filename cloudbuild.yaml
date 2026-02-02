@@ -54,7 +54,7 @@ steps:
       - '--allow-unauthenticated'
       - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_APP_URL=${_APP_URL},AUTH_URL=${_APP_URL},CLOUD_SQL_CONNECTION_NAME=${_CLOUD_SQL_INSTANCE}'
       - '--add-cloudsql-instances=${_CLOUD_SQL_INSTANCE}'
-      - '--set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest'
+      - '--set-secrets=DATABASE_URL=database-url:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest,RESEND_API_KEY=resend-api-key:latest'
       - '--min-instances=0'
       - '--max-instances=10'
       - '--memory=512Mi'
