@@ -35,9 +35,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      // SECURITY: Disabled dangerous email linking to prevent account takeover
-      // If a user signs up with Google, they must continue using Google
-      allowDangerousEmailAccountLinking: false,
+      // Allow linking Google OAuth to an existing email/password account
+      allowDangerousEmailAccountLinking: true,
     }),
     // Email/password credentials login
     Credentials({
