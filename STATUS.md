@@ -8,7 +8,7 @@
 ✅ **All Phase 2, 3, 4, 5, 6 & 7 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, and comprehensive AI enhancements.
 
 **Completed Features**:
-- Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests, 94.73% coverage
+- Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
 - Note Capture (Form + validation + database) - 124 tests, 81.03% coverage
 - Content Library (Filtering + sorting + components) - 164 tests total, 87.5% coverage
 - Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
@@ -481,6 +481,12 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-03** - ✅ **EMAIL VERIFICATION TESTS** — Added 37 unit tests across 3 new test files:
+  - `lib/email.test.ts` (24 tests) — hashToken, sendVerificationEmail, consumeVerificationToken, sendPasswordResetEmail, verifyResetToken, consumeResetToken
+  - `app/(auth)/verify-email/page.test.tsx` (6 tests) — invalid link, expired link, branding, resend links
+  - `app/(auth)/verify-email-sent/page.test.tsx` (7 tests) — check-your-email message, email display, resend button, 24h expiry, back-to-sign-in, resent success
+  - Full suite: 1330 tests passing, 0 regressions
+  - Commit: f2aaa55
 - **2026-02-03** - ✅ **EMAIL VERIFICATION FOR NEW REGISTRATIONS**
   - New email/password users must verify their email before accessing the dashboard
   - Registration now sets `emailVerified: null` and sends verification email via Resend
