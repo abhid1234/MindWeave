@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-02
+**Last Updated**: 2026-02-03
 **Current Phase**: UI Polish Complete
 **Active Ralph Loop**: No
 
@@ -8,7 +8,7 @@
 ✅ **All Phase 2, 3, 4, 5, 6 & 7 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, and comprehensive AI enhancements.
 
 **Completed Features**:
-- Authentication (Google OAuth + Email/Password + Password Reset with JWT sessions) - 97 tests, 94.73% coverage
+- Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests, 94.73% coverage
 - Note Capture (Form + validation + database) - 124 tests, 81.03% coverage
 - Content Library (Filtering + sorting + components) - 164 tests total, 87.5% coverage
 - Full-text Search (PostgreSQL ILIKE search) - 182 tests total, 89.71% coverage
@@ -47,6 +47,8 @@
 - [x] **Public User Profiles** - Username, bio, public profile pages with shareable collections
 
 - [x] **Password Reset Flow** - Forgot/reset password via Resend email with tokenized links
+
+- [x] **Email Verification** - New email/password registrations require email verification before dashboard access
 
 **Latest Enhancement**:
 - [x] **E2E Test Unskip (Round 2)** - Unskipped 3 more E2E tests with app code fixes: (1) clear tag filter — replaced `<Link>` with `<button>` using `window.location.href` for reliable navigation; (2) file upload — added `data-testid` to hidden input + fixed Zod URL validation to only enforce URL format for link type (file type uses relative paths); (3) invalid URL — changed `type="url"` to `type="text" inputMode="url"` so Zod errors render. 1 test remains skipped (auto-save debounce timing is inherently flaky in E2E). Final: 68 passed, 0 failures, 1 skip in these 3 spec files.
@@ -479,6 +481,19 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-03** - ✅ **EMAIL VERIFICATION FOR NEW REGISTRATIONS**
+  - New email/password users must verify their email before accessing the dashboard
+  - Registration now sets `emailVerified: null` and sends verification email via Resend
+  - Created `/verify-email-sent` page with "Check your email" message and resend button
+  - Created `/verify-email` page that consumes token, sets `emailVerified`, redirects to login
+  - Dashboard layout checks `emailVerified` and redirects unverified users to `/verify-email-sent`
+  - SHA-256 hashed tokens with 24-hour expiry, single-use (same pattern as password reset)
+  - Tokens use `verify:` prefix on identifier to avoid collision with password reset tokens
+  - JWT token includes `emailVerified` boolean (fetched from DB on sign-in)
+  - Login page shows success banner after email verification (`?verified=true`)
+  - OAuth users (Google) unaffected — Google already sets `emailVerified`
+  - `pnpm build` passes
+  - Commit: cce5c0e
 - **2026-02-02** - ✅ **PASSWORD RESET FLOW VIA RESEND EMAIL**
   - Added forgot-password page (`/forgot-password`) with email input form
   - Added reset-password page (`/reset-password`) with token validation and new password form
