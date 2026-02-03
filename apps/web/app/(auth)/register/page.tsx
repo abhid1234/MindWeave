@@ -4,6 +4,7 @@ import { auth, signIn } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
 import bcrypt from 'bcryptjs';
+import { sendVerificationEmail } from '@/lib/email';
 
 export default async function RegisterPage({
   searchParams,
@@ -52,15 +53,14 @@ export default async function RegisterPage({
       name,
       email,
       password: hashedPassword,
-      emailVerified: new Date(),
+      emailVerified: null,
     });
 
-    // Auto sign-in after registration
-    await signIn('credentials', {
-      email,
-      password,
-      redirectTo: '/dashboard',
-    });
+    // Send verification email
+    await sendVerificationEmail(email);
+
+    // Redirect to verification sent page
+    redirect('/verify-email-sent');
   }
 
   const errorMessages: Record<string, string> = {

@@ -5,7 +5,7 @@ import { auth, signIn } from '@/lib/auth';
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; verified?: string }>;
 }) {
   const session = await auth();
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -73,6 +73,12 @@ export default async function LoginPage({
           )}
 
           {/* Email/Password Login */}
+          {params.verified === 'true' && (
+            <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm text-green-700">
+              Email verified successfully! You can now sign in.
+            </div>
+          )}
+
           {params.error && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-700">
               {params.error === 'CredentialsSignin'

@@ -142,14 +142,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token && session.user) {
         // Use token.sub (set in jwt callback) as the user ID
         session.user.id = token.sub as string;
+        (session.user as unknown as Record<string, unknown>).emailVerified = token.emailVerified as boolean;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       // Store user ID in token.sub on sign in
       // token.sub is the standard JWT subject claim used for user ID
       if (user) {
         token.sub = user.id;
+      }
+      // Fetch emailVerified from DB on sign-in or when triggered to update
+      if (user || trigger === 'update') {
+        const dbUser = await db.query.users.findFirst({
+          where: (users, { eq }) => eq(users.id, token.sub as string),
+        });
+        token.emailVerified = dbUser?.emailVerified ? true : false;
       }
       return token;
     },

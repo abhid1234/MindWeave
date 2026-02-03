@@ -22,6 +22,17 @@ export default async function DashboardLayout({
     redirect('/login');
   }
 
+  // Check email verification status
+  if (session.user.id) {
+    const userRecord = await db.query.users.findFirst({
+      where: eq(users.id, session.user.id),
+      columns: { emailVerified: true },
+    });
+    if (userRecord && !userRecord.emailVerified) {
+      redirect('/verify-email-sent');
+    }
+  }
+
   // Check onboarding status
   if (session.user.id) {
     const user = await db.query.users.findFirst({

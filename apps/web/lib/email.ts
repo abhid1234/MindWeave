@@ -58,6 +58,69 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
   }
 }
 
+export async function sendVerificationEmail(email: string): Promise<void> {
+  // Delete any existing verification tokens for this email
+  await db
+    .delete(verificationTokens)
+    .where(eq(verificationTokens.identifier, `verify:${email}`));
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = hashToken(rawToken);
+  const expires = Math.floor(Date.now() / 1000) + 86400; // 24 hours
+
+  await db.insert(verificationTokens).values({
+    identifier: `verify:${email}`,
+    token: hashedToken,
+    expires,
+  });
+
+  const verifyUrl = `${APP_URL}/verify-email?token=${rawToken}&email=${encodeURIComponent(email)}`;
+
+  const { data, error } = await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+    to: email,
+    subject: 'Verify your Mindweave email',
+    html: `
+      <h2>Verify your email</h2>
+      <p>Welcome to Mindweave! Please verify your email address to get started.</p>
+      <p><a href="${verifyUrl}" style="display:inline-block;padding:12px 24px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:8px;">Verify Email</a></p>
+      <p>This link expires in 24 hours. If you didn't create an account, ignore this email.</p>
+    `,
+  });
+
+  if (error) {
+    console.error('[Email Verification] Resend API error:', JSON.stringify(error));
+  } else {
+    console.warn('[Email Verification] Email sent successfully, id:', data?.id);
+  }
+}
+
+export async function consumeVerificationToken(
+  email: string,
+  rawToken: string
+): Promise<boolean> {
+  const hashedToken = hashToken(rawToken);
+  const now = Math.floor(Date.now() / 1000);
+
+  const record = await db.query.verificationTokens.findFirst({
+    where: (vt, { eq, and }) =>
+      and(eq(vt.identifier, `verify:${email}`), eq(vt.token, hashedToken)),
+  });
+
+  if (!record || record.expires < now) return false;
+
+  await db
+    .delete(verificationTokens)
+    .where(
+      and(
+        eq(verificationTokens.identifier, `verify:${email}`),
+        eq(verificationTokens.token, hashedToken)
+      )
+    );
+
+  return true;
+}
+
 export async function verifyResetToken(
   email: string,
   rawToken: string
