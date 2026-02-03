@@ -493,7 +493,10 @@ None - fresh scaffolding
   - Login page shows success banner after email verification (`?verified=true`)
   - OAuth users (Google) unaffected — Google already sets `emailVerified`
   - `pnpm build` passes
-  - Commit: cce5c0e
+  - Deployed to Cloud Run (build c81ec420, commit 590647c)
+  - Image: `gcr.io/mindweave-prod/mindweave:590647c`
+  - URL: https://mindweave.space
+  - Commits: cce5c0e, 590647c
 - **2026-02-02** - ✅ **PASSWORD RESET FLOW VIA RESEND EMAIL**
   - Added forgot-password page (`/forgot-password`) with email input form
   - Added reset-password page (`/reset-password`) with token validation and new password form
