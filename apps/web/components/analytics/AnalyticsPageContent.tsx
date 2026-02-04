@@ -1,0 +1,78 @@
+'use client';
+
+import { useState } from 'react';
+import {
+  OverviewStats,
+  ContentGrowthChart,
+  TagDistributionChart,
+  CollectionUsageChart,
+  KnowledgeInsightsCard,
+  AnalyticsHeader,
+} from '@/components/analytics';
+import { exportAnalyticsAction } from '@/app/actions/analytics';
+import { useToast } from '@/components/ui/toast';
+
+export function AnalyticsPageContent() {
+  const [isExporting, setIsExporting] = useState(false);
+  const { addToast } = useToast();
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const result = await exportAnalyticsAction();
+
+      if (result.success && result.data) {
+        // Create and download JSON file
+        const blob = new Blob([JSON.stringify(result.data, null, 2)], {
+          type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mindweave-analytics-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        addToast({
+          title: 'Export complete',
+          description: 'Your analytics data has been downloaded.',
+          variant: 'success',
+        });
+      } else {
+        addToast({
+          title: 'Export failed',
+          description: result.message || 'Could not export analytics data.',
+          variant: 'error',
+        });
+      }
+    } catch {
+      addToast({
+        title: 'Export failed',
+        description: 'An unexpected error occurred.',
+        variant: 'error',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6">
+      <AnalyticsHeader onExport={handleExport} isExporting={isExporting} />
+
+      <OverviewStats />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ContentGrowthChart initialPeriod="month" />
+        <TagDistributionChart />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <CollectionUsageChart />
+        <KnowledgeInsightsCard />
+      </div>
+    </div>
+  );
+}

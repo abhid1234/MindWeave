@@ -10,6 +10,7 @@ import { CommandPalette } from '@/components/ui/command-palette';
 import { ViewTransition } from '@/components/layout/ViewTransition';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
+import { FeedbackWidget } from '@/components/feedback/FeedbackWidget';
 
 export default async function DashboardLayout({
   children,
@@ -64,6 +65,7 @@ export default async function DashboardLayout({
       <ScrollToTop />
       <CommandPalette />
       <ViewTransition />
+      <FeedbackWidget />
     </div>
   );
 }

@@ -284,8 +284,16 @@ test.describe('Manual Tagging Feature', () => {
       await expect(page.locator('text=saved-tag').first()).toBeVisible();
     });
 
-    // Skip: Auto-save debounce + server action timing is inherently flaky in E2E
-    // The auto-save logic is covered by the manual Save tests above
+    // INTENTIONALLY SKIPPED: Auto-save debounce timing is inherently flaky in E2E tests.
+    // Why this is skipped:
+    // 1. The 1-second debounce has variable timing in E2E due to CPU/network variability
+    // 2. The "Saving..." state may be too brief to reliably detect
+    // 3. Server action response times are unpredictable in E2E environments
+    //
+    // Coverage provided by other tests:
+    // - "should save tags when clicking Save button" - tests persistence via explicit Save
+    // - Unit tests in EditableTags.test.tsx - test the debounce logic directly
+    // - "should show Saving... during save" - tests the saving state visibility
     test.skip('should auto-save after 1 second of inactivity', async ({ page }) => {
       const firstCard = page.locator('article').filter({ hasText: 'Test Note for Tagging' });
 
@@ -299,14 +307,10 @@ test.describe('Manual Tagging Feature', () => {
       // Verify tag badge appears (confirms React state update)
       await expect(firstCard.locator('text=auto-saved')).toBeVisible({ timeout: 5000 });
 
-      // The auto-save debounce fires 1s after tag change and calls handleSave.
-      // On success, handleSave sets isEditing=false, hiding the input.
-      // Wait for edit mode to exit, confirming auto-save triggered and completed.
+      // Wait for auto-save to trigger and complete (edit mode exits on success)
       await expect(input).not.toBeVisible({ timeout: 15000 });
 
-      // Wait for DB write to propagate
-      await page.waitForTimeout(2000);
-
+      await page.waitForLoadState('networkidle');
       await page.reload({ waitUntil: 'networkidle' });
       await expect(page.locator('text=auto-saved').first()).toBeVisible({ timeout: 10000 });
     });

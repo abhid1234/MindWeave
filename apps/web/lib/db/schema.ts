@@ -296,6 +296,39 @@ export const contentCollectionsRelations = relations(contentCollections, ({ one 
   }),
 }));
 
+// Feedback table
+export const feedbackTypeEnum = ['bug', 'feature', 'improvement', 'other'] as const;
+export type FeedbackType = (typeof feedbackTypeEnum)[number];
+
+export const feedback = pgTable(
+  'feedback',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    type: varchar('type', { length: 20 }).notNull().$type<FeedbackType>(),
+    message: text('message').notNull(),
+    email: text('email'), // For anonymous users
+    page: text('page'), // Current page URL
+    userAgent: text('user_agent'),
+    status: varchar('status', { length: 20 }).notNull().default('new'),
+    resolvedAt: timestamp('resolved_at', { mode: 'date' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('feedback_user_id_idx').on(table.userId),
+    statusIdx: index('feedback_status_idx').on(table.status),
+    typeIdx: index('feedback_type_idx').on(table.type),
+    createdAtIdx: index('feedback_created_at_idx').on(table.createdAt),
+  })
+);
+
+export const feedbackRelations = relations(feedback, ({ one }) => ({
+  user: one(users, {
+    fields: [feedback.userId],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -317,3 +350,6 @@ export type NewDevice = typeof devices.$inferInsert;
 
 export type Task = typeof tasks.$inferSelect;
 export type NewTask = typeof tasks.$inferInsert;
+
+export type Feedback = typeof feedback.$inferSelect;
+export type NewFeedback = typeof feedback.$inferInsert;

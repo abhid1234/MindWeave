@@ -437,3 +437,45 @@ export async function getKnowledgeInsightsAction(): Promise<
     return { success: false, message: 'Failed to generate insights' };
   }
 }
+
+/**
+ * Export analytics data as JSON
+ */
+export async function exportAnalyticsAction(): Promise<
+  AnalyticsActionResult<{
+    overview: OverviewStats | null;
+    contentGrowth: ContentGrowthData[] | null;
+    tagDistribution: TagDistributionData[] | null;
+    collectionUsage: CollectionUsageData[] | null;
+    exportedAt: string;
+  }>
+> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    // Fetch all analytics data in parallel
+    const [overviewResult, growthResult, tagResult, collectionResult] = await Promise.all([
+      getOverviewStatsAction(),
+      getContentGrowthAction('year'),
+      getTagDistributionAction(),
+      getCollectionUsageAction(),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        overview: overviewResult.success ? overviewResult.data ?? null : null,
+        contentGrowth: growthResult.success ? growthResult.data ?? null : null,
+        tagDistribution: tagResult.success ? tagResult.data ?? null : null,
+        collectionUsage: collectionResult.success ? collectionResult.data ?? null : null,
+        exportedAt: new Date().toISOString(),
+      },
+    };
+  } catch (error) {
+    console.error('Error exporting analytics:', error);
+    return { success: false, message: 'Failed to export analytics data' };
+  }
+}
