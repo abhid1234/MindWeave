@@ -152,6 +152,12 @@ export default async function Home() {
               Tech Stack
             </a>
             <Link
+              href="/docs"
+              className="hidden text-sm font-medium text-muted-foreground hover:text-foreground transition-colors sm:inline-block"
+            >
+              Docs
+            </Link>
+            <Link
               href="/login"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors btn-press"
             >
@@ -474,6 +480,8 @@ export default async function Home() {
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
             <span>&middot;</span>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+            <span>&middot;</span>
+            <Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link>
             <span>&middot;</span>
             <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
             <span>&middot;</span>
