@@ -4,8 +4,17 @@ node_modules/
 # Build output
 dist/
 
-# Native platforms (generated, can be recreated with cap add)
-android/
+# Native platforms - track source, ignore build artifacts
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/keystore.properties
+android/capacitor-cordova-android-plugins/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/res/xml/config.xml
 ios/
 
 # IDE

@@ -9,14 +9,14 @@ const config: CapacitorConfig = {
   server: {
     // For production, use the deployed URL
     // For development, use localhost or your dev server URL
-    url: process.env.CAPACITOR_SERVER_URL || 'https://mindweave.app',
+    url: process.env.CAPACITOR_SERVER_URL || 'https://mindweave.space',
     cleartext: false,
     // Allow navigation to external URLs (for OAuth flows)
     allowNavigation: [
       'accounts.google.com',
       '*.google.com',
-      'mindweave.app',
-      '*.mindweave.app',
+      'mindweave.space',
+      '*.mindweave.space',
     ],
   },
 

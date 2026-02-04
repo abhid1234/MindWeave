@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mindweave brand colors -->
+    <color name="colorPrimary">#6366f1</color>
+    <color name="colorPrimaryDark">#4f46e5</color>
+    <color name="colorAccent">#818cf8</color>
+
+    <!-- Status bar and navigation bar -->
+    <color name="statusBarColor">#6366f1</color>
+    <color name="navigationBarColor">#ffffff</color>
+
+    <!-- Splash screen -->
+    <color name="splashBackground">#6366f1</color>
+</resources>

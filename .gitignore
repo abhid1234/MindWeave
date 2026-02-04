@@ -86,6 +86,7 @@ docker/data/
 # Screenshots
 *.png
 !**/icons/*.png
+!apps/mobile/android/**/*.png
 
 # Extension builds
 *.zip

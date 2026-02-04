@@ -50,6 +50,8 @@
 
 - [x] **Email Verification** - New email/password registrations require email verification before dashboard access
 
+- [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
+
 **Latest Enhancement**:
 - [x] **Performance Monitoring & Feedback System** - 1390 total tests:
   - Structured JSON logger for GCP Cloud Logging (`lib/logger.ts`)
@@ -488,6 +490,18 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-04** - ✅ **IN-APP DOCUMENTATION SITE**
+  - Added public `/docs` pages within the Next.js app (no auth required)
+  - 12 content pages: landing, getting started, features overview, capture, library, tagging, search, knowledge Q&A, collections, analytics, account & settings, FAQ
+  - Docs layout with desktop sidebar (w-64) and mobile Sheet-based navigation
+  - Components: DocsSidebar, DocsMobileNav, DocsHeader, DocsBreadcrumbs, docs-nav-config
+  - All pages are static server components with Tailwind prose styling
+  - Added "Docs" link to landing page header and footer
+  - Added all 12 docs URLs to sitemap.ts
+  - 29 component tests across 4 test files (all passing)
+  - Build verified: all docs pages render as static content
+  - 1419 total tests passing, 0 regressions
+  - Commit: c15019d
 - **2026-02-04** - ✅ **DEPLOYED TO CLOUD RUN** (build e480f8ce, commit c203d44)
   - Performance monitoring, feedback system, and analytics refinements live
   - Image: `gcr.io/mindweave-prod/mindweave:c203d44`

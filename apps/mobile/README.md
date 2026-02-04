@@ -96,7 +96,7 @@ The app loads Mindweave from a remote URL. Configure this in `capacitor.config.t
 
 ```typescript
 server: {
-  url: 'https://mindweave.app', // Production URL
+  url: 'https://mindweave.space', // Production URL
   // url: 'http://localhost:3000', // Development URL
 }
 ```
@@ -119,7 +119,7 @@ The device token is sent to `/api/devices` on the backend.
 
 The app handles:
 - `mindweave://` custom URL scheme
-- `https://mindweave.app/*` universal links
+- `https://mindweave.space/*` universal links
 
 ### Share Intent
 
@@ -286,7 +286,7 @@ server: {
   url: 'http://192.168.1.100:3000',
 
   // Production
-  url: 'https://mindweave.app',
+  url: 'https://mindweave.space',
 }
 ```
 

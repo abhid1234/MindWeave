@@ -216,7 +216,7 @@ function handleDeepLink(url: string): void {
       return;
     }
 
-    // Handle https://mindweave.app/* URLs (Universal Links)
+    // Handle https://mindweave.space/* URLs (Universal Links)
     if (parsedUrl.hostname.includes('mindweave')) {
       window.location.href = `${serverUrl}${parsedUrl.pathname}${parsedUrl.search}`;
       return;
@@ -234,7 +234,7 @@ function handleDeepLink(url: string): void {
 function getServerUrl(): string {
   // In production, this would be the deployed URL
   // For development, you can override via environment
-  return 'https://mindweave.app';
+  return 'https://mindweave.space';
 }
 
 /**
