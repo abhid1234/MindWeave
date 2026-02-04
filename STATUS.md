@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-03
+**Last Updated**: 2026-02-04
 **Current Phase**: UI Polish Complete
 **Active Ralph Loop**: No
 
@@ -51,6 +51,13 @@
 - [x] **Email Verification** - New email/password registrations require email verification before dashboard access
 
 **Latest Enhancement**:
+- [x] **Performance Monitoring & Feedback System** - 1390 total tests:
+  - Structured JSON logger for GCP Cloud Logging (`lib/logger.ts`)
+  - Performance metrics collection with timing utilities (`lib/performance.ts`)
+  - `/api/metrics` endpoint for viewing aggregated stats
+  - Database query timing utility in `lib/db/client.ts`
+  - User feedback system with `feedback` table, server actions, and FeedbackWidget
+  - Analytics dashboard refinements: date range filters, content type filters, export to JSON
 - [x] **E2E Test Unskip (Round 2)** - Unskipped 3 more E2E tests with app code fixes: (1) clear tag filter — replaced `<Link>` with `<button>` using `window.location.href` for reliable navigation; (2) file upload — added `data-testid` to hidden input + fixed Zod URL validation to only enforce URL format for link type (file type uses relative paths); (3) invalid URL — changed `type="url"` to `type="text" inputMode="url"` so Zod errors render. 1 test remains skipped (auto-save debounce timing is inherently flaky in E2E). Final: 68 passed, 0 failures, 1 skip in these 3 spec files.
 - [x] **E2E Test Unskip** - Unskipped 12 of 17 previously-skipped E2E tests by replacing sequential click navigation with `page.goto()` URL params to avoid Next.js Link soft-navigation timing issues. Fixed across library.spec.ts (7), search.spec.ts (3), capture.spec.ts (1), authentication.spec.ts (1). 4 tests remain skipped due to genuine app behavior issues (clear tag filter, file upload, browser URL validation, auto-save exit). Final: 96 chromium tests passing, 0 failures.
 - [x] **Onboarding Flow + Public Profiles** - 3-step onboarding, public user profiles with username/bio, shareable collections, SEO metadata. 24 new tests (1174 total). Migration sets existing users as onboarding-complete.
@@ -481,6 +488,28 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-04** - ✅ **PERFORMANCE MONITORING, FEEDBACK SYSTEM & ANALYTICS REFINEMENTS**
+  - **Performance Profiling**:
+    - `lib/logger.ts` — Structured JSON logging for GCP Cloud Logging (dev: human-readable, prod: JSON)
+    - `lib/performance.ts` — Performance metrics collection with `measureAsync`, `measureSync`, `createTimer`, percentile stats
+    - `/api/metrics` endpoint — View aggregated performance statistics
+    - `lib/db/client.ts` — Added `measureDbQuery` utility for database query timing
+    - `/api/health` — Now includes top 5 performance metrics
+  - **User Feedback System**:
+    - `feedback` table in schema (type: bug/feature/improvement/other, message, status, email)
+    - `submitFeedbackAction` and `getFeedbackAction` server actions
+    - `FeedbackWidget` — Floating button + modal with type selection, character count, optional email
+    - Added to dashboard layout
+  - **Analytics Dashboard Refinements**:
+    - `AnalyticsHeader` — Filters panel with date range (7d/30d/90d/1yr/all) and content type filters
+    - `exportAnalyticsAction` — Export all analytics data as JSON download
+    - `AnalyticsPageContent` — Client wrapper for analytics page
+  - **E2E Test Documentation**:
+    - Improved documentation for intentionally skipped auto-save debounce test
+    - Explains why skipped and what other tests provide coverage
+  - 60 new tests (26 logger/performance + 23 feedback + 11 analytics header)
+  - Full suite: 1390 tests passing, 0 regressions
+  - Commit: 95351db
 - **2026-02-03** - ✅ **EMAIL VERIFICATION TESTS** — Added 37 unit tests across 3 new test files:
   - `lib/email.test.ts` (24 tests) — hashToken, sendVerificationEmail, consumeVerificationToken, sendPasswordResetEmail, verifyResetToken, consumeResetToken
   - `app/(auth)/verify-email/page.test.tsx` (6 tests) — invalid link, expired link, branding, resend links
