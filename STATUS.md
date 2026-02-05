@@ -71,6 +71,7 @@
 - [x] **AI Features UI Integration** - SearchSuggestions in search form, ContentClusters in library sidebar
 - [x] **Mobile CI/CD Pipeline** - GitHub Actions workflow for Android/iOS builds, AAB support, app icon generation
 - [x] **Play Store Build Pipeline** - R8/ProGuard, Fastlane, store listing asset scripts, AAB CI/CD
+- [x] **Google Play Store Internal Testing** - AAB uploaded, internal testing release live
 - [x] **Security Audit & Hardening** - Rate limiting, file upload security, auth hardening, security headers, secure share IDs
 - [x] **AI Performance Optimizations** - Database indexes, N+1 query fixes, infinite scroll, response caching
 - [x] **AI-Powered Features** - Auto-summarization, content clustering, key insights extraction, smart search suggestions
@@ -491,6 +492,16 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-05** - ✅ **GOOGLE PLAY STORE INTERNAL TESTING LIVE**
+  - App uploaded to Google Play Console as internal testing release
+  - Package name changed to `space.mindweave.app` (`com.mindweave.app` was taken)
+  - Target API level bumped to 35 (Play Store requirement)
+  - versionCode 3 / versionName 1.0.2
+  - Fixed Dockerfile: public directory now served from correct path (`apps/web/public/`)
+  - Fixed `AUTH_URL` on Cloud Run (was pointing to Cloud Run URL instead of `https://mindweave.space`)
+  - Generated store listing assets: 5 phone screenshots (1080x2400), 5 tablet screenshots each (7-inch 1080x1920, 10-inch 1440x2560), feature graphic (1024x500)
+  - Redeployed web app to Cloud Run (image: `gcr.io/mindweave-prod/mindweave:0dd4802`)
+  - Commits: ae10911, a1bd4c9, 0dd4802, aa764e6, c8906e9, 32db6fe
 - **2026-02-05** - ✅ **PLAY STORE BUILD PIPELINE & FASTLANE SETUP**
   - **Android Build Config**:
     - Enabled R8 minification (`minifyEnabled true`, `shrinkResources true`) with `proguard-android-optimize.txt`
