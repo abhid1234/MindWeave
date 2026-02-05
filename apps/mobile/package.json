@@ -15,7 +15,13 @@
     "add:android": "cap add android",
     "live": "cap run android --livereload --external",
     "live:ios": "cap run ios --livereload --external",
-    "icons": "node scripts/generate-icons.js"
+    "icons": "node scripts/generate-icons.js",
+    "screenshots": "node scripts/generate-screenshots.js",
+    "feature-graphic": "node scripts/generate-feature-graphic.js",
+    "fastlane:build": "cd android && bundle exec fastlane build",
+    "fastlane:upload-internal": "cd android && bundle exec fastlane upload_internal",
+    "fastlane:upload-production": "cd android && bundle exec fastlane upload_production",
+    "fastlane:upload-metadata": "cd android && bundle exec fastlane upload_metadata"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.0",

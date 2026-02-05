@@ -1,0 +1,45 @@
+Mindweave is your AI-powered personal knowledge hub. Capture notes, save bookmarks, upload files — then let AI help you organize and rediscover everything.
+
+CAPTURE ANYTHING
+• Save notes, links, and files in one place
+• Drag-and-drop file uploads (images, PDFs, documents)
+• Import from Chrome bookmarks, Pocket, Notion, Evernote, and X/Twitter
+• Browser extension for one-click web page saving
+
+AI-POWERED ORGANIZATION
+• Auto-tagging: AI analyzes your content and suggests relevant tags
+• Smart collections: Group related content into color-coded folders
+• Content clustering: AI groups similar items together automatically
+• Favorites and pinning for quick access
+
+INTELLIGENT SEARCH
+• Keyword search across all your content
+• Semantic search: Find content by meaning, not just keywords
+• AI-powered search suggestions based on your knowledge base
+• Smart filters by type, tag, collection, and date
+
+ASK YOUR KNOWLEDGE BASE
+• Chat with your content using AI-powered Q&A
+• Get answers with citations from your saved knowledge
+• Discover connections between your notes and bookmarks
+• AI extracts key insights and patterns from your collection
+
+ANALYTICS & INSIGHTS
+• Dashboard showing your knowledge growth over time
+• Tag distribution and collection usage charts
+• AI-generated knowledge insights and suggestions
+• Content recommendations based on what you've saved
+
+PRIVACY & SECURITY
+• Your data is yours — we never sell personal information
+• Secure Google OAuth and email/password authentication
+• Rate limiting and security headers for API protection
+• Share specific content via secure, revocable links
+
+WORKS EVERYWHERE
+• Web app at mindweave.space
+• Progressive Web App (installable on any device)
+• Native Android app with share intent support
+• Dark mode with system preference detection
+
+Built with Next.js, PostgreSQL, and Google Gemini AI.

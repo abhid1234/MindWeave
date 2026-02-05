@@ -1,5 +1,5 @@
 # Mobile App Build Workflow
-# Builds Android APK and iOS IPA for Mindweave mobile app
+# Builds Android APK/AAB and iOS IPA for Mindweave mobile app
 
 name: Mobile Build
 
@@ -19,6 +19,11 @@ on:
         description: 'Build Android APK'
         required: true
         default: true
+        type: boolean
+      build_aab:
+        description: 'Build Android AAB (Play Store)'
+        required: false
+        default: false
         type: boolean
       build_ios:
         description: 'Build iOS IPA'
@@ -115,8 +120,15 @@ jobs:
         working-directory: apps/mobile
         run: npx cap sync android
 
+      - name: Decode keystore
+        if: inputs.release || inputs.build_aab
+        working-directory: apps/mobile/android
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > mindweave-upload.keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
       - name: Build Debug APK
-        if: "!inputs.release"
+        if: "!inputs.release && !inputs.build_aab"
         working-directory: apps/mobile/android
         run: ./gradlew assembleDebug
 
@@ -125,12 +137,23 @@ jobs:
         working-directory: apps/mobile/android
         run: ./gradlew assembleRelease
         env:
+          KEYSTORE_FILE: ${{ github.workspace }}/apps/mobile/android/mindweave-upload.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Build Release AAB
+        if: inputs.build_aab
+        working-directory: apps/mobile/android
+        run: ./gradlew bundleRelease
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/apps/mobile/android/mindweave-upload.keystore
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Upload Debug APK
-        if: "!inputs.release"
+        if: "!inputs.release && !inputs.build_aab"
         uses: actions/upload-artifact@v4
         with:
           name: android-debug-apk
@@ -143,6 +166,14 @@ jobs:
         with:
           name: android-release-apk
           path: apps/mobile/android/app/build/outputs/apk/release/*.apk
+          retention-days: 90
+
+      - name: Upload Release AAB
+        if: inputs.build_aab
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-aab
+          path: apps/mobile/android/app/build/outputs/bundle/release/*.aab
           retention-days: 90
 
   # Build iOS IPA (requires macOS runner)
@@ -238,11 +269,21 @@ jobs:
     runs-on: ubuntu-latest
     if: inputs.release && github.event_name == 'workflow_dispatch'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download Android APK
         uses: actions/download-artifact@v4
         with:
           name: android-release-apk
           path: artifacts/android
+
+      - name: Download Android AAB
+        if: inputs.build_aab
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release-aab
+          path: artifacts/android-aab
 
       - name: Download iOS IPA
         uses: actions/download-artifact@v4
@@ -264,12 +305,14 @@ jobs:
           draft: true
           files: |
             artifacts/android/*.apk
+            artifacts/android-aab/*.aab
             artifacts/ios/*.ipa
           body: |
             ## Mindweave Mobile App v${{ steps.version.outputs.version }}
 
             ### Downloads
-            - **Android**: Download the APK and install directly
+            - **Android APK**: Download and install directly
+            - **Android AAB**: Upload to Google Play Console
             - **iOS**: Requires TestFlight or enterprise distribution
 
             ### What's New

@@ -1,0 +1,8 @@
+Initial release of Mindweave for Android!
+
+• Capture notes, links, and files in one place
+• AI auto-tagging with Google Gemini
+• Semantic search across your knowledge base
+• Ask AI questions about your saved content
+• Dashboard with analytics and insights
+• Dark mode support
