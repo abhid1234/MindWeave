@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.mindweave.app',
+  appId: 'space.mindweave.app',
   appName: 'Mindweave',
   webDir: 'dist',
 

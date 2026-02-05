@@ -1,4 +1,4 @@
-package com.mindweave.app;
+package space.mindweave.app;
 
 import com.getcapacitor.BridgeActivity;
 
