@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-04
+**Last Updated**: 2026-02-05
 **Current Phase**: UI Polish Complete
 **Active Ralph Loop**: No
 
@@ -69,7 +69,8 @@
 - [x] **Test Suite Fixes** - Fixed 15 pre-existing test failures (rate limiting mocks, AI SDK, next-auth import chains). 955 tests passing, 0 failures
 - [x] **Lighthouse Performance Audit** - Accessibility 100, Performance optimizations, font/bundle improvements
 - [x] **AI Features UI Integration** - SearchSuggestions in search form, ContentClusters in library sidebar
-- [x] **Mobile CI/CD Pipeline** - GitHub Actions workflow for Android/iOS builds, app icon generation
+- [x] **Mobile CI/CD Pipeline** - GitHub Actions workflow for Android/iOS builds, AAB support, app icon generation
+- [x] **Play Store Build Pipeline** - R8/ProGuard, Fastlane, store listing asset scripts, AAB CI/CD
 - [x] **Security Audit & Hardening** - Rate limiting, file upload security, auth hardening, security headers, secure share IDs
 - [x] **AI Performance Optimizations** - Database indexes, N+1 query fixes, infinite scroll, response caching
 - [x] **AI-Powered Features** - Auto-summarization, content clustering, key insights extraction, smart search suggestions
@@ -490,6 +491,28 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-05** - ✅ **PLAY STORE BUILD PIPELINE & FASTLANE SETUP**
+  - **Android Build Config**:
+    - Enabled R8 minification (`minifyEnabled true`, `shrinkResources true`) with `proguard-android-optimize.txt`
+    - Added Capacitor/Cordova ProGuard keep rules (bridge, JS interface, plugins, WebView)
+    - Added CI signing via env vars (`KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`)
+  - **CI/CD AAB Support**:
+    - Added `build_aab` workflow dispatch input for Play Store bundles
+    - Keystore decode step (base64 secret → file) for CI signing
+    - `./gradlew bundleRelease` step producing signed AAB
+    - AAB artifact upload and inclusion in GitHub Releases
+  - **Store Listing Asset Scripts**:
+    - `generate-screenshots.js` — Playwright script capturing 5 key pages at Pixel 7 (1080x2400)
+    - `generate-feature-graphic.js` — Sharp script creating 1024x500 feature graphic with indigo gradient
+    - New npm scripts: `screenshots`, `feature-graphic`, `fastlane:*`
+  - **Fastlane Setup**:
+    - `Gemfile` with fastlane ~> 2.220
+    - `Appfile` with package name and key file reference
+    - `Fastfile` with 5 lanes: `build`, `upload_internal`, `upload_production`, `upload_metadata`, `deploy_internal`
+    - Metadata files: `title.txt`, `short_description.txt`, `full_description.txt`, `changelogs/1.txt`
+    - Added `fastlane/play-store-key.json` to `.gitignore`
+  - 14 files changed (5 modified, 9 created)
+  - Commit: ae10911
 - **2026-02-04** - ✅ **IN-APP DOCUMENTATION SITE**
   - Added public `/docs` pages within the Next.js app (no auth required)
   - 12 content pages: landing, getting started, features overview, capture, library, tagging, search, knowledge Q&A, collections, analytics, account & settings, FAQ
