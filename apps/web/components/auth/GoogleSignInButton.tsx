@@ -34,9 +34,8 @@ export function GoogleSignInButton({ authUrl }: GoogleSignInButtonProps) {
     if (isCapacitor) {
       e.preventDefault();
 
-      // Open OAuth URL in external browser
-      // Construct the full OAuth URL
-      const oauthUrl = `${authUrl}/api/auth/signin/google?callbackUrl=${encodeURIComponent(authUrl + '/dashboard')}`;
+      // Use dedicated mobile signin endpoint that accepts GET requests
+      const oauthUrl = `${authUrl}/api/auth/mobile-signin?callbackUrl=${encodeURIComponent('/dashboard')}`;
 
       // Try using Capacitor App plugin
       if (window.Capacitor?.Plugins?.App?.openUrl) {
