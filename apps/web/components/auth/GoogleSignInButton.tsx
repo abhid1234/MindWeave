@@ -6,11 +6,10 @@ declare global {
   interface Window {
     Capacitor?: {
       isNativePlatform: () => boolean;
-      Plugins?: {
-        App?: {
-          openUrl: (options: { url: string }) => Promise<{ completed: boolean }>;
-        };
-      };
+      getPlatform?: () => string;
+    };
+    MindweaveNative?: {
+      openExternal: (url: string) => void;
     };
   }
 }
@@ -37,18 +36,18 @@ export function GoogleSignInButton({ authUrl }: GoogleSignInButtonProps) {
       // Use dedicated mobile signin endpoint that accepts GET requests
       const oauthUrl = `${authUrl}/api/auth/mobile-signin?callbackUrl=${encodeURIComponent('/dashboard')}`;
 
-      // Try using Capacitor App plugin
-      if (window.Capacitor?.Plugins?.App?.openUrl) {
+      // Try using native Android bridge (injected by MainActivity)
+      if (window.MindweaveNative?.openExternal) {
         try {
-          await window.Capacitor.Plugins.App.openUrl({ url: oauthUrl });
+          window.MindweaveNative.openExternal(oauthUrl);
           return;
         } catch (err) {
-          console.error('Failed to open URL via Capacitor:', err);
+          console.error('Failed to open URL via native bridge:', err);
         }
       }
 
-      // Fallback: open in new window (which should trigger external browser)
-      window.open(oauthUrl, '_system');
+      // Fallback: open in new window
+      window.open(oauthUrl, '_blank');
     }
     // If not Capacitor, let the form submit normally
   };

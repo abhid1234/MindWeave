@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
 import com.getcapacitor.BridgeActivity;
@@ -23,11 +24,14 @@ public class MainActivity extends BridgeActivity {
 
         Bridge bridge = this.getBridge();
         if (bridge != null && bridge.getWebView() != null) {
-            bridge.setWebViewClient(new BridgeWebViewClient(bridge) {
+            WebView webView = bridge.getWebView();
 
+            // Add JavaScript interface for opening URLs externally
+            webView.addJavascriptInterface(new WebAppInterface(), "MindweaveNative");
+
+            bridge.setWebViewClient(new BridgeWebViewClient(bridge) {
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                    // Intercept Google OAuth URLs as soon as they start loading
                     if (isGoogleOAuthUrl(url)) {
                         view.stopLoading();
                         openExternalBrowser(url);
@@ -64,14 +68,22 @@ public class MainActivity extends BridgeActivity {
                            url.contains("/signin/oauth") ||
                            url.contains("googleapis.com/oauth");
                 }
-
-                private void openExternalBrowser(String url) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    startActivity(intent);
-                }
             });
+        }
+    }
+
+    private void openExternalBrowser(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+    }
+
+    // JavaScript interface for web app to call
+    public class WebAppInterface {
+        @JavascriptInterface
+        public void openExternal(String url) {
+            openExternalBrowser(url);
         }
     }
 
@@ -81,7 +93,7 @@ public class MainActivity extends BridgeActivity {
         if (intent != null && intent.getData() != null) {
             String url = intent.getData().toString();
             if (url.contains("mindweave.space")) {
-                Bridge bridge = this.getBridge();
+                Bridge bridge = getBridge();
                 if (bridge != null && bridge.getWebView() != null) {
                     bridge.getWebView().loadUrl(url);
                 }
