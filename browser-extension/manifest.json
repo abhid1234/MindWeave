@@ -3,7 +3,7 @@
   "name": "Mindweave - Quick Capture",
   "version": "1.0.0",
   "description": "Save webpages to your Mindweave knowledge hub with one click",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab"],
   "host_permissions": [
     "https://mindweave.space/*"
   ],
