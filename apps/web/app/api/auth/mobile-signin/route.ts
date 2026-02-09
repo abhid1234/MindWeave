@@ -1,54 +1,61 @@
 import { NextResponse } from 'next/server';
+import { Auth, skipCSRFCheck, raw, createActionURL } from '@auth/core';
+import authConfig from '@/lib/auth.config';
 
 // This endpoint handles OAuth initiation for mobile/Capacitor apps.
-// It fetches a CSRF token server-side, passes both the cookie and token to the browser,
-// then auto-submits the Auth.js signin form via POST.
+// It calls Auth.js directly with skipCSRFCheck (like the signIn server action does),
+// avoiding the CSRF token dance entirely.
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const callbackUrl = url.searchParams.get('callbackUrl') || '/dashboard';
   const authUrl = process.env.AUTH_URL || 'https://mindweave.space';
 
-  // Fetch CSRF token from Auth.js (server-side, same origin)
-  const csrfResponse = await fetch(`${authUrl}/api/auth/csrf`);
-  const csrfData = await csrfResponse.json();
-  const csrfToken = csrfData.csrfToken;
+  // Construct the signin URL (same as Auth.js does internally)
+  const signInUrl = `${authUrl}/api/auth/signin/google`;
 
-  // Extract Set-Cookie headers from the CSRF response
-  // getSetCookie() returns individual cookie strings
-  let csrfCookies: string[] = [];
-  if (typeof csrfResponse.headers.getSetCookie === 'function') {
-    csrfCookies = csrfResponse.headers.getSetCookie();
-  } else {
-    // Fallback: get raw set-cookie header
-    const raw = csrfResponse.headers.get('set-cookie');
-    if (raw) {
-      // Split on comma followed by a cookie name pattern (not inside expires date)
-      csrfCookies = raw.split(/,(?=\s*(?:__Host-|__Secure-|[a-zA-Z]))/);
-    }
-  }
-
-  const html = `<!DOCTYPE html>
-<html>
-<head><title>Signing in...</title></head>
-<body>
-<p>Redirecting to Google Sign-In...</p>
-<form id="f" method="POST" action="${authUrl}/api/auth/signin/google">
-<input type="hidden" name="csrfToken" value="${csrfToken}" />
-<input type="hidden" name="callbackUrl" value="${callbackUrl}" />
-</form>
-<script>document.getElementById('f').submit();</script>
-</body>
-</html>`;
-
-  // Create response with HTML and forward CSRF cookies to browser
-  const response = new NextResponse(html, {
-    status: 200,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  // Create a POST request to the signin endpoint
+  const body = new URLSearchParams({ callbackUrl });
+  const headers = new Headers({
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'X-Auth-Return-Redirect': '1',
   });
 
-  // Forward each cookie from the CSRF response
-  for (const cookie of csrfCookies) {
-    response.headers.append('Set-Cookie', cookie);
+  const req = new Request(signInUrl, {
+    method: 'POST',
+    headers,
+    body,
+  });
+
+  // Call Auth directly with skipCSRFCheck (same as signIn server action)
+  const res = await Auth(req, {
+    ...authConfig,
+    basePath: '/api/auth',
+    secret: process.env.AUTH_SECRET,
+    raw,
+    skipCSRFCheck,
+  });
+
+  // Get the redirect URL from the response
+  let redirectUrl: string;
+  if (res instanceof Response) {
+    redirectUrl = res.headers.get('Location') || `${authUrl}/dashboard`;
+  } else {
+    redirectUrl = (res as any).redirect || `${authUrl}/dashboard`;
+  }
+
+  // Build the response with cookies from Auth
+  const response = NextResponse.redirect(redirectUrl, 302);
+
+  // Forward cookies from Auth response
+  if (res instanceof Response) {
+    const setCookies = res.headers.getSetCookie?.() || [];
+    for (const cookie of setCookies) {
+      response.headers.append('Set-Cookie', cookie);
+    }
+  } else if ((res as any)?.cookies) {
+    for (const c of (res as any).cookies) {
+      response.cookies.set(c.name, c.value, c.options);
+    }
   }
 
   return response;
