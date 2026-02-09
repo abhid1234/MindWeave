@@ -6,7 +6,6 @@ declare global {
   interface Window {
     Capacitor?: {
       isNativePlatform: () => boolean;
-      getPlatform?: () => string;
     };
     MindweaveNative?: {
       openExternal: (url: string) => void;
@@ -19,42 +18,39 @@ interface GoogleSignInButtonProps {
 }
 
 export function GoogleSignInButton({ authUrl }: GoogleSignInButtonProps) {
-  const [isCapacitor, setIsCapacitor] = useState(false);
+  const [isNativeApp, setIsNativeApp] = useState(false);
 
   useEffect(() => {
-    // Detect if running in Capacitor
-    setIsCapacitor(
-      typeof window !== 'undefined' &&
-      window.Capacitor?.isNativePlatform?.() === true
-    );
+    // Detect if running in Android WebView via our native bridge
+    // window.Capacitor is NOT available for remote URLs, so check MindweaveNative
+    const hasNativeBridge = typeof window !== 'undefined' && !!window.MindweaveNative;
+    const hasCapacitor = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.() === true;
+    setIsNativeApp(hasNativeBridge || hasCapacitor);
   }, []);
 
-  const handleClick = async (e: React.MouseEvent) => {
-    if (isCapacitor) {
+  const handleClick = (e: React.MouseEvent) => {
+    if (isNativeApp) {
       e.preventDefault();
+      e.stopPropagation();
 
       // Use dedicated mobile signin endpoint that accepts GET requests
       const oauthUrl = `${authUrl}/api/auth/mobile-signin?callbackUrl=${encodeURIComponent('/dashboard')}`;
 
-      // Try using native Android bridge (injected by MainActivity)
+      // Use native Android bridge to open in Chrome
       if (window.MindweaveNative?.openExternal) {
-        try {
-          window.MindweaveNative.openExternal(oauthUrl);
-          return;
-        } catch (err) {
-          console.error('Failed to open URL via native bridge:', err);
-        }
+        window.MindweaveNative.openExternal(oauthUrl);
+        return;
       }
 
       // Fallback: open in new window
       window.open(oauthUrl, '_blank');
     }
-    // If not Capacitor, let the form submit normally
+    // If not native app, let the form submit normally
   };
 
   return (
     <button
-      type={isCapacitor ? 'button' : 'submit'}
+      type={isNativeApp ? 'button' : 'submit'}
       onClick={handleClick}
       className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md"
     >
