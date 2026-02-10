@@ -10,8 +10,11 @@ export async function GET(request: Request) {
   try {
     // signIn is a server action that internally skips CSRF checks.
     // With redirect: false, it returns the redirect URL instead of throwing.
+    // After OAuth, redirect to mobile-auth-complete which creates a
+    // one-time token and redirects to the app via custom scheme.
+    // This is needed because Chrome and WebView have separate cookie jars.
     const result = await signIn('google', {
-      redirectTo: callbackUrl,
+      redirectTo: '/api/auth/mobile-auth-complete',
       redirect: false,
     });
 
