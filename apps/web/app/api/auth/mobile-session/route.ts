@@ -28,6 +28,8 @@ export async function GET(request: Request) {
   }
 
   // Create Auth.js JWT session token with the same fields as the jwt callback
+  // The salt parameter is the cookie name used by Auth.js
+  const cookieName = '__Secure-authjs.session-token';
   const sessionToken = await encode({
     token: {
       sub: user.id,
@@ -37,6 +39,7 @@ export async function GET(request: Request) {
       emailVerified: user.emailVerified ? true : false,
     },
     secret: process.env.AUTH_SECRET!,
+    salt: cookieName,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   });
 
