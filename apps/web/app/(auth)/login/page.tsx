@@ -151,7 +151,7 @@ export default async function LoginPage({
               await signIn('google', { redirectTo: '/dashboard' });
             }}
           >
-            <GoogleSignInButton authUrl={process.env.AUTH_URL || 'https://mindweave.space'} />
+            <GoogleSignInButton authUrl="https://mindweave.space" />
           </form>
         </div>
 
