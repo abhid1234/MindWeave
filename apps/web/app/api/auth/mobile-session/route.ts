@@ -3,6 +3,8 @@ import { encode } from 'next-auth/jwt';
 import { verifyMobileAuthToken } from '@/lib/mobile-auth';
 import { db } from '@/lib/db/client';
 
+const BASE_URL = process.env.AUTH_URL || 'https://mindweave.space';
+
 // This endpoint is loaded in the Android WebView after the OAuth flow completes in Chrome.
 // It receives a signed one-time token, verifies it, creates an Auth.js session token,
 // and sets the session cookie in the WebView's context.
@@ -11,12 +13,12 @@ export async function GET(request: Request) {
   const token = url.searchParams.get('token');
 
   if (!token) {
-    return NextResponse.redirect(new URL('/login?error=InvalidToken', request.url));
+    return NextResponse.redirect(`${BASE_URL}/login?error=InvalidToken`);
   }
 
   const verified = verifyMobileAuthToken(token);
   if (!verified) {
-    return NextResponse.redirect(new URL('/login?error=InvalidToken', request.url));
+    return NextResponse.redirect(`${BASE_URL}/login?error=InvalidToken`);
   }
 
   const user = await db.query.users.findFirst({
@@ -24,7 +26,7 @@ export async function GET(request: Request) {
   });
 
   if (!user) {
-    return NextResponse.redirect(new URL('/login?error=InvalidToken', request.url));
+    return NextResponse.redirect(`${BASE_URL}/login?error=InvalidToken`);
   }
 
   // Create Auth.js JWT session token with the same fields as the jwt callback
@@ -43,7 +45,7 @@ export async function GET(request: Request) {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   });
 
-  const response = NextResponse.redirect(new URL('/dashboard', request.url));
+  const response = NextResponse.redirect(`${BASE_URL}/dashboard`);
   response.cookies.set('__Secure-authjs.session-token', sessionToken, {
     httpOnly: true,
     secure: true,
