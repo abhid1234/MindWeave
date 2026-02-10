@@ -14,43 +14,49 @@ declare global {
 }
 
 interface GoogleSignInButtonProps {
-  authUrl: string;
+  /** When set (server detected WebView), button bypasses form submission and opens this URL externally */
+  mobileSigninUrl?: string;
 }
 
-export function GoogleSignInButton({ authUrl }: GoogleSignInButtonProps) {
-  const [isNativeApp, setIsNativeApp] = useState(false);
+export function GoogleSignInButton({ mobileSigninUrl }: GoogleSignInButtonProps) {
+  const [isWebView, setIsWebView] = useState(!!mobileSigninUrl);
 
   useEffect(() => {
-    // Detect if running in Android WebView via our native bridge
-    // window.Capacitor is NOT available for remote URLs, so check MindweaveNative
-    const hasNativeBridge = typeof window !== 'undefined' && !!window.MindweaveNative;
-    const hasCapacitor = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.() === true;
-    setIsNativeApp(hasNativeBridge || hasCapacitor);
-  }, []);
+    // Client-side WebView detection as backup when server didn't detect it
+    if (!mobileSigninUrl) {
+      const hasNativeBridge = typeof window !== 'undefined' && !!window.MindweaveNative;
+      const hasCapacitor = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.() === true;
+      const uaIsWebView = /Android.*; wv\b/.test(navigator.userAgent);
+      if (hasNativeBridge || hasCapacitor || uaIsWebView) {
+        setIsWebView(true);
+      }
+    }
+  }, [mobileSigninUrl]);
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isNativeApp) {
+    if (isWebView) {
       e.preventDefault();
       e.stopPropagation();
 
-      // Use dedicated mobile signin endpoint that accepts GET requests
-      const oauthUrl = `${authUrl}/api/auth/mobile-signin?callbackUrl=${encodeURIComponent('/dashboard')}`;
+      const targetUrl = mobileSigninUrl ||
+        'https://mindweave.space/api/auth/mobile-signin?callbackUrl=%2Fdashboard';
 
-      // Use native Android bridge to open in Chrome
+      // Try native Android bridge to open in Chrome
       if (window.MindweaveNative?.openExternal) {
-        window.MindweaveNative.openExternal(oauthUrl);
+        window.MindweaveNative.openExternal(targetUrl);
         return;
       }
 
-      // Fallback: open in new window
-      window.open(oauthUrl, '_blank');
+      // Fallback: navigate in WebView — the mobile-signin endpoint
+      // will return an HTML intermediary page that tries JS bridge again
+      window.location.href = targetUrl;
     }
-    // If not native app, let the form submit normally
+    // If not WebView, let the form submit normally (type="submit")
   };
 
   return (
     <button
-      type={isNativeApp ? 'button' : 'submit'}
+      type={isWebView ? 'button' : 'submit'}
       onClick={handleClick}
       className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md"
     >

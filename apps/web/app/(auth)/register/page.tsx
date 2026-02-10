@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { auth, signIn } from '@/lib/auth';
 import { db } from '@/lib/db/client';
@@ -14,6 +15,11 @@ export default async function RegisterPage({
 }) {
   const session = await auth();
   const params = await searchParams;
+
+  // Detect Android WebView via User-Agent to avoid loading Google OAuth in WebView
+  const headersList = await headers();
+  const userAgent = headersList.get('user-agent') || '';
+  const isWebView = /Android.*; wv\b/.test(userAgent);
 
   if (session?.user) {
     redirect('/dashboard');
@@ -144,14 +150,18 @@ export default async function RegisterPage({
           </div>
 
           {/* Google OAuth */}
-          <form
-            action={async () => {
-              'use server';
-              await signIn('google', { redirectTo: '/dashboard' });
-            }}
-          >
-            <GoogleSignInButton authUrl="https://mindweave.space" />
-          </form>
+          {isWebView ? (
+            <GoogleSignInButton mobileSigninUrl="https://mindweave.space/api/auth/mobile-signin?callbackUrl=%2Fdashboard" />
+          ) : (
+            <form
+              action={async () => {
+                'use server';
+                await signIn('google', { redirectTo: '/dashboard' });
+              }}
+            >
+              <GoogleSignInButton />
+            </form>
+          )}
         </div>
 
         <p className="mt-8 text-center text-xs text-slate-500">

@@ -21,9 +21,14 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Set up JS bridge and custom WebViewClient after Capacitor has fully initialized.
+     * Using onPostCreate instead of onStart ensures the Bridge and WebView are ready,
+     * avoiding timing issues where the bridge isn't available when the page loads.
+     */
     @Override
-    public void onStart() {
-        super.onStart();
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
 
         Bridge bridge = this.getBridge();
         if (bridge != null && bridge.getWebView() != null) {
