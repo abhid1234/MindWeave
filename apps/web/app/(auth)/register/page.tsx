@@ -140,27 +140,27 @@ export default async function RegisterPage({
             </Link>
           </p>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-slate-500">or</span>
-            </div>
-          </div>
+          {/* Google OAuth - hidden in Android WebView due to disallowed_useragent issue */}
+          {!isWebView && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-slate-500">or</span>
+                </div>
+              </div>
 
-          {/* Google OAuth */}
-          {isWebView ? (
-            <GoogleSignInButton mobileSigninUrl="https://mindweave.space/api/auth/mobile-signin?callbackUrl=%2Fdashboard" />
-          ) : (
-            <form
-              action={async () => {
-                'use server';
-                await signIn('google', { redirectTo: '/dashboard' });
-              }}
-            >
-              <GoogleSignInButton />
-            </form>
+              <form
+                action={async () => {
+                  'use server';
+                  await signIn('google', { redirectTo: '/dashboard' });
+                }}
+              >
+                <GoogleSignInButton />
+              </form>
+            </>
           )}
         </div>
 
