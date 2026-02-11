@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { auth, signIn } from '@/lib/auth';
+import { AuthError } from 'next-auth';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 export default async function LoginPage({
@@ -99,11 +100,18 @@ export default async function LoginPage({
               'use server';
               const email = formData.get('email') as string;
               const password = formData.get('password') as string;
-              await signIn('credentials', {
-                email,
-                password,
-                redirectTo: '/dashboard',
-              });
+              try {
+                await signIn('credentials', {
+                  email,
+                  password,
+                  redirectTo: '/dashboard',
+                });
+              } catch (error) {
+                if (error instanceof AuthError) {
+                  return redirect(`/login?error=${error.type}`);
+                }
+                throw error;
+              }
             }}
             className="space-y-3"
           >
