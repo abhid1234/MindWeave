@@ -63,7 +63,21 @@ const serwist = new Serwist({
         networkTimeoutSeconds: 10,
       }),
     },
-    // Stale-while-revalidate for pages
+    // Network-first for auth pages (server action IDs change between deployments)
+    {
+      matcher: ({ url }) => url.pathname === '/login' || url.pathname === '/register' || url.pathname === '/forgot-password' || url.pathname === '/reset-password',
+      handler: new NetworkFirst({
+        cacheName: 'auth-pages-cache',
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 10,
+            maxAgeSeconds: 60 * 60, // 1 hour
+          }),
+        ],
+        networkTimeoutSeconds: 5,
+      }),
+    },
+    // Stale-while-revalidate for other pages
     {
       matcher: ({ request }) => request.mode === 'navigate',
       handler: new StaleWhileRevalidate({
