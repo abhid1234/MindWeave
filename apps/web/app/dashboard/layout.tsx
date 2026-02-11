@@ -56,7 +56,7 @@ export default async function DashboardLayout({
           <div className="absolute -bottom-1/4 left-1/3 h-[550px] w-[550px] rounded-full bg-green-500/5 blur-3xl animate-drift drift-delay-2" />
         </div>
         <Nav />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 pb-20 sm:p-6 lg:pb-6" tabIndex={-1}>
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6 lg:pb-6" tabIndex={-1}>
           <Breadcrumbs />
           {children}
         </main>
