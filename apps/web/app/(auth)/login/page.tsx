@@ -137,7 +137,7 @@ export default async function LoginPage({
             </button>
           </form>
 
-          <div className="flex items-center justify-between text-sm text-slate-600">
+          <div className="flex flex-col items-center gap-3 pt-2 text-sm text-slate-600 sm:flex-row sm:justify-between sm:gap-0 sm:pt-0">
             <p>
               Don&apos;t have an account?{' '}
               <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
