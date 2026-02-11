@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-05
+**Last Updated**: 2026-02-10
 **Current Phase**: UI Polish Complete
 **Active Ralph Loop**: No
 
@@ -52,7 +52,18 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement**:
+**Latest Enhancement (2026-02-10)**:
+- [x] **Mobile OAuth & UX Fixes** - 6 commits deployed:
+  - Server-side WebView detection via User-Agent header to prevent Google OAuth `403 disallowed_useragent` errors
+  - HTML intermediary page in mobile-signin endpoint (replaces 302 redirects with JS-initiated navigation)
+  - Moved Android JS bridge setup from `onStart` to `onPostCreate` for earlier availability
+  - Hidden Google OAuth button in Android WebView (temporary; email/password login works)
+  - Clickable recent items on dashboard (links to library with item highlighted)
+  - Fixed bottom nav overlapping content on mobile (feedback widget repositioned, increased content padding)
+  - Fixed service worker caching stale auth pages (NetworkFirst strategy for login/register pages)
+  - Bumped Android versionCode to 12 for Play Console upload
+
+**Previous Enhancement**:
 - [x] **Performance Monitoring & Feedback System** - 1390 total tests:
   - Structured JSON logger for GCP Cloud Logging (`lib/logger.ts`)
   - Performance metrics collection with timing utilities (`lib/performance.ts`)
