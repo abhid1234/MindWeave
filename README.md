@@ -447,7 +447,16 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Password reset flow via Resend email (forgot-password, tokenized reset links)
 - [x] OAuth account linking (Google can link to existing email accounts)
 
+### Phase 12: Mobile App Fixes & UX Improvements ✅ Complete
+- [x] Server-side WebView detection for Google OAuth (prevents `403 disallowed_useragent`)
+- [x] HTML intermediary page for mobile OAuth flow (replaces 302 redirects)
+- [x] Hidden Google OAuth in Android WebView (temporary; email/password login works)
+- [x] Clickable recent items on dashboard (navigates to library with highlight)
+- [x] Fixed bottom nav overlapping content on mobile
+- [x] Fixed service worker caching stale auth pages (NetworkFirst for login/register)
+
 ### Future Enhancements (Planned)
+- [ ] Google OAuth in Android WebView (Custom Tabs or Chrome redirect flow)
 - [ ] Firefox browser extension
 - [ ] Collaborative knowledge bases
 - [ ] Content versioning and history
