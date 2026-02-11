@@ -65,7 +65,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="space-y-4">
             {latestItems.map((item) => (
-              <div key={item.id} className="rounded-lg border bg-card p-4 hover:bg-accent">
+              <Link key={item.id} href={`/dashboard/library?highlight=${item.id}`} className="block rounded-lg border bg-card p-4 transition-colors hover:bg-accent">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-semibold">{item.title.split(/\s+/).slice(0, 10).join(' ')}{item.title.split(/\s+/).length > 10 ? '...' : ''}</h3>
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
                     {formatDateUTC(item.createdAt)}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
