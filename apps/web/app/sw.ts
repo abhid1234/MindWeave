@@ -4,7 +4,6 @@ import {
   Serwist,
   CacheFirst,
   NetworkFirst,
-  StaleWhileRevalidate,
   ExpirationPlugin
 } from 'serwist';
 
@@ -49,7 +48,21 @@ const serwist = new Serwist({
         ],
       }),
     },
-    // Use network-first for API routes (except auth)
+    // Network-first for auth API routes (never serve stale session data)
+    {
+      matcher: /\/api\/auth\/.*/i,
+      handler: new NetworkFirst({
+        cacheName: 'auth-api-cache',
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 10,
+            maxAgeSeconds: 60 * 5, // 5 minutes
+          }),
+        ],
+        networkTimeoutSeconds: 10,
+      }),
+    },
+    // Use network-first for other API routes
     {
       matcher: /\/api\/(?!auth).*/i,
       handler: new NetworkFirst({
@@ -77,10 +90,10 @@ const serwist = new Serwist({
         networkTimeoutSeconds: 5,
       }),
     },
-    // Stale-while-revalidate for other pages
+    // Network-first for all navigation requests (ensures auth state is always fresh)
     {
       matcher: ({ request }) => request.mode === 'navigate',
-      handler: new StaleWhileRevalidate({
+      handler: new NetworkFirst({
         cacheName: 'pages-cache',
         plugins: [
           new ExpirationPlugin({
@@ -88,6 +101,7 @@ const serwist = new Serwist({
             maxAgeSeconds: 60 * 60 * 24, // 1 day
           }),
         ],
+        networkTimeoutSeconds: 5,
       }),
     },
     // Default cache configuration from serwist/next
