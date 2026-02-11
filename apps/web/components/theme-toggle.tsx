@@ -4,13 +4,6 @@ import * as React from 'react';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -22,7 +15,6 @@ export function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    // Return a placeholder with the same dimensions to avoid layout shift
     return (
       <Button variant="ghost" size="icon" disabled aria-label="Toggle theme">
         <Sun className="h-5 w-5" />
@@ -30,33 +22,33 @@ export function ThemeToggle() {
     );
   }
 
+  // Cycle: light → dark → system → light
+  function cycleTheme() {
+    if (theme === 'light') setTheme('dark');
+    else if (theme === 'dark') setTheme('system');
+    else setTheme('light');
+  }
+
+  const label =
+    theme === 'light' ? 'Switch to dark mode' :
+    theme === 'dark' ? 'Switch to system mode' :
+    'Switch to light mode';
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Toggle theme">
-          {resolvedTheme === 'dark' ? (
-            <Moon className="h-5 w-5" />
-          ) : (
-            <Sun className="h-5 w-5" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="light">
-            <Sun className="mr-2 h-4 w-4" />
-            Light
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">
-            <Moon className="mr-2 h-4 w-4" />
-            Dark
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">
-            <Monitor className="mr-2 h-4 w-4" />
-            System
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={cycleTheme}
+      aria-label={label}
+      title={label}
+    >
+      {theme === 'dark' ? (
+        <Moon className="h-5 w-5" />
+      ) : theme === 'light' ? (
+        <Sun className="h-5 w-5" />
+      ) : (
+        <Monitor className="h-5 w-5" />
+      )}
+    </Button>
   );
 }
