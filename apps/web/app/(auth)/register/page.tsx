@@ -5,7 +5,7 @@ import { auth, signIn } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
 import bcrypt from 'bcryptjs';
-import { sendVerificationEmail } from '@/lib/email';
+
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 export default async function RegisterPage({
@@ -63,11 +63,27 @@ export default async function RegisterPage({
       emailVerified: null,
     });
 
-    // Send verification email
-    await sendVerificationEmail(email);
-
-    // Redirect to verification sent page
-    redirect('/verify-email-sent');
+    // Auto-login after registration
+    try {
+      await signIn('credentials', {
+        email,
+        password,
+        redirectTo: '/dashboard',
+      });
+    } catch (error: unknown) {
+      // signIn throws a NEXT_REDIRECT on success — rethrow it
+      if (
+        error &&
+        typeof error === 'object' &&
+        'digest' in error &&
+        typeof (error as { digest?: string }).digest === 'string' &&
+        (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
+      ) {
+        throw error;
+      }
+      // If auto-login fails for any other reason, redirect to login page
+      redirect('/login');
+    }
   }
 
   const errorMessages: Record<string, string> = {
