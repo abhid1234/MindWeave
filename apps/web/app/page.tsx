@@ -18,7 +18,6 @@ import {
   Palette,
   Code2,
   Layers,
-  Play,
   Smartphone,
   Chrome,
   Globe,
@@ -78,21 +77,43 @@ const features = [
 const steps = [
   {
     number: '1',
-    title: 'Capture',
-    description: 'Save notes, links, or upload files in seconds.',
+    title: 'Capture anything',
+    subtitle: 'Notes, links, files.',
+    description: 'Type a thought, paste a URL, or drop a file. One click and it\'s saved.',
     icon: BookOpen,
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/20',
   },
   {
     number: '2',
-    title: 'Organize',
-    description: 'AI auto-tags and embeds your content for you.',
+    title: 'AI does the rest',
+    subtitle: 'Tags, summaries, embeddings.',
+    description: 'Gemini auto-tags, summarizes, and creates vector embeddings. Zero manual work.',
     icon: Brain,
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
   },
   {
     number: '3',
-    title: 'Rediscover',
-    description: 'Search semantically or ask questions to find anything.',
+    title: 'Find it instantly',
+    subtitle: 'Search by meaning.',
+    description: 'Semantic search finds related ideas, not just keyword matches. Or just ask a question.',
+    icon: Search,
+    color: 'text-green-500',
+    bg: 'bg-green-500/10',
+    border: 'border-green-500/20',
+  },
+  {
+    number: '4',
+    title: 'Never forget again',
+    subtitle: 'Your second brain.',
+    description: 'Every idea resurfaces when you need it. Recommendations, clusters, and insights — all automatic.',
     icon: Sparkles,
+    color: 'text-orange-500',
+    bg: 'bg-orange-500/10',
+    border: 'border-orange-500/20',
   },
 ];
 
@@ -272,67 +293,48 @@ export default async function Home() {
         {/* How It Works */}
         <section id="how-it-works" className="py-24">
           <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-4xl">
+            <div className="mx-auto max-w-5xl">
               <div className="text-center mb-16">
                 <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                  How it works
+                  Four steps.{' '}
+                  <span className="text-gradient">Total recall.</span>
                 </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Three simple steps to build your personal knowledge base.
+                <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                  Save it once and let AI handle the rest.
                 </p>
               </div>
-              <div className="relative grid gap-8 sm:grid-cols-3">
-                {/* Connecting line */}
-                <div className="absolute top-10 left-[16.67%] right-[16.67%] hidden h-[2px] bg-gradient-to-r from-primary/30 via-primary/50 to-primary/30 sm:block" />
+              <div className="grid gap-6 sm:grid-cols-2">
                 {steps.map((step) => {
                   const StepIcon = step.icon;
                   return (
-                    <div key={step.number} className="relative text-center">
-                      <div className="relative mx-auto mb-4 flex h-20 w-20 items-center justify-center">
-                        <div className="absolute inset-0 rounded-full bg-primary/10" />
-                        <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-                          <StepIcon className="h-5 w-5" />
+                    <div key={step.number} className="group relative rounded-xl border bg-card p-8 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20">
+                      <div className="flex items-start gap-5">
+                        <div className="flex-shrink-0">
+                          <div className={`flex h-14 w-14 items-center justify-center rounded-xl ${step.bg} ${step.border} border`}>
+                            <StepIcon className={`h-6 w-6 ${step.color}`} />
+                          </div>
+                          <span className="mt-2 block text-center text-xs font-bold text-muted-foreground/60">
+                            {step.number}
+                          </span>
                         </div>
-                        <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground ring-2 ring-background">
-                          {step.number}
-                        </span>
+                        <div className="pt-1">
+                          <h3 className="text-xl font-semibold">{step.title}</h3>
+                          <p className="mt-0.5 text-sm font-medium text-primary/80">{step.subtitle}</p>
+                          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+                        </div>
                       </div>
-                      <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                      <p className="text-sm text-muted-foreground">{step.description}</p>
                     </div>
                   );
                 })}
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Demo Video */}
-        <section id="demo" className="bg-muted/50 py-24">
-          <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-4xl">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-sm font-medium text-muted-foreground mb-6">
-                  <Play className="h-3.5 w-3.5" />
-                  60-Second Demo
-                </div>
-                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                  See it in action
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Watch how Mindweave captures, organizes, and resurfaces your knowledge.
-                </p>
-              </div>
-              <div className="relative rounded-2xl border bg-card overflow-hidden shadow-lg">
-                <video
-                  className="w-full aspect-video"
-                  controls
-                  preload="metadata"
-                  poster="/demo-poster.png"
+              <div className="mt-12 text-center">
+                <Link
+                  href="/login"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <source src="/demo.mp4" type="video/mp4" />
-                  Your browser does not support the video element.
-                </video>
+                  Try It Free
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
               </div>
             </div>
           </div>
