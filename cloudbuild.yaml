@@ -23,6 +23,8 @@ steps:
       - 'DATABASE_URL=${_DATABASE_URL}'
       - '--build-arg'
       - 'NEXT_PUBLIC_APP_URL=${_APP_URL}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAACa3eqmrh0p5DsBc'
       - '-t'
       - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:$SHORT_SHA'
       - '-t'
