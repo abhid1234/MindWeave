@@ -36,7 +36,8 @@ spec:
           GOOGLE_AI_API_KEY:google-ai-api-key:latest,
           AUTH_SECRET:auth-secret:latest,
           AUTH_GOOGLE_ID:google-oauth-client-id:latest,
-          AUTH_GOOGLE_SECRET:google-oauth-client-secret:latest
+          AUTH_GOOGLE_SECRET:google-oauth-client-secret:latest,
+          TURNSTILE_SECRET_KEY:turnstile-secret-key:latest
     spec:
       containerConcurrency: 80
       timeoutSeconds: 300
@@ -54,6 +55,8 @@ spec:
               value: https://mindweave-us-central1.run.app
             - name: AUTH_URL
               value: https://mindweave-us-central1.run.app
+            - name: NEXT_PUBLIC_TURNSTILE_SITE_KEY
+              value: 0x4AAAAAACa3eqmrh0p5DsBc
 
             # Secrets from Secret Manager (automatically injected)
             # - DATABASE_URL

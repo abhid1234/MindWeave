@@ -87,6 +87,7 @@ echo ""
 
 create_secret "google-oauth-client-id" "Google OAuth Client ID" ""
 create_secret "google-oauth-client-secret" "Google OAuth Client Secret" ""
+create_secret "turnstile-secret-key" "Cloudflare Turnstile Secret Key (from dash.cloudflare.com)" ""
 
 echo ""
 echo "✅ Secrets setup complete!"
