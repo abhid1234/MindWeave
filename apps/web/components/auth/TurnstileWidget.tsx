@@ -58,7 +58,9 @@ export function TurnstileWidget() {
         strategy="afterInteractive"
         onReady={renderWidget}
       />
-      <div ref={containerRef} />
+      <div className="flex justify-center">
+        <div ref={containerRef} />
+      </div>
       <input type="hidden" name="cf-turnstile-response" value={token} />
     </>
   );
