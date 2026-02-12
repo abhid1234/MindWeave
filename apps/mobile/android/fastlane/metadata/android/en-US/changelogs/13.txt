@@ -1,0 +1,7 @@
+Mindweave v1.1.0 - Production Release
+
+• Simplified sign-up: auto-login after registration
+• Fixed session persistence issues on login/logout
+• Improved theme toggle responsiveness
+• Better mobile layout for sign-in page
+• Performance and stability improvements
