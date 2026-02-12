@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { auth, signIn } from '@/lib/auth';
 import { AuthError } from 'next-auth';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 
 export default async function LoginPage({
   searchParams,
@@ -91,13 +93,21 @@ export default async function LoginPage({
             <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-700">
               {params.error === 'CredentialsSignin'
                 ? 'Invalid email or password.'
-                : 'An error occurred. Please try again.'}
+                : params.error === 'TurnstileFailed'
+                  ? 'Human verification failed. Please try again.'
+                  : 'An error occurred. Please try again.'}
             </div>
           )}
 
           <form
             action={async (formData: FormData) => {
               'use server';
+              const turnstileToken = formData.get('cf-turnstile-response') as string;
+              const valid = await verifyTurnstileToken(turnstileToken || '');
+              if (!valid) {
+                return redirect('/login?error=TurnstileFailed');
+              }
+
               const email = formData.get('email') as string;
               const password = formData.get('password') as string;
               try {
@@ -129,6 +139,7 @@ export default async function LoginPage({
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               required
             />
+            <TurnstileWidget />
             <button
               type="submit"
               className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700"

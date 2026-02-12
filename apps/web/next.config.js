@@ -87,11 +87,12 @@ const nextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js requires unsafe-inline/eval
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com", // Next.js requires unsafe-inline/eval; Turnstile widget
           "style-src 'self' 'unsafe-inline'", // Tailwind requires inline styles
           "img-src 'self' data: https: blob:",
           "font-src 'self' data:",
-          "connect-src 'self' https://api.anthropic.com https://generativelanguage.googleapis.com",
+          "connect-src 'self' https://api.anthropic.com https://generativelanguage.googleapis.com https://challenges.cloudflare.com",
+          "frame-src https://challenges.cloudflare.com", // Turnstile iframe
           "frame-ancestors 'none'",
           "base-uri 'self'",
           "form-action 'self'",

@@ -7,6 +7,8 @@ import { users } from '@/lib/db/schema';
 import bcrypt from 'bcryptjs';
 
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 
 export default async function RegisterPage({
   searchParams,
@@ -27,6 +29,12 @@ export default async function RegisterPage({
 
   async function register(formData: FormData) {
     'use server';
+
+    const turnstileToken = formData.get('cf-turnstile-response') as string;
+    const valid = await verifyTurnstileToken(turnstileToken || '');
+    if (!valid) {
+      redirect('/register?error=TurnstileFailed');
+    }
 
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
@@ -87,6 +95,7 @@ export default async function RegisterPage({
   }
 
   const errorMessages: Record<string, string> = {
+    TurnstileFailed: 'Human verification failed. Please try again.',
     MissingFields: 'Please fill in all fields.',
     PasswordTooShort: 'Password must be at least 8 characters.',
     PasswordMismatch: 'Passwords do not match.',
@@ -141,6 +150,7 @@ export default async function RegisterPage({
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               required
             />
+            <TurnstileWidget />
             <button
               type="submit"
               className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700"
