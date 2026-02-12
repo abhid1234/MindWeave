@@ -109,6 +109,7 @@ echo -n "$(openssl rand -base64 32)" | gcloud secrets create auth-secret --data-
 echo -n "your-google-ai-key" | gcloud secrets create google-ai-api-key --data-file=-
 echo -n "your-google-oauth-id" | gcloud secrets create google-oauth-client-id --data-file=-
 echo -n "your-google-oauth-secret" | gcloud secrets create google-oauth-client-secret --data-file=-
+echo -n "your-turnstile-secret-key" | gcloud secrets create turnstile-secret-key --data-file=-
 ```
 
 #### Grant Cloud Run Access to Secrets
@@ -448,11 +449,12 @@ The CSP restricts resource loading:
 
 ```
 default-src 'self';
-script-src 'self' 'unsafe-inline' 'unsafe-eval';
+script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com;
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: https: blob:;
 font-src 'self' data:;
-connect-src 'self' https://generativelanguage.googleapis.com;
+connect-src 'self' https://generativelanguage.googleapis.com https://challenges.cloudflare.com;
+frame-src https://challenges.cloudflare.com;
 frame-ancestors 'none';
 base-uri 'self';
 form-action 'self';
@@ -485,6 +487,7 @@ Rate limits return `429 Too Many Requests` with `Retry-After` header.
 - **Disabled dangerous email linking**: Prevents account takeover
 - **Production guards**: Dev login disabled in production environments
 - **Secure cookies**: HttpOnly, Secure, SameSite=Lax
+- **Cloudflare Turnstile**: Bot protection on login and registration forms
 
 ### Database Security
 
@@ -536,6 +539,8 @@ gcloud compute security-policies rules create 2001 \
 | `NEXT_PUBLIC_APP_URL` | Yes | Public app URL |
 | `NODE_ENV` | Yes | `production` for deployments |
 | `ALLOW_DEV_LOGIN` | No | `true` only in development |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | No | Cloudflare Turnstile site key (public) |
+| `TURNSTILE_SECRET_KEY` | No | Cloudflare Turnstile secret key (Secret Manager) |
 
 ### Security Checklist for Production
 

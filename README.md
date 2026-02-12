@@ -24,6 +24,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **SEO Optimized**: Open Graph and Twitter Card metadata for shared content
 - **Onboarding Flow**: Guided 3-step onboarding for new users
 - **Public Profiles**: Shareable user profiles with public collections
+- **Bot Protection**: Cloudflare Turnstile CAPTCHA on login and registration
 - **Privacy First**: Your data stays yours - self-host or use our secure cloud
 
 ## Tech Stack
@@ -427,6 +428,7 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Authentication hardening (multi-environment guards)
 - [x] Security headers (CSP, HSTS, X-Frame-Options, etc.)
 - [x] Secure random share IDs (crypto.randomBytes)
+- [x] Cloudflare Turnstile bot protection on login/register forms
 
 ### Phase 9: Polish & Performance ✅ Complete
 - [x] Lighthouse audit with perfect accessibility score (100)
@@ -475,6 +477,8 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 | `RESEND_API_KEY` | Resend API key for password reset emails | No |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID | No |
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret | No |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key (from dash.cloudflare.com) | No |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key | No |
 
 ## Deployment
 
@@ -489,7 +493,7 @@ Mindweave is deployed on Google Cloud Platform:
 |---------|---------|
 | **Cloud Run** | Next.js app (512Mi, 1 CPU, 0–10 instances) |
 | **Cloud SQL** | PostgreSQL 16 + pgvector (db-f1-micro) |
-| **Secret Manager** | 6 secrets (DB, auth, API keys, OAuth) |
+| **Secret Manager** | 7 secrets (DB, auth, API keys, OAuth, Turnstile) |
 | **Cloud Build** | Docker image builds via `cloudbuild.yaml` |
 
 ### CI/CD

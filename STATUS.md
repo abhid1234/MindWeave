@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-10
+**Last Updated**: 2026-02-12
 **Current Phase**: UI Polish Complete
 **Active Ralph Loop**: No
 
@@ -52,7 +52,10 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-10)**:
+**Latest Enhancement (2026-02-12)**:
+- [x] **Cloudflare Turnstile Bot Protection** - Added Turnstile CAPTCHA widget to login and register forms to prevent automated attacks and credential stuffing. Tokens verified server-side before auth proceeds. CSP headers updated. Deployed to Cloud Run with secret in Secret Manager.
+
+**Previous Enhancement (2026-02-10)**:
 - [x] **Mobile OAuth & UX Fixes** - 6 commits deployed:
   - Server-side WebView detection via User-Agent header to prevent Google OAuth `403 disallowed_useragent` errors
   - HTML intermediary page in mobile-signin endpoint (replaces 302 redirects with JS-initiated navigation)

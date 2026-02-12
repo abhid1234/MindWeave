@@ -250,6 +250,10 @@ AUTH_GOOGLE_SECRET=<optional>
 # AI
 GOOGLE_AI_API_KEY=<get from aistudio.google.com/app/apikey>
 
+# Cloudflare Turnstile (bot protection on login/register)
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<from dash.cloudflare.com → Turnstile>
+TURNSTILE_SECRET_KEY=<from dash.cloudflare.com → Turnstile>
+
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development

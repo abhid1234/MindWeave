@@ -105,6 +105,7 @@ Mindweave is your AI-powered personal knowledge hub. Capture notes, save bookmar
 🔒 PRIVACY & SECURITY
 • Your data is yours — we never sell personal information
 • Secure Google OAuth and email/password authentication
+• Cloudflare Turnstile bot protection on login and registration
 • Rate limiting and security headers for API protection
 • Share specific content via secure, revocable links
 
@@ -186,6 +187,7 @@ In Play Console → **Data safety**, declare what data is collected:
 |---------|-------------|---------|
 | Google Gemini AI | Content text (notes, links) | Auto-tagging, semantic search embeddings, Q&A answers |
 | Google OAuth | Email, name | Authentication |
+| Cloudflare Turnstile | None (browser signals only) | Bot protection on login/registration |
 
 ## Step 6: App Access (for Review)
 

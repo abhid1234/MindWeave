@@ -31,7 +31,12 @@ Mindweave uses **Auth.js v5** with JWT sessions for authentication.
 | Provider | Description |
 |----------|-------------|
 | Google OAuth | Primary authentication method |
+| Email/Password | Credentials-based authentication |
 | Credentials | Development-only (requires `ALLOW_DEV_LOGIN=true`) |
+
+### Bot Protection
+
+Login and registration forms are protected by **Cloudflare Turnstile**. The Turnstile token is submitted as `cf-turnstile-response` in the form data and verified server-side before authentication proceeds. If verification fails, the server redirects with `?error=TurnstileFailed`.
 
 ### Session Access
 
