@@ -1,7 +1,7 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-12
-**Current Phase**: UI Polish Complete
+**Last Updated**: 2026-02-13
+**Current Phase**: Security Hardening Complete
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
@@ -52,7 +52,23 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-12)**:
+**Latest Enhancement (2026-02-13)**:
+- [x] **Comprehensive Security Hardening** - Addressed 13 vulnerabilities from security audit across authorization, auth, data exposure, rate limiting, and input validation:
+  - Fixed IDOR in `getContentCollectionsAction` (content ownership verification)
+  - Added defense-in-depth userId checks to task mutation WHERE clauses
+  - Turnstile fails closed in production when secret key is missing
+  - Removed `allowDangerousEmailAccountLinking` from Google OAuth (prevents account takeover)
+  - Added password complexity requirements (uppercase, lowercase, number)
+  - Secured metrics endpoint (requires auth or bearer token in production)
+  - Sanitized internal `filePath` from export metadata
+  - Authenticated file serving via `/api/files/` route (files moved out of `public/`)
+  - Constrained metadata schema (rejects arbitrary nested objects)
+  - Added server action rate limiting (`createContent`, `bulkDelete`, `semanticSearch`, `askQuestion`, `bulkAddToCollection`)
+  - Added API rate limiting to devices and tasks routes
+  - Reduced import file size limit to 20MB with 30s parsing timeout
+  - Added security comments for Turnstile SRI and shared content XSS safety
+
+**Previous Enhancement (2026-02-12)**:
 - [x] **Cloudflare Turnstile Bot Protection** - Added Turnstile CAPTCHA widget to login and register forms to prevent automated attacks and credential stuffing. Tokens verified server-side before auth proceeds. CSP headers updated. Deployed to Cloud Run with secret in Secret Manager.
 
 **Previous Enhancement (2026-02-10)**:

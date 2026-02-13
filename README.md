@@ -25,6 +25,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Onboarding Flow**: Guided 3-step onboarding for new users
 - **Public Profiles**: Shareable user profiles with public collections
 - **Bot Protection**: Cloudflare Turnstile CAPTCHA on login and registration
+- **Security Hardened**: Authenticated file serving, rate limiting, IDOR prevention, input validation
 - **Privacy First**: Your data stays yours - self-host or use our secure cloud
 
 ## Tech Stack
@@ -423,12 +424,16 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Performance optimizations (database indexes, N+1 fixes, infinite scroll, caching)
 
 ### Phase 8: Security Hardening ✅ Complete
-- [x] Rate limiting for all API endpoints
+- [x] Rate limiting for all API endpoints and server actions
 - [x] File upload security (magic bytes verification)
-- [x] Authentication hardening (multi-environment guards)
+- [x] Authentication hardening (multi-environment guards, password complexity)
 - [x] Security headers (CSP, HSTS, X-Frame-Options, etc.)
 - [x] Secure random share IDs (crypto.randomBytes)
 - [x] Cloudflare Turnstile bot protection on login/register forms
+- [x] Authorization fixes (IDOR prevention, defense-in-depth on mutations)
+- [x] Authenticated file serving (files behind /api/files auth gate)
+- [x] Data exposure prevention (export metadata sanitization)
+- [x] Input validation hardening (constrained metadata schema, import limits)
 
 ### Phase 9: Polish & Performance ✅ Complete
 - [x] Lighthouse audit with perfect accessibility score (100)
@@ -479,6 +484,7 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret | No |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key (from dash.cloudflare.com) | No |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key | No |
+| `METRICS_AUTH_TOKEN` | Bearer token for `/api/metrics` in production | No |
 
 ## Deployment
 
