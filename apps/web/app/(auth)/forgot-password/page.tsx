@@ -1,20 +1,30 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { checkUnauthenticatedRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export default async function ForgotPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sent?: string }>;
+  searchParams: Promise<{ sent?: string; error?: string }>;
 }) {
   const params = await searchParams;
 
   async function handleSubmit(formData: FormData) {
     'use server';
     const email = formData.get('email') as string;
-    if (email) {
-      await sendPasswordResetEmail(email);
+    if (!email) {
+      redirect('/forgot-password?error=MissingEmail');
     }
+
+    // SECURITY: Rate limit password reset requests per email (3/hour)
+    const rateCheck = checkUnauthenticatedRateLimit(email, 'passwordReset', RATE_LIMITS.passwordReset);
+    if (!rateCheck.success) {
+      // Still show generic success to prevent enumeration
+      redirect('/forgot-password?sent=1');
+    }
+
+    await sendPasswordResetEmail(email);
     redirect('/forgot-password?sent=1');
   }
 

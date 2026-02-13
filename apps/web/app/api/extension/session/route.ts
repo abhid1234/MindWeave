@@ -1,12 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { checkRateLimit, rateLimitExceededResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 /**
  * GET /api/extension/session
  * Check if user is authenticated (for browser extension)
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Rate limit session checks
+    const rateLimitResult = checkRateLimit(request, 'extension-session', RATE_LIMITS.api);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     const session = await auth();
 
     if (!session?.user?.id) {

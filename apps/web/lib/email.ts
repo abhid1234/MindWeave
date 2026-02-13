@@ -29,7 +29,7 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
 
   const rawToken = crypto.randomBytes(32).toString('hex');
   const hashedToken = hashToken(rawToken);
-  const expires = Math.floor(Date.now() / 1000) + 3600; // 1 hour
+  const expires = Math.floor(Date.now() / 1000) + 1800; // 30 minutes
 
   await db.insert(verificationTokens).values({
     identifier: email,
@@ -47,7 +47,7 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
       <h2>Reset your password</h2>
       <p>You requested a password reset for your Mindweave account.</p>
       <p><a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:8px;">Reset Password</a></p>
-      <p>This link expires in 1 hour. If you didn't request this, ignore this email.</p>
+      <p>This link expires in 30 minutes. If you didn't request this, ignore this email.</p>
     `,
   });
 

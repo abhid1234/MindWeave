@@ -1,11 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, OPTIONS } from './route';
 import { auth } from '@/lib/auth';
+import { NextRequest } from 'next/server';
 
 // Mock auth
 vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
 }));
+
+// Mock rate limiter
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: () => ({ success: true, remaining: 99, resetTime: Date.now() + 60000 }),
+  rateLimitExceededResponse: () => new Response(JSON.stringify({ error: 'Too many requests' }), { status: 429 }),
+  RATE_LIMITS: {
+    api: { maxRequests: 100, windowMs: 60000 },
+  },
+}));
+
+function createMockRequest(): NextRequest {
+  return new NextRequest('http://localhost:3000/api/extension/session');
+}
 
 describe('Extension Session API Route', () => {
   beforeEach(() => {
@@ -16,7 +30,7 @@ describe('Extension Session API Route', () => {
     it('should return authenticated: false when not logged in', async () => {
       vi.mocked(auth).mockResolvedValue(null as any);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -27,7 +41,7 @@ describe('Extension Session API Route', () => {
     it('should return authenticated: false when session has no user id', async () => {
       vi.mocked(auth).mockResolvedValue({ user: {} } as any);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -43,7 +57,7 @@ describe('Extension Session API Route', () => {
         },
       } as any);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -60,7 +74,7 @@ describe('Extension Session API Route', () => {
         user: { id: 'user-123' },
       } as any);
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
 
       expect(response.headers.get('Access-Control-Allow-Credentials')).toBe('true');
       expect(response.headers.get('Access-Control-Allow-Methods')).toContain('GET');
@@ -69,7 +83,7 @@ describe('Extension Session API Route', () => {
     it('should handle auth errors gracefully', async () => {
       vi.mocked(auth).mockRejectedValue(new Error('Auth error'));
 
-      const response = await GET();
+      const response = await GET(createMockRequest());
       const data = await response.json();
 
       expect(response.status).toBe(200);

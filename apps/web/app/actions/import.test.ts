@@ -57,6 +57,13 @@ vi.mock('@/lib/validations', () => ({
   },
 }));
 
+vi.mock('@/lib/rate-limit', () => ({
+  checkServerActionRateLimit: () => ({ success: true }),
+  RATE_LIMITS: {
+    serverActionBulk: { maxRequests: 10, windowMs: 60000 },
+  },
+}));
+
 vi.mock('@/lib/ai/claude', () => ({
   generateTags: (...args: unknown[]) => mockGenerateTags(...args),
 }));

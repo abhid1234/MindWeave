@@ -64,6 +64,11 @@ export async function createCollectionAction(
       return { success: false, message: 'Unauthorized' };
     }
 
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'createCollection', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     const validatedData = createCollectionSchema.parse(params);
 
     const [newCollection] = await db
@@ -142,6 +147,11 @@ export async function updateCollectionAction(
       return { success: false, message: 'Unauthorized' };
     }
 
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'updateCollection', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     // Verify ownership
     const [existing] = await db
       .select()
@@ -190,6 +200,11 @@ export async function deleteCollectionAction(collectionId: string): Promise<Acti
       return { success: false, message: 'Unauthorized' };
     }
 
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'deleteCollection', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     // Verify ownership
     const [existing] = await db
       .select()
@@ -224,6 +239,11 @@ export async function addToCollectionAction(
     const session = await auth();
     if (!session?.user?.id) {
       return { success: false, message: 'Unauthorized' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'addToCollection', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     // Verify collection ownership
@@ -277,6 +297,11 @@ export async function removeFromCollectionAction(
     const session = await auth();
     if (!session?.user?.id) {
       return { success: false, message: 'Unauthorized' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'removeFromCollection', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     // Verify collection ownership

@@ -156,13 +156,9 @@ describe('createContentSchema', () => {
 
   describe('edge cases', () => {
     it('should handle URLs with various protocols', () => {
-      const urls = [
-        'https://example.com',
-        'http://example.com',
-        'ftp://files.example.com',
-      ];
-
-      urls.forEach((url) => {
+      // SECURITY: Only http and https are allowed (SSRF prevention blocks ftp, file, etc.)
+      const validUrls = ['https://example.com', 'http://example.com'];
+      validUrls.forEach((url) => {
         const result = createContentSchema.safeParse({
           type: 'link',
           title: 'Test',
@@ -170,6 +166,14 @@ describe('createContentSchema', () => {
         });
         expect(result.success).toBe(true);
       });
+
+      // ftp should be rejected by SSRF protection
+      const ftpResult = createContentSchema.safeParse({
+        type: 'link',
+        title: 'Test',
+        url: 'ftp://files.example.com',
+      });
+      expect(ftpResult.success).toBe(false);
     });
 
     it('should handle special characters in title', () => {

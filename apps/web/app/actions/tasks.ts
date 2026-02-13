@@ -6,6 +6,7 @@ import { tasks } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { eq, desc, and, type SQL } from 'drizzle-orm';
+import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export type ActionResult = {
   success: boolean;
@@ -92,6 +93,11 @@ export async function createTaskAction(data: {
       return { success: false, message: 'Unauthorized. Please log in.' };
     }
 
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'createTask', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     const validationResult = createTaskSchema.safeParse(data);
     if (!validationResult.success) {
       return {
@@ -142,6 +148,11 @@ export async function updateTaskAction(
     const session = await auth();
     if (!session?.user?.id) {
       return { success: false, message: 'Unauthorized. Please log in.' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'updateTask', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     const validationResult = updateTaskSchema.safeParse(data);
@@ -196,6 +207,11 @@ export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
       return { success: false, message: 'Unauthorized. Please log in.' };
     }
 
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'deleteTask', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     const existing = await db
       .select({ id: tasks.id })
       .from(tasks)
@@ -223,6 +239,11 @@ export async function toggleTaskDoneAction(taskId: string): Promise<ActionResult
     const session = await auth();
     if (!session?.user?.id) {
       return { success: false, message: 'Unauthorized. Please log in.' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'toggleTaskDone', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     const [existing] = await db

@@ -58,13 +58,17 @@ export interface RateLimitResult {
 
 /**
  * Get client identifier from request
- * Uses X-Forwarded-For header for proxied requests, falls back to a default
+ * SECURITY: Uses the LAST IP in X-Forwarded-For (added by trusted load balancer),
+ * not the first (which is user-controlled and spoofable).
+ * Cloud Run / GCP LB appends the real client IP as the rightmost entry.
  */
 function getClientIdentifier(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) {
-    // Take the first IP in the chain (original client)
-    return forwarded.split(',')[0].trim();
+    const ips = forwarded.split(',').map(ip => ip.trim()).filter(Boolean);
+    // Take the LAST IP — added by the trusted proxy (Cloud Run LB)
+    // The first IP is user-controlled and can be spoofed
+    return ips[ips.length - 1];
   }
 
   const realIp = request.headers.get('x-real-ip');
@@ -73,7 +77,7 @@ function getClientIdentifier(request: Request): string {
   }
 
   // Fallback for local development
-  return 'anonymous';
+  return 'localhost';
 }
 
 /**
@@ -252,4 +256,48 @@ export const RATE_LIMITS = {
     maxRequests: 10,
     windowMs: 60 * 1000,
   },
+  // Password reset: 3 requests per hour per email
+  passwordReset: {
+    maxRequests: 3,
+    windowMs: 60 * 60 * 1000,
+  },
+  // File serving: 200 requests per minute
+  fileServing: {
+    maxRequests: 200,
+    windowMs: 60 * 1000,
+  },
 } as const;
+
+/**
+ * Check rate limit for unauthenticated actions (keyed by identifier like email or IP)
+ * Used for auth forms where userId is not yet available
+ */
+export function checkUnauthenticatedRateLimit(
+  identifier: string,
+  action: string,
+  config: { maxRequests: number; windowMs: number }
+): { success: boolean; message?: string } {
+  const now = Date.now();
+  const key = `unauth:${action}:${identifier}`;
+  const entry = rateLimitStore.get(key);
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitStore.set(key, {
+      count: 1,
+      resetTime: now + config.windowMs,
+    });
+    return { success: true };
+  }
+
+  entry.count++;
+
+  if (entry.count > config.maxRequests) {
+    const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
+    return {
+      success: false,
+      message: `Too many attempts. Please try again in ${retryAfter} seconds.`,
+    };
+  }
+
+  return { success: true };
+}

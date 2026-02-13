@@ -210,6 +210,12 @@ export async function updateContentTagsAction(
       };
     }
 
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'updateContentTags', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     const { contentId, tags } = params;
 
     // Validate inputs
@@ -291,6 +297,12 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
         success: false,
         message: 'Unauthorized. Please log in.',
       };
+    }
+
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'updateContent', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     const { contentId, ...updateFields } = params;
@@ -445,6 +457,12 @@ export async function deleteContentAction(contentId: string): Promise<ActionResu
         success: false,
         message: 'Unauthorized. Please log in.',
       };
+    }
+
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'deleteContent', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     // Validate content ID
@@ -691,6 +709,12 @@ export async function shareContentAction(
       };
     }
 
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'shareContent', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     // Verify the content belongs to the user
     const existingContent = await db
       .select({ id: content.id, isShared: content.isShared, shareId: content.shareId })
@@ -760,6 +784,12 @@ export async function unshareContentAction(
         success: false,
         message: 'Unauthorized. Please log in.',
       };
+    }
+
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'unshareContent', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     // Verify the content belongs to the user
@@ -974,6 +1004,12 @@ export async function bulkAddTagsAction(
       };
     }
 
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'bulkAddTags', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     if (!contentIds || contentIds.length === 0) {
       return {
         success: false,
@@ -1063,6 +1099,12 @@ export async function bulkShareContentAction(
       };
     }
 
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'bulkShareContent', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     if (!contentIds || contentIds.length === 0) {
       return {
         success: false,
@@ -1147,6 +1189,12 @@ export async function bulkUnshareContentAction(
       };
     }
 
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'bulkUnshareContent', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     if (!contentIds || contentIds.length === 0) {
       return {
         success: false,
@@ -1212,6 +1260,12 @@ export async function toggleFavoriteAction(
         success: false,
         message: 'Unauthorized. Please log in.',
       };
+    }
+
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'toggleFavorite', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     // Get the current favorite status

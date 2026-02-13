@@ -6,6 +6,7 @@ import { users, collections, contentCollections, content } from '@/lib/db/schema
 import { updateProfileSchema } from '@/lib/validations';
 import { eq, and, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 type ActionResult = {
   success: boolean;
@@ -59,6 +60,11 @@ export async function updateProfile(data: {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: 'Unauthorized' };
+  }
+
+  const rateCheck = checkServerActionRateLimit(session.user.id, 'updateProfile', RATE_LIMITS.serverAction);
+  if (!rateCheck.success) {
+    return { success: false, message: rateCheck.message! };
   }
 
   const parsed = updateProfileSchema.safeParse(data);
@@ -249,6 +255,11 @@ export async function toggleCollectionPublic(collectionId: string): Promise<Acti
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: 'Unauthorized' };
+  }
+
+  const rateCheck = checkServerActionRateLimit(session.user.id, 'toggleCollectionPublic', RATE_LIMITS.serverAction);
+  if (!rateCheck.success) {
+    return { success: false, message: rateCheck.message! };
   }
 
   const collection = await db.query.collections.findFirst({

@@ -6,6 +6,7 @@ import { AuthError } from 'next-auth';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
 import { verifyTurnstileToken } from '@/lib/turnstile';
+import { checkUnauthenticatedRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export default async function LoginPage({
   searchParams,
@@ -99,20 +100,29 @@ export default async function LoginPage({
                 ? 'Invalid email or password.'
                 : params.error === 'TurnstileFailed'
                   ? 'Human verification failed. Please try again.'
-                  : 'An error occurred. Please try again.'}
+                  : params.error === 'RateLimited'
+                    ? 'Too many login attempts. Please try again later.'
+                    : 'An error occurred. Please try again.'}
             </div>
           )}
 
           <form
             action={async (formData: FormData) => {
               'use server';
+              const email = formData.get('email') as string;
+
+              // SECURITY: Rate limit login attempts per email
+              const rateCheck = checkUnauthenticatedRateLimit(email, 'login', RATE_LIMITS.auth);
+              if (!rateCheck.success) {
+                return redirect('/login?error=RateLimited');
+              }
+
               const turnstileToken = formData.get('cf-turnstile-response') as string;
               const valid = await verifyTurnstileToken(turnstileToken || '');
               if (!valid) {
                 return redirect('/login?error=TurnstileFailed');
               }
 
-              const email = formData.get('email') as string;
               const password = formData.get('password') as string;
               try {
                 await signIn('credentials', {

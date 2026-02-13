@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
-import { consumeResetToken, verifyResetToken } from '@/lib/email';
+import { consumeResetToken } from '@/lib/email';
 import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -15,6 +15,9 @@ export default async function ResetPasswordPage({
   const params = await searchParams;
   const { token, email, error } = params;
 
+  // SECURITY: Only validate token presence on page load — don't verify against DB here.
+  // Token is consumed (single-use) only on form submit via consumeResetToken().
+  // This prevents the token from being "used up" just by visiting the link.
   if (!token || !email) {
     return (
       <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
@@ -25,29 +28,6 @@ export default async function ResetPasswordPage({
           </div>
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center text-sm text-red-700">
             This password reset link is invalid. Please request a new one.
-          </div>
-          <p className="text-center text-sm text-slate-600">
-            <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Request new reset link
-            </Link>
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  const isValid = await verifyResetToken(email, token);
-
-  if (!isValid) {
-    return (
-      <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
-            <p className="mt-2 text-sm text-slate-600">Link expired</p>
-          </div>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center text-sm text-red-700">
-            This password reset link has expired or already been used. Please request a new one.
           </div>
           <p className="text-center text-sm text-slate-600">
             <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">

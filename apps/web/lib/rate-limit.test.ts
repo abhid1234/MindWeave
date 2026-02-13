@@ -74,18 +74,25 @@ describe('rate-limit', () => {
       expect(result.retryAfter).toBeGreaterThan(0);
     });
 
-    it('should use x-forwarded-for header when present', () => {
+    it('should use last ip from x-forwarded-for header (trusted proxy)', () => {
       const config = { maxRequests: 3, windowMs: 60000 };
+      // SECURITY: Rate limiter uses the LAST IP (added by trusted LB), not the first (user-controlled)
       const request = createMockRequest('10.0.0.99', '203.0.113.1, 198.51.100.1');
 
       const result = checkRateLimit(request, 'test-endpoint-4', config);
       expect(result.success).toBe(true);
 
-      // Different IP from x-forwarded-for should have separate limit
+      // Same last IP should share the same rate limit counter
       const request2 = createMockRequest('10.0.0.99', '203.0.113.2, 198.51.100.1');
       const result2 = checkRateLimit(request2, 'test-endpoint-4', config);
       expect(result2.success).toBe(true);
-      expect(result2.remaining).toBe(2); // Fresh counter for different IP
+      expect(result2.remaining).toBe(1); // Same counter (same last IP: 198.51.100.1)
+
+      // Different last IP should have separate limit
+      const request3 = createMockRequest('10.0.0.99', '203.0.113.1, 198.51.100.2');
+      const result3 = checkRateLimit(request3, 'test-endpoint-4', config);
+      expect(result3.success).toBe(true);
+      expect(result3.remaining).toBe(2); // Fresh counter for different last IP
     });
 
     it('should reset after window expires', () => {

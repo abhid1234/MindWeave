@@ -6,6 +6,7 @@ import { content, collections, contentCollections } from '@/lib/db/schema';
 import { eq, sql, gte, and, count } from 'drizzle-orm';
 import { revalidateTag } from 'next/cache';
 import { unstable_cache } from 'next/cache';
+import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import type {
   OverviewStats,
   ContentGrowthData,
@@ -350,6 +351,12 @@ export async function getKnowledgeInsightsAction(): Promise<
     const session = await auth();
     if (!session?.user?.id) {
       return { success: false, message: 'Unauthorized' };
+    }
+
+    // Rate limit (AI-intensive)
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'knowledgeInsights', RATE_LIMITS.serverActionAI);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     // Gather basic stats and advanced insights in parallel

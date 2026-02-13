@@ -10,6 +10,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { passwordSchema } from '@/lib/validations';
+import { checkUnauthenticatedRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export default async function RegisterPage({
   searchParams,
@@ -31,6 +32,14 @@ export default async function RegisterPage({
   async function register(formData: FormData) {
     'use server';
 
+    const email = formData.get('email') as string;
+
+    // SECURITY: Rate limit registration attempts per email
+    const rateCheck = checkUnauthenticatedRateLimit(email, 'register', RATE_LIMITS.auth);
+    if (!rateCheck.success) {
+      redirect('/register?error=RateLimited');
+    }
+
     const turnstileToken = formData.get('cf-turnstile-response') as string;
     const valid = await verifyTurnstileToken(turnstileToken || '');
     if (!valid) {
@@ -38,7 +47,6 @@ export default async function RegisterPage({
     }
 
     const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
 
@@ -55,13 +63,15 @@ export default async function RegisterPage({
       redirect('/register?error=PasswordMismatch');
     }
 
-    // Check if email already exists
+    // SECURITY: Check if email already exists — return generic response
+    // to prevent account enumeration (don't reveal whether email is registered)
     const existing = await db.query.users.findFirst({
       where: (users, { eq }) => eq(users.email, email),
     });
 
     if (existing) {
-      redirect('/register?error=EmailExists');
+      // Show same success page as normal registration to prevent enumeration
+      redirect('/login?error=CredentialsSignin');
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -101,7 +111,7 @@ export default async function RegisterPage({
     MissingFields: 'Please fill in all fields.',
     PasswordWeak: 'Password must be at least 8 characters, with one uppercase letter, one lowercase letter, and one number.',
     PasswordMismatch: 'Passwords do not match.',
-    EmailExists: 'An account with this email already exists.',
+    RateLimited: 'Too many registration attempts. Please try again later.',
   };
 
   return (

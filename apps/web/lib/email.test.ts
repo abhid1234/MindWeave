@@ -244,7 +244,7 @@ describe('Email Functions', () => {
       expect(mockInsert).toHaveBeenCalled();
     });
 
-    it('should use 1-hour expiry for reset tokens', async () => {
+    it('should use 30-minute expiry for reset tokens', async () => {
       const { sendPasswordResetEmail } = await import('./email');
       mockFindFirst.mockResolvedValue({ email: 'user@example.com', password: 'hashed-pw' });
       const mockWhere = vi.fn();
@@ -256,8 +256,9 @@ describe('Email Functions', () => {
       await sendPasswordResetEmail('user@example.com');
 
       const callArg = mockValues.mock.calls[0][0];
-      expect(callArg.expires).toBeGreaterThanOrEqual(now + 3600 - 5);
-      expect(callArg.expires).toBeLessThanOrEqual(now + 3600 + 5);
+      // SECURITY: Reduced from 1 hour to 30 minutes (1800 seconds)
+      expect(callArg.expires).toBeGreaterThanOrEqual(now + 1800 - 5);
+      expect(callArg.expires).toBeLessThanOrEqual(now + 1800 + 5);
     });
 
     it('should include reset URL in email HTML', async () => {

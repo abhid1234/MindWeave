@@ -1,6 +1,45 @@
 import { z } from 'zod';
 
 /**
+ * SECURITY: Validate that a URL does not point to private/internal networks (SSRF prevention)
+ */
+function isPrivateUrl(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    const hostname = url.hostname.toLowerCase();
+
+    // Block localhost variants
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '0.0.0.0') {
+      return true;
+    }
+
+    // Block private IP ranges (RFC 1918 + link-local)
+    if (
+      hostname.startsWith('10.') ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('169.254.') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+    ) {
+      return true;
+    }
+
+    // Block metadata endpoints (cloud provider)
+    if (hostname === 'metadata.google.internal' || hostname === '169.254.169.254') {
+      return true;
+    }
+
+    // Block file:// and other dangerous protocols
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return true; // Invalid URL = reject
+  }
+}
+
+/**
  * Content creation validation schema
  */
 export const createContentSchema = z.object({
@@ -24,6 +63,15 @@ export const createContentSchema = z.object({
         message: 'Invalid URL',
         path: ['url'],
       });
+      return;
+    }
+    // SECURITY: Reject private/internal network URLs (SSRF prevention)
+    if (isPrivateUrl(data.url)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'URLs pointing to private networks are not allowed',
+        path: ['url'],
+      });
     }
   }
 });
@@ -36,7 +84,9 @@ export type CreateContentInput = z.infer<typeof createContentSchema>;
 export const updateContentSchema = z.object({
   title: z.string().min(1, 'Title is required').max(500, 'Title is too long').optional(),
   body: z.string().max(50000, 'Content is too long').optional(),
-  url: z.string().url('Invalid URL').optional().or(z.literal('')),
+  url: z.string().url('Invalid URL')
+    .refine(url => !isPrivateUrl(url), 'URLs pointing to private networks are not allowed')
+    .optional().or(z.literal('')),
   tags: z.array(z.string()).optional(),
   metadata: z.record(
     z.string().max(100),
@@ -94,7 +144,9 @@ export type ImportSourceType = z.infer<typeof importSourceSchema>;
 export const importItemSchema = z.object({
   title: z.string().min(1, 'Title is required').max(500, 'Title is too long'),
   body: z.string().max(50000, 'Content is too long').optional(),
-  url: z.string().url('Invalid URL').optional().or(z.literal('')),
+  url: z.string().url('Invalid URL')
+    .refine(url => !isPrivateUrl(url), 'URLs pointing to private networks are not allowed')
+    .optional().or(z.literal('')),
   tags: z.array(z.string()).default([]),
   type: z.enum(['note', 'link']),
   createdAt: z.coerce.date().optional(),

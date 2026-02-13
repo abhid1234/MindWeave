@@ -10,6 +10,7 @@ import { revalidatePath } from 'next/cache';
 import { eq, and, or, inArray } from 'drizzle-orm';
 import { ImportResult, ImportItem, ImportError } from '@/lib/import/types';
 import { batchArray, normalizeTags } from '@/lib/import/utils';
+import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 const BATCH_SIZE = 10;
 
@@ -36,6 +37,20 @@ export async function importContentAction(
       return {
         success: false,
         message: 'Unauthorized. Please log in.',
+        imported: 0,
+        skipped: 0,
+        failed: 0,
+        errors: [],
+        createdIds: [],
+      };
+    }
+
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'importContent', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return {
+        success: false,
+        message: rateCheck.message!,
         imported: 0,
         skipped: 0,
         failed: 0,

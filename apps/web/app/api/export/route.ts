@@ -57,14 +57,14 @@ export async function POST(request: NextRequest) {
       .from(content)
       .where(and(...conditions));
 
-    // SECURITY: Sanitize metadata to remove internal fields (e.g. filePath)
-    const INTERNAL_METADATA_KEYS = ['filePath'];
+    // SECURITY: Sanitize metadata using ALLOWLIST (not blocklist) to prevent leaking internal fields
+    const ALLOWED_METADATA_KEYS = ['source', 'importSource', 'originalUrl', 'author', 'description', 'language', 'fileSize', 'mimeType', 'fileName'];
     const sanitizedItems = items.map((item) => ({
       ...item,
       metadata: item.metadata
         ? Object.fromEntries(
             Object.entries(item.metadata).filter(
-              ([key]) => !INTERNAL_METADATA_KEYS.includes(key)
+              ([key]) => ALLOWED_METADATA_KEYS.includes(key)
             )
           )
         : null,

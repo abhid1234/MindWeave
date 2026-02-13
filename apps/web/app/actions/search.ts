@@ -140,6 +140,12 @@ export async function getRecommendationsAction(
       };
     }
 
+    // Rate limit (AI-intensive)
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'getRecommendations', RATE_LIMITS.serverActionAI);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message!, recommendations: [] };
+    }
+
     // Validate contentId
     if (!contentId || typeof contentId !== 'string') {
       return {
@@ -325,6 +331,12 @@ export async function getDashboardRecommendationsAction(): Promise<DashboardReco
         message: 'Unauthorized. Please log in.',
         recommendations: [],
       };
+    }
+
+    // Rate limit (AI-intensive)
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'dashboardRecommendations', RATE_LIMITS.serverActionAI);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message!, recommendations: [] };
     }
 
     // Get user's 3 most recent content items

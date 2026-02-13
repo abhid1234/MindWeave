@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { checkRateLimit, rateLimitExceededResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 /**
  * GET /api/files/[userId]/[filename]
@@ -17,6 +18,12 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    // SECURITY: Rate limit file serving to prevent bandwidth exhaustion
+    const rateLimitResult = checkRateLimit(_request, 'fileServing', RATE_LIMITS.fileServing);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -69,7 +76,8 @@ export async function GET(
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `inline; filename="${fileName}"`,
+        // SECURITY: Use RFC 5987 encoding to prevent header injection via filename
+        'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(fileName)}`,
         'Cache-Control': 'private, max-age=3600',
       },
     });
