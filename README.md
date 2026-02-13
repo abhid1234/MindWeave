@@ -462,6 +462,11 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Fixed bottom nav overlapping content on mobile
 - [x] Fixed service worker caching stale auth pages (NetworkFirst for login/register)
 
+### Phase 13: UI Polish ✅ Complete
+- [x] Login page "Back to home" navigation link
+- [x] Fixed sidebar navigation shake (view transition opacity-only crossfade)
+- [x] Clickable "Total Items" dashboard stat (links to library)
+
 ### Future Enhancements (Planned)
 - [ ] Google OAuth in Android WebView (Custom Tabs or Chrome redirect flow)
 - [ ] Firefox browser extension

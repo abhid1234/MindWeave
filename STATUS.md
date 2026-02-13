@@ -53,6 +53,12 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-13)**:
+- [x] **UI Enhancements** - Three user-reported fixes:
+  - Added "Back to home" link on login page for navigation back to landing page
+  - Fixed sidebar navigation screen shake by removing translateY from view transition keyframes (opacity-only crossfade)
+  - Made "Total Items" dashboard stat clickable, linking to `/dashboard/library`
+
+**Previous Enhancement (2026-02-13)**:
 - [x] **Comprehensive Security Hardening** - Addressed 13 vulnerabilities from security audit across authorization, auth, data exposure, rate limiting, and input validation:
   - Fixed IDOR in `getContentCollectionsAction` (content ownership verification)
   - Added defense-in-depth userId checks to task mutation WHERE clauses
