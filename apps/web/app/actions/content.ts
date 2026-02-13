@@ -13,6 +13,7 @@ import { eq, desc, asc, and, or, sql, inArray, type SQL } from 'drizzle-orm';
 import { revalidateTag } from 'next/cache';
 import { CacheTags } from '@/lib/cache';
 import { randomBytes } from 'crypto';
+import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export type ActionResult = {
   success: boolean;
@@ -30,6 +31,12 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
         success: false,
         message: 'Unauthorized. Please log in.',
       };
+    }
+
+    // Rate limit
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'createContent', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     // Parse and prepare data
@@ -900,6 +907,11 @@ export async function bulkDeleteContentAction(
         success: false,
         message: 'Unauthorized. Please log in.',
       };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'bulkDelete', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
     }
 
     if (!contentIds || contentIds.length === 0) {

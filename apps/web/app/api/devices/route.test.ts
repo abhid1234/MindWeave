@@ -26,6 +26,14 @@ vi.mock('@/lib/db/client', () => ({
 
 import { db } from '@/lib/db/client';
 
+// Mock rate limiting to always allow
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(() => ({ success: true, remaining: 99, resetTime: Date.now() + 60000 })),
+  rateLimitHeaders: vi.fn(() => ({})),
+  rateLimitExceededResponse: vi.fn(),
+  RATE_LIMITS: { api: { maxRequests: 100, windowMs: 60000 } },
+}));
+
 // Helper to create a mock NextRequest
 function createMockRequest(body: unknown, method = 'POST'): NextRequest {
   return new NextRequest('http://localhost:3000/api/devices', {
@@ -304,7 +312,7 @@ describe('/api/devices', () => {
     it('should return 401 if not authenticated', async () => {
       mockAuth.mockResolvedValue(null);
 
-      const response = await GET();
+      const response = await GET(new NextRequest('http://localhost:3000/api/devices'));
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -319,7 +327,7 @@ describe('/api/devices', () => {
 
       vi.mocked(db.query.devices.findMany).mockResolvedValue([]);
 
-      const response = await GET();
+      const response = await GET(new NextRequest('http://localhost:3000/api/devices'));
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -349,7 +357,7 @@ describe('/api/devices', () => {
 
       vi.mocked(db.query.devices.findMany).mockResolvedValue(mockDevices as never);
 
-      const response = await GET();
+      const response = await GET(new NextRequest('http://localhost:3000/api/devices'));
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -375,7 +383,7 @@ describe('/api/devices', () => {
 
       vi.mocked(db.query.devices.findMany).mockResolvedValue(mockDevices as never);
 
-      const response = await GET();
+      const response = await GET(new NextRequest('http://localhost:3000/api/devices'));
       const data = await response.json();
 
       expect(response.status).toBe(200);

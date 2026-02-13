@@ -336,7 +336,8 @@ describe('Collection Actions', () => {
       } as never);
 
       const mockWhere = vi.fn().mockResolvedValue([{ collectionId: 'col-1' }, { collectionId: 'col-2' }]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      const mockInnerJoin = vi.fn().mockReturnValue({ where: mockWhere });
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin });
       vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
 
       const result = await getContentCollectionsAction('c1');

@@ -57,7 +57,20 @@ export async function POST(request: NextRequest) {
       .from(content)
       .where(and(...conditions));
 
-    if (items.length === 0) {
+    // SECURITY: Sanitize metadata to remove internal fields (e.g. filePath)
+    const INTERNAL_METADATA_KEYS = ['filePath'];
+    const sanitizedItems = items.map((item) => ({
+      ...item,
+      metadata: item.metadata
+        ? Object.fromEntries(
+            Object.entries(item.metadata).filter(
+              ([key]) => !INTERNAL_METADATA_KEYS.includes(key)
+            )
+          )
+        : null,
+    }));
+
+    if (sanitizedItems.length === 0) {
       return NextResponse.json(
         { success: false, message: 'No content found to export' },
         { status: 404 }
@@ -71,18 +84,18 @@ export async function POST(request: NextRequest) {
 
     switch (format) {
       case 'markdown':
-        exportData = generateMarkdown(items);
+        exportData = generateMarkdown(sanitizedItems);
         contentType = 'text/markdown';
         filename = 'mindweave-export.md';
         break;
       case 'csv':
-        exportData = generateCsv(items);
+        exportData = generateCsv(sanitizedItems);
         contentType = 'text/csv';
         filename = 'mindweave-export.csv';
         break;
       case 'json':
       default:
-        exportData = JSON.stringify(items, null, 2);
+        exportData = JSON.stringify(sanitizedItems, null, 2);
         contentType = 'application/json';
         filename = 'mindweave-export.json';
         break;

@@ -4,6 +4,11 @@ import { db } from '@/lib/db/client';
 import { tasks } from '@/lib/db/schema';
 import { eq, and, desc, asc, count } from 'drizzle-orm';
 import { createTaskSchema, taskQuerySchema } from '@/lib/validations';
+import {
+  checkRateLimit,
+  rateLimitExceededResponse,
+  RATE_LIMITS,
+} from '@/lib/rate-limit';
 
 /**
  * GET /api/tasks
@@ -11,6 +16,11 @@ import { createTaskSchema, taskQuerySchema } from '@/lib/validations';
  */
 export async function GET(request: NextRequest) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'tasks', RATE_LIMITS.api);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -92,6 +102,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'tasks', RATE_LIMITS.api);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

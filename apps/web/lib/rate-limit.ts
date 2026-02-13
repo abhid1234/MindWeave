@@ -167,6 +167,44 @@ export function rateLimitExceededResponse(result: RateLimitResult): Response {
   );
 }
 
+/**
+ * Check rate limit for server actions (keyed by userId instead of IP)
+ *
+ * @param userId - The authenticated user's ID
+ * @param action - Action identifier for separate limits per action
+ * @param config - Rate limit configuration (uses maxRequests and windowMs)
+ * @returns { success: boolean; message?: string } - whether the action is allowed
+ */
+export function checkServerActionRateLimit(
+  userId: string,
+  action: string,
+  config: { maxRequests: number; windowMs: number }
+): { success: boolean; message?: string } {
+  const now = Date.now();
+  const key = `action:${action}:${userId}`;
+  const entry = rateLimitStore.get(key);
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitStore.set(key, {
+      count: 1,
+      resetTime: now + config.windowMs,
+    });
+    return { success: true };
+  }
+
+  entry.count++;
+
+  if (entry.count > config.maxRequests) {
+    const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
+    return {
+      success: false,
+      message: `Rate limit exceeded. Please try again in ${retryAfter} seconds.`,
+    };
+  }
+
+  return { success: true };
+}
+
 // Preset configurations for common use cases
 export const RATE_LIMITS = {
   // General API: 100 requests per minute
@@ -197,6 +235,21 @@ export const RATE_LIMITS = {
   // AI features: 30 requests per minute
   ai: {
     maxRequests: 30,
+    windowMs: 60 * 1000,
+  },
+  // Server actions: 60 requests per minute
+  serverAction: {
+    maxRequests: 60,
+    windowMs: 60 * 1000,
+  },
+  // Server actions with AI: 20 requests per minute
+  serverActionAI: {
+    maxRequests: 20,
+    windowMs: 60 * 1000,
+  },
+  // Bulk server actions: 10 requests per minute
+  serverActionBulk: {
+    maxRequests: 10,
     windowMs: 60 * 1000,
   },
 } as const;

@@ -201,6 +201,8 @@ export default async function SharePage({ params }: Props) {
             )}
 
             {/* Content body */}
+            {/* SECURITY: content.body is rendered as text via React's JSX interpolation,
+                which auto-escapes HTML/JS. Do NOT switch to dangerouslySetInnerHTML. */}
             {content.body && (
               <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
                 {content.body}

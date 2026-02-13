@@ -31,7 +31,8 @@ import {
   RATE_LIMITS,
 } from '@/lib/rate-limit';
 
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB — reduced from 100MB to limit zip bomb risk
+const PARSE_TIMEOUT_MS = 30_000; // 30 seconds max for parsing
 
 export async function POST(request: NextRequest) {
   try {
@@ -89,88 +90,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse based on source type
-    let result: ParseResult;
+    // Parse based on source type, with a timeout to prevent DoS via slow parsing
 
-    switch (sourceType) {
-      case 'bookmarks': {
-        const content = await file.text();
-        if (!isBookmarksFile(content)) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: 'This does not appear to be a valid bookmarks HTML file.',
-            },
-            { status: 400 }
-          );
-        }
-        result = parseBookmarks(content);
-        break;
-      }
-
-      case 'pocket': {
-        const content = await file.text();
-        const fileName = file.name.toLowerCase();
-
-        if (fileName.endsWith('.csv')) {
-          result = parsePocketCsv(content);
-        } else {
-          if (!isPocketFile(content)) {
+    const parsePromise = (async (): Promise<ParseResult | NextResponse> => {
+      switch (sourceType) {
+        case 'bookmarks': {
+          const content = await file.text();
+          if (!isBookmarksFile(content)) {
             return NextResponse.json(
               {
                 success: false,
-                message: 'This does not appear to be a valid Pocket export file.',
+                message: 'This does not appear to be a valid bookmarks HTML file.',
               },
               { status: 400 }
             );
           }
-          result = parsePocket(content);
+          return parseBookmarks(content);
         }
-        break;
-      }
 
-      case 'notion': {
-        const buffer = await file.arrayBuffer();
-        result = await parseNotion(buffer);
-        break;
-      }
+        case 'pocket': {
+          const content = await file.text();
+          const fileName = file.name.toLowerCase();
 
-      case 'evernote': {
-        const content = await file.text();
-        if (!isEvernoteFile(content)) {
+          if (fileName.endsWith('.csv')) {
+            return parsePocketCsv(content);
+          } else {
+            if (!isPocketFile(content)) {
+              return NextResponse.json(
+                {
+                  success: false,
+                  message: 'This does not appear to be a valid Pocket export file.',
+                },
+                { status: 400 }
+              );
+            }
+            return parsePocket(content);
+          }
+        }
+
+        case 'notion': {
+          const buffer = await file.arrayBuffer();
+          return await parseNotion(buffer);
+        }
+
+        case 'evernote': {
+          const content = await file.text();
+          if (!isEvernoteFile(content)) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: 'This does not appear to be a valid Evernote ENEX file.',
+              },
+              { status: 400 }
+            );
+          }
+          return parseEvernote(content);
+        }
+
+        case 'twitter': {
+          const content = await file.text();
+          if (!isTwitterBookmarksFile(content)) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: 'This does not appear to be a valid X/Twitter bookmarks.js file.',
+              },
+              { status: 400 }
+            );
+          }
+          return parseTwitterBookmarks(content);
+        }
+
+        default:
           return NextResponse.json(
-            {
-              success: false,
-              message: 'This does not appear to be a valid Evernote ENEX file.',
-            },
+            { success: false, message: `Unsupported import source: ${sourceType}` },
             { status: 400 }
           );
-        }
-        result = parseEvernote(content);
-        break;
       }
+    })();
 
-      case 'twitter': {
-        const content = await file.text();
-        if (!isTwitterBookmarksFile(content)) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: 'This does not appear to be a valid X/Twitter bookmarks.js file.',
-            },
-            { status: 400 }
-          );
-        }
-        result = parseTwitterBookmarks(content);
-        break;
-      }
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Import parsing timed out')), PARSE_TIMEOUT_MS)
+    );
 
-      default:
-        return NextResponse.json(
-          { success: false, message: `Unsupported import source: ${sourceType}` },
-          { status: 400 }
-        );
+    const parseResult = await Promise.race([parsePromise, timeoutPromise]);
+
+    // If the parser returned a NextResponse (validation error), return it directly
+    if (parseResult instanceof NextResponse) {
+      return parseResult;
     }
+
+    const result = parseResult;
 
     // Return parse result
     return NextResponse.json(

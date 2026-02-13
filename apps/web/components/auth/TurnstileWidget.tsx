@@ -53,6 +53,9 @@ export function TurnstileWidget() {
 
   return (
     <>
+      {/* SECURITY NOTE: SRI (Subresource Integrity) is intentionally NOT used here.
+          Cloudflare updates the Turnstile script frequently, which would break SRI hashes.
+          The script is mitigated by CSP restricting script sources. */}
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"

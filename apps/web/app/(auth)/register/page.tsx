@@ -9,6 +9,7 @@ import bcrypt from 'bcryptjs';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
 import { verifyTurnstileToken } from '@/lib/turnstile';
+import { passwordSchema } from '@/lib/validations';
 
 export default async function RegisterPage({
   searchParams,
@@ -45,8 +46,9 @@ export default async function RegisterPage({
       redirect('/register?error=MissingFields');
     }
 
-    if (password.length < 8) {
-      redirect('/register?error=PasswordTooShort');
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      redirect('/register?error=PasswordWeak');
     }
 
     if (password !== confirmPassword) {
@@ -97,7 +99,7 @@ export default async function RegisterPage({
   const errorMessages: Record<string, string> = {
     TurnstileFailed: 'Human verification failed. Please try again.',
     MissingFields: 'Please fill in all fields.',
-    PasswordTooShort: 'Password must be at least 8 characters.',
+    PasswordWeak: 'Password must be at least 8 characters, with one uppercase letter, one lowercase letter, and one number.',
     PasswordMismatch: 'Passwords do not match.',
     EmailExists: 'An account with this email already exists.',
   };
@@ -134,14 +136,19 @@ export default async function RegisterPage({
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               required
             />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password (min. 8 characters)"
-              minLength={8}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              required
-            />
+            <div>
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                minLength={8}
+                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                required
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Min. 8 characters, with uppercase, lowercase, and a number.
+              </p>
+            </div>
             <input
               type="password"
               name="confirmPassword"

@@ -7,6 +7,7 @@ import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import type { ContentType } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export type SemanticSearchResult = {
   id: string;
@@ -61,6 +62,11 @@ export async function semanticSearchAction(
         message: 'Unauthorized. Please log in.',
         results: [],
       };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'semanticSearch', RATE_LIMITS.serverActionAI);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message, results: [] };
     }
 
     // Validate query
@@ -217,6 +223,11 @@ export async function askQuestionAction(
         success: false,
         message: 'Unauthorized. Please log in.',
       };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'askQuestion', RATE_LIMITS.serverActionAI);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message };
     }
 
     // Validate question

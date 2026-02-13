@@ -3,9 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { collections, contentCollections } from '@/lib/db/schema';
+import { collections, contentCollections, content } from '@/lib/db/schema';
 import { eq, and, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 // Validation schemas
 const createCollectionSchema = z.object({
@@ -320,6 +321,11 @@ export async function bulkAddToCollectionAction(
       return { success: false, message: 'Unauthorized' };
     }
 
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'bulkAddToCollection', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
     // Verify collection ownership
     const [collection] = await db
       .select()
@@ -380,10 +386,17 @@ export async function getContentCollectionsAction(
       return { success: false, collectionIds: [], message: 'Unauthorized' };
     }
 
+    // SECURITY: Join to content table to verify the content belongs to the authenticated user
     const result = await db
       .select({ collectionId: contentCollections.collectionId })
       .from(contentCollections)
-      .where(eq(contentCollections.contentId, contentId));
+      .innerJoin(content, eq(contentCollections.contentId, content.id))
+      .where(
+        and(
+          eq(contentCollections.contentId, contentId),
+          eq(content.userId, session.user.id)
+        )
+      );
 
     return {
       success: true,

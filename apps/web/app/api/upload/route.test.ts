@@ -195,7 +195,7 @@ describe('Upload API Route', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.fileName).toBe('notes.txt');
-      expect(data.data.filePath).toContain('/uploads/');
+      expect(data.data.filePath).toContain('/api/files/');
     });
 
     it('should upload markdown file successfully', async () => {

@@ -4,6 +4,12 @@ import { db } from '@/lib/db/client';
 import { devices } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
+import {
+  checkRateLimit,
+  rateLimitHeaders,
+  rateLimitExceededResponse,
+  RATE_LIMITS,
+} from '@/lib/rate-limit';
 
 // Validation schema for device registration
 const registerDeviceSchema = z.object({
@@ -17,6 +23,11 @@ const registerDeviceSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'devices', RATE_LIMITS.api);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     // Check authentication
     const session = await auth();
     if (!session?.user?.id) {
@@ -98,6 +109,11 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'devices', RATE_LIMITS.api);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     // Check authentication
     const session = await auth();
     if (!session?.user?.id) {
@@ -141,8 +157,13 @@ export async function DELETE(request: NextRequest) {
  * GET /api/devices
  * List all registered devices for the current user
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'devices', RATE_LIMITS.api);
+    if (!rateLimitResult.success) {
+      return rateLimitExceededResponse(rateLimitResult);
+    }
+
     // Check authentication
     const session = await auth();
     if (!session?.user?.id) {

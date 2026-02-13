@@ -43,6 +43,13 @@ vi.mock('@/lib/db/client', () => ({
   },
 }));
 
+// Mock rate limiting to always allow
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(() => ({ success: true, remaining: 99, resetTime: Date.now() + 60000 })),
+  rateLimitExceededResponse: vi.fn(),
+  RATE_LIMITS: { api: { maxRequests: 100, windowMs: 60000 } },
+}));
+
 // Mock drizzle-orm functions
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),

@@ -177,7 +177,8 @@ export async function updateTaskAction(
       updateData.dueDate = validated.dueDate ? new Date(validated.dueDate) : null;
     }
 
-    await db.update(tasks).set(updateData).where(eq(tasks.id, taskId));
+    // SECURITY: Include userId in WHERE clause for defense-in-depth
+    await db.update(tasks).set(updateData).where(and(eq(tasks.id, taskId), eq(tasks.userId, session.user.id)));
 
     revalidatePath('/dashboard/tasks');
 
@@ -205,7 +206,8 @@ export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
       return { success: false, message: 'Task not found or access denied.' };
     }
 
-    await db.delete(tasks).where(eq(tasks.id, taskId));
+    // SECURITY: Include userId in WHERE clause for defense-in-depth
+    await db.delete(tasks).where(and(eq(tasks.id, taskId), eq(tasks.userId, session.user.id)));
 
     revalidatePath('/dashboard/tasks');
 
@@ -241,7 +243,8 @@ export async function toggleTaskDoneAction(taskId: string): Promise<ActionResult
         completedAt: newStatus === 'done' ? new Date() : null,
         updatedAt: new Date(),
       })
-      .where(eq(tasks.id, taskId));
+      // SECURITY: Include userId in WHERE clause for defense-in-depth
+      .where(and(eq(tasks.id, taskId), eq(tasks.userId, session.user.id)));
 
     revalidatePath('/dashboard/tasks');
 

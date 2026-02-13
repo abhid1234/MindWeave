@@ -370,7 +370,7 @@ describe('ContentCard', () => {
       metadata: {
         fileType: 'application/pdf',
         fileSize: 1048576,
-        filePath: '/uploads/doc.pdf',
+        filePath: '/api/files/doc.pdf',
         fileName: 'Document.pdf',
       },
     };
@@ -389,7 +389,7 @@ describe('ContentCard', () => {
           {...fileProps}
           metadata={{
             fileType: 'image/png',
-            filePath: '/uploads/photo.png',
+            filePath: '/api/files/photo.png',
           }}
         />
       );

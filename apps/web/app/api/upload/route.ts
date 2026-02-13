@@ -159,8 +159,8 @@ export async function POST(request: NextRequest) {
     const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `${uniqueId}-${safeFileName}`;
 
-    // Create user-specific upload directory
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', session.user.id);
+    // SECURITY: Store files outside public/ so they are only accessible via /api/files (authenticated)
+    const uploadDir = path.join(process.cwd(), 'uploads', session.user.id);
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
@@ -169,8 +169,8 @@ export async function POST(request: NextRequest) {
     const filePath = path.join(uploadDir, fileName);
     await writeFile(filePath, buffer);
 
-    // Return file info
-    const publicPath = `/uploads/${session.user.id}/${fileName}`;
+    // Return authenticated file serving path
+    const publicPath = `/api/files/${session.user.id}/${fileName}`;
 
     return NextResponse.json(
       {

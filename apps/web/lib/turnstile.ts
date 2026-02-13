@@ -4,8 +4,13 @@ const TURNSTILE_VERIFY_URL =
 export async function verifyTurnstileToken(token: string): Promise<boolean> {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
   if (!secretKey) {
-    // Skip verification if secret key is not configured (e.g. local dev)
-    console.warn('TURNSTILE_SECRET_KEY not set — skipping Turnstile verification');
+    // SECURITY: In production, missing key must fail closed to prevent bypass
+    if (process.env.NODE_ENV === 'production') {
+      console.error('TURNSTILE_SECRET_KEY not set in production — rejecting request');
+      return false;
+    }
+    // Skip verification only in development
+    console.warn('TURNSTILE_SECRET_KEY not set — skipping Turnstile verification (dev only)');
     return true;
   }
 

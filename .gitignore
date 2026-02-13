@@ -65,7 +65,8 @@ Thumbs.db
 *.db-shm
 *.db-wal
 
-# Uploads
+# Uploads (stored outside public/ for authenticated serving)
+uploads/
 public/uploads/*
 !public/uploads/.gitkeep
 **/public/uploads/*

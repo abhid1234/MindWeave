@@ -9,7 +9,10 @@ export const createContentSchema = z.object({
   body: z.string().max(50000, 'Content is too long').optional(),
   url: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).default([]),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(
+    z.string().max(100),
+    z.union([z.string().max(2000), z.number(), z.boolean(), z.null()])
+  ).optional(),
 }).superRefine((data, ctx) => {
   // Only validate URL format for link type
   if (data.type === 'link' && data.url && data.url !== '') {
@@ -35,7 +38,10 @@ export const updateContentSchema = z.object({
   body: z.string().max(50000, 'Content is too long').optional(),
   url: z.string().url('Invalid URL').optional().or(z.literal('')),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(
+    z.string().max(100),
+    z.union([z.string().max(2000), z.number(), z.boolean(), z.null()])
+  ).optional(),
 });
 
 export type UpdateContentInput = z.infer<typeof updateContentSchema>;
@@ -92,7 +98,10 @@ export const importItemSchema = z.object({
   tags: z.array(z.string()).default([]),
   type: z.enum(['note', 'link']),
   createdAt: z.coerce.date().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(
+    z.string().max(100),
+    z.union([z.string().max(2000), z.number(), z.boolean(), z.null()])
+  ).optional(),
 });
 
 export type ImportItemInput = z.infer<typeof importItemSchema>;
@@ -127,6 +136,18 @@ export const onboardingStepSchema = z.object({
 });
 
 export type OnboardingStepInput = z.infer<typeof onboardingStepSchema>;
+
+/**
+ * Password validation schema
+ * Requires: min 8 chars, max 128, at least one uppercase, one lowercase, one number
+ */
+export const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(128, 'Password must be at most 128 characters')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
 
 /**
  * Profile update validation schema

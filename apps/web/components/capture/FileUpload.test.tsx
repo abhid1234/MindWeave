@@ -14,7 +14,7 @@ describe('FileUpload', () => {
 
   const mockUploadedFile: UploadedFile = {
     fileName: 'test.pdf',
-    filePath: '/uploads/user123/abc123-test.pdf',
+    filePath: '/api/files/user123/abc123-test.pdf',
     fileType: 'application/pdf',
     fileSize: 1024 * 1024, // 1MB
   };
@@ -56,7 +56,7 @@ describe('FileUpload', () => {
       const imageFile: UploadedFile = {
         ...mockUploadedFile,
         fileName: 'test.jpg',
-        filePath: '/uploads/user123/abc123-test.jpg',
+        filePath: '/api/files/user123/abc123-test.jpg',
         fileType: 'image/jpeg',
       };
 
