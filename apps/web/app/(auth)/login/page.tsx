@@ -28,6 +28,10 @@ export default async function LoginPage({
   return (
     <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          Back to home
+        </Link>
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
           <p className="mt-2 text-sm text-slate-600">
