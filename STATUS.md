@@ -1,7 +1,7 @@
 # Mindweave Project Status
 
 **Last Updated**: 2026-02-13
-**Current Phase**: Security Hardening Complete
+**Current Phase**: Abuse Prevention Complete
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
@@ -53,6 +53,19 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-13)**:
+- [x] **Abuse Prevention & Security Hardening** - Comprehensive protection against DDoS, credential abuse, SSRF, and data leaks across 23 files:
+  - Fixed X-Forwarded-For IP spoofing: rate limiter now uses LAST IP (added by trusted load balancer) instead of first (user-controlled)
+  - Added rate limiting to 30+ unprotected server actions (content, tasks, collections, profile, analytics, search)
+  - Added per-email rate limiting to auth forms (login, register, forgot-password) for pre-auth abuse prevention
+  - Fixed account enumeration on registration (existing email now redirects to login with generic error)
+  - Hardened password reset tokens: reduced expiry from 1 hour to 30 minutes, made single-use (consumed only on submit, not page visit)
+  - Added SSRF prevention: `isPrivateUrl()` blocks localhost, private IPs, cloud metadata, and non-http/https protocols in all URL inputs
+  - Fixed export metadata to use allowlist instead of blocklist (only safe fields like source, author, description exported)
+  - Fixed Content-Disposition header injection via RFC 5987 encoding (`filename*=UTF-8''...`)
+  - Added rate limiting to file serving endpoint (200 req/min)
+  - Updated 5 test files to match new security behaviors (352+ tests passing)
+
+**Previous Enhancement (2026-02-13)**:
 - [x] **UI Enhancements** - Three user-reported fixes:
   - Added "Back to home" link on login page for navigation back to landing page
   - Fixed sidebar navigation screen shake by removing translateY from view transition keyframes (opacity-only crossfade)

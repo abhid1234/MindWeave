@@ -25,7 +25,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **Onboarding Flow**: Guided 3-step onboarding for new users
 - **Public Profiles**: Shareable user profiles with public collections
 - **Bot Protection**: Cloudflare Turnstile CAPTCHA on login and registration
-- **Security Hardened**: Authenticated file serving, rate limiting, IDOR prevention, input validation
+- **Security Hardened**: Authenticated file serving, rate limiting, IDOR prevention, SSRF protection, abuse prevention
 - **Privacy First**: Your data stays yours - self-host or use our secure cloud
 
 ## Tech Stack
@@ -466,6 +466,17 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Login page "Back to home" navigation link
 - [x] Fixed sidebar navigation shake (view transition opacity-only crossfade)
 - [x] Clickable "Total Items" dashboard stat (links to library)
+
+### Phase 14: Abuse Prevention ✅ Complete
+- [x] Fixed X-Forwarded-For IP spoofing (rate limiter uses last IP from trusted proxy)
+- [x] Rate limiting on 30+ server actions (content, tasks, collections, profile, analytics)
+- [x] Per-email rate limiting on auth forms (login, register, forgot-password)
+- [x] Account enumeration fix (registration no longer reveals existing emails)
+- [x] Password reset hardening (30-min expiry, single-use tokens)
+- [x] SSRF prevention (blocks private IPs, cloud metadata, non-http protocols)
+- [x] Export metadata allowlist (only safe fields exported)
+- [x] Content-Disposition header injection prevention (RFC 5987 encoding)
+- [x] File serving rate limiting (200 req/min)
 
 ### Future Enhancements (Planned)
 - [ ] Google OAuth in Android WebView (Custom Tabs or Chrome redirect flow)
