@@ -49,7 +49,7 @@ Return only the tags as a comma-separated list, nothing else. Make tags:
 Example format: machine learning, python, tutorial, data science`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 100,
       messages: [
         {
@@ -103,7 +103,7 @@ User question: ${input.question}
 Please answer the question using the information from the knowledge base. If the answer cannot be found in the knowledge base, say so clearly. Cite which items you used by their numbers [1], [2], etc.`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 1024,
       messages: [
         {
@@ -135,7 +135,7 @@ export async function summarizeContent(text: string): Promise<string> {
 
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 200,
       messages: [
         {

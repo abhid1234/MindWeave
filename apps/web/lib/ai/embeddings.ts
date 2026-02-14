@@ -7,7 +7,7 @@ import { eq, sql } from 'drizzle-orm';
  * Gemini Embedding Configuration
  *
  * Using Google's Gemini embedding model for semantic search
- * - Model: text-embedding-004
+ * - Model: text-embedding-005
  * - Dimensions: 768
  * - Cost: Free tier available, then $0.025 per 1M tokens
  * - Setup: Add GOOGLE_AI_API_KEY to .env.local
@@ -28,7 +28,7 @@ export interface EmbeddingConfig {
 
 // Configuration for Gemini embeddings
 export const EMBEDDING_CONFIG: EmbeddingConfig = {
-  model: 'text-embedding-004',
+  model: 'text-embedding-005',
   dimensions: 768,
 };
 
