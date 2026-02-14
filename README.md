@@ -22,7 +22,7 @@ Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmar
 - **PWA Support**: Install as a native app on desktop and mobile
 - **Mobile Apps**: Native iOS and Android apps via Capacitor
 - **SEO Optimized**: Open Graph and Twitter Card metadata for shared content
-- **Onboarding Flow**: Guided 3-step onboarding for new users
+- **Onboarding Flow**: Guided 3-step onboarding for new users with sample content seeding
 - **Public Profiles**: Shareable user profiles with public collections
 - **Bot Protection**: Cloudflare Turnstile CAPTCHA on login and registration
 - **Security Hardened**: Authenticated file serving, rate limiting, IDOR prevention, SSRF protection, abuse prevention
@@ -443,6 +443,7 @@ See [STATUS.md](STATUS.md) for current development status.
 
 ### Phase 10: Onboarding & Public Profiles ✅ Complete
 - [x] 3-step onboarding flow (Welcome, Create Content, Explore Features)
+- [x] Sample content seeding (~15 notes/links across 4 themes on onboarding completion/skip)
 - [x] Public user profiles with username, bio, and visibility toggle
 - [x] Public profile pages with SEO metadata (OpenGraph, Twitter Cards)
 - [x] Public collection pages showing shared content
