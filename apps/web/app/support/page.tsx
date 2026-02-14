@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     question: 'How do I delete my account and data?',
-    answer: 'Contact us at das.abhijit34@gmail.com to request complete deletion of your account and all associated data.',
+    answer: 'Contact us at mindweaveapp27@gmail.com to request complete deletion of your account and all associated data.',
   },
   {
     question: 'Is my data shared with anyone?',
@@ -48,10 +48,10 @@ export default function Support() {
                 For questions, bug reports, or feature requests, email us at:
               </p>
               <a
-                href="mailto:das.abhijit34@gmail.com"
+                href="mailto:mindweaveapp27@gmail.com"
                 className="text-primary font-medium hover:underline"
               >
-                das.abhijit34@gmail.com
+                mindweaveapp27@gmail.com
               </a>
             </div>
           </div>

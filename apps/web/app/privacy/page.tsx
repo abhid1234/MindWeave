@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-3">10. Contact Us</h2>
             <p className="text-muted-foreground leading-relaxed">
               If you have questions about this privacy policy, please contact us at{' '}
-              <a href="mailto:das.abhijit34@gmail.com" className="text-primary hover:underline">das.abhijit34@gmail.com</a>.
+              <a href="mailto:mindweaveapp27@gmail.com" className="text-primary hover:underline">mindweaveapp27@gmail.com</a>.
             </p>
           </section>
         </div>

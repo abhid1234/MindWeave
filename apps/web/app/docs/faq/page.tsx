@@ -55,7 +55,7 @@ const faqs = [
   {
     question: 'How do I delete my account?',
     answer:
-      'To delete your account and all associated data, contact support at das.abhijit34@gmail.com. Account deletion is permanent.',
+      'To delete your account and all associated data, contact support at mindweaveapp27@gmail.com. Account deletion is permanent.',
   },
   {
     question: 'What browsers are supported?',
@@ -77,7 +77,7 @@ export default function FAQPage() {
         <p className="text-lg text-muted-foreground leading-relaxed">
           Answers to common questions about Mindweave. Can&apos;t find what you&apos;re looking for?
           Reach out to{' '}
-          <a href="mailto:das.abhijit34@gmail.com" className="text-primary hover:underline">support</a>.
+          <a href="mailto:mindweaveapp27@gmail.com" className="text-primary hover:underline">support</a>.
         </p>
       </section>
 

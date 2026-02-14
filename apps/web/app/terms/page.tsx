@@ -88,7 +88,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold mb-3">11. Contact</h2>
             <p className="text-muted-foreground leading-relaxed">
               For questions about these terms, contact us at{' '}
-              <a href="mailto:das.abhijit34@gmail.com" className="text-primary hover:underline">das.abhijit34@gmail.com</a>.
+              <a href="mailto:mindweaveapp27@gmail.com" className="text-primary hover:underline">mindweaveapp27@gmail.com</a>.
             </p>
           </section>
         </div>

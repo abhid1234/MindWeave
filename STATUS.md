@@ -782,7 +782,7 @@ None - fresh scaffolding
     - Returns structured JSON: `{ status, db: { status, latencyMs }, version, uptime, timestamp }`
     - Returns 503 when DB is unreachable (status: "degraded")
     - Created GCP uptime check on `/api/health` (5-minute interval)
-    - Created email notification channel (das.abhijit34@gmail.com)
+    - Created email notification channel (mindweaveapp27@gmail.com)
     - Created uptime failure alert policy (triggers after 5min of failures)
     - Created log-based metric `mindweave-5xx-errors` for Cloud Run 5xx responses
     - Created error rate alert policy (triggers when 5xx rate exceeds threshold)

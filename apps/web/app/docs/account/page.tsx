@@ -86,8 +86,8 @@ export default function AccountPage() {
         <h2 className="text-2xl font-semibold">Deleting Your Account</h2>
         <p className="text-muted-foreground leading-relaxed">
           To delete your account and all associated data, contact support at{' '}
-          <a href="mailto:das.abhijit34@gmail.com" className="text-primary hover:underline">
-            das.abhijit34@gmail.com
+          <a href="mailto:mindweaveapp27@gmail.com" className="text-primary hover:underline">
+            mindweaveapp27@gmail.com
           </a>.
           Account deletion is permanent and removes all your content, tags, embeddings,
           and collections.

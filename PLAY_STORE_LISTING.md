@@ -177,7 +177,7 @@ In Play Console → **Data safety**, declare what data is collected:
 | Question | Answer |
 |----------|--------|
 | Is data encrypted in transit? | **Yes** (HTTPS/TLS) |
-| Can users request data deletion? | **Yes** (delete via app or email das.abhijit34@gmail.com) |
+| Can users request data deletion? | **Yes** (delete via app or email mindweaveapp27@gmail.com) |
 | Does the app share data with third parties? | **Yes** — Google Gemini AI for content processing (auto-tagging, search, Q&A) |
 | Does the app follow Google's Families policy? | Not a family app (13+ only) |
 
