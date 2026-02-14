@@ -17,14 +17,15 @@ async function getGoogleOAuthUrl(): Promise<string | null> {
     if (typeof result === 'string') return result;
     if (result?.url) return result.url;
     return null;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // signIn might throw a redirect (Next.js NEXT_REDIRECT error)
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-      const parts = error.digest.split(';');
+    const err = error as { digest?: string; url?: string };
+    if (err?.digest?.startsWith('NEXT_REDIRECT')) {
+      const parts = err.digest!.split(';');
       const redirectUrl = parts[2];
       if (redirectUrl) return redirectUrl;
     }
-    throw error;
+    throw err;
   }
 }
 
@@ -148,7 +149,7 @@ export async function GET(request: Request) {
 
     // Chrome/normal browser: standard 302 redirect (works fine)
     return NextResponse.redirect(oauthUrl, 302);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Mobile signin error:', error);
     return NextResponse.redirect(
       `${BASE_URL}/login?error=MobileSigninFailed`,

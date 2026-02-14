@@ -3,8 +3,6 @@ import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import { sendVerificationEmail } from '@/lib/email';
 import { db } from '@/lib/db/client';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 
 export default async function VerifyEmailSentPage({
   searchParams,

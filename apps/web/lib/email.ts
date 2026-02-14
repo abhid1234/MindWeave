@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import crypto from 'crypto';
 import { db } from './db/client';
-import { verificationTokens, users } from './db/schema';
+import { verificationTokens } from './db/schema';
 import { eq, and } from 'drizzle-orm';
 
 function getResend() {

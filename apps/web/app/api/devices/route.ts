@@ -6,7 +6,6 @@ import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   checkRateLimit,
-  rateLimitHeaders,
   rateLimitExceededResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit';

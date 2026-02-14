@@ -4,7 +4,7 @@ import { consumeVerificationToken } from '@/lib/email';
 import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { signIn } from '@/lib/auth';
+
 
 export default async function VerifyEmailPage({
   searchParams,
