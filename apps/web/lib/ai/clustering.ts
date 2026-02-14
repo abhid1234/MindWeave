@@ -202,15 +202,21 @@ Respond in JSON format:
     const textContent = message.content[0];
     if (textContent.type === 'text') {
       try {
-        const parsed = JSON.parse(textContent.text);
+        // Strip markdown code fences if present (e.g. ```json ... ```)
+        const cleaned = textContent.text
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```\s*$/, '')
+          .trim();
+        const parsed = JSON.parse(cleaned);
         return {
           name: parsed.name || 'Cluster',
           description: parsed.description || 'Group of related items',
         };
       } catch {
-        // If JSON parsing fails, try to extract from text
+        // If JSON parsing fails, try to extract name from text
+        const nameMatch = textContent.text.match(/"name"\s*:\s*"([^"]+)"/);
         return {
-          name: textContent.text.slice(0, 30).trim(),
+          name: nameMatch ? nameMatch[1] : 'Cluster',
           description: 'Group of related items',
         };
       }

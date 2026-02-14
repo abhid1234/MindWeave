@@ -242,7 +242,12 @@ Respond in JSON: {"title": "short title", "description": "1-2 sentence actionabl
     const textContent = message.content[0];
     if (textContent.type === 'text') {
       try {
-        const parsed = JSON.parse(textContent.text);
+        // Strip markdown code fences if present (e.g. ```json ... ```)
+        const cleaned = textContent.text
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```\s*$/, '')
+          .trim();
+        const parsed = JSON.parse(cleaned);
         return [
           {
             type: 'suggestion' as InsightType,

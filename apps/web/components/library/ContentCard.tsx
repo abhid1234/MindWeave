@@ -171,7 +171,7 @@ export function ContentCard({
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="spotlight-card group relative rounded-xl border bg-card p-4 shadow-soft transition-all duration-300 ease-smooth hover:shadow-soft-md hover:-translate-y-0.5 hover:border-primary/20 overflow-hidden"
+        className="spotlight-card group relative flex flex-col rounded-xl border bg-card p-4 shadow-soft transition-all duration-300 ease-smooth hover:shadow-soft-md hover:-translate-y-0.5 hover:border-primary/20 overflow-hidden h-full"
         aria-labelledby={`content-title-${id}`}
       >
         {/* Type indicator bar */}
@@ -322,7 +322,7 @@ export function ContentCard({
           </a>
         )}
 
-        <div className="pl-2">
+        <div className="pl-2 mt-auto">
           <EditableTags
           contentId={id}
           initialTags={tags}
