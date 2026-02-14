@@ -6,7 +6,7 @@ import ProgressBar from './ProgressBar';
 import WelcomeStep from './WelcomeStep';
 import CreateContentStep from './CreateContentStep';
 import ExploreStep from './ExploreStep';
-import { updateOnboardingStep, completeOnboarding, skipOnboarding } from '@/app/actions/onboarding';
+import { updateOnboardingStep, completeOnboarding, skipOnboarding, seedSampleContent } from '@/app/actions/onboarding';
 
 const TOTAL_STEPS = 3;
 
@@ -25,6 +25,7 @@ export default function OnboardingFlow({ initialStep }: OnboardingFlowProps) {
       await updateOnboardingStep(next);
     } else {
       await completeOnboarding();
+      await seedSampleContent();
       router.push('/dashboard');
     }
   }
@@ -39,6 +40,7 @@ export default function OnboardingFlow({ initialStep }: OnboardingFlowProps) {
 
   async function handleSkip() {
     await skipOnboarding();
+    await seedSampleContent();
     router.push('/dashboard');
   }
 
