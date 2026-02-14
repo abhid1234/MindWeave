@@ -1,7 +1,7 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-13
-**Current Phase**: Abuse Prevention Complete
+**Last Updated**: 2026-02-14
+**Current Phase**: AI Model Upgrades Complete
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
@@ -52,7 +52,15 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-13)**:
+**Latest Enhancement (2026-02-14)**:
+- [x] **AI Model Upgrades & Test Fixes** - Updated all AI models to latest versions and fixed 13 failing tests:
+  - Upgraded Claude models: `claude-3-5-sonnet-20241022` → `claude-sonnet-4-5-20250929`, `claude-3-5-haiku-20241022` → `claude-haiku-4-5-20251001` across claude.ts, clustering.ts, insights.ts, search-suggestions.ts, summarization.ts
+  - Upgraded Gemini embedding model: `text-embedding-004` → `text-embedding-005` in embeddings.ts
+  - Fixed 4 embeddings test failures: updated model name expectations to match text-embedding-005
+  - Fixed 9 ThemeToggle test failures: rewrote tests for refactored cycling button (was dropdown menu), updated aria-label queries from "Toggle theme" to dynamic labels ("Switch to dark/light/system mode"), added click-cycle interaction tests
+  - 1420 tests passing, 0 failures
+
+**Previous Enhancement (2026-02-13)**:
 - [x] **Abuse Prevention & Security Hardening** - Comprehensive protection against DDoS, credential abuse, SSRF, and data leaks across 23 files:
   - Fixed X-Forwarded-For IP spoofing: rate limiter now uses LAST IP (added by trusted load balancer) instead of first (user-controlled)
   - Added rate limiting to 30+ unprotected server actions (content, tasks, collections, profile, analytics, search)
