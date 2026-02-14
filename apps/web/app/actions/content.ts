@@ -41,6 +41,15 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
 
     // Parse and prepare data
     const tagsInput = formData.get('tags') as string | null;
+    const metadataInput = formData.get('metadata') as string | null;
+    let parsedMetadata: Record<string, string | number | boolean | null> | undefined;
+    if (metadataInput) {
+      try {
+        parsedMetadata = JSON.parse(metadataInput);
+      } catch {
+        // Invalid metadata JSON, ignore
+      }
+    }
     const rawData = {
       type: formData.get('type'),
       title: formData.get('title'),
@@ -49,6 +58,7 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
       tags: tagsInput
         ? tagsInput.split(',').map((tag) => tag.trim()).filter(Boolean)
         : [],
+      ...(parsedMetadata ? { metadata: parsedMetadata } : {}),
     };
 
     // Validate with Zod
@@ -256,7 +266,7 @@ export async function updateContentTagsAction(
     // Update tags
     await db
       .update(content)
-      .set({ tags: cleanedTags })
+      .set({ tags: cleanedTags, updatedAt: new Date() })
       .where(eq(content.id, contentId));
 
     // Regenerate embedding with new tags (non-blocking)

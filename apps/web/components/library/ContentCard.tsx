@@ -288,7 +288,12 @@ export function ContentCard({
             ) : (
               <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-md">
                 {getFileIcon(metadata.fileType)}
-                <div className="flex-1 min-w-0">
+                <a
+                  href={metadata.filePath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 min-w-0 hover:underline"
+                >
                   <p className="text-sm font-medium truncate">
                     {metadata.fileName || title}
                   </p>
@@ -297,7 +302,7 @@ export function ContentCard({
                       {formatFileSize(metadata.fileSize)}
                     </p>
                   )}
-                </div>
+                </a>
                 <a
                   href={metadata.filePath}
                   download

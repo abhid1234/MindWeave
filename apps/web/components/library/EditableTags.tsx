@@ -31,7 +31,11 @@ export function EditableTags({
     setTags(initialTags);
   }, [initialTags]);
 
+  const isSavingRef = React.useRef(false);
+
   const handleSave = React.useCallback(async () => {
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setIsSaving(true);
     setError(null);
 
@@ -52,6 +56,7 @@ export function EditableTags({
       setError('Failed to save tags. Please try again.');
       setTags(initialTags);
     } finally {
+      isSavingRef.current = false;
       setIsSaving(false);
     }
   }, [contentId, tags, initialTags]);
@@ -70,10 +75,10 @@ export function EditableTags({
   }, [handleSave]);
 
   React.useEffect(() => {
-    if (!isEditing) return;
+    if (!isEditing || isSavingRef.current) return;
 
     const timer = setTimeout(() => {
-      if (JSON.stringify(tags) !== JSON.stringify(initialTags)) {
+      if (JSON.stringify(tags) !== JSON.stringify(initialTags) && !isSavingRef.current) {
         handleSaveRef.current();
       }
     }, 1000);
