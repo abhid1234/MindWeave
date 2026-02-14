@@ -53,6 +53,15 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-14)**:
+- [x] **Sample Content Seeding for New Users** - Pre-populates ~15 sample notes and links across 4 themes (Productivity & Learning, Technology & AI, Health & Wellness, Creative & Personal) when users complete or skip onboarding:
+  - `seedSampleContent()` server action in onboarding.ts with idempotent guard against double-seeding
+  - 10 notes + 5 links with rich body text, manual tags, and varied `createdAt` dates (spread over 2 weeks for realistic analytics)
+  - 3 items marked as favorites for dashboard variety
+  - Async AI auto-tagging and embedding generation (non-blocking, same pattern as import)
+  - Called from OnboardingFlow on both completion and skip paths
+  - 3 new tests (13 total in onboarding suite), all 1423 tests passing
+
+**Previous Enhancement (2026-02-14)**:
 - [x] **UI Polish & Bug Fixes** - Three fixes deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:b71cf04`):
   - Fixed Content Clusters displaying raw JSON: stripped markdown code fences from Claude API responses before JSON parsing in clustering.ts and insights.ts, with regex fallback for malformed responses
   - Fixed uneven card heights in library grid: added `h-full flex flex-col` to ContentCard with `mt-auto` on tags section so all cards in a row match height
@@ -555,6 +564,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-14** - ✅ **Sample Content Seeding** — New users get 15 pre-seeded notes/links on onboarding completion/skip, showcasing AI tagging, semantic search, analytics, and Q&A from day one
 - **2026-02-05** - ✅ **GOOGLE PLAY STORE INTERNAL TESTING LIVE**
   - App uploaded to Google Play Console as internal testing release
   - Package name changed to `space.mindweave.app` (`com.mindweave.app` was taken)
