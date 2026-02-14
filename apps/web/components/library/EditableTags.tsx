@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { TagInput } from '@/components/ui/tag-input';
+import { TagInput, type TagInputHandle } from '@/components/ui/tag-input';
 import { updateContentTagsAction } from '@/app/actions/content';
 import { cn } from '@/lib/utils';
 
@@ -32,9 +32,18 @@ export function EditableTags({
   }, [initialTags]);
 
   const isSavingRef = React.useRef(false);
+  const tagInputRef = React.useRef<TagInputHandle>(null);
 
   const handleSave = React.useCallback(async () => {
     if (isSavingRef.current) return;
+    // Commit any text still in the input field before saving
+    const pendingTag = tagInputRef.current?.commitPending() || '';
+    // Build final tags including any uncommitted input text
+    let tagsToSave = tags;
+    if (pendingTag && !tags.includes(pendingTag)) {
+      tagsToSave = [...tags, pendingTag];
+      setTags(tagsToSave);
+    }
     isSavingRef.current = true;
     setIsSaving(true);
     setError(null);
@@ -42,7 +51,7 @@ export function EditableTags({
     try {
       const result = await updateContentTagsAction({
         contentId,
-        tags,
+        tags: tagsToSave,
       });
 
       if (!result.success) {
@@ -90,6 +99,7 @@ export function EditableTags({
     return (
       <div className={cn('space-y-2 animate-in fade-in-50 duration-200', className)}>
         <TagInput
+          ref={tagInputRef}
           tags={tags}
           suggestions={allTags}
           onChange={setTags}

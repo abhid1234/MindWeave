@@ -5,6 +5,10 @@ import { Badge } from './badge';
 import { Input } from './input';
 import { cn } from '@/lib/utils';
 
+export interface TagInputHandle {
+  commitPending: () => string;
+}
+
 export interface TagInputProps {
   tags: string[];
   suggestions?: string[];
@@ -14,14 +18,14 @@ export interface TagInputProps {
   className?: string;
 }
 
-export function TagInput({
+export const TagInput = React.forwardRef<TagInputHandle, TagInputProps>(function TagInput({
   tags,
   suggestions = [],
   onChange,
   placeholder = 'Add tags...',
   maxTags,
   className,
-}: TagInputProps) {
+}: TagInputProps, ref) {
   const [inputValue, setInputValue] = React.useState('');
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -50,6 +54,14 @@ export function TagInput({
     setInputValue('');
     setShowSuggestions(false);
   }, [tags, maxTags, onChange]);
+
+  React.useImperativeHandle(ref, () => ({
+    commitPending: () => {
+      const trimmed = inputValue.trim();
+      if (trimmed) addTag(trimmed);
+      return trimmed;
+    },
+  }), [addTag, inputValue]);
 
   // Handle removing a tag
   const removeTag = React.useCallback((tagToRemove: string) => {
@@ -132,4 +144,4 @@ export function TagInput({
       )}
     </div>
   );
-}
+});
