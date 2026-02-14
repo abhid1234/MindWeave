@@ -1,7 +1,7 @@
 # Mindweave Project Status
 
 **Last Updated**: 2026-02-14
-**Current Phase**: AI Model Upgrades Complete
+**Current Phase**: UI Polish & Bug Fixes Complete
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
@@ -53,6 +53,12 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-14)**:
+- [x] **UI Polish & Bug Fixes** - Three fixes deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:b71cf04`):
+  - Fixed Content Clusters displaying raw JSON: stripped markdown code fences from Claude API responses before JSON parsing in clustering.ts and insights.ts, with regex fallback for malformed responses
+  - Fixed uneven card heights in library grid: added `h-full flex flex-col` to ContentCard with `mt-auto` on tags section so all cards in a row match height
+  - Made Tags, This Week, and Searches dashboard stats clickable (linking to library and search pages, matching Total Items behavior)
+
+**Previous Enhancement (2026-02-14)**:
 - [x] **AI Model Upgrades & Test Fixes** - Updated all AI models to latest versions and fixed 13 failing tests:
   - Upgraded Claude models: `claude-3-5-sonnet-20241022` → `claude-sonnet-4-5-20250929`, `claude-3-5-haiku-20241022` → `claude-haiku-4-5-20251001` across claude.ts, clustering.ts, insights.ts, search-suggestions.ts, summarization.ts
   - Upgraded Gemini embedding model: `text-embedding-004` → `text-embedding-005` in embeddings.ts
