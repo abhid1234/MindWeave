@@ -71,8 +71,8 @@ describe('Embeddings Module', () => {
   });
 
   describe('EMBEDDING_CONFIG', () => {
-    it('should have model set to text-embedding-004', () => {
-      expect(EMBEDDING_CONFIG.model).toBe('text-embedding-004');
+    it('should have model set to text-embedding-005', () => {
+      expect(EMBEDDING_CONFIG.model).toBe('text-embedding-005');
     });
 
     it('should have dimensions set to 768', () => {
@@ -146,7 +146,7 @@ describe('Embeddings Module', () => {
       const insertData = mockInsert.mock.calls[0][0];
       expect(insertData.contentId).toBe('content-123');
       expect(insertData.embedding.length).toBe(768);
-      expect(insertData.model).toBe('text-embedding-004');
+      expect(insertData.model).toBe('text-embedding-005');
     });
 
     it('should update existing embedding', async () => {
@@ -160,7 +160,7 @@ describe('Embeddings Module', () => {
       expect(mockUpdate).toHaveBeenCalled();
       const updateData = mockUpdate.mock.calls[0][0];
       expect(updateData.embedding.length).toBe(768);
-      expect(updateData.model).toBe('text-embedding-004');
+      expect(updateData.model).toBe('text-embedding-005');
     });
 
     it('should throw error when content not found', async () => {
@@ -387,6 +387,6 @@ describe('Embeddings Module - Missing API Key', () => {
 
     // Verify EMBEDDING_CONFIG is always available
     expect(EMBEDDING_CONFIG.dimensions).toBe(768);
-    expect(EMBEDDING_CONFIG.model).toBe('text-embedding-004');
+    expect(EMBEDDING_CONFIG.model).toBe('text-embedding-005');
   });
 });

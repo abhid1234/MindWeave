@@ -29,28 +29,29 @@ describe('ThemeToggle', () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /switch to/i })).toBeInTheDocument();
       });
     });
 
     it('should render sun icon when theme is light', async () => {
+      mockTheme = 'light';
       mockResolvedTheme = 'light';
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        const button = screen.getByRole('button', { name: /toggle theme/i });
+        const button = screen.getByRole('button', { name: /switch to dark mode/i });
         expect(button).toBeInTheDocument();
-        // Check that there's an SVG (icon) inside the button
         expect(button.querySelector('svg')).toBeInTheDocument();
       });
     });
 
     it('should render moon icon when theme is dark', async () => {
+      mockTheme = 'dark';
       mockResolvedTheme = 'dark';
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        const button = screen.getByRole('button', { name: /toggle theme/i });
+        const button = screen.getByRole('button', { name: /switch to system mode/i });
         expect(button).toBeInTheDocument();
         expect(button.querySelector('svg')).toBeInTheDocument();
       });
@@ -65,78 +66,102 @@ describe('ThemeToggle', () => {
   });
 
   describe('Interaction', () => {
-    it('should open dropdown on click', async () => {
+    it('should cycle from light to dark on click', async () => {
+      mockTheme = 'light';
       const user = userEvent.setup();
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument();
       });
 
-      const button = screen.getByRole('button', { name: /toggle theme/i });
+      const button = screen.getByRole('button', { name: /switch to dark mode/i });
       await user.click(button);
 
-      // After clicking, the button should have aria-expanded="true"
-      await waitFor(() => {
-        expect(button).toHaveAttribute('aria-expanded', 'true');
-      });
+      expect(mockSetTheme).toHaveBeenCalledWith('dark');
     });
 
-    it('should have dropdown trigger with correct attributes', async () => {
+    it('should cycle from dark to system on click', async () => {
+      mockTheme = 'dark';
+      const user = userEvent.setup();
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        const button = screen.getByRole('button', { name: /toggle theme/i });
-        expect(button).toHaveAttribute('aria-haspopup', 'menu');
+        expect(screen.getByRole('button', { name: /switch to system mode/i })).toBeInTheDocument();
       });
+
+      const button = screen.getByRole('button', { name: /switch to system mode/i });
+      await user.click(button);
+
+      expect(mockSetTheme).toHaveBeenCalledWith('system');
+    });
+
+    it('should cycle from system to light on click', async () => {
+      mockTheme = 'system';
+      const user = userEvent.setup();
+      render(<ThemeToggle />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /switch to light mode/i })).toBeInTheDocument();
+      });
+
+      const button = screen.getByRole('button', { name: /switch to light mode/i });
+      await user.click(button);
+
+      expect(mockSetTheme).toHaveBeenCalledWith('light');
     });
   });
 
   describe('Accessibility', () => {
     it('should have appropriate aria-label', async () => {
+      mockTheme = 'light';
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument();
       });
     });
 
     it('should be keyboard accessible', async () => {
+      mockTheme = 'light';
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument();
       });
 
-      const button = screen.getByRole('button', { name: /toggle theme/i });
+      const button = screen.getByRole('button', { name: /switch to dark mode/i });
       button.focus();
       expect(button).toHaveFocus();
     });
 
-    it('should have button type', async () => {
+    it('should have button role', async () => {
+      mockTheme = 'light';
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        const button = screen.getByRole('button', { name: /toggle theme/i });
-        expect(button).toHaveAttribute('type', 'button');
+        const button = screen.getByRole('button', { name: /switch to dark mode/i });
+        expect(button.tagName).toBe('BUTTON');
       });
     });
   });
 
   describe('Theme state', () => {
-    it('should show different icon based on resolved theme', async () => {
+    it('should show different icon based on theme', async () => {
       // Test with light theme
+      mockTheme = 'light';
       mockResolvedTheme = 'light';
       const { rerender, container } = render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument();
       });
 
       // Check for sun icon class (lucide-sun)
       expect(container.querySelector('.lucide-sun')).toBeInTheDocument();
 
       // Change to dark theme and rerender
+      mockTheme = 'dark';
       mockResolvedTheme = 'dark';
       rerender(<ThemeToggle />);
 
