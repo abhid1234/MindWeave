@@ -53,6 +53,13 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-14)**:
+- [x] **File Card & Tag Editing Bug Fixes** - Two bug fixes deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:367841b`):
+  - Made non-image file names (PDF, resume, etc.) clickable to open in a new tab — previously only had a download button with no way to view the file
+  - Fixed tag edits not saving when typing a tag and clicking Save without pressing Enter first: TagInput now exposes `commitPending()` via `forwardRef`, and EditableTags calls it before persisting to commit any pending input text
+  - Added `updatedAt` timestamp update when saving tags for proper cache staleness detection
+  - Added `isSavingRef` guard to prevent auto-save race conditions when a save is already in flight
+
+**Previous Enhancement (2026-02-14)**:
 - [x] **Sample Content Seeding for New Users** - Pre-populates ~15 sample notes and links across 4 themes (Productivity & Learning, Technology & AI, Health & Wellness, Creative & Personal) when users complete or skip onboarding:
   - `seedSampleContent()` server action in onboarding.ts with idempotent guard against double-seeding
   - 10 notes + 5 links with rich body text, manual tags, and varied `createdAt` dates (spread over 2 weeks for realistic analytics)
@@ -564,6 +571,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-14** - ✅ **File Card & Tag Editing Fixes** — File cards now have clickable "Open" links; tag edits save correctly when clicking Save without pressing Enter first; auto-save race condition prevented
 - **2026-02-14** - ✅ **Sample Content Seeding** — New users get 15 pre-seeded notes/links on onboarding completion/skip, showcasing AI tagging, semantic search, analytics, and Q&A from day one
 - **2026-02-05** - ✅ **GOOGLE PLAY STORE INTERNAL TESTING LIVE**
   - App uploaded to Google Play Console as internal testing release
