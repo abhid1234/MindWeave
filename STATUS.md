@@ -39,7 +39,7 @@
   - API endpoints for session check and content capture
   - Dark mode support in popup UI
 
-**Next Step**: All core features complete! Ready for deployment or additional features (email verification, Firefox extension, collaborative features, etc.).
+**Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues).
 
 - [x] **Tasks Dashboard** - Full task management UI with CRUD, filtering, and 57 tests
 
@@ -53,11 +53,14 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-15)**:
-- [x] **Logo, Dashboard Stats, Website & Blog Updates** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:1678c1f`):
+- [x] **Logo, Dashboard Stats, Website & Blog Updates** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:1a22f38`):
   - Added Mindweave logo (icon.svg) to landing page header, dashboard header, login, and register pages
   - Fixed dashboard stats showing all zeros: added real DB queries for unique tags count (UNNEST + COUNT DISTINCT), this-week count, and favorites count; replaced "Searches" with "Favorites"
   - Chrome Extension card on landing page now links to Chrome Web Store listing with CTA
   - Android App card shows "Coming Soon" badge with "Currently in Closed Testing" in description
+  - Case-insensitive tag grouping in analytics tag distribution (LOWER() in SQL GROUP BY)
+  - Updated blog post with "Recent Updates (February 2026)" section
+  - Added soft launch notice on website and blog with GitHub Issues link for bug reporting
   - Case-insensitive tag grouping in analytics tag distribution (LOWER() in SQL GROUP BY)
   - Updated blog post (blog-post.md + blog-post.html) with "Recent Updates (February 2026)" section covering all changes since initial launch
   - Added soft launch notice on website and blog: bug reporting via GitHub Issues

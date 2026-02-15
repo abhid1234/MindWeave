@@ -1,8 +1,10 @@
 # Mindweave
 
-**AI-Powered Personal Knowledge Hub**
+**AI-Powered Personal Knowledge Hub** | [Live at mindweave.space](https://mindweave.space) | [Chrome Extension](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp)
 
 Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmarks, and learnings using the power of AI.
+
+> **Soft Launch** — Mindweave is live and fully functional! We expect to discover bugs as more users start using it. If you run into anything unexpected, please [report it on GitHub](https://github.com/abhid1234/MindWeave/issues).
 
 ## Features
 
@@ -109,7 +111,15 @@ Mindweave/
 
 Save any webpage to Mindweave with one click using our Chrome extension.
 
-### Installation
+**[Install from Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp)**
+
+### Installation (from Web Store)
+
+1. Visit the [Chrome Web Store listing](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp)
+2. Click **Add to Chrome**
+3. Pin the extension from the puzzle piece menu
+
+### Installation (for Development)
 
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable **Developer mode** (toggle in top-right)
@@ -130,6 +140,8 @@ See [browser-extension/README.md](browser-extension/README.md) for detailed docu
 ## Mobile App
 
 Mindweave is available as a native mobile app for iOS and Android using Capacitor.
+
+> **Android App Status**: Currently in Closed Testing on Google Play. Coming soon to the Play Store.
 
 ### Features
 
@@ -467,6 +479,11 @@ See [STATUS.md](STATUS.md) for current development status.
 - [x] Login page "Back to home" navigation link
 - [x] Fixed sidebar navigation shake (view transition opacity-only crossfade)
 - [x] Clickable "Total Items" dashboard stat (links to library)
+- [x] Mindweave logo on landing page, dashboard, login, and register pages
+- [x] Fixed dashboard stats (Tags, This Week, Favorites) showing real data
+- [x] Chrome Extension card links to Chrome Web Store
+- [x] Android App "Coming Soon" badge with Closed Testing notice
+- [x] Soft launch notice with GitHub bug reporting link
 
 ### Phase 14: Abuse Prevention ✅ Complete
 - [x] Fixed X-Forwarded-For IP spoofing (rate limiter uses last IP from trusted proxy)
