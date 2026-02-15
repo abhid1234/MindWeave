@@ -537,6 +537,15 @@ export default async function Home() {
               <Github className="h-3.5 w-3.5" />
               GitHub
             </a>
+            <span>&middot;</span>
+            <a
+              href="https://abhid.substack.com/p/i-built-an-ai-powered-second-brain"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+            >
+              Blog
+            </a>
           </div>
           <p>&copy; 2026 Mindweave. Built with Next.js, Gemini AI, and pgvector.</p>
         </div>

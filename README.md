@@ -1,6 +1,6 @@
 # Mindweave
 
-**AI-Powered Personal Knowledge Hub** | [Live at mindweave.space](https://mindweave.space) | [Chrome Extension](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp)
+**AI-Powered Personal Knowledge Hub** | [Live at mindweave.space](https://mindweave.space) | [Chrome Extension](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp) | [Blog Post](https://abhid.substack.com/p/i-built-an-ai-powered-second-brain)
 
 Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmarks, and learnings using the power of AI.
 
