@@ -68,15 +68,14 @@ export function TagDistributionChart() {
             <PieChart>
               <Pie
                 data={data}
-                cx="50%"
+                cx="40%"
                 cy="50%"
                 innerRadius={60}
                 outerRadius={100}
                 paddingAngle={2}
                 dataKey="count"
                 nameKey="tag"
-                label={({ tag, percentage }: { tag: string; percentage: number }) => `${tag} (${percentage}%)`}
-                labelLine={{ stroke: 'hsl(var(--muted-foreground))' }}
+                label={false}
               >
                 {data.map((entry, index) => (
                   <Cell
@@ -97,9 +96,14 @@ export function TagDistributionChart() {
                 layout="vertical"
                 align="right"
                 verticalAlign="middle"
-                formatter={(value) => (
-                  <span className="text-sm text-foreground">{value}</span>
-                )}
+                formatter={(value: string) => {
+                  const item = data.find((d) => d.tag === value);
+                  return (
+                    <span className="text-sm text-foreground">
+                      {value} ({item?.percentage ?? 0}%)
+                    </span>
+                  );
+                }}
               />
             </PieChart>
           </ResponsiveContainer>
