@@ -53,7 +53,10 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-15)**:
-- [x] **Substack Blog Launch** - Published technical deep-dive blog post on Substack: [I Built an AI-Powered Second Brain](https://abhid.substack.com/p/i-built-an-ai-powered-second-brain). Added blog link to website footer and README.md. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d9cba50`).
+- [x] **Git History Cleanup** - Rewrote all 260 commits to replace work email with personal email using `git filter-branch`. Force pushed to remote. Redeployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fcba5f8`).
+
+**Previous Enhancement (2026-02-15)**:
+- [x] **Substack Blog Launch** - Published technical deep-dive blog post on Substack: [I Built an AI-Powered Second Brain](https://abhid.substack.com/p/i-built-an-ai-powered-second-brain). Added blog link to website footer and README.md.
 
 **Previous Enhancement (2026-02-15)**:
 - [x] **Logo, Dashboard Stats, Website & Blog Updates** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:1a22f38`):
