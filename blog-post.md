@@ -729,6 +729,14 @@ If you're tired of your knowledge being scattered across 15 different apps, give
 
 **The full source is structured as a monorepo** with the web app, mobile apps, browser extension, and deployment configs all in one place.
 
+### A Note on This Soft Launch
+
+This is Mindweave's **first soft launch** — the product is live and fully functional, but we expect to discover bugs as more users start using it in real-world workflows. If you run into anything unexpected — a broken feature, a confusing UI, or an edge case we missed — please log it as an issue on GitHub:
+
+**[Report a Bug on GitHub](https://github.com/abhid1234/MindWeave/issues)**
+
+Every bug report helps make Mindweave better. Include steps to reproduce, what you expected, and what actually happened. Screenshots are always appreciated.
+
 ---
 
 *Built with Next.js 15, PostgreSQL + pgvector, Google Gemini, Anthropic Claude, and deployed on Google Cloud Run. 1,390+ tests. One developer. Zero excuses for scattered knowledge.*

@@ -469,6 +469,33 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Soft Launch Notice */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-2xl rounded-xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
+              <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-600 mb-4">
+                Soft Launch
+              </span>
+              <h3 className="text-xl font-semibold mb-2">Help Us Improve</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                This is Mindweave&apos;s first soft launch. The product is live and fully functional,
+                but we expect to discover bugs as more users start using it. If you run into anything
+                unexpected, please report it on GitHub — every bug report helps!
+              </p>
+              <a
+                href="https://github.com/abhid1234/MindWeave/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-semibold hover:bg-accent transition-colors"
+              >
+                <Github className="h-4 w-4" />
+                Report a Bug on GitHub
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Final CTA */}
         <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-24">
           <div className="container mx-auto px-4 text-center">
