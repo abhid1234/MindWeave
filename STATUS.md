@@ -53,17 +53,17 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-15)**:
+- [x] **Substack Blog Launch** - Published technical deep-dive blog post on Substack: [I Built an AI-Powered Second Brain](https://abhid.substack.com/p/i-built-an-ai-powered-second-brain). Added blog link to website footer and README.md. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d9cba50`).
+
+**Previous Enhancement (2026-02-15)**:
 - [x] **Logo, Dashboard Stats, Website & Blog Updates** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:1a22f38`):
   - Added Mindweave logo (icon.svg) to landing page header, dashboard header, login, and register pages
   - Fixed dashboard stats showing all zeros: added real DB queries for unique tags count (UNNEST + COUNT DISTINCT), this-week count, and favorites count; replaced "Searches" with "Favorites"
   - Chrome Extension card on landing page now links to Chrome Web Store listing with CTA
   - Android App card shows "Coming Soon" badge with "Currently in Closed Testing" in description
   - Case-insensitive tag grouping in analytics tag distribution (LOWER() in SQL GROUP BY)
-  - Updated blog post with "Recent Updates (February 2026)" section
+  - Updated blog post (blog-post.md + blog-post.html) with "Recent Updates (February 2026)" section
   - Added soft launch notice on website and blog with GitHub Issues link for bug reporting
-  - Case-insensitive tag grouping in analytics tag distribution (LOWER() in SQL GROUP BY)
-  - Updated blog post (blog-post.md + blog-post.html) with "Recent Updates (February 2026)" section covering all changes since initial launch
-  - Added soft launch notice on website and blog: bug reporting via GitHub Issues
 
 **Previous Enhancement (2026-02-14)**:
 - [x] **File Card & Tag Editing Bug Fixes** - Two bug fixes deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:367841b`):
