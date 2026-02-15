@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import {
@@ -150,7 +151,8 @@ export default async function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 glass glass-dark border-b border-border/50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <span className="text-2xl font-bold text-gradient">
+          <span className="flex items-center gap-2 text-2xl font-bold text-gradient">
+            <Image src="/icons/icon.svg" alt="Mindweave logo" width={32} height={32} className="rounded-lg" />
             Mindweave
           </span>
           <div className="flex items-center gap-6">
@@ -364,7 +366,12 @@ export default async function Home() {
                   </p>
                 </div>
                 {/* Chrome Extension */}
-                <div className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
+                <a
+                  href="https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20"
+                >
                   <div className="inline-flex rounded-xl p-4 bg-green-500/10 border border-green-500/20 mb-5">
                     <Chrome className="h-8 w-8 text-green-500" />
                   </div>
@@ -372,15 +379,22 @@ export default async function Home() {
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Save any webpage with one click. Auto-captures title, URL, and content — AI tags it instantly.
                   </p>
-                </div>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                    Get it on Chrome Web Store
+                    <ArrowRight className="h-3 w-3" />
+                  </span>
+                </a>
                 {/* Android App */}
-                <div className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
+                <div className="group relative rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
+                  <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-amber-600">
+                    Coming Soon
+                  </span>
                   <div className="inline-flex rounded-xl p-4 bg-purple-500/10 border border-purple-500/20 mb-5">
                     <Smartphone className="h-8 w-8 text-purple-500" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Android App</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Capture ideas on the go. Share links and notes directly from any app to your Mindweave knowledge base.
+                    Capture ideas on the go. Share links and notes directly from any app to your Mindweave knowledge base. Currently in Closed Testing.
                   </p>
                 </div>
               </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { MobileNav } from './MobileNav';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserMenu } from './UserMenu';
@@ -21,6 +22,7 @@ export default function Header({ user }: HeaderProps) {
             href="/dashboard"
             className="group flex items-center gap-2 text-xl font-bold tracking-tight transition-colors hover:text-primary"
           >
+            <Image src="/icons/icon.svg" alt="Mindweave logo" width={28} height={28} className="rounded-lg" />
             <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               Mindweave
             </span>

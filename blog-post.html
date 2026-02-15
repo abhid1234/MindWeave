@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Built an AI-Powered Second Brain — Here's the Full Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --bg: #ffffff;
+            --accent: #6366f1;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+            --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-500: #3b82f6; --blue-600: #2563eb; --blue-700: #1d4ed8; --blue-900: #1e3a8a;
+            --indigo-50: #eef2ff; --indigo-100: #e0e7ff; --indigo-500: #6366f1; --indigo-600: #4f46e5; --indigo-900: #312e81;
+            --purple-50: #faf5ff; --purple-100: #f3e8ff; --purple-500: #a855f7; --purple-600: #9333ea; --purple-900: #581c87;
+            --green-50: #f0fdf4; --green-100: #dcfce7; --green-500: #22c55e; --green-600: #16a34a; --green-900: #14532d;
+            --amber-50: #fffbeb; --amber-100: #fef3c7; --amber-500: #f59e0b; --amber-600: #d97706; --amber-900: #78350f;
+            --rose-50: #fff1f2; --rose-100: #ffe4e6; --rose-500: #f43f5e; --rose-600: #e11d48;
+            --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0; --slate-400: #94a3b8; --slate-500: #64748b; --slate-600: #475569; --slate-700: #334155; --slate-800: #1e293b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.75;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 48px 24px 96px;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1 {
+            font-size: 2.25rem;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 64px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+        h3 {
+            font-size: 1.15rem;
+            margin-top: 40px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        p { margin-bottom: 16px; font-size: 1.05rem; color: var(--slate-700); }
+        strong { color: var(--text); font-weight: 600; }
+        em { font-style: italic; }
+        a { color: var(--indigo-600); text-decoration: none; border-bottom: 1px solid var(--indigo-100); }
+        a:hover { border-bottom-color: var(--indigo-600); }
+        ul, ol { margin-bottom: 16px; padding-left: 24px; }
+        li { margin-bottom: 6px; font-size: 1.05rem; color: var(--slate-700); }
+        li strong { color: var(--text); }
+        hr { border: none; border-top: 1px solid var(--border); margin: 56px 0; }
+        code {
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            font-size: 0.85em;
+            background: var(--code-bg);
+            padding: 2px 7px;
+            border-radius: 5px;
+            color: var(--indigo-600);
+        }
+        pre {
+            background: var(--slate-800);
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            border: 1px solid var(--slate-700);
+        }
+        pre code { background: none; padding: 0; color: inherit; font-size: 0.85rem; border-radius: 0; }
+        blockquote {
+            background: var(--indigo-50);
+            border-left: 3px solid var(--indigo-500);
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        blockquote p { margin-bottom: 0; color: var(--indigo-900); font-size: 1rem; }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 20px 0 28px;
+            font-size: 0.92rem;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        th { background: var(--slate-50); font-weight: 600; text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text); }
+        td { padding: 10px 16px; border-bottom: 1px solid var(--slate-100); color: var(--slate-600); }
+        tr:last-child td { border-bottom: none; }
+
+        /* ── Diagram System ── */
+        .diagram {
+            background: var(--slate-50);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 28px;
+            margin: 28px 0;
+            overflow: hidden;
+        }
+        .diagram-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--slate-400);
+            margin-bottom: 20px;
+        }
+
+        /* Flow row (horizontal steps) */
+        .flow-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: nowrap;
+            justify-content: center;
+        }
+        .flow-arrow {
+            flex-shrink: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--slate-300);
+            position: relative;
+        }
+        .flow-arrow::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: -4px;
+            border: solid var(--slate-300);
+            border-width: 0 2px 2px 0;
+            padding: 4px;
+            transform: rotate(-45deg);
+        }
+        .flow-arrow-down {
+            width: 2px;
+            height: 32px;
+            background: var(--slate-300);
+            margin: 0 auto;
+            position: relative;
+        }
+        .flow-arrow-down::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: -4px;
+            border: solid var(--slate-300);
+            border-width: 0 2px 2px 0;
+            padding: 4px;
+            transform: rotate(45deg);
+        }
+        .flow-arrow-dashed {
+            width: 40px;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, var(--slate-300) 0, var(--slate-300) 6px, transparent 6px, transparent 12px);
+            position: relative;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            text-align: center;
+            min-width: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.3;
+        }
+        .card-sub {
+            font-size: 0.72rem;
+            color: var(--slate-500);
+            margin-top: 3px;
+            line-height: 1.3;
+        }
+
+        /* Color variants */
+        .card-blue { border-color: var(--blue-500); background: var(--blue-50); }
+        .card-blue .card-label { color: var(--blue-700); }
+        .card-indigo { border-color: var(--indigo-500); background: var(--indigo-50); }
+        .card-indigo .card-label { color: var(--indigo-600); }
+        .card-purple { border-color: var(--purple-500); background: var(--purple-50); }
+        .card-purple .card-label { color: var(--purple-600); }
+        .card-green { border-color: var(--green-500); background: var(--green-50); }
+        .card-green .card-label { color: var(--green-600); }
+        .card-amber { border-color: var(--amber-500); background: var(--amber-50); }
+        .card-amber .card-label { color: var(--amber-600); }
+        .card-rose { border-color: var(--rose-500); background: var(--rose-50); }
+        .card-rose .card-label { color: var(--rose-600); }
+        .card-slate { border-color: var(--slate-400); background: var(--slate-100); }
+        .card-slate .card-label { color: var(--slate-700); }
+
+        /* Tier rows (for layered architecture) */
+        .tier {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .tier:last-child { margin-bottom: 0; }
+        .tier-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+        .tier-cards {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tier-cards .card {
+            flex: 1;
+            min-width: 100px;
+        }
+        .tier-blue { background: var(--blue-50); border: 1px solid var(--blue-100); }
+        .tier-blue .tier-label { color: var(--blue-600); }
+        .tier-green { background: var(--green-50); border: 1px solid var(--green-100); }
+        .tier-green .tier-label { color: var(--green-600); }
+        .tier-amber { background: var(--amber-50); border: 1px solid var(--amber-100); }
+        .tier-amber .tier-label { color: var(--amber-600); }
+        .tier-purple { background: var(--purple-50); border: 1px solid var(--purple-100); }
+        .tier-purple .tier-label { color: var(--purple-600); }
+        .tier-indigo { background: var(--indigo-50); border: 1px solid var(--indigo-100); }
+        .tier-indigo .tier-label { color: var(--indigo-600); }
+        .tier-slate { background: var(--slate-100); border: 1px solid var(--slate-200); }
+        .tier-slate .tier-label { color: var(--slate-600); }
+
+        /* Branch layout */
+        .branch-container { text-align: center; }
+        .branch-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .branch-row .card { flex: 1; max-width: 180px; }
+
+        /* Connector lines for branching */
+        .branch-lines {
+            display: flex;
+            justify-content: center;
+            height: 32px;
+            position: relative;
+        }
+        .branch-lines::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 12px;
+            background: var(--slate-300);
+        }
+        .branch-lines::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: calc(50% - 110px);
+            width: 220px;
+            height: 2px;
+            background: var(--slate-300);
+        }
+        .branch-stubs {
+            display: flex;
+            justify-content: center;
+            gap: 100px;
+            height: 20px;
+        }
+        .branch-stub {
+            width: 2px;
+            height: 20px;
+            background: var(--slate-300);
+            position: relative;
+        }
+        .branch-stub::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: -4px;
+            border: solid var(--slate-300);
+            border-width: 0 2px 2px 0;
+            padding: 4px;
+            transform: rotate(45deg);
+        }
+
+        /* Pie chart */
+        .pie-container { display: flex; align-items: center; gap: 32px; justify-content: center; }
+        .pie-chart {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--green-500) 0deg 230deg,
+                var(--amber-500) 230deg 282deg,
+                var(--rose-500) 282deg 360deg
+            );
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .pie-chart::after {
+            content: '';
+            position: absolute;
+            top: 30px; left: 30px; right: 30px; bottom: 30px;
+            background: var(--slate-50);
+            border-radius: 50%;
+        }
+        .pie-legend { display: flex; flex-direction: column; gap: 10px; }
+        .pie-legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--slate-700); }
+        .pie-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+        .pie-dot-green { background: var(--green-500); }
+        .pie-dot-amber { background: var(--amber-500); }
+        .pie-dot-rose { background: var(--rose-500); }
+        .pie-number { font-weight: 700; color: var(--text); min-width: 32px; }
+
+        /* Sequence diagram */
+        .seq { display: flex; gap: 0; overflow-x: auto; }
+        .seq-actor { flex: 1; text-align: center; min-width: 130px; }
+        .seq-actor-name {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text);
+            background: white;
+            border: 2px solid var(--indigo-500);
+            border-radius: 10px;
+            padding: 8px 14px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .seq-lifeline {
+            width: 2px;
+            background: var(--slate-200);
+            margin: 0 auto;
+            position: relative;
+        }
+        .seq-msgs { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .seq-msg {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.78rem;
+            color: var(--slate-600);
+        }
+        .seq-msg-line {
+            flex: 1;
+            height: 1.5px;
+            background: var(--slate-400);
+        }
+        .seq-msg-label { white-space: nowrap; font-weight: 500; }
+
+        /* ER diagram */
+        .er-container { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+        .er-table {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            min-width: 170px;
+            flex: 1;
+            max-width: 200px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .er-header {
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            border-bottom: 2px solid;
+        }
+        .er-header-blue { background: var(--blue-50); color: var(--blue-700); border-color: var(--blue-500); }
+        .er-header-indigo { background: var(--indigo-50); color: var(--indigo-600); border-color: var(--indigo-500); }
+        .er-header-purple { background: var(--purple-50); color: var(--purple-600); border-color: var(--purple-500); }
+        .er-header-green { background: var(--green-50); color: var(--green-600); border-color: var(--green-500); }
+        .er-row {
+            padding: 5px 14px;
+            font-size: 0.72rem;
+            color: var(--slate-600);
+            border-bottom: 1px solid var(--slate-100);
+            display: flex;
+            justify-content: space-between;
+        }
+        .er-row:last-child { border-bottom: none; }
+        .er-field { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--slate-700); }
+        .er-type { color: var(--slate-400); font-size: 0.68rem; }
+        .er-badge {
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .er-pk { background: var(--amber-100); color: var(--amber-900); }
+        .er-fk { background: var(--blue-100); color: var(--blue-900); }
+
+        /* Section divider accent */
+        h2::before {
+            content: '';
+            display: block;
+            width: 32px;
+            height: 3px;
+            background: var(--indigo-500);
+            border-radius: 2px;
+            margin-bottom: 12px;
+        }
+
+        .closing-line {
+            color: var(--slate-500);
+            text-align: center;
+            margin-top: 48px;
+            font-size: 0.95rem;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .tip {
+            background: var(--blue-50);
+            border: 1px solid var(--blue-100);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 28px;
+            font-size: 0.85rem;
+            color: var(--blue-700);
+        }
+        .tip strong { color: var(--blue-900); }
+
+        /* Feature grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 24px 0;
+        }
+        .feature-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            transition: box-shadow 0.2s;
+        }
+        .feature-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .feature-card h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .feature-card p {
+            font-size: 0.85rem;
+            color: var(--slate-500);
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+        .fi-blue { background: var(--blue-100); color: var(--blue-600); }
+        .fi-purple { background: var(--purple-100); color: var(--purple-600); }
+        .fi-green { background: var(--green-100); color: var(--green-600); }
+        .fi-amber { background: var(--amber-100); color: var(--amber-600); }
+        .fi-rose { background: var(--rose-100); color: var(--rose-600); }
+        .fi-indigo { background: var(--indigo-100); color: var(--indigo-600); }
+
+        /* Use case cards */
+        .usecase-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-left: 4px solid;
+            border-radius: 0 12px 12px 0;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .usecase-card h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .usecase-card p {
+            font-size: 0.92rem;
+            color: var(--slate-600);
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+        .usecase-card em { color: var(--indigo-600); font-style: italic; }
+        .uc-blue { border-left-color: var(--blue-500); }
+        .uc-purple { border-left-color: var(--purple-500); }
+        .uc-green { border-left-color: var(--green-500); }
+        .uc-amber { border-left-color: var(--amber-500); }
+        .uc-rose { border-left-color: var(--rose-500); }
+
+        @media (max-width: 600px) {
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            .tip { display: none; }
+            body { max-width: 100%; padding: 20px; }
+            .diagram { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="tip">
+    <strong>To use in Google Docs:</strong> Right-click each diagram &rarr; Copy image &rarr; Paste. For text, Ctrl+A &rarr; Copy &rarr; Paste, then drop in diagram images.
+</div>
+
+<h1>I Built an AI-Powered Second Brain &mdash; Here's the Full Architecture</h1>
+
+<p><strong>I was drowning in my own knowledge.</strong></p>
+
+<p>Hundreds of bookmarks scattered across Chrome, Firefox, and Safari. Notes fragmented between Notion, Apple Notes, and random <code>.txt</code> files. Tweets I'd saved but could never find again. Articles I'd read but couldn't recall when I needed them most.</p>
+
+<p>Sound familiar?</p>
+
+<p>I realized I didn't have a <em>knowledge problem</em> &mdash; I had a <strong>retrieval problem</strong>. I could capture information just fine. But when I actually needed something I'd saved three months ago? Gone. Buried. Irretrievable.</p>
+
+<p>So I built <strong>Mindweave</strong> &mdash; an AI-powered personal knowledge hub that doesn't just store your ideas, it <em>understands</em> them. You can ask it questions in plain English, and it finds answers from your own knowledge base using semantic search and RAG (Retrieval-Augmented Generation).</p>
+
+<p>This post covers what Mindweave does, who it's for, and a technical deep-dive into how I architected it &mdash; from database schema to deployment pipeline &mdash; and the engineering decisions behind every layer.</p>
+
+<hr>
+
+<h2>Who Is This For?</h2>
+
+<p>If you've ever thought <em>"I know I saved something about this..."</em> and then spent 20 minutes digging through bookmarks, note apps, and browser history &mdash; Mindweave is for you.</p>
+
+<!-- DIAGRAM: Audience -->
+<div class="diagram">
+    <div class="diagram-label">Built for Knowledge Workers</div>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon fi-blue">&lt;/&gt;</div>
+            <h4>Engineers &amp; Developers</h4>
+            <p>Save Stack Overflow answers, architecture articles, API docs. Ask <em>"How did I set up Redis caching?"</em> months later and get a cited answer.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-purple">&para;</div>
+            <h4>Researchers &amp; Academics</h4>
+            <p>Capture papers, references, field notes. Semantic search finds related work by concept &mdash; even when the exact keywords don't match.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-green">&check;</div>
+            <h4>Product Managers &amp; Designers</h4>
+            <p>Collect competitor analyses, user research, design inspiration. AI insights surface patterns across all your research.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-amber">&starf;</div>
+            <h4>Students</h4>
+            <p>Save lecture notes, tutorials, reading lists. Q&amp;A becomes a personalized study assistant that answers from your own materials.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-rose">&hearts;</div>
+            <h4>Content Creators &amp; Writers</h4>
+            <p>Bookmark references, save drafts, collect inspiration. Rediscover forgotten ideas through smart recommendations.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-indigo">&infin;</div>
+            <h4>Anyone Drowning in Bookmarks</h4>
+            <p>500+ unorganized bookmarks across browsers? Import them all. AI auto-tags every one. That graveyard becomes your best resource.</p>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<h2>What Mindweave Does</h2>
+
+<!-- DIAGRAM: Feature Overview -->
+<div class="diagram">
+    <div class="diagram-label">Core Feature Set</div>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon fi-blue">&oplus;</div>
+            <h4>Multi-Surface Capture</h4>
+            <p>Web app, Chrome extension, iOS, Android, PWA. Notes, links, files with drag-and-drop.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-purple">&loz;</div>
+            <h4>AI Auto-Organization</h4>
+            <p>Auto-tagging, summarization, and semantic embedding &mdash; all async, zero manual effort.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-indigo">&target;</div>
+            <h4>Semantic Search</h4>
+            <p>Find content by meaning, not just keywords. 768-dimensional vector similarity.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-rose">&quest;</div>
+            <h4>Knowledge Q&amp;A</h4>
+            <p>Ask questions in plain English. Get cited answers from your own knowledge base.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-green">&equiv;</div>
+            <h4>Smart Clustering</h4>
+            <p>AI groups your content into meaningful categories. Discover connections you missed.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-amber">&varr;</div>
+            <h4>Import &amp; Export</h4>
+            <p>Pocket, Notion, Evernote, Twitter, bookmarks. Export as JSON, Markdown, or CSV.</p>
+        </div>
+    </div>
+</div>
+
+<h3>Capture From Anywhere</h3>
+
+<p>Mindweave meets you where you already are. Save content from the <strong>web app</strong> with a rich capture form, clip pages with one click from the <strong>Chrome extension</strong>, or capture on the go from <strong>iOS and Android</strong>. The web app is also a <strong>PWA</strong> &mdash; install it to your desktop or home screen for native-app feel with offline support.</p>
+
+<p>Content types: <strong>notes</strong> (freeform text), <strong>links</strong> (URLs with auto-extracted metadata like title, description, and favicon), and <strong>files</strong> (documents, images, PDFs with drag-and-drop upload).</p>
+
+<h3>AI Does the Organizing</h3>
+
+<p>Here's the thing that makes Mindweave different: <strong>you never have to organize anything</strong>. The moment you save content, AI takes over in the background:</p>
+
+<ul>
+    <li><strong>Auto-tagging</strong> &mdash; Claude analyzes your content and generates 3-5 relevant tags. No manual labeling.</li>
+    <li><strong>Auto-summarization</strong> &mdash; Every item gets a concise AI summary, so you can scan your library at a glance.</li>
+    <li><strong>Semantic embedding</strong> &mdash; Each item is converted to a 768-dimensional vector, placing it in a "meaning space" alongside all your other content.</li>
+</ul>
+
+<p>All of this happens <strong>asynchronously</strong> &mdash; the save is instant, AI enrichment runs in the background. You never wait.</p>
+
+<h3>Find Anything by Meaning</h3>
+
+<p><strong>Keyword search</strong> works great when you remember the exact words. But what about <em>"that article about scaling databases for high-traffic apps"</em>? You didn't save it with those words. With <strong>semantic search</strong>, Mindweave understands what you <em>mean</em> and finds content by concept &mdash; even if the exact keywords don't match.</p>
+
+<p>The search experience includes <strong>recent search history</strong>, <strong>AI-powered suggestions</strong>, and <strong>keyboard navigation</strong>. Results are ranked by relevance with content type badges and tag previews.</p>
+
+<h3>Ask Your Knowledge Base Questions</h3>
+
+<p>This is the feature that changed how I use my own knowledge. Instead of searching and manually reading through results, you just <strong>ask a question in plain English</strong>:</p>
+
+<blockquote><p><em>"What are the tradeoffs between server-side rendering and static generation?"</em></p></blockquote>
+
+<p>Mindweave retrieves the most relevant content from your knowledge base, feeds it to an AI model, and generates a <strong>cited answer</strong> with numbered references like [1], [2], [3] &mdash; each linking back to the original source. It's like having a research assistant who's read everything you've ever saved.</p>
+
+<h3>Collections, Sharing &amp; Collaboration</h3>
+
+<p><strong>Collections</strong> are color-coded folders for grouping related content &mdash; think "Interview Prep", "Side Project Ideas", or "Q3 Research". They can be <strong>public or private</strong>.</p>
+
+<p>Any piece of content can be <strong>shared via a public link</strong> &mdash; beautiful standalone pages with Open Graph metadata and Twitter Card support, so they look great when shared on social media. You can also create a <strong>public profile</strong> (<code>/profile/@username</code>) showcasing your public collections.</p>
+
+<p><strong>Bulk operations</strong> let you select multiple items and tag, share, delete, or add to a collection in one action.</p>
+
+<h3>Import Your Existing Knowledge</h3>
+
+<p>You don't start from zero. Mindweave imports from <strong>5+ platforms</strong>:</p>
+
+<table>
+    <thead><tr><th>Source</th><th>Format</th><th>What You Get</th></tr></thead>
+    <tbody>
+        <tr><td>Browser bookmarks</td><td>HTML / JSON</td><td>All your saved links with titles</td></tr>
+        <tr><td>Pocket</td><td>Export file</td><td>Articles, tags, and read status</td></tr>
+        <tr><td>Notion</td><td>Database export</td><td>Pages and database entries</td></tr>
+        <tr><td>Evernote</td><td>ENEX</td><td>Notes with formatting</td></tr>
+        <tr><td>Twitter / X</td><td>Archive</td><td>Your saved tweets and bookmarks</td></tr>
+    </tbody>
+</table>
+
+<p>The import wizard lets you <strong>preview everything before importing</strong> and select exactly which items to bring in. Export anytime in <strong>JSON, Markdown, or CSV</strong> &mdash; your data is never locked in.</p>
+
+<h3>Analytics &amp; AI Insights</h3>
+
+<p>The analytics dashboard shows you <strong>how your knowledge base is growing</strong> &mdash; content growth over time, tag distribution charts, collection usage, and content type breakdowns. But the real standout is <strong>AI-generated insights</strong>: Mindweave analyzes your entire knowledge base and surfaces patterns, identifies knowledge gaps, and suggests areas for exploration you might not have considered.</p>
+
+<h3>Smart Recommendations &amp; Clustering</h3>
+
+<p>Every item in your library has a <strong>"View Similar"</strong> button that uses semantic similarity to surface related content &mdash; connections you might never have found by browsing. The library sidebar also features <strong>AI-generated content clusters</strong> that automatically group your content into meaningful categories like "Web Development", "Project Planning", or "Machine Learning" &mdash; no manual sorting required.</p>
+
+<h3>Polished UX Details</h3>
+
+<ul>
+    <li><strong>Dark mode</strong> &mdash; Light, Dark, and System theme with smooth switching.</li>
+    <li><strong>Command palette</strong> (Cmd+K) &mdash; Quick navigation, theme switching, and actions from anywhere.</li>
+    <li><strong>Infinite scroll</strong> &mdash; Cursor-based pagination that loads content seamlessly as you browse.</li>
+    <li><strong>Guided onboarding</strong> &mdash; 3-step walkthrough for new users.</li>
+    <li><strong>Feedback widget</strong> &mdash; Built-in bug reporting and feature requests.</li>
+    <li><strong>Full accessibility</strong> &mdash; ARIA labels, keyboard navigation, skip links, screen reader support, WCAG AA color contrast.</li>
+</ul>
+
+<hr>
+
+<h2>Real-World Use Cases</h2>
+
+<p>Here's how different people actually use Mindweave day-to-day:</p>
+
+<div class="usecase-card uc-blue">
+    <h4>The Developer Who Solves the Same Problem Twice</h4>
+    <p>You fixed a gnarly CORS issue six months ago. You <em>know</em> you bookmarked the Stack Overflow answer. But which browser? Which bookmark folder? With Mindweave, you ask: <em>"How do I fix CORS errors with Express middleware?"</em> &mdash; and get the exact answer, cited from your own saved content.</p>
+</div>
+
+<div class="usecase-card uc-purple">
+    <h4>The Researcher Building a Literature Review</h4>
+    <p>You've saved 200 papers and articles over the past year. Import them into Mindweave, and semantic search lets you find all content related to <em>"attention mechanisms in transformer architectures"</em> &mdash; even papers that never use those exact words. AI clustering automatically groups your research into thematic areas.</p>
+</div>
+
+<div class="usecase-card uc-green">
+    <h4>The Product Manager Preparing a Strategy Doc</h4>
+    <p>You've been collecting competitor analyses, market reports, and user interview notes for months. Instead of re-reading everything, ask: <em>"What are the common pain points users mentioned about onboarding?"</em> &mdash; Mindweave surfaces the relevant notes with citations.</p>
+</div>
+
+<div class="usecase-card uc-amber">
+    <h4>The Student Studying for Finals</h4>
+    <p>Semester's worth of lecture notes, saved articles, and tutorial links &mdash; all in one place. Semantic search finds connections between topics across different courses. Knowledge Q&amp;A becomes a personalized study assistant that answers from <em>your</em> materials.</p>
+</div>
+
+<div class="usecase-card uc-rose">
+    <h4>The Bookmark Hoarder Who Wants Redemption</h4>
+    <p>2,000 bookmarks across three browsers. Import them all. AI auto-tags every single one. Semantic search makes them findable. Suddenly, that bookmark graveyard becomes your most valuable resource.</p>
+</div>
+
+<hr>
+
+<h2>System Architecture</h2>
+
+<!-- DIAGRAM 1: System Architecture -->
+<div class="diagram">
+    <div class="diagram-label">High-Level Architecture</div>
+
+    <div class="tier tier-blue">
+        <div class="tier-label">Client Layer</div>
+        <div class="tier-cards">
+            <div class="card card-blue"><div class="card-label">Web App</div><div class="card-sub">Next.js PWA</div></div>
+            <div class="card card-blue"><div class="card-label">Chrome Extension</div><div class="card-sub">Manifest V3</div></div>
+            <div class="card card-blue"><div class="card-label">Mobile Apps</div><div class="card-sub">iOS + Android</div></div>
+        </div>
+    </div>
+
+    <div class="flow-arrow-down"></div>
+
+    <div class="tier tier-indigo">
+        <div class="tier-label">Application Layer &mdash; Next.js 15 App Router</div>
+        <div class="tier-cards">
+            <div class="card card-indigo"><div class="card-label">Server Actions</div><div class="card-sub">20+ mutations</div></div>
+            <div class="card card-indigo"><div class="card-label">REST API</div><div class="card-sub">Upload, Import, Export</div></div>
+            <div class="card card-indigo"><div class="card-label">Middleware</div><div class="card-sub">Auth + Rate Limiting</div></div>
+        </div>
+    </div>
+
+    <div class="flow-arrow-down"></div>
+
+    <div class="tier tier-purple">
+        <div class="tier-label">Service Layer</div>
+        <div class="tier-cards">
+            <div class="card card-purple"><div class="card-label">Content</div></div>
+            <div class="card card-purple"><div class="card-label">Embeddings</div></div>
+            <div class="card card-purple"><div class="card-label">Clustering</div></div>
+            <div class="card card-purple"><div class="card-label">Analytics</div></div>
+        </div>
+    </div>
+
+    <div class="flow-arrow-down"></div>
+
+    <div class="tier tier-amber">
+        <div class="tier-label">Data Layer</div>
+        <div class="tier-cards">
+            <div class="card card-amber"><div class="card-label">PostgreSQL + pgvector</div><div class="card-sub">Relational + Vector</div></div>
+            <div class="card card-green"><div class="card-label">Gemini</div><div class="card-sub">Embeddings (768d)</div></div>
+            <div class="card card-rose"><div class="card-label">Claude</div><div class="card-sub">Tags, Q&amp;A, Insights</div></div>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<h2>The Database: PostgreSQL + pgvector</h2>
+
+<p>I chose <strong>PostgreSQL 16</strong> with <strong>pgvector</strong> &mdash; vector embeddings stored right alongside relational data. No separate vector database needed.</p>
+
+<h3>Schema Design</h3>
+
+<!-- DIAGRAM 2: ER Diagram -->
+<div class="diagram">
+    <div class="diagram-label">Core Schema</div>
+    <div class="er-container">
+        <div class="er-table">
+            <div class="er-header er-header-blue">users</div>
+            <div class="er-row"><span class="er-field">id</span> <span><span class="er-badge er-pk">PK</span> uuid</span></div>
+            <div class="er-row"><span class="er-field">email</span> <span class="er-type">string</span></div>
+            <div class="er-row"><span class="er-field">password</span> <span class="er-type">nullable</span></div>
+            <div class="er-row"><span class="er-field">username</span> <span class="er-type">unique</span></div>
+            <div class="er-row"><span class="er-field">profilePublic</span> <span class="er-type">bool</span></div>
+        </div>
+        <div class="er-table">
+            <div class="er-header er-header-indigo">content</div>
+            <div class="er-row"><span class="er-field">id</span> <span><span class="er-badge er-pk">PK</span> uuid</span></div>
+            <div class="er-row"><span class="er-field">userId</span> <span><span class="er-badge er-fk">FK</span></span></div>
+            <div class="er-row"><span class="er-field">type</span> <span class="er-type">note|link|file</span></div>
+            <div class="er-row"><span class="er-field">title</span> <span class="er-type">string</span></div>
+            <div class="er-row"><span class="er-field">tags[]</span> <span class="er-type">user-defined</span></div>
+            <div class="er-row"><span class="er-field">autoTags[]</span> <span class="er-type">AI-generated</span></div>
+            <div class="er-row"><span class="er-field">summary</span> <span class="er-type">AI, max 500</span></div>
+            <div class="er-row"><span class="er-field">metadata</span> <span class="er-type">jsonb</span></div>
+        </div>
+        <div class="er-table">
+            <div class="er-header er-header-purple">embeddings</div>
+            <div class="er-row"><span class="er-field">id</span> <span><span class="er-badge er-pk">PK</span> uuid</span></div>
+            <div class="er-row"><span class="er-field">contentId</span> <span><span class="er-badge er-fk">FK</span> cascade</span></div>
+            <div class="er-row"><span class="er-field">embedding</span> <span class="er-type">vector(768)</span></div>
+            <div class="er-row"><span class="er-field">model</span> <span class="er-type">string</span></div>
+        </div>
+        <div class="er-table">
+            <div class="er-header er-header-green">collections</div>
+            <div class="er-row"><span class="er-field">id</span> <span><span class="er-badge er-pk">PK</span> uuid</span></div>
+            <div class="er-row"><span class="er-field">userId</span> <span><span class="er-badge er-fk">FK</span></span></div>
+            <div class="er-row"><span class="er-field">name</span> <span class="er-type">string</span></div>
+            <div class="er-row"><span class="er-field">color</span> <span class="er-type">#hex</span></div>
+            <div class="er-row"><span class="er-field">isPublic</span> <span class="er-type">bool</span></div>
+        </div>
+    </div>
+</div>
+
+<p><strong>Key design decisions:</strong></p>
+
+<ol>
+    <li><strong>Tags as PostgreSQL arrays</strong> &mdash; enables <code>UNNEST</code>-based searching. No join tables.</li>
+    <li><strong>JSONB metadata</strong> &mdash; flexible data (<code>fileType</code>, <code>favicon</code>, <code>domain</code>) without schema bloat.</li>
+    <li><strong>Embeddings alongside content</strong> &mdash; pgvector's <code>vector(768)</code> column. One DB, one transaction boundary.</li>
+    <li><strong>Composite indexes</strong> &mdash; <code>(userId, createdAt)</code>, <code>(userId, type)</code>, <code>(userId, isFavorite)</code>.</li>
+    <li><strong>Cryptographic share IDs</strong> &mdash; <code>randomBytes(12).toString('base64url')</code>. No guessable URLs.</li>
+</ol>
+
+<h3>Why Not a Separate Vector DB?</h3>
+
+<ul>
+    <li><strong>Simplicity</strong> &mdash; One database to manage, backup, and deploy.</li>
+    <li><strong>Transactional consistency</strong> &mdash; Content + embeddings in the same transaction.</li>
+    <li><strong>Cost</strong> &mdash; pgvector is free. Managed vector DBs charge per query.</li>
+    <li><strong>Good enough scale</strong> &mdash; Cosine similarity with <code>&lt;=&gt;</code> returns results in milliseconds.</li>
+</ul>
+
+<hr>
+
+<h2>The AI Pipeline</h2>
+
+<p>Every piece of content flows through a multi-stage AI pipeline:</p>
+
+<!-- DIAGRAM 3: AI Capture Pipeline -->
+<div class="diagram">
+    <div class="diagram-label">Content Capture Pipeline</div>
+    <div class="branch-container">
+        <div class="flow-row" style="justify-content:center;">
+            <div class="card card-blue" style="max-width:180px;"><div class="card-label">Save content</div><div class="card-sub">Note, link, or file</div></div>
+            <div class="flow-arrow"></div>
+            <div class="card card-slate" style="max-width:160px;"><div class="card-label">Validate</div><div class="card-sub">Zod schema</div></div>
+            <div class="flow-arrow"></div>
+            <div class="card card-green" style="max-width:160px;"><div class="card-label">Save to DB</div><div class="card-sub">Instant response</div></div>
+        </div>
+
+        <div class="flow-arrow-down"></div>
+
+        <div class="card card-amber" style="max-width:240px; margin: 0 auto;">
+            <div class="card-label">Async AI Enrichment</div>
+            <div class="card-sub">Non-blocking, runs in background</div>
+        </div>
+
+        <div style="display:flex;justify-content:center;height:24px;">
+            <div style="width:2px;height:12px;background:var(--slate-300);"></div>
+        </div>
+        <div style="display:flex;justify-content:center;">
+            <div style="width:320px;height:2px;background:var(--slate-300);"></div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:148px;height:16px;">
+            <div style="width:2px;height:16px;background:var(--slate-300);position:relative;">
+                <div style="position:absolute;bottom:-1px;left:-4px;border:solid var(--slate-300);border-width:0 2px 2px 0;padding:4px;transform:rotate(45deg);"></div>
+            </div>
+            <div style="width:2px;height:16px;background:var(--slate-300);position:relative;">
+                <div style="position:absolute;bottom:-1px;left:-4px;border:solid var(--slate-300);border-width:0 2px 2px 0;padding:4px;transform:rotate(45deg);"></div>
+            </div>
+            <div style="width:2px;height:16px;background:var(--slate-300);position:relative;">
+                <div style="position:absolute;bottom:-1px;left:-4px;border:solid var(--slate-300);border-width:0 2px 2px 0;padding:4px;transform:rotate(45deg);"></div>
+            </div>
+        </div>
+
+        <div class="branch-row">
+            <div class="card card-rose"><div class="card-label">Auto-Tag</div><div class="card-sub">Claude Sonnet</div></div>
+            <div class="card card-rose"><div class="card-label">Summarize</div><div class="card-sub">Claude Haiku</div></div>
+            <div class="card card-purple"><div class="card-label">Embed</div><div class="card-sub">Gemini 768d</div></div>
+        </div>
+    </div>
+</div>
+
+<blockquote><p><strong>Key insight:</strong> Content is saved instantly. Tagging, summarization, and embedding all happen asynchronously. The user never waits for AI.</p></blockquote>
+
+<h3>The Two-AI Architecture</h3>
+
+<p><strong>Google Gemini</strong> handles embeddings &mdash; <code>text-embedding-004</code>, 768 dimensions, up to 10,000 chars input.</p>
+
+<p><strong>Anthropic Claude</strong> handles language &mdash; Sonnet for tagging + Q&amp;A, Haiku for summarization.</p>
+
+<p><strong>Why two models?</strong> Cost optimization. Gemini is excellent for embeddings. Claude excels at nuanced language tasks.</p>
+
+<h3>Semantic Search</h3>
+
+<!-- DIAGRAM 4: Semantic Search -->
+<div class="diagram">
+    <div class="diagram-label">Semantic Search Flow</div>
+    <div class="flow-row">
+        <div class="card card-blue"><div class="card-label">Query</div><div class="card-sub">Plain text</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-purple"><div class="card-label">Vectorize</div><div class="card-sub">Gemini 768d</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-amber"><div class="card-label">Compare</div><div class="card-sub">pgvector &lt;=&gt;</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-green"><div class="card-label">Results</div><div class="card-sub">Ranked by meaning</div></div>
+    </div>
+</div>
+
+<pre><code>SELECT *, 1 - (embedding &lt;=&gt; $1) AS similarity
+FROM embeddings
+JOIN content ON content.id = embeddings."contentId"
+WHERE content."userId" = $2
+ORDER BY embedding &lt;=&gt; $1
+LIMIT 20;</code></pre>
+
+<h3>Knowledge Q&amp;A: RAG Pipeline</h3>
+
+<!-- DIAGRAM 5: RAG -->
+<div class="diagram">
+    <div class="diagram-label">Retrieval-Augmented Generation</div>
+    <div class="flow-row">
+        <div class="card card-blue"><div class="card-label">Question</div><div class="card-sub">Natural language</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-indigo"><div class="card-label">Retrieve</div><div class="card-sub">Top 10 semantic</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-amber"><div class="card-label">Augment</div><div class="card-sub">Prompt + sources</div></div>
+    </div>
+    <div class="flow-arrow-down"></div>
+    <div class="flow-row">
+        <div class="card card-rose"><div class="card-label">Generate</div><div class="card-sub">Claude Sonnet</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-green"><div class="card-label">Cited Answer</div><div class="card-sub">[1], [2], [3]</div></div>
+    </div>
+</div>
+
+<hr>
+
+<h2>Authentication &amp; Security</h2>
+
+<!-- DIAGRAM 6: Auth -->
+<div class="diagram">
+    <div class="diagram-label">Authentication Flow</div>
+    <div class="flow-row">
+        <div class="card card-blue"><div class="card-label">User</div><div class="card-sub">OAuth or Email</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-amber"><div class="card-label">Turnstile</div><div class="card-sub">Bot check</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-purple"><div class="card-label">Auth.js v5</div><div class="card-sub">Verify + hash</div></div>
+    </div>
+    <div class="flow-arrow-down"></div>
+    <div class="flow-row">
+        <div class="card card-indigo"><div class="card-label">JWT Session</div><div class="card-sub">HTTP-only cookie</div></div>
+        <div class="flow-arrow"></div>
+        <div class="card card-green"><div class="card-label">Dashboard</div><div class="card-sub">Authenticated</div></div>
+    </div>
+</div>
+
+<p><strong>8 layers of security</strong>, baked in:</p>
+
+<table>
+    <thead><tr><th>Layer</th><th>Implementation</th></tr></thead>
+    <tbody>
+        <tr><td>Bot protection</td><td>Cloudflare Turnstile</td></tr>
+        <tr><td>Password hashing</td><td>bcryptjs with salt rounds</td></tr>
+        <tr><td>Sessions</td><td>JWT for Edge Runtime</td></tr>
+        <tr><td>Rate limiting</td><td>10 auth attempts / 15 min</td></tr>
+        <tr><td>Email verification</td><td>Token-based, required</td></tr>
+        <tr><td>Password reset</td><td>Tokenized links via Resend</td></tr>
+        <tr><td>CSRF</td><td>Built-in via Auth.js</td></tr>
+        <tr><td>Security headers</td><td>CSP, HSTS, X-Frame-Options</td></tr>
+    </tbody>
+</table>
+
+<hr>
+
+<h2>Frontend to Deployment</h2>
+
+<h3>Frontend Architecture</h3>
+
+<!-- DIAGRAM 7: Frontend -->
+<div class="diagram">
+    <div class="diagram-label">Next.js 15 App Router</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+            <div class="tier tier-blue" style="height:100%;">
+                <div class="tier-label">Server Components (default)</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <div class="card" style="flex:1;min-width:90px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Dashboard</div></div>
+                    <div class="card" style="flex:1;min-width:90px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Library</div></div>
+                    <div class="card" style="flex:1;min-width:90px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Analytics</div></div>
+                </div>
+            </div>
+        </div>
+        <div style="flex:1;min-width:240px;">
+            <div class="tier tier-green" style="height:100%;">
+                <div class="tier-label">Client Components</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <div class="card" style="flex:1;min-width:90px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Capture</div></div>
+                    <div class="card" style="flex:1;min-width:90px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Search</div></div>
+                    <div class="card" style="flex:1;min-width:90px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Q&amp;A</div></div>
+                    <div class="card" style="flex:1;min-width:90px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Infinite Scroll</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="height:10px;"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+            <div class="tier tier-amber">
+                <div class="tier-label">Server Actions (20+)</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <div class="card" style="flex:1;min-width:100px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Create</div></div>
+                    <div class="card" style="flex:1;min-width:100px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Search</div></div>
+                    <div class="card" style="flex:1;min-width:100px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Ask</div></div>
+                </div>
+            </div>
+        </div>
+        <div style="flex:1;min-width:240px;">
+            <div class="tier tier-purple">
+                <div class="tier-label">UI Layer</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <div class="card" style="flex:1;min-width:100px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">shadcn/ui</div></div>
+                    <div class="card" style="flex:1;min-width:100px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Tailwind</div></div>
+                    <div class="card" style="flex:1;min-width:100px;padding:10px 14px;"><div class="card-label" style="font-size:0.78rem;">Recharts</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Multi-Platform</h3>
+
+<!-- DIAGRAM 8: Platforms -->
+<div class="diagram">
+    <div class="diagram-label">Platform Reach</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="card card-blue" style="flex:1;min-width:140px;"><div class="card-label">Web + PWA</div><div class="card-sub">Offline, installable,<br>app shortcuts</div></div>
+        <div class="card card-amber" style="flex:1;min-width:140px;"><div class="card-label">Chrome Extension</div><div class="card-sub">Manifest V3,<br>one-click save</div></div>
+        <div class="card card-green" style="flex:1;min-width:140px;"><div class="card-label">iOS + Android</div><div class="card-sub">Capacitor, push,<br>deep links, share intent</div></div>
+    </div>
+</div>
+
+<hr>
+
+<h2>Deployment Architecture</h2>
+
+<!-- DIAGRAM 9: Deployment -->
+<div class="diagram">
+    <div class="diagram-label">CI/CD Pipeline &mdash; Google Cloud Platform</div>
+    <div class="branch-container">
+        <div class="card card-blue" style="max-width:200px;margin:0 auto;"><div class="card-label">git push main</div></div>
+
+        <div class="flow-arrow-down"></div>
+
+        <div class="tier tier-indigo" style="max-width:540px;margin:0 auto;">
+            <div class="tier-label">Cloud Build</div>
+            <div class="flow-row">
+                <div class="card" style="padding:10px 16px;"><div class="card-label" style="font-size:0.78rem;">Build</div><div class="card-sub">Multi-stage</div></div>
+                <div class="flow-arrow"></div>
+                <div class="card" style="padding:10px 16px;"><div class="card-label" style="font-size:0.78rem;">Push</div><div class="card-sub">to GCR</div></div>
+                <div class="flow-arrow"></div>
+                <div class="card" style="padding:10px 16px;"><div class="card-label" style="font-size:0.78rem;">Deploy</div><div class="card-sub">Cloud Run</div></div>
+            </div>
+        </div>
+
+        <div class="flow-arrow-down"></div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div class="card card-green" style="flex:1;min-width:140px;"><div class="card-label">Cloud Run</div><div class="card-sub">0-10 instances<br>Auto-scaling</div></div>
+            <div class="card card-amber" style="flex:1;min-width:140px;"><div class="card-label">Cloud SQL</div><div class="card-sub">PostgreSQL + pgvector<br>Auto-backups</div></div>
+            <div class="card card-rose" style="flex:1;min-width:140px;"><div class="card-label">Secrets</div><div class="card-sub">Injected at runtime<br>Zero in container</div></div>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<h2>1,390+ Tests and Counting</h2>
+
+<!-- DIAGRAM 10: Test Pie -->
+<div class="diagram">
+    <div class="diagram-label">Test Distribution</div>
+    <div class="pie-container">
+        <div class="pie-chart"></div>
+        <div class="pie-legend">
+            <div class="pie-legend-item"><div class="pie-dot pie-dot-green"></div><span class="pie-number">888</span> Unit + Integration (Vitest)</div>
+            <div class="pie-legend-item"><div class="pie-dot pie-dot-amber"></div><span class="pie-number">200</span> Component (React Testing Library)</div>
+            <div class="pie-legend-item"><div class="pie-dot pie-dot-rose"></div><span class="pie-number">302</span> E2E (Playwright)</div>
+        </div>
+    </div>
+</div>
+
+<blockquote><p><strong>1,390+ tests. 80%+ coverage. 3 frameworks. All passing.</strong> The kind of test suite you'd expect from a team, not a solo developer.</p></blockquote>
+
+<h3>Development Workflow</h3>
+
+<ol>
+    <li><strong>Feature branch</strong> &mdash; <code>feature/semantic-search</code>, one at a time.</li>
+    <li><strong>Build + test</strong> &mdash; Unit, integration, component, E2E. Minimum 80% coverage.</li>
+    <li><strong>Quality gates</strong> &mdash; <code>test</code> + <code>type-check</code> + <code>lint</code> + <code>build</code> must all pass.</li>
+    <li><strong>Merge to main</strong> &mdash; Full test suite re-run. Any failure = stop and fix.</li>
+    <li><strong>Update docs</strong> &mdash; STATUS.md and README.md after every feature.</li>
+</ol>
+
+<h3>AI-Assisted Development</h3>
+
+<p>I built Mindweave with <strong>Claude Code</strong> as an AI pair programmer &mdash; iterative, test-driven collaboration. Claude helped write tests alongside implementation, caught edge cases (like MIME type spoofing in uploads), and co-developed complex queries like UNNEST-based tag co-occurrence analysis.</p>
+
+<hr>
+
+<h2>Feature Highlights</h2>
+
+<ul>
+    <li><strong>Intelligent auto-organization</strong> &mdash; AI generates 3-5 tags, a summary, and a 768d embedding for every item. You do nothing.</li>
+    <li><strong>Collections</strong> with custom colors and public/private visibility.</li>
+    <li><strong>Bulk operations</strong> &mdash; batch delete, tag, share, or add to collection.</li>
+    <li><strong>Import/Export</strong> &mdash; Pocket, Notion, Evernote, Twitter bookmarks. Export as JSON, Markdown, or CSV.</li>
+    <li><strong>Analytics dashboard</strong> &mdash; Recharts visualizations + AI-generated insights.</li>
+    <li><strong>Dark mode</strong> &mdash; Light, Dark, System. Persisted in localStorage.</li>
+</ul>
+
+<hr>
+
+<h2>Tech Stack Summary</h2>
+
+<table>
+    <thead><tr><th>Layer</th><th>Technology</th><th>Why</th></tr></thead>
+    <tbody>
+        <tr><td>Framework</td><td>Next.js 15 (App Router)</td><td>Server components, server actions</td></tr>
+        <tr><td>Language</td><td>TypeScript 5.5 (strict)</td><td>Full-stack type safety</td></tr>
+        <tr><td>Database</td><td>PostgreSQL 16 + pgvector</td><td>Relational + vector in one DB</td></tr>
+        <tr><td>ORM</td><td>Drizzle ORM</td><td>Type-safe, lightweight</td></tr>
+        <tr><td>Auth</td><td>Auth.js v5</td><td>Multi-provider, Edge Runtime</td></tr>
+        <tr><td>AI (Embeddings)</td><td>Google Gemini</td><td>768d vectors, cost-effective</td></tr>
+        <tr><td>AI (Language)</td><td>Anthropic Claude</td><td>Tags, Q&amp;A, insights</td></tr>
+        <tr><td>Styling</td><td>Tailwind + shadcn/ui</td><td>Rapid, consistent UI</td></tr>
+        <tr><td>Testing</td><td>Vitest + Playwright + RTL</td><td>Full pyramid coverage</td></tr>
+        <tr><td>Deploy</td><td>GCP Cloud Run</td><td>Serverless, scale-to-zero</td></tr>
+        <tr><td>CI/CD</td><td>Google Cloud Build</td><td>Auto build + deploy</td></tr>
+        <tr><td>Mobile</td><td>Capacitor</td><td>Native iOS + Android</td></tr>
+        <tr><td>Bot Protection</td><td>Cloudflare Turnstile</td><td>Invisible CAPTCHA</td></tr>
+    </tbody>
+</table>
+
+<hr>
+
+<h2>Lessons Learned</h2>
+
+<h3>1. pgvector is underrated</h3>
+<p>For most AI apps, you don't need a dedicated vector DB. pgvector gives you similarity search with full PostgreSQL power &mdash; joins, transactions, indexes. Start here.</p>
+
+<h3>2. Non-blocking AI operations matter</h3>
+<p>Save to DB instantly, run AI async. Users never wait for AI. This was the most important UX decision.</p>
+
+<h3>3. Two AI models beat one</h3>
+<p>Gemini for embeddings (commodity &mdash; use the cheapest good option). Claude for language (quality matters here).</p>
+
+<h3>4. TDD scales solo projects</h3>
+<p>1,390+ tests let me refactor anything with confidence. When I added clustering, tests caught 3 regressions I would have shipped.</p>
+
+<h3>5. Server Actions are a game-changer</h3>
+<p>They eliminated an entire API layer. No REST endpoints, no fetch calls, no serialization. Just TypeScript functions on the server.</p>
+
+<hr>
+
+<h2>Recent Updates (February 2026)</h2>
+
+<p>Since the initial launch, Mindweave has seen significant improvements across every layer:</p>
+
+<h3>Chrome Extension &mdash; Now on Chrome Web Store</h3>
+<p>The Mindweave Quick Capture extension is <a href="https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp">now available on the Chrome Web Store</a>. One click saves any webpage with auto-captured title, URL, and content &mdash; AI tags it instantly.</p>
+
+<h3>Android App &mdash; In Closed Testing</h3>
+<p>A native Android app built with Capacitor is currently in Closed Testing on Google Play. It supports share-intent capture &mdash; share a link or text from any app directly into your Mindweave knowledge base.</p>
+
+<h3>Sample Content Seeding for New Users</h3>
+<p>New users no longer land on an empty dashboard. On completing onboarding, Mindweave seeds ~15 sample notes and links across 4 themes, each with AI auto-tags and vector embeddings. Users immediately experience semantic search, Q&amp;A, analytics, and clustering without adding their own content first.</p>
+
+<h3>Security Hardening</h3>
+<ul>
+    <li><strong>Cloudflare Turnstile</strong> &mdash; Invisible CAPTCHA on login/registration</li>
+    <li><strong>Enhanced rate limiting</strong> &mdash; Per-email rate limiting on auth endpoints</li>
+    <li><strong>SSRF protection</strong> &mdash; Server-side URL validation prevents internal network access</li>
+    <li><strong>Data exposure fixes</strong> &mdash; Authorization checks tightened across all server actions</li>
+</ul>
+
+<h3>Dashboard &amp; Analytics Improvements</h3>
+<ul>
+    <li><strong>Live dashboard stats</strong> &mdash; Real-time data for Total Items, Tags, This Week, and Favorites</li>
+    <li><strong>Fixed analytics chart labels</strong> &mdash; Tag distribution donut chart no longer overlaps</li>
+    <li><strong>Content clusters</strong> &mdash; Fixed JSON parsing and card height alignment</li>
+    <li><strong>Clickable stats</strong> &mdash; All dashboard stat cards link to filtered library views</li>
+</ul>
+
+<h3>Tag Editing UX Fix</h3>
+<p>The <code>TagInput</code> component now exposes a <code>commitPending()</code> method via <code>React.forwardRef</code>, ensuring typed but uncommitted tag text is never silently lost on save.</p>
+
+<h3>File Card Open Link</h3>
+<p>Content cards for uploaded files now have a clickable filename that opens the file in a new tab.</p>
+
+<hr>
+
+<h2>What's Next</h2>
+
+<p>Mindweave is live at <a href="https://mindweave.space">mindweave.space</a>. Planned:</p>
+
+<ul>
+    <li><strong>Firefox extension</strong></li>
+    <li><strong>Collaborative features</strong> &mdash; shared knowledge bases for teams</li>
+    <li><strong>Spaced repetition</strong> &mdash; surface content at optimal review intervals</li>
+    <li><strong>Public API</strong> &mdash; let users build their own integrations</li>
+</ul>
+
+<hr>
+
+<h2>Try It / Get in Touch</h2>
+
+<p>If you're tired of your knowledge being scattered across 15 different apps, give Mindweave a try. The <a href="https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp">Chrome extension</a> makes saving webpages effortless, and the Android app is coming soon. Drop a comment if you want a deep-dive on any specific layer.</p>
+
+<hr>
+
+<p class="closing-line"><em>Built with Next.js 15, PostgreSQL + pgvector, Google Gemini, Anthropic Claude, and deployed on Google Cloud Run.<br>1,390+ tests. One developer. Zero excuses for scattered knowledge.</em></p>
+
+</body>
+</html>

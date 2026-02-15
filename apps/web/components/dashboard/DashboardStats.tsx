@@ -5,6 +5,9 @@ import { useCountUp } from '@/hooks/useCountUp';
 
 interface DashboardStatsProps {
   totalCount: number;
+  tagCount: number;
+  thisWeekCount: number;
+  favoritesCount: number;
 }
 
 function AnimatedStat({ value, label, delay, href }: { value: number; label: string; delay: number; href?: string }) {
@@ -38,13 +41,13 @@ function AnimatedStat({ value, label, delay, href }: { value: number; label: str
   );
 }
 
-export function DashboardStats({ totalCount }: DashboardStatsProps) {
+export function DashboardStats({ totalCount, tagCount, thisWeekCount, favoritesCount }: DashboardStatsProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <AnimatedStat value={totalCount} label="Total Items" delay={0} href="/dashboard/library" />
-      <AnimatedStat value={0} label="Tags" delay={50} href="/dashboard/library" />
-      <AnimatedStat value={0} label="This Week" delay={100} href="/dashboard/library" />
-      <AnimatedStat value={0} label="Searches" delay={150} href="/dashboard/search" />
+      <AnimatedStat value={tagCount} label="Tags" delay={50} href="/dashboard/library" />
+      <AnimatedStat value={thisWeekCount} label="This Week" delay={100} href="/dashboard/library" />
+      <AnimatedStat value={favoritesCount} label="Favorites" delay={150} href="/dashboard/library?favorites=true" />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import Link from 'next/link';
+import Image from 'next/image';
 import { auth, signIn } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
@@ -118,7 +119,10 @@ export default async function RegisterPage({
     <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
         <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
+          <div className="flex items-center justify-center gap-3 mb-1">
+            <Image src="/icons/icon.svg" alt="Mindweave logo" width={40} height={40} className="rounded-lg" />
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
+          </div>
           <p className="mt-2 text-sm text-slate-600">
             Create your account
           </p>

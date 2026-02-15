@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, gte, and } from 'drizzle-orm';
 import Link from 'next/link';
 import { formatDateUTC } from '@/lib/utils';
 import { DashboardRecommendations } from '@/components/dashboard/DashboardRecommendations';
@@ -23,6 +23,34 @@ export default async function DashboardPage() {
 
   const totalCount = Number(recentContent[0]?.count || 0);
 
+  // Get unique tags count
+  const tagsResult = await db.execute<{ tag_count: string }>(sql`
+    SELECT COUNT(DISTINCT tag) as tag_count
+    FROM (
+      SELECT UNNEST(tags || auto_tags) as tag
+      FROM ${content}
+      WHERE user_id = ${userId}
+    ) as all_tags
+    WHERE tag IS NOT NULL AND tag != ''
+  `);
+  const tagCount = parseInt((tagsResult as unknown as { tag_count: string }[])[0]?.tag_count || '0', 10);
+
+  // Get items created this week
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const [thisWeekResult] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(content)
+    .where(and(eq(content.userId, userId), gte(content.createdAt, oneWeekAgo)));
+  const thisWeekCount = Number(thisWeekResult?.count || 0);
+
+  // Get favorites count
+  const [favoritesResult] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(content)
+    .where(and(eq(content.userId, userId), eq(content.isFavorite, true)));
+  const favoritesCount = Number(favoritesResult?.count || 0);
+
   // Get latest items
   const latestItems = await db
     .select()
@@ -41,7 +69,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <DashboardStats totalCount={totalCount} />
+      <DashboardStats totalCount={totalCount} tagCount={tagCount} thisWeekCount={thisWeekCount} favoritesCount={favoritesCount} />
 
       {/* Recent Items */}
       <div className="mt-8">

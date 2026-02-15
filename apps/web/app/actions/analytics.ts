@@ -243,16 +243,16 @@ export async function getContentGrowthAction(
 // Cached internal function for tag distribution
 const getCachedTagDistribution = unstable_cache(
   async (userId: string): Promise<TagDistributionData[]> => {
-    // Get tag counts using SQL
+    // Get tag counts using SQL (case-insensitive grouping)
     const result = await db.execute<{ tag: string; count: string }>(sql`
-      SELECT tag, COUNT(*) as count
+      SELECT LOWER(tag) as tag, COUNT(*) as count
       FROM (
         SELECT UNNEST(tags || auto_tags) as tag
         FROM ${content}
         WHERE user_id = ${userId}
       ) as all_tags
       WHERE tag IS NOT NULL AND tag != ''
-      GROUP BY tag
+      GROUP BY LOWER(tag)
       ORDER BY count DESC
       LIMIT 10
     `);
