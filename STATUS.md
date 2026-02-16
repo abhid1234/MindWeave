@@ -53,6 +53,15 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-16)**:
+- [x] **Anthropic SDK Removal & Full Cleanup** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fe3479e`):
+  - **Removed `@ai-sdk/anthropic` and `@anthropic-ai/sdk`** from `package.json` — 26 packages pruned from lockfile.
+  - **Cleaned all config/deployment files**: removed `ANTHROPIC_API_KEY` from `cloudbuild.yaml`, `cloud-run-service.yaml`, `deploy-gcp.sh`, `setup-gcp-secrets.sh`, `setup-dev.sh`, `.env.example`, `.env.production.example`.
+  - **Removed `api.anthropic.com`** from CSP `connect-src` in `next.config.js`.
+  - **Updated remaining test mocks**: `clustering.test.ts` and `search-suggestions.test.ts` now mock `@google/generative-ai` instead of `@anthropic-ai/sdk`.
+  - Google Gemini is now the sole AI provider — single `GOOGLE_AI_API_KEY` for all features (tagging, Q&A, summarization, embeddings, clustering, insights, search suggestions).
+  - 1440 tests passing.
+
+**Previous Enhancement (2026-02-16)**:
 - [x] **Full Gemini Migration + Cloud Build Cost Optimization** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:45840cb`):
   - **Gemini Migration** - Migrated all AI features from Anthropic Claude (Sonnet/Haiku) to Google Gemini 2.0 Flash, eliminating ~$85/month Anthropic API costs. Gemini Flash is ~100x cheaper and covered under existing Google AI API key. Migrated 5 files:
     - `claude.ts` — generateTags, answerQuestion, summarizeContent
@@ -62,7 +71,6 @@
     - `insights.ts` — generateAISuggestions
   - **Cloud Build Cost Optimization** - Downgraded Cloud Build machine from `E2_HIGHCPU_8` (~$0.016/min) to `E2_MEDIUM` (~$0.003/min) for ~75% cost reduction. Build time increased from ~4min to ~9.5min but cost savings are significant.
   - Updated 2 test files (`summarization.test.ts`, `insights.test.ts`) to mock `@google/generative-ai` instead of `@anthropic-ai/sdk`.
-  - Anthropic SDK (`@anthropic-ai/sdk`) can now be removed from dependencies.
   - 1440 tests passing.
 
 **Previous Enhancement (2026-02-16)**:
