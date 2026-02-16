@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-15
+**Last Updated**: 2026-02-16
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -39,7 +39,7 @@
   - API endpoints for session check and content capture
   - Dark mode support in popup UI
 
-**Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues).
+**Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
 - [x] **Tasks Dashboard** - Full task management UI with CRUD, filtering, and 57 tests
 
@@ -52,7 +52,10 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-15)**:
+**Latest Enhancement (2026-02-16)**:
+- [x] **LinkedIn Launch Post** - Created and published LinkedIn launch post with 6-slide PDF carousel (Codebase Stats, AI Auto-Tagging, Knowledge Q&A, Semantic Search, Smart Library, Analytics). Generated carousel tiles as HTML, rendered via Chrome headless at 1080x1080, combined into LinkedIn-compatible PDF using Chrome's `--print-to-pdf`. Post live at [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
+
+**Previous Enhancement (2026-02-15)**:
 - [x] **Git History Cleanup** - Rewrote all 260 commits to replace work email with personal email using `git filter-branch`. Force pushed to remote. Redeployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fcba5f8`).
 
 **Previous Enhancement (2026-02-15)**:
