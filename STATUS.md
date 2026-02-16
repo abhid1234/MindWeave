@@ -53,6 +53,9 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-16)**:
+- [x] **Dashboard Stats Fix** - Fixed dashboard stats (Total Items, Tags, This Week, Favorites) showing all zeros despite correct server-side values. Root cause: React Strict Mode double-fires effects, and the `useCountUp` hook's ref-based guard prevented the animation from running on the second invocation. Fixed by resetting the ref in the effect cleanup function.
+
+**Previous Enhancement (2026-02-16)**:
 - [x] **Content Detail Dialog** - Fixed content cards being non-clickable in Library, keyword search, and semantic search. Clicking a card now opens a detail dialog showing full title, body text, URL, tags (manual + AI), file previews, and action buttons (Edit, Share, Delete). Created reusable `ContentDetailDialog` and `SearchResultCard` components. 1440 tests passing.
 
 **Previous Enhancement (2026-02-16)**:
