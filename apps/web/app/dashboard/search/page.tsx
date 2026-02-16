@@ -4,8 +4,7 @@ import { content } from '@/lib/db/schema';
 import { sql, ilike } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { SemanticSearchForm } from '@/components/search/SemanticSearchForm';
-import { formatDateUTC } from '@/lib/utils';
-import { highlightText } from '@/lib/highlight';
+import { SearchResultCard } from '@/components/search/SearchResultCard';
 
 type SearchMode = 'keyword' | 'semantic';
 
@@ -75,51 +74,7 @@ export default async function SearchPage({
           ) : (
             <div className="space-y-4">
               {keywordResults.map((item) => (
-                <div key={item.id} className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold line-clamp-1">{highlightText(item.title, query)}</h3>
-                        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs">
-                          {item.type}
-                        </span>
-                      </div>
-                      {item.url && (
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 block text-sm text-primary hover:underline"
-                        >
-                          {item.url}
-                        </a>
-                      )}
-                      {((item.tags?.length ?? 0) > 0 || (item.autoTags?.length ?? 0) > 0) && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {(item.tags ?? []).map((tag: string) => (
-                            <span
-                              key={tag}
-                              className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {(item.autoTags ?? []).map((tag: string) => (
-                            <span
-                              key={`auto-${tag}`}
-                              className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"
-                            >
-                              {tag} (AI)
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <span className="ml-4 text-xs text-muted-foreground whitespace-nowrap">
-                      {formatDateUTC(item.createdAt)}
-                    </span>
-                  </div>
-                </div>
+                <SearchResultCard key={item.id} item={item} query={query} />
               ))}
             </div>
           )}

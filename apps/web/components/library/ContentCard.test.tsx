@@ -108,6 +108,24 @@ vi.mock('./RecommendationsDialog', () => ({
   ),
 }));
 
+// Mock ContentDetailDialog component
+vi.mock('./ContentDetailDialog', () => ({
+  ContentDetailDialog: ({
+    open,
+    content,
+  }: {
+    open: boolean;
+    content: { title: string; body: string | null };
+  }) => (
+    open ? (
+      <div data-testid="detail-dialog">
+        Detail dialog for: {content.title}
+        {content.body && <span>{content.body}</span>}
+      </div>
+    ) : null
+  ),
+}));
+
 // Mock toggleFavoriteAction
 vi.mock('@/app/actions/content', () => ({
   toggleFavoriteAction: vi.fn().mockResolvedValue({ success: true, isFavorite: true }),
@@ -142,17 +160,14 @@ describe('ContentCard', () => {
       expect(screen.queryByText('This is a test note body')).not.toBeInTheDocument();
     });
 
-    it('should render URL when provided', () => {
+    it('should render URL text when provided', () => {
       render(<ContentCard {...baseProps} url="https://example.com" />);
-      const link = screen.getByRole('link');
-      expect(link).toHaveAttribute('href', 'https://example.com');
-      expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(screen.getByText('https://example.com')).toBeInTheDocument();
     });
 
     it('should not render URL when null', () => {
       render(<ContentCard {...baseProps} />);
-      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(screen.queryByText(/https?:\/\//)).not.toBeInTheDocument();
     });
 
     it('should render formatted date', () => {
@@ -375,12 +390,11 @@ describe('ContentCard', () => {
       },
     };
 
-    it('should render file info with size and download link', () => {
+    it('should render file info with size', () => {
       render(<ContentCard {...fileProps} />);
 
       expect(screen.getAllByText('Document.pdf').length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText('1.0 MB')).toBeInTheDocument();
-      expect(screen.getByLabelText('Download file')).toBeInTheDocument();
     });
 
     it('should render image preview for image files', () => {
@@ -407,7 +421,8 @@ describe('ContentCard', () => {
         />
       );
 
-      expect(screen.queryByLabelText('Download file')).not.toBeInTheDocument();
+      // No file name or size should be rendered in the file preview area
+      expect(screen.queryByText('1.0 MB')).not.toBeInTheDocument();
     });
   });
 
@@ -460,6 +475,53 @@ describe('ContentCard', () => {
     it('should not show Shared badge when content is not shared', () => {
       render(<ContentCard {...baseProps} isShared={false} />);
       expect(screen.queryByText('Shared')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Detail dialog', () => {
+    it('should open detail dialog when clicking the card title area', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+
+      const viewButton = screen.getByLabelText('View details for Test Note');
+      await user.click(viewButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('detail-dialog')).toBeInTheDocument();
+        expect(screen.getByText('Detail dialog for: Test Note')).toBeInTheDocument();
+      });
+    });
+
+    it('should show body content in detail dialog', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+
+      const viewButton = screen.getByLabelText('View details for Test Note');
+      await user.click(viewButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('This is a test note body')).toBeInTheDocument();
+      });
+    });
+
+    it('should not open detail dialog when clicking favorite button', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+
+      const favButton = screen.getByLabelText('Add to favorites');
+      await user.click(favButton);
+
+      expect(screen.queryByTestId('detail-dialog')).not.toBeInTheDocument();
+    });
+
+    it('should not open detail dialog when clicking actions menu', async () => {
+      const user = userEvent.setup();
+      render(<ContentCard {...baseProps} />);
+
+      const actionsButton = screen.getByLabelText('Content actions');
+      await user.click(actionsButton);
+
+      expect(screen.queryByTestId('detail-dialog')).not.toBeInTheDocument();
     });
   });
 });

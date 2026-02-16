@@ -1,0 +1,266 @@
+'use client';
+
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink } from 'lucide-react';
+import NextImage from 'next/image';
+import type { ContentType } from '@/lib/db/schema';
+import { formatDateUTC } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+
+const DeleteConfirmDialog = dynamic(
+  () => import('./DeleteConfirmDialog').then((mod) => mod.DeleteConfirmDialog),
+  { loading: () => null }
+);
+const ContentEditDialog = dynamic(
+  () => import('./ContentEditDialog').then((mod) => mod.ContentEditDialog),
+  { loading: () => null }
+);
+const ShareDialog = dynamic(
+  () => import('./ShareDialog').then((mod) => mod.ShareDialog),
+  { loading: () => null }
+);
+
+export type ContentDetailDialogProps = {
+  content: {
+    id: string;
+    type: ContentType;
+    title: string;
+    body: string | null;
+    url: string | null;
+    tags: string[];
+    autoTags: string[];
+    createdAt: Date;
+    isFavorite?: boolean;
+    isShared?: boolean;
+    shareId?: string | null;
+    metadata?: {
+      fileType?: string;
+      fileSize?: number;
+      filePath?: string;
+      fileName?: string;
+      [key: string]: unknown;
+    } | null;
+  };
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+function getFileIcon(fileType?: string) {
+  if (!fileType) return <File className="h-8 w-8 text-gray-500" aria-hidden="true" />;
+  if (fileType.startsWith('image/')) {
+    return <ImageIcon className="h-8 w-8 text-blue-500" aria-hidden="true" />;
+  }
+  if (fileType === 'application/pdf') {
+    return <FileText className="h-8 w-8 text-red-500" aria-hidden="true" />;
+  }
+  return <File className="h-8 w-8 text-gray-500" aria-hidden="true" />;
+}
+
+function formatFileSize(bytes?: number) {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+export function ContentDetailDialog({
+  content,
+  open,
+  onOpenChange,
+}: ContentDetailDialogProps) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const { id, type, title, body, url, tags, autoTags, createdAt, isFavorite, isShared, shareId, metadata } = content;
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                type === 'note'
+                  ? 'bg-note/10 text-note dark:bg-note/20'
+                  : type === 'link'
+                    ? 'bg-link/10 text-link dark:bg-link/20'
+                    : 'bg-file/10 text-file dark:bg-file/20'
+              }`}>
+                {type}
+              </span>
+              {isShared && (
+                <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                  <Globe className="h-3 w-3" aria-hidden="true" />
+                  Shared
+                </span>
+              )}
+              {isFavorite && (
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" aria-label="Favorited" />
+              )}
+              <span className="ml-auto text-xs text-muted-foreground">
+                <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
+              </span>
+            </div>
+            <DialogTitle className="text-xl">{title}</DialogTitle>
+            <DialogDescription className="sr-only">
+              Details for {title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* URL for links */}
+            {url && type !== 'file' && (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-primary hover:underline break-all"
+              >
+                <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                {url}
+              </a>
+            )}
+
+            {/* File preview for file type */}
+            {type === 'file' && metadata?.filePath && (
+              <div>
+                {metadata.fileType?.startsWith('image/') ? (
+                  <a
+                    href={metadata.filePath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block relative h-48 w-full"
+                  >
+                    <NextImage
+                      src={metadata.filePath}
+                      alt={title}
+                      fill
+                      className="object-contain rounded-md"
+                      sizes="(max-width: 640px) 100vw, 560px"
+                    />
+                  </a>
+                ) : (
+                  <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-md">
+                    {getFileIcon(metadata.fileType)}
+                    <a
+                      href={metadata.filePath}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 min-w-0 hover:underline"
+                    >
+                      <p className="text-sm font-medium truncate">
+                        {metadata.fileName || title}
+                      </p>
+                      {metadata.fileSize && (
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(metadata.fileSize)}
+                        </p>
+                      )}
+                    </a>
+                    <a
+                      href={metadata.filePath}
+                      download
+                      className="p-2 hover:bg-secondary rounded-md"
+                      aria-label="Download file"
+                    >
+                      <Download className="h-4 w-4" />
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Body text */}
+            {body && (
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <p className="whitespace-pre-wrap text-sm text-foreground">{body}</p>
+              </div>
+            )}
+
+            {/* Tags */}
+            {((tags?.length ?? 0) > 0 || (autoTags?.length ?? 0) > 0) && (
+              <div className="flex flex-wrap gap-2">
+                {(tags ?? []).map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {(autoTags ?? []).map((tag) => (
+                  <span
+                    key={`auto-${tag}`}
+                    className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                  >
+                    {tag} (AI)
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex gap-2 pt-2 border-t">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditDialogOpen(true)}
+              >
+                <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsShareDialogOpen(true)}
+              >
+                <Share2 className="mr-1.5 h-3.5 w-3.5" />
+                {isShared ? 'Manage Share' : 'Share'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <ContentEditDialog
+        content={{ id, type, title, body, url }}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+      />
+
+      <ShareDialog
+        contentId={id}
+        contentTitle={title}
+        isShared={isShared ?? false}
+        shareId={shareId ?? null}
+        open={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+      />
+
+      <DeleteConfirmDialog
+        contentId={id}
+        contentTitle={title}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
+    </>
+  );
+}

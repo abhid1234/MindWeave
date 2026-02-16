@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Download, Share2, Globe, FolderPlus, Star, Loader2, Sparkles } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
@@ -37,6 +37,10 @@ const CollectionSelector = dynamic(
 );
 const RecommendationsDialog = dynamic(
   () => import('./RecommendationsDialog').then((mod) => mod.RecommendationsDialog),
+  { loading: () => null }
+);
+const ContentDetailDialog = dynamic(
+  () => import('./ContentDetailDialog').then((mod) => mod.ContentDetailDialog),
   { loading: () => null }
 );
 
@@ -100,6 +104,7 @@ export function ContentCard({
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
   const [isRecommendationsDialogOpen, setIsRecommendationsDialogOpen] = useState(false);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isShared, setIsShared] = useState(initialIsShared);
   const [shareId, setShareId] = useState(initialShareId);
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
@@ -265,67 +270,52 @@ export function ContentCard({
           </div>
         </div>
 
-        <h3 id={`content-title-${id}`} className="font-semibold line-clamp-1 mb-2 pl-2">{title}</h3>
+        {/* Clickable area to open detail dialog */}
+        <button
+          type="button"
+          className="text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+          onClick={() => setIsDetailDialogOpen(true)}
+          aria-label={`View details for ${title}`}
+        >
+          <h3 id={`content-title-${id}`} className="font-semibold line-clamp-1 mb-2 pl-2">{title}</h3>
 
-        {/* File preview for file type */}
-        {type === 'file' && metadata?.filePath && (
-          <div className="mb-3 pl-2">
-            {metadata.fileType?.startsWith('image/') ? (
-              <a
-                href={metadata.filePath}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block relative h-32 w-full"
-              >
-                <NextImage
-                  src={metadata.filePath}
-                  alt={title}
-                  fill
-                  className="object-cover rounded-md"
-                  sizes="(max-width: 640px) 100vw, 300px"
-                />
-              </a>
-            ) : (
-              <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-md">
-                {getFileIcon(metadata.fileType)}
-                <a
-                  href={metadata.filePath}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 min-w-0 hover:underline"
-                >
-                  <p className="text-sm font-medium truncate">
-                    {metadata.fileName || title}
-                  </p>
-                  {metadata.fileSize && (
-                    <p className="text-xs text-muted-foreground">
-                      {formatFileSize(metadata.fileSize)}
+          {/* File preview for file type */}
+          {type === 'file' && metadata?.filePath && (
+            <div className="mb-3 pl-2">
+              {metadata.fileType?.startsWith('image/') ? (
+                <div className="block relative h-32 w-full">
+                  <NextImage
+                    src={metadata.filePath}
+                    alt={title}
+                    fill
+                    className="object-cover rounded-md"
+                    sizes="(max-width: 640px) 100vw, 300px"
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-md">
+                  {getFileIcon(metadata.fileType)}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {metadata.fileName || title}
                     </p>
-                  )}
-                </a>
-                <a
-                  href={metadata.filePath}
-                  download
-                  className="p-2 hover:bg-secondary rounded-md"
-                  aria-label="Download file"
-                >
-                  <Download className="h-4 w-4" />
-                </a>
-              </div>
-            )}
-          </div>
-        )}
+                    {metadata.fileSize && (
+                      <p className="text-xs text-muted-foreground">
+                        {formatFileSize(metadata.fileSize)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
-        {url && type !== 'file' && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-xs text-primary hover:underline mb-3 pl-2 truncate transition-colors"
-          >
-            {url}
-          </a>
-        )}
+          {url && type !== 'file' && (
+            <p className="text-xs text-primary mb-3 pl-2 truncate">
+              {url}
+            </p>
+          )}
+        </button>
 
         <div className="pl-2 mt-auto">
           <EditableTags
@@ -371,6 +361,25 @@ export function ContentCard({
         contentTitle={title}
         open={isRecommendationsDialogOpen}
         onOpenChange={setIsRecommendationsDialogOpen}
+      />
+
+      <ContentDetailDialog
+        content={{
+          id,
+          type,
+          title,
+          body,
+          url,
+          tags,
+          autoTags,
+          createdAt,
+          isFavorite,
+          isShared,
+          shareId,
+          metadata,
+        }}
+        open={isDetailDialogOpen}
+        onOpenChange={setIsDetailDialogOpen}
       />
     </>
   );

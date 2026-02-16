@@ -347,9 +347,7 @@ describe('SemanticSearchForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        const link = screen.getByRole('link', { name: /example\.com/i });
-        expect(link).toHaveAttribute('href', 'https://example.com');
-        expect(link).toHaveAttribute('target', '_blank');
+        expect(screen.getByText('https://example.com')).toBeInTheDocument();
       });
     });
 

@@ -4,9 +4,8 @@ import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { semanticSearchAction, type SemanticSearchResult } from '@/app/actions/search';
 import { Input } from '@/components/ui/input';
-import { formatDateUTC } from '@/lib/utils';
 import { SearchSuggestions } from './SearchSuggestions';
-import { highlightText } from '@/lib/highlight';
+import { SearchResultCard } from './SearchResultCard';
 
 type SearchMode = 'keyword' | 'semantic';
 
@@ -139,10 +138,6 @@ export function SemanticSearchForm({
     }
   };
 
-  const formatSimilarity = (similarity: number) => {
-    return `${Math.round(similarity * 100)}%`;
-  };
-
   return (
     <div>
       {/* Search Mode Toggle */}
@@ -237,55 +232,14 @@ export function SemanticSearchForm({
               {results.map((item, index) => (
                 <div
                   key={item.id}
-                  className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
+                  className="animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
                   style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold line-clamp-1">{highlightText(item.title, query)}</h3>
-                        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs">
-                          {item.type}
-                        </span>
-                        <span className="rounded-full bg-green-100 dark:bg-green-900 px-2 py-0.5 text-xs text-green-700 dark:text-green-300 font-medium">
-                          {formatSimilarity(item.similarity)} match
-                        </span>
-                      </div>
-                      {item.url && (
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 block text-sm text-primary hover:underline"
-                        >
-                          {item.url}
-                        </a>
-                      )}
-                      {((item.tags?.length ?? 0) > 0 || (item.autoTags?.length ?? 0) > 0) && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {(item.tags ?? []).map((tag: string) => (
-                            <span
-                              key={tag}
-                              className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {(item.autoTags ?? []).map((tag: string) => (
-                            <span
-                              key={`auto-${tag}`}
-                              className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"
-                            >
-                              {tag} (AI)
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <span className="ml-4 text-xs text-muted-foreground whitespace-nowrap">
-                      {formatDateUTC(item.createdAt)}
-                    </span>
-                  </div>
+                  <SearchResultCard
+                    item={item}
+                    query={query}
+                    similarity={item.similarity}
+                  />
                 </div>
               ))}
             </div>
