@@ -26,7 +26,12 @@ export function useCountUp(target: number, duration = 1000): number {
       }
     };
     rafId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafId);
+    return () => {
+      cancelAnimationFrame(rafId);
+      // Reset ref so the effect can re-run correctly in React Strict Mode
+      // (Strict Mode fires effects twice: run → cleanup → run)
+      prevTarget.current = start;
+    };
   }, [target, duration]);
 
   return current;
