@@ -53,6 +53,9 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-16)**:
+- [x] **Recommendation NaN% Fix** - Fixed "Recommended for You" cards showing NaN% similarity. Root cause: pgvector cosine distance returns NaN for zero-magnitude embeddings, and PostgreSQL `float8` treats NaN as greater than all numbers so the WHERE filter didn't exclude them. Added `<> 'NaN'::float8` SQL filter to both `getRecommendations` and `searchSimilarContent` queries, coerced non-finite values to 0, and hidden the similarity badge when value is 0.
+
+**Previous Enhancement (2026-02-16)**:
 - [x] **Dashboard Stats Fix** - Fixed dashboard stats (Total Items, Tags, This Week, Favorites) showing all zeros despite correct server-side values. Root cause: React Strict Mode double-fires effects, and the `useCountUp` hook's ref-based guard prevented the animation from running on the second invocation. Fixed by resetting the ref in the effect cleanup function.
 
 **Previous Enhancement (2026-02-16)**:
