@@ -78,7 +78,6 @@ echo ""
 
 create_secret "database-url" "Database URL (Cloud SQL connection string)" ""
 create_secret "auth-secret" "Auth Secret (generate with: openssl rand -base64 32)" ""
-create_secret "anthropic-api-key" "Anthropic API Key for Claude (from console.anthropic.com)" ""
 create_secret "google-ai-api-key" "Google AI API Key for Gemini (from aistudio.google.com/app/apikey)" ""
 
 # Optional secrets

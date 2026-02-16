@@ -32,7 +32,6 @@ spec:
         # Secret Manager integration
         run.googleapis.com/secrets: |
           DATABASE_URL:database-url:latest,
-          ANTHROPIC_API_KEY:anthropic-api-key:latest,
           GOOGLE_AI_API_KEY:google-ai-api-key:latest,
           AUTH_SECRET:auth-secret:latest,
           AUTH_GOOGLE_ID:google-oauth-client-id:latest,
@@ -60,8 +59,7 @@ spec:
 
             # Secrets from Secret Manager (automatically injected)
             # - DATABASE_URL
-            # - ANTHROPIC_API_KEY (Claude AI)
-            # - GOOGLE_AI_API_KEY (Gemini embeddings)
+            # - GOOGLE_AI_API_KEY (Gemini AI)
             # - AUTH_SECRET
             # - AUTH_GOOGLE_ID
             # - AUTH_GOOGLE_SECRET

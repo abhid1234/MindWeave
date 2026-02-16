@@ -72,7 +72,7 @@ echo "✅ APIs enabled"
 echo ""
 echo "🔐 Checking secrets in Secret Manager..."
 
-REQUIRED_SECRETS=("anthropic-api-key" "google-ai-api-key" "auth-secret" "database-url")
+REQUIRED_SECRETS=("google-ai-api-key" "auth-secret" "database-url")
 MISSING_SECRETS=()
 
 for secret in "${REQUIRED_SECRETS[@]}"; do

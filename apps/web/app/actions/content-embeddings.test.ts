@@ -79,7 +79,7 @@ vi.mock('@/lib/ai/claude', () => ({
   generateTags: vi.fn().mockResolvedValue(['auto-tag-1', 'auto-tag-2']),
 }));
 
-// Mock summarization module (Anthropic SDK doesn't work in test environment)
+// Mock summarization module (AI SDK not available in test environment)
 vi.mock('@/lib/ai/summarization', () => ({
   generateSummary: vi.fn().mockResolvedValue(null),
   regenerateSummary: vi.fn().mockResolvedValue(null),

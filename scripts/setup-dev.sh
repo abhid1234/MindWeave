@@ -71,9 +71,8 @@ if [ ! -f "apps/web/.env.local" ]; then
     echo ""
     echo "⚠️  IMPORTANT: Please update the following in apps/web/.env.local:"
     echo "   1. Generate AUTH_SECRET: openssl rand -base64 32"
-    echo "   2. Add your ANTHROPIC_API_KEY from https://console.anthropic.com/"
-    echo "   3. Add your OPENAI_API_KEY from https://platform.openai.com/"
-    echo "   4. (Optional) Add Google OAuth credentials"
+    echo "   2. Add your GOOGLE_AI_API_KEY from https://aistudio.google.com/app/apikey"
+    echo "   3. (Optional) Add Google OAuth credentials"
 else
     echo "✅ .env.local exists"
 fi

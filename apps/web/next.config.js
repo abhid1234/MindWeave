@@ -91,7 +91,7 @@ const nextConfig = {
           "style-src 'self' 'unsafe-inline'", // Tailwind requires inline styles
           "img-src 'self' data: https: blob:",
           "font-src 'self' data:",
-          "connect-src 'self' https://api.anthropic.com https://generativelanguage.googleapis.com https://challenges.cloudflare.com",
+          "connect-src 'self' https://generativelanguage.googleapis.com https://challenges.cloudflare.com",
           "frame-src https://challenges.cloudflare.com", // Turnstile iframe
           "frame-ancestors 'none'",
           "base-uri 'self'",

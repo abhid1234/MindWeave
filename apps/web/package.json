@@ -22,8 +22,6 @@
     "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.0.0",
-    "@anthropic-ai/sdk": "^0.30.0",
     "@auth/drizzle-adapter": "^1.7.0",
     "@google/generative-ai": "^0.21.0",
     "@hookform/resolvers": "^3.3.4",
