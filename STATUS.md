@@ -53,6 +53,9 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-16)**:
+- [x] **Content Detail Dialog** - Fixed content cards being non-clickable in Library, keyword search, and semantic search. Clicking a card now opens a detail dialog showing full title, body text, URL, tags (manual + AI), file previews, and action buttons (Edit, Share, Delete). Created reusable `ContentDetailDialog` and `SearchResultCard` components. 1440 tests passing.
+
+**Previous Enhancement (2026-02-16)**:
 - [x] **LinkedIn Launch Post** - Created and published LinkedIn launch post with 6-slide PDF carousel (Codebase Stats, AI Auto-Tagging, Knowledge Q&A, Semantic Search, Smart Library, Analytics). Generated carousel tiles as HTML, rendered via Chrome headless at 1080x1080, combined into LinkedIn-compatible PDF using Chrome's `--print-to-pdf`. Post live at [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
 **Previous Enhancement (2026-02-15)**:
