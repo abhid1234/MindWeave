@@ -53,6 +53,14 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-16)**:
+- [x] **Knowledge Q&A Fix + Demo Tasks** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0b31181`):
+  - **Knowledge Q&A Fallback** - Fixed Q&A returning "I couldn't find any relevant content" for broad queries like "Summarize all my notes". Root cause: when Gemini API fails, `generateEmbedding` returns a zero vector, cosine distance with zero vectors produces NaN, and the NaN filter excludes all results. Added `fetchRecentContent` fallback that returns recent items directly from DB when semantic search is unavailable.
+  - **Demo Tasks for New Users** - Added 5 pre-populated tasks during onboarding that guide new users through: semantic search, Knowledge Q&A, content capture, library exploration, and cross-topic discovery.
+  - **Interactive Demo Content** - Updated onboarding seed note with 5 specific actionable tasks instead of generic feature list.
+  - **CLAUDE.md Workflow Update** - Streamlined with Core Principles, Workflow Orchestration, and simplified development workflow.
+  - 1440 tests passing.
+
+**Previous Enhancement (2026-02-16)**:
 - [x] **Bug Fixes & Deployment** - Three bug fixes deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4c46942`):
   - **Content Detail Dialog** - Fixed content cards being non-clickable in Library, keyword search, and semantic search. Clicking a card now opens a detail dialog showing full title, body text, URL, tags (manual + AI), file previews, and action buttons (Edit, Share, Delete). Created reusable `ContentDetailDialog` and `SearchResultCard` components.
   - **Dashboard Stats Fix** - Fixed stats (Total Items, Tags, This Week, Favorites) showing all zeros. Root cause: React Strict Mode double-fires effects, and the `useCountUp` hook's ref-based guard prevented the animation from running on the second invocation.
