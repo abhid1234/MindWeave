@@ -135,6 +135,13 @@ export async function searchSimilarContent(
     // Generate embedding for the query
     const queryEmbedding = await generateEmbedding(query);
 
+    // Check if embedding generation failed (returns zero vector)
+    const isZeroVector = queryEmbedding.every(v => v === 0);
+    if (isZeroVector) {
+      console.warn('Query embedding generation failed (zero vector) - falling back to recent content');
+      return fetchRecentContent(userId, limit);
+    }
+
     // Convert embedding to pgvector string format: '[1,2,3,...]'
     const vectorString = `[${queryEmbedding.join(',')}]`;
 
@@ -159,13 +166,58 @@ export async function searchSimilarContent(
       LIMIT ${limit}
     `);
 
-    return (results as unknown as Record<string, unknown>[]).map((row) => ({
+    const searchResults = (results as unknown as Record<string, unknown>[]).map((row) => ({
       ...row,
       similarity: Number.isFinite(row.similarity as number) ? Number(row.similarity) : 0,
       createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt as string),
     })) as SearchResult[];
+
+    // If semantic search returned nothing (e.g. all stored embeddings are zero vectors),
+    // fall back to recent content so broad queries like "Summarize all my notes" still work
+    if (searchResults.length === 0) {
+      console.warn('Semantic search returned no results - falling back to recent content');
+      return fetchRecentContent(userId, limit);
+    }
+
+    return searchResults;
   } catch (error) {
     console.error('Error searching similar content:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch recent content as a fallback when semantic search is unavailable
+ */
+async function fetchRecentContent(
+  userId: string,
+  limit: number
+): Promise<SearchResult[]> {
+  try {
+    const results = await db.execute(sql`
+      SELECT
+        c.id,
+        c.title,
+        c.body,
+        c.type,
+        c.tags,
+        c.auto_tags as "autoTags",
+        c.url,
+        c.created_at as "createdAt",
+        0 as similarity
+      FROM ${content} c
+      WHERE c.user_id = ${userId}
+      ORDER BY c.created_at DESC
+      LIMIT ${limit}
+    `);
+
+    return (results as unknown as Record<string, unknown>[]).map((row) => ({
+      ...row,
+      similarity: 0,
+      createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt as string),
+    })) as SearchResult[];
+  } catch (error) {
+    console.error('Error fetching recent content:', error);
     return [];
   }
 }
