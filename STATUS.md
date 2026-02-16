@@ -53,13 +53,11 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-16)**:
-- [x] **Recommendation NaN% Fix** - Fixed "Recommended for You" cards showing NaN% similarity. Root cause: pgvector cosine distance returns NaN for zero-magnitude embeddings, and PostgreSQL `float8` treats NaN as greater than all numbers so the WHERE filter didn't exclude them. Added `<> 'NaN'::float8` SQL filter to both `getRecommendations` and `searchSimilarContent` queries, coerced non-finite values to 0, and hidden the similarity badge when value is 0.
-
-**Previous Enhancement (2026-02-16)**:
-- [x] **Dashboard Stats Fix** - Fixed dashboard stats (Total Items, Tags, This Week, Favorites) showing all zeros despite correct server-side values. Root cause: React Strict Mode double-fires effects, and the `useCountUp` hook's ref-based guard prevented the animation from running on the second invocation. Fixed by resetting the ref in the effect cleanup function.
-
-**Previous Enhancement (2026-02-16)**:
-- [x] **Content Detail Dialog** - Fixed content cards being non-clickable in Library, keyword search, and semantic search. Clicking a card now opens a detail dialog showing full title, body text, URL, tags (manual + AI), file previews, and action buttons (Edit, Share, Delete). Created reusable `ContentDetailDialog` and `SearchResultCard` components. 1440 tests passing.
+- [x] **Bug Fixes & Deployment** - Three bug fixes deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4c46942`):
+  - **Content Detail Dialog** - Fixed content cards being non-clickable in Library, keyword search, and semantic search. Clicking a card now opens a detail dialog showing full title, body text, URL, tags (manual + AI), file previews, and action buttons (Edit, Share, Delete). Created reusable `ContentDetailDialog` and `SearchResultCard` components.
+  - **Dashboard Stats Fix** - Fixed stats (Total Items, Tags, This Week, Favorites) showing all zeros. Root cause: React Strict Mode double-fires effects, and the `useCountUp` hook's ref-based guard prevented the animation from running on the second invocation.
+  - **Recommendation NaN% Fix** - Fixed "Recommended for You" cards showing NaN% similarity. Root cause: pgvector cosine distance returns NaN for zero-magnitude embeddings, and PostgreSQL `float8` treats NaN as greater than all numbers so the WHERE filter didn't exclude them. Added `<> 'NaN'::float8` SQL filter and hidden the badge when value is 0.
+  - 1440 tests passing.
 
 **Previous Enhancement (2026-02-16)**:
 - [x] **LinkedIn Launch Post** - Created and published LinkedIn launch post with 6-slide PDF carousel (Codebase Stats, AI Auto-Tagging, Knowledge Q&A, Semantic Search, Smart Library, Analytics). Generated carousel tiles as HTML, rendered via Chrome headless at 1080x1080, combined into LinkedIn-compatible PDF using Chrome's `--print-to-pdf`. Post live at [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
