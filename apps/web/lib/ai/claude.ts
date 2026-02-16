@@ -1,12 +1,14 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.warn('ANTHROPIC_API_KEY is not set. AI features will be disabled.');
+if (!process.env.GOOGLE_AI_API_KEY) {
+  console.warn('GOOGLE_AI_API_KEY is not set. AI features will be disabled.');
 }
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+const genAI = process.env.GOOGLE_AI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
+  : null;
+
+const GEMINI_MODEL = 'gemini-2.0-flash';
 
 export interface GenerateTagsInput {
   title: string;
@@ -25,11 +27,11 @@ export interface AnswerQuestionInput {
 }
 
 /**
- * Generate relevant tags for content using Claude
+ * Generate relevant tags for content using Gemini Flash
  */
 export async function generateTags(input: GenerateTagsInput): Promise<string[]> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.warn('Skipping tag generation - ANTHROPIC_API_KEY not set');
+  if (!genAI) {
+    console.warn('Skipping tag generation - GOOGLE_AI_API_KEY not set');
     return [];
   }
 
@@ -48,20 +50,12 @@ Return only the tags as a comma-separated list, nothing else. Make tags:
 
 Example format: machine learning, python, tutorial, data science`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 100,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const content = message.content[0];
-    if (content.type === 'text') {
-      const tags = content.text
+    if (text) {
+      const tags = text
         .split(',')
         .map((tag) => tag.trim().toLowerCase())
         .filter((tag) => tag.length > 0);
@@ -76,11 +70,11 @@ Example format: machine learning, python, tutorial, data science`;
 }
 
 /**
- * Answer a question based on the user's knowledge base
+ * Answer a question based on the user's knowledge base using Gemini Flash
  */
 export async function answerQuestion(input: AnswerQuestionInput): Promise<string> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY not set');
+  if (!genAI) {
+    throw new Error('GOOGLE_AI_API_KEY not set');
   }
 
   try {
@@ -102,20 +96,12 @@ User question: ${input.question}
 
 Please answer the question using the information from the knowledge base. If the answer cannot be found in the knowledge base, say so clearly. Cite which items you used by their numbers [1], [2], etc.`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const content = message.content[0];
-    if (content.type === 'text') {
-      return content.text;
+    if (text) {
+      return text;
     }
 
     return 'Sorry, I could not generate an answer.';
@@ -126,28 +112,22 @@ Please answer the question using the information from the knowledge base. If the
 }
 
 /**
- * Summarize a piece of content
+ * Summarize a piece of content using Gemini Flash
  */
 export async function summarizeContent(text: string): Promise<string> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY not set');
+  if (!genAI) {
+    throw new Error('GOOGLE_AI_API_KEY not set');
   }
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 200,
-      messages: [
-        {
-          role: 'user',
-          content: `Summarize this content in 2-3 sentences:\n\n${text.slice(0, 4000)}`,
-        },
-      ],
-    });
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(
+      `Summarize this content in 2-3 sentences:\n\n${text.slice(0, 4000)}`
+    );
+    const responseText = result.response.text();
 
-    const content = message.content[0];
-    if (content.type === 'text') {
-      return content.text;
+    if (responseText) {
+      return responseText;
     }
 
     return '';

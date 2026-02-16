@@ -1,11 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { db } from '@/lib/db/client';
 import { content, embeddings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+const genAI = process.env.GOOGLE_AI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
+  : null;
 
 export interface ContentCluster {
   id: string;
@@ -174,7 +174,7 @@ function kMeans(
 async function generateClusterName(
   contents: Array<{ title: string; type: string }>
 ): Promise<{ name: string; description: string }> {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!genAI) {
     return {
       name: 'Cluster',
       description: 'Group of related items',
@@ -193,17 +193,14 @@ Content types: ${types}
 Respond in JSON format:
 {"name": "cluster name", "description": "brief description"}`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 100,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const textContent = message.content[0];
-    if (textContent.type === 'text') {
+    if (text) {
       try {
         // Strip markdown code fences if present (e.g. ```json ... ```)
-        const cleaned = textContent.text
+        const cleaned = text
           .replace(/^```(?:json)?\s*/i, '')
           .replace(/\s*```\s*$/, '')
           .trim();
@@ -214,7 +211,7 @@ Respond in JSON format:
         };
       } catch {
         // If JSON parsing fails, try to extract name from text
-        const nameMatch = textContent.text.match(/"name"\s*:\s*"([^"]+)"/);
+        const nameMatch = text.match(/"name"\s*:\s*"([^"]+)"/);
         return {
           name: nameMatch ? nameMatch[1] : 'Cluster',
           description: 'Group of related items',

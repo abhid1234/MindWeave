@@ -1,9 +1,9 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { ContentType } from '@/lib/db/schema';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+const genAI = process.env.GOOGLE_AI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
+  : null;
 
 export interface GenerateSummaryInput {
   title: string;
@@ -13,12 +13,12 @@ export interface GenerateSummaryInput {
 }
 
 /**
- * Generate a 1-2 sentence summary of content using Claude
+ * Generate a 1-2 sentence summary of content using Gemini Flash
  * Returns null if API key is not set or summarization fails
  */
 export async function generateSummary(input: GenerateSummaryInput): Promise<string | null> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.warn('Skipping summarization - ANTHROPIC_API_KEY not set');
+  if (!genAI) {
+    console.warn('Skipping summarization - GOOGLE_AI_API_KEY not set');
     return null;
   }
 
@@ -43,20 +43,12 @@ ${input.url ? `URL: ${input.url}` : ''}
 
 Summary:`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 100,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const content = message.content[0];
-    if (content.type === 'text') {
-      const summary = content.text.trim();
+    if (text) {
+      const summary = text.trim();
       // Ensure summary fits in the column (max 500 chars)
       return summary.slice(0, 500);
     }

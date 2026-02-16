@@ -1,11 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import { eq, desc, count, sql } from 'drizzle-orm';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+const genAI = process.env.GOOGLE_AI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
+  : null;
 
 export type InsightType = 'connection' | 'pattern' | 'gap' | 'suggestion';
 
@@ -209,7 +209,7 @@ async function generateAISuggestions(
   userId: string,
   contentSummaries: ContentSummary[]
 ): Promise<KeyInsight[]> {
-  if (!process.env.ANTHROPIC_API_KEY || contentSummaries.length < 5) {
+  if (!genAI || contentSummaries.length < 5) {
     return [];
   }
 
@@ -233,17 +233,14 @@ Suggest a brief, actionable insight about:
 
 Respond in JSON: {"title": "short title", "description": "1-2 sentence actionable suggestion"}`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 150,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const textContent = message.content[0];
-    if (textContent.type === 'text') {
+    if (text) {
       try {
         // Strip markdown code fences if present (e.g. ```json ... ```)
-        const cleaned = textContent.text
+        const cleaned = text
           .replace(/^```(?:json)?\s*/i, '')
           .replace(/\s*```\s*$/, '')
           .trim();
@@ -252,7 +249,7 @@ Respond in JSON: {"title": "short title", "description": "1-2 sentence actionabl
           {
             type: 'suggestion' as InsightType,
             title: parsed.title || 'AI Suggestion',
-            description: parsed.description || textContent.text,
+            description: parsed.description || text,
             relatedContentIds: [],
             confidence: 0.7,
             icon: 'lightbulb',
@@ -263,7 +260,7 @@ Respond in JSON: {"title": "short title", "description": "1-2 sentence actionabl
           {
             type: 'suggestion' as InsightType,
             title: 'AI Insight',
-            description: textContent.text.slice(0, 200),
+            description: text.slice(0, 200),
             relatedContentIds: [],
             confidence: 0.6,
             icon: 'lightbulb',

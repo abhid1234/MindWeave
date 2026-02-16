@@ -1,11 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import { sql } from 'drizzle-orm';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+const genAI = process.env.GOOGLE_AI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
+  : null;
 
 export interface SearchSuggestion {
   text: string;
@@ -40,7 +40,7 @@ async function generateAISuggestions(
   query: string,
   userTopics: string[]
 ): Promise<string[]> {
-  if (!process.env.ANTHROPIC_API_KEY || query.length < 2) {
+  if (!genAI || query.length < 2) {
     return [];
   }
 
@@ -49,15 +49,12 @@ async function generateAISuggestions(
 
 Suggest 3 related search queries they might want to try. Return only the suggestions, one per line, nothing else.`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 100,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const textContent = message.content[0];
-    if (textContent.type === 'text') {
-      return textContent.text
+    if (text) {
+      return text
         .split('\n')
         .map((s) => s.trim())
         .filter((s) => s.length > 0 && s.length < 50)
