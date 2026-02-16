@@ -53,147 +53,82 @@ Mindweave/
 └── STATUS.md                   # Project status tracker
 ```
 
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
+- **Read Before Writing**: Always read existing code before modifying. Understand patterns first.
+
+## Workflow Orchestration
+
+### 1. Plan Mode Default
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately - don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Subagent Strategy
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
+
+### 3. Verification Before Done
+- Never mark a task complete without proving it works
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
+
+### 4. Demand Elegance (Balanced)
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip this for simple, obvious fixes - don't over-engineer
+- Challenge your own work before presenting it
+
+### 5. Autonomous Bug Fixing
+- When given a bug report: just fix it. Don't ask for hand-holding
+- Point at logs, errors, failing tests - then resolve them
+- Zero context switching required from the user
+- Go fix failing CI tests without being told how
+
 ## Development Workflow
 
-This project uses a **strict test-driven development workflow** with feature branches and comprehensive testing:
-
-### Feature Development Cycle
-
-**For each feature, follow these steps in order:**
-
-#### 1. Create Feature Branch
+### Quality Gates
+Before any commit, run these checks:
 ```bash
-git checkout -b feature/feature-name
+pnpm test -- --run       # All tests pass (1440+ tests)
+pnpm lint                # No linting errors
+pnpm type-check          # No TypeScript errors
 ```
 
-Branch naming convention:
-- `feature/authentication-flow`
-- `feature/note-capture`
-- `feature/semantic-search`
-
-#### 2. Build the Feature
-- Implement the feature following the plan in STATUS.md
-- Focus on ONE feature at a time
-- Follow existing code patterns and conventions
-- Use Ralph Wiggum plugin for iterative development: `/ralph-loop`
-
-#### 3. Write Comprehensive Test Cases
-**Testing Requirements:**
-- Unit tests for all business logic functions
-- Integration tests for API routes and database operations
-- Component tests for React components with React Testing Library
-- E2E tests for critical user flows with Playwright
-- **Minimum code coverage: 80%**
-
+Before deployment:
 ```bash
-npm run test:watch       # Develop tests in watch mode
-npm run test:coverage    # Check coverage percentage
+pnpm build               # Production build succeeds
 ```
 
-#### 4. Verify All Quality Checks Pass
-Before merging, ensure:
-```bash
-npm run test             # ✅ All tests pass
-npm run test:coverage    # ✅ Coverage ≥ 80%
-npm run type-check       # ✅ No TypeScript errors
-npm run lint             # ✅ No linting errors
-npm run build            # ✅ Build succeeds
-```
+### Feature Development
+1. **Plan first** - Enter plan mode, identify files to change, write approach
+2. **Build the feature** - Focus on ONE feature at a time, follow existing patterns
+3. **Write tests** - Unit, component, integration tests. Target 80%+ coverage
+4. **Verify quality** - Run all quality gates above
+5. **Test in browser** - `pnpm dev` and manually verify the feature works
+6. **Commit and push** - Descriptive commit messages
+7. **Update STATUS.md** - Mark feature complete, add to recent updates
+8. **Deploy** - Build and deploy to Cloud Run when ready
 
-**Manual verification:**
-- ✅ Feature works as expected in browser
-- ✅ Edge cases handled
-- ✅ Error states tested
-- ✅ No console errors or warnings
-
-#### 5. Merge to Main
-Only merge when feature is **completely solid**:
-```bash
-# Run all checks one final time in feature branch
-npm run test && npm run type-check && npm run lint
-
-# Merge to main
-git checkout main
-git merge feature/feature-name
-
-# Push to remote
-git push origin main
-
-# Delete feature branch
-git branch -d feature/feature-name
-```
-
-#### 6. Run Full Test Suite in Main Branch
-**CRITICAL: Verify main branch stability after every merge**
-```bash
-# Switch to main branch
-git checkout main
-
-# Run complete test suite
-npm run test              # All unit & integration tests
-npm run test:e2e          # All E2E tests
-npm run test:coverage     # Verify coverage ≥ 80%
-npm run type-check        # TypeScript validation
-npm run lint              # Code quality
-npm run build             # Production build
-
-# Manual verification
-# - Test the feature in the browser
-# - Check for console errors
-# - Verify existing features still work
-```
-
-**If any tests fail after merge:**
-- ⚠️ **STOP - Do not proceed to next feature**
-- Fix the issue immediately in main branch
-- Re-run all tests until they pass
-- Investigate why tests passed in feature branch but failed in main
-- Main branch must **ALWAYS** be stable and deployable
-
-**Why this step is critical:**
-- Catches integration issues between features
-- Detects regressions in existing functionality
-- Ensures main branch is always production-ready
-- Prevents cascading failures in future features
-
-#### 7. Update Documentation
-**📝 MANDATORY: Update documentation after every feature completion**
-
-```bash
-# Update STATUS.md
-# - Mark feature as complete in "Completed Features" section
-# - Add entry in "Recent Updates" with timestamp and details
-# - Update "Current Focus" to next feature
-# - Mark feature checkbox in "Pending Features" as [x]
-
-# Update README.md
-# - Mark feature as complete [x] in "Feature Roadmap" section
-
-# Commit documentation updates
-git add README.md STATUS.md
-git commit -m "docs: Update documentation after [feature-name] completion"
-git push origin main
-```
-
-**Why this is critical:**
-- Keeps project status transparent and up-to-date
-- Helps team understand what's completed
-- Prevents confusion (like we just had!)
-- Makes it easy to see project progress
-
-#### 8. Move to Next Feature
-**Do not start the next feature until the current one is:**
-- ✅ Fully implemented
-- ✅ All tests passing with ≥80% coverage in feature branch
-- ✅ Merged to main
-- ✅ **ALL tests passing in main branch (no regressions)**
-- ✅ Build succeeds in main
-- ✅ Feature verified working in main branch
-- ✅ **Documentation updated (README.md and STATUS.md)**
+### Bug Fixing
+1. **Reproduce** - Understand the bug (screenshot, error message, steps)
+2. **Investigate** - Read code, add debug logs if needed, trace the root cause
+3. **Fix** - Minimal, targeted fix at the root cause (not symptoms)
+4. **Remove debug code** - Clean up any console.logs added during investigation
+5. **Test** - Run full test suite, fix any broken tests
+6. **Verify in browser** - Confirm the fix works visually
+7. **Commit, push, update STATUS.md**
 
 ### Using Ralph Wiggum Plugin
 
-Ralph helps with iterative development within a feature branch:
+Ralph helps with iterative development:
 
 - Start loop: `/ralph-loop`
 - Cancel loop: `/cancel-ralph`
@@ -204,8 +139,6 @@ Ralph helps with iterative development within a feature branch:
 - Runs tests after each change
 - Fixes issues immediately
 - Ensures code quality
-
-**Important:** Ralph operates within the feature branch workflow above.
 
 ## Common Commands
 
