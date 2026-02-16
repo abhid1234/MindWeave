@@ -53,6 +53,19 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-16)**:
+- [x] **Full Gemini Migration + Cloud Build Cost Optimization** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:45840cb`):
+  - **Gemini Migration** - Migrated all AI features from Anthropic Claude (Sonnet/Haiku) to Google Gemini 2.0 Flash, eliminating ~$85/month Anthropic API costs. Gemini Flash is ~100x cheaper and covered under existing Google AI API key. Migrated 5 files:
+    - `claude.ts` — generateTags, answerQuestion, summarizeContent
+    - `summarization.ts` — generateSummary
+    - `search-suggestions.ts` — generateAISuggestions
+    - `clustering.ts` — generateClusterName
+    - `insights.ts` — generateAISuggestions
+  - **Cloud Build Cost Optimization** - Downgraded Cloud Build machine from `E2_HIGHCPU_8` (~$0.016/min) to `E2_MEDIUM` (~$0.003/min) for ~75% cost reduction. Build time increased from ~4min to ~9.5min but cost savings are significant.
+  - Updated 2 test files (`summarization.test.ts`, `insights.test.ts`) to mock `@google/generative-ai` instead of `@anthropic-ai/sdk`.
+  - Anthropic SDK (`@anthropic-ai/sdk`) can now be removed from dependencies.
+  - 1440 tests passing.
+
+**Previous Enhancement (2026-02-16)**:
 - [x] **Knowledge Q&A Fix + Demo Tasks** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0b31181`):
   - **Knowledge Q&A Fallback** - Fixed Q&A returning "I couldn't find any relevant content" for broad queries like "Summarize all my notes". Root cause: when Gemini API fails, `generateEmbedding` returns a zero vector, cosine distance with zero vectors produces NaN, and the NaN filter excludes all results. Added `fetchRecentContent` fallback that returns recent items directly from DB when semantic search is unavailable.
   - **Demo Tasks for New Users** - Added 5 pre-populated tasks during onboarding that guide new users through: semantic search, Knowledge Q&A, content capture, library exploration, and cross-topic discovery.

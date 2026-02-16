@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock Anthropic before importing
-vi.mock('@anthropic-ai/sdk', () => {
+// Mock Google Generative AI before importing
+vi.mock('@google/generative-ai', () => {
   return {
-    default: class MockAnthropic {
-      messages = {
-        create: vi.fn().mockResolvedValue({
-          content: [{ type: 'text', text: 'suggestion 1\nsuggestion 2\nsuggestion 3' }],
-        }),
-      };
+    GoogleGenerativeAI: class MockGoogleGenerativeAI {
+      getGenerativeModel() {
+        return {
+          generateContent: vi.fn().mockResolvedValue({
+            response: {
+              text: () => 'suggestion 1\nsuggestion 2\nsuggestion 3',
+            },
+          }),
+        };
+      }
     },
   };
 });
@@ -112,7 +116,7 @@ describe('Search Suggestions', () => {
     });
 
     it('should include AI suggestions when query is long enough and has topics', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.GOOGLE_AI_API_KEY = 'test-key';
       const { getSearchSuggestions } = await import('./search-suggestions');
 
       const { db } = await import('@/lib/db/client');
@@ -130,7 +134,7 @@ describe('Search Suggestions', () => {
     });
 
     it('should skip AI suggestions when query is short', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.GOOGLE_AI_API_KEY = 'test-key';
       const { getSearchSuggestions } = await import('./search-suggestions');
 
       const { db } = await import('@/lib/db/client');

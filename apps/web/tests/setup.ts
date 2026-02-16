@@ -14,7 +14,7 @@ afterEach(() => {
 // Mock environment variables
 vi.stubEnv('DATABASE_URL', 'postgresql://test:test@localhost:5432/test_db');
 vi.stubEnv('AUTH_SECRET', 'test-auth-secret');
-vi.stubEnv('ANTHROPIC_API_KEY', 'test-anthropic-key');
+// ANTHROPIC_API_KEY no longer needed — all AI features use Google Gemini
 vi.stubEnv('GOOGLE_AI_API_KEY', 'test-google-ai-key');
 vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://localhost:3000');
 
