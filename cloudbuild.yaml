@@ -83,8 +83,9 @@ images:
   - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:latest'
 
 options:
-  # Use high-performance build machine
-  machineType: 'E2_HIGHCPU_8'
+  # Use default machine (cost-effective for ~4min builds)
+  # Upgrade to E2_HIGHCPU_8 only if builds exceed 10 minutes
+  machineType: 'E2_MEDIUM'
 
   # Enable Docker layer caching
   substitutionOption: 'ALLOW_LOOSE'
