@@ -154,11 +154,16 @@ export async function searchSimilarContent(
       FROM ${content} c
       INNER JOIN ${embeddings} e ON c.id = e.content_id
       WHERE c.user_id = ${userId}
+        AND (e.embedding <=> ${vectorString}::vector) <> 'NaN'::float8
       ORDER BY e.embedding <=> ${vectorString}::vector
       LIMIT ${limit}
     `);
 
-    return results as unknown as SearchResult[];
+    return (results as unknown as Record<string, unknown>[]).map((row) => ({
+      ...row,
+      similarity: Number.isFinite(row.similarity as number) ? Number(row.similarity) : 0,
+      createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt as string),
+    })) as SearchResult[];
   } catch (error) {
     console.error('Error searching similar content:', error);
     return [];
@@ -216,12 +221,17 @@ export async function getRecommendations(
       INNER JOIN ${embeddings} e ON c.id = e.content_id
       WHERE c.id != ${contentId}
         AND c.user_id = ${userId}
+        AND (e.embedding <=> ${vectorString}::vector) <> 'NaN'::float8
         AND 1 - (e.embedding <=> ${vectorString}::vector) >= ${minSimilarity}
       ORDER BY e.embedding <=> ${vectorString}::vector
       LIMIT ${limit}
     `);
 
-    return results as unknown as Recommendation[];
+    return (results as unknown as Record<string, unknown>[]).map((row) => ({
+      ...row,
+      similarity: Number.isFinite(row.similarity as number) ? Number(row.similarity) : 0,
+      createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt as string),
+    })) as Recommendation[];
   } catch (error) {
     console.error('Error getting recommendations:', error);
     return [];

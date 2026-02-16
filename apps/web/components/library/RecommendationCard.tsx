@@ -43,7 +43,7 @@ export function RecommendationCard({
       type="button"
       onClick={onClick}
       className="w-full text-left rounded-lg border bg-card p-3 hover:bg-accent hover:border-primary/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
-      aria-label={`View ${title}, ${formatSimilarity(similarity)} similar`}
+      aria-label={`View ${title}${similarity > 0 ? `, ${formatSimilarity(similarity)} similar` : ''}`}
       data-testid={`recommendation-card-${id}`}
     >
       <div className="flex items-start gap-3">
@@ -54,12 +54,14 @@ export function RecommendationCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <h4 className="font-medium truncate text-sm">{title}</h4>
-            <span
-              className="flex-shrink-0 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full"
-              aria-label={`${formatSimilarity(similarity)} similar`}
-            >
-              {formatSimilarity(similarity)}
-            </span>
+            {similarity > 0 && (
+              <span
+                className="flex-shrink-0 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full"
+                aria-label={`${formatSimilarity(similarity)} similar`}
+              >
+                {formatSimilarity(similarity)}
+              </span>
+            )}
           </div>
 
           {tags.length > 0 && (
