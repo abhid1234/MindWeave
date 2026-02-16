@@ -118,9 +118,9 @@ const SAMPLE_CONTENT = [
   // Productivity & Learning (4 items)
   {
     type: 'note' as const,
-    title: 'Getting Started with Mindweave',
-    body: 'Welcome to Mindweave! This is your personal knowledge hub. Here are the key features to explore:\n\n1. **Capture** — Save notes, links, and files in one place\n2. **AI Tagging** — Content is automatically tagged by AI for easy organization\n3. **Semantic Search** — Find content by meaning, not just keywords\n4. **Knowledge Q&A** — Ask questions and get answers from your saved knowledge\n5. **Analytics** — See insights about your knowledge base\n\nTry searching for "how to learn effectively" to see semantic search in action!',
-    tags: ['getting-started', 'mindweave', 'productivity'],
+    title: 'Try These Demo Tasks to See Mindweave in Action',
+    body: 'Welcome to Mindweave! Try these tasks to see what your AI knowledge hub can do:\n\n**Task 1: Semantic Search**\nGo to Search and type: "how to be more focused and productive"\nNotice how it finds results across different topics — productivity, morning routines, even Atomic Habits — by understanding meaning, not just matching keywords.\n\n**Task 2: Knowledge Q&A**\nGo to Ask and try these questions:\n- "What are the best learning techniques?"\n- "Summarize my notes about healthy habits"\n- "What programming concepts have I saved?"\nThe AI reads your saved content and gives you real answers with citations.\n\n**Task 3: Capture Something New**\nGo to Capture and save a note about something you learned today. Watch how AI auto-tags it instantly — no manual organizing needed.\n\n**Task 4: Explore Your Library**\nGo to Library and try filtering by type (notes vs links) or by tags. Click any card to see its full content. Star your favorites.\n\n**Task 5: Cross-Topic Discovery**\nSearch for "self-improvement" and see how it connects book notes, health tips, and productivity systems — content you might not have found with a keyword search.',
+    tags: ['getting-started', 'mindweave', 'demo'],
     isFavorite: true,
     daysAgo: 13,
   },
