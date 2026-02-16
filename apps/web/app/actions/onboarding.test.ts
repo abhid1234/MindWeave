@@ -14,6 +14,7 @@ vi.mock('@/lib/auth', () => ({
 vi.mock('@/lib/db/schema', () => ({
   users: { id: 'id', onboardingCompleted: 'onboarding_completed', onboardingStep: 'onboarding_step' },
   content: { id: 'id', userId: 'user_id' },
+  tasks: { id: 'id', userId: 'user_id' },
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -172,7 +173,7 @@ describe('Onboarding Actions', () => {
       expect(mockInsertInto).not.toHaveBeenCalled();
     });
 
-    it('seeds sample content for new user with no existing content', async () => {
+    it('seeds sample content and tasks for new user with no existing content', async () => {
       vi.mocked(auth).mockResolvedValue({ user: { id: 'user-1' } } as never);
       mockWhere.mockResolvedValue([{ value: 0 }]);
 
@@ -181,8 +182,8 @@ describe('Onboarding Actions', () => {
 
       const result = await seedSampleContent();
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Sample content seeded successfully');
-      expect(result.seeded).toBe(15);
+      expect(result.message).toBe('Sample content and tasks seeded successfully');
+      expect(result.seeded).toBe(20); // 15 content + 5 tasks
       expect(mockInsertInto).toHaveBeenCalled();
       expect(mockInsertValues).toHaveBeenCalled();
     });

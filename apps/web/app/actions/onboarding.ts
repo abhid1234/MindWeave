@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { users, content } from '@/lib/db/schema';
+import { users, content, tasks } from '@/lib/db/schema';
 import { eq, count } from 'drizzle-orm';
 import { generateTags } from '@/lib/ai/claude';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
@@ -246,6 +246,44 @@ const SAMPLE_CONTENT = [
   },
 ] as const;
 
+const SAMPLE_TASKS = [
+  {
+    title: 'Try Semantic Search',
+    description: 'Go to Search and type "how to be more focused and productive". Notice how it finds results across different topics by understanding meaning, not just matching keywords.',
+    status: 'todo',
+    priority: 'high',
+    daysAgo: 0,
+  },
+  {
+    title: 'Ask your Knowledge Base a Question',
+    description: 'Go to Ask AI and try: "What are the best learning techniques?" or "Summarize my notes about healthy habits". The AI reads your saved content and gives answers with citations.',
+    status: 'todo',
+    priority: 'high',
+    daysAgo: 0,
+  },
+  {
+    title: 'Capture your First Note',
+    description: 'Go to Capture and save a note about something you learned today. Watch how AI auto-tags it instantly — no manual organizing needed.',
+    status: 'todo',
+    priority: 'medium',
+    daysAgo: 0,
+  },
+  {
+    title: 'Explore your Library',
+    description: 'Go to Library and try filtering by type (notes vs links) or by tags. Click any card to see its full content. Star your favorites.',
+    status: 'todo',
+    priority: 'medium',
+    daysAgo: 0,
+  },
+  {
+    title: 'Discover Cross-Topic Connections',
+    description: 'Search for "self-improvement" and see how it connects book notes, health tips, and productivity systems — content you might not have found with a keyword search.',
+    status: 'todo',
+    priority: 'low',
+    daysAgo: 0,
+  },
+];
+
 export async function seedSampleContent(): Promise<SeedResult> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -313,9 +351,26 @@ export async function seedSampleContent(): Promise<SeedResult> {
     });
   }
 
+  // Seed sample tasks for the demo
+  const taskValues = SAMPLE_TASKS.map((task) => {
+    const createdAt = new Date(now);
+    createdAt.setDate(createdAt.getDate() - task.daysAgo);
+    return {
+      userId,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      createdAt,
+      updatedAt: createdAt,
+    };
+  });
+
+  await db.insert(tasks).values(taskValues);
+
   return {
     success: true,
-    message: 'Sample content seeded successfully',
-    seeded: insertedItems.length,
+    message: 'Sample content and tasks seeded successfully',
+    seeded: insertedItems.length + taskValues.length,
   };
 }
