@@ -19,9 +19,24 @@ const displayFont = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.mindweave.space'),
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
   description: 'Capture, organize, and rediscover your ideas, notes, bookmarks, and learnings',
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'Mindweave - AI-Powered Personal Knowledge Hub',
+    description: 'Capture, organize, and rediscover your ideas, notes, bookmarks, and learnings',
+    url: 'https://www.mindweave.space',
+    siteName: 'Mindweave',
+    type: 'website',
+    images: '/icons/icon-512.png',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Mindweave - AI-Powered Personal Knowledge Hub',
+    description: 'Capture, organize, and rediscover your ideas, notes, bookmarks, and learnings',
+    images: '/icons/icon-512.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

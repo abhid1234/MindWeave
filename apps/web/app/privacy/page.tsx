@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy - Mindweave',
+  description: 'Learn how Mindweave collects, uses, and protects your personal information and content.',
+};
+
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background">

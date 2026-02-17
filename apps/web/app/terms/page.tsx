@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service - Mindweave',
+  description: 'Terms of Service for using Mindweave, the AI-powered personal knowledge hub.',
+};
+
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background">

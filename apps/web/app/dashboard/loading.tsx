@@ -7,6 +7,7 @@ export default function DashboardLoading() {
       <div className="mb-8">
         <Skeleton className="h-9 w-64 mb-2 animate-fade-up stagger-1" style={{ animationFillMode: 'backwards' }} />
         <Skeleton className="h-5 w-80 animate-fade-up stagger-2" style={{ animationFillMode: 'backwards' }} />
+        <p className="mt-3 text-sm text-muted-foreground animate-pulse">Loading your dashboard...</p>
       </div>
 
       {/* Stat cards */}

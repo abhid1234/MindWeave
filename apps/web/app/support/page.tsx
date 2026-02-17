@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { Mail, MessageCircleQuestion } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Support - Mindweave',
+  description: 'Get help with Mindweave. Find answers to frequently asked questions or contact our support team.',
+};
 
 const faqs = [
   {

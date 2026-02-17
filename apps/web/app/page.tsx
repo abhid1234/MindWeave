@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { auth } from '@/lib/auth';
@@ -23,6 +24,12 @@ import {
   Chrome,
   Globe,
 } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Mindweave - AI-Powered Personal Knowledge Hub',
+  description:
+    'Stop losing your best ideas. Capture notes, links, and files — AI auto-tags, organizes, and lets you search by meaning. Open source.',
+};
 
 const features = [
   {
@@ -240,8 +247,24 @@ export default async function Home() {
                 </a>
               </div>
 
+              {/* Product Hunt */}
+              <div className="mt-8 flex justify-center">
+                <a
+                  href="https://www.producthunt.com/products/mindweave-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/5 px-5 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 transition-colors"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 40 40" fill="currentColor" aria-hidden="true">
+                    <path d="M22.667 20H17.333V13.333H22.667C24.507 13.333 26 14.827 26 16.667C26 18.507 24.507 20 22.667 20ZM22.667 10H14V30H17.333V23.333H22.667C26.347 23.333 29.333 20.347 29.333 16.667C29.333 12.987 26.347 10 22.667 10Z" />
+                  </svg>
+                  Live on Product Hunt
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+
               {/* Floating feature pills */}
-              <div className="mt-16 flex flex-wrap items-center justify-center gap-3">
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 {heroPills.map((pill) => (
                   <span
                     key={pill}
@@ -337,6 +360,33 @@ export default async function Home() {
                   Try It Free
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* See It In Action */}
+        <section className="bg-muted/50 py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-4xl">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                  See it in <span className="text-gradient">action</span>
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                  Watch how Mindweave helps you capture, organize, and rediscover your knowledge.
+                </p>
+              </div>
+              <div className="rounded-xl border bg-card overflow-hidden shadow-soft-md">
+                <video
+                  controls
+                  preload="metadata"
+                  className="w-full"
+                  poster="/videos/mindweave-explainer.mp4#t=0.5"
+                >
+                  <source src="/videos/mindweave-explainer.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               </div>
             </div>
           </div>
@@ -459,7 +509,7 @@ export default async function Home() {
                 </a>
               </div>
               <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                <span>350+ tests passing</span>
+                <span>1,440+ tests passing</span>
                 <span className="text-border">|</span>
                 <span>TypeScript strict</span>
                 <span className="text-border">|</span>

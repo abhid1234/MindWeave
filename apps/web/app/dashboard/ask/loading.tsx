@@ -7,6 +7,7 @@ export default function AskLoading() {
       <div className="mb-8">
         <Skeleton className="h-9 w-72 mb-2" />
         <Skeleton className="h-5 w-full max-w-xl" />
+        <p className="mt-3 text-sm text-muted-foreground animate-pulse">Loading your knowledge base...</p>
       </div>
 
       {/* Chat Container */}

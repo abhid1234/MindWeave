@@ -29,6 +29,7 @@ export default function SearchLoading() {
       <div className="mb-8">
         <Skeleton className="h-9 w-28 mb-2" />
         <Skeleton className="h-5 w-64" />
+        <p className="mt-3 text-sm text-muted-foreground animate-pulse">Loading your search...</p>
       </div>
 
       {/* Search Form */}
