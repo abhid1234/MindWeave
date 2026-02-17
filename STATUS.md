@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-16
+**Last Updated**: 2026-02-17
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -52,7 +52,17 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-16)**:
+**Latest Enhancement (2026-02-17)**:
+- [x] **Product Explainer Video** - Created 2:04 product demo video (`video-demo/mindweave-explainer-final.mp4`):
+  - **12-scene video** with real authenticated app screenshots: Dashboard, Capture, Chrome Extension, Search, Ask AI, Library, Analytics.
+  - **ElevenLabs voiceover** (Rachel voice) — professional narration covering problem statement, feature walkthrough, and CTA.
+  - **Ken Burns zoom effects** on all screenshots with fade transitions between scenes.
+  - Captured real dashboard screenshots via Playwright with authenticated session cookie.
+  - Chrome Extension screenshot showing the popup with "Save to Mindweave" functionality.
+  - Built with ffmpeg pipeline: zoompan effects, drawtext overlays, concat, AAC audio merge.
+  - Also created text-overlay-only version and Claude Code skills for deploy, test, status, and find-skills.
+
+**Previous Enhancement (2026-02-16)**:
 - [x] **Anthropic SDK Removal & Full Cleanup** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fe3479e`):
   - **Removed `@ai-sdk/anthropic` and `@anthropic-ai/sdk`** from `package.json` — 26 packages pruned from lockfile.
   - **Cleaned all config/deployment files**: removed `ANTHROPIC_API_KEY` from `cloudbuild.yaml`, `cloud-run-service.yaml`, `deploy-gcp.sh`, `setup-gcp-secrets.sh`, `setup-dev.sh`, `.env.example`, `.env.production.example`.
