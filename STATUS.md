@@ -53,6 +53,17 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-17)**:
+- [x] **App Polish & SEO for Product Hunt Launch** - 8 improvements for a more professional first impression:
+  - **OpenGraph & Twitter Card meta tags** on root layout for rich social sharing previews (LinkedIn, Twitter/X).
+  - **Custom 404 page** (`not-found.tsx`) with centered layout, navigation buttons, and GitHub issue link.
+  - **Demo video section** on landing page ("See it in action") embedding the explainer video.
+  - **Product Hunt badge** in hero section linking to the PH product page.
+  - **Landing page metadata** — homepage-specific title/description for better SEO.
+  - **Legal page metadata** — title/description on Privacy, Terms, and Support pages.
+  - **Loading state text hints** — "Loading your dashboard/search/knowledge base..." on dashboard loading screens.
+  - **Test count updated** from 350+ to 1,440+ on landing page.
+
+**Previous Enhancement (2026-02-17)**:
 - [x] **Product Explainer Video** - Created 2:04 product demo video (`video-demo/mindweave-explainer-final.mp4`):
   - **12-scene video** with real authenticated app screenshots: Dashboard, Capture, Chrome Extension, Search, Ask AI, Library, Analytics.
   - **ElevenLabs voiceover** (Rachel voice) — professional narration covering problem statement, feature walkthrough, and CTA.
