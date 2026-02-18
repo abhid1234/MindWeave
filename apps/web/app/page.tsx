@@ -381,8 +381,7 @@ export default async function Home() {
                 <video
                   controls
                   preload="metadata"
-                  className="w-full"
-                  poster="/videos/mindweave-explainer.mp4#t=0.5"
+                  className="w-full aspect-video bg-black"
                 >
                   <source src="/videos/mindweave-explainer.mp4" type="video/mp4" />
                   Your browser does not support the video tag.
