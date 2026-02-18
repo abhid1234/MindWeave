@@ -53,7 +53,7 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-18)**:
-- [x] **OG Image, JSON-LD, Favicon & Keyboard Shortcuts** (`1912131`). 4 quick wins for social sharing, SEO, and power-user UX:
+- [x] **OG Image, JSON-LD, Favicon & Keyboard Shortcuts** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:62bf9db`). 4 quick wins for social sharing, SEO, and power-user UX:
   - **Dynamic OG image** (1200x630) via `opengraph-image.tsx` using Next.js `ImageResponse` — dark gradient, branding, feature pills. Auto-injected for OpenGraph + Twitter Card.
   - **JSON-LD structured data** on landing page — `WebSite` + `WebApplication` schemas for rich search results.
   - **Favicon coverage** — generated `favicon.ico` (32x32), added SVG icon to metadata alongside existing apple-touch-icon.
