@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-17
+**Last Updated**: 2026-02-18
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -52,8 +52,8 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-17)**:
-- [x] **App Polish & SEO for Product Hunt Launch** - 8 improvements for a more professional first impression:
+**Latest Enhancement (2026-02-18)**:
+- [x] **App Polish & SEO for Product Hunt Launch** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d2e13e4`). 8 improvements for a more professional first impression:
   - **OpenGraph & Twitter Card meta tags** on root layout for rich social sharing previews (LinkedIn, Twitter/X).
   - **Custom 404 page** (`not-found.tsx`) with centered layout, navigation buttons, and GitHub issue link.
   - **Demo video section** on landing page ("See it in action") embedding the explainer video.
