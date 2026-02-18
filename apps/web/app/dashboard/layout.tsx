@@ -7,6 +7,7 @@ import Header from '@/components/layout/header';
 import Nav from '@/components/layout/nav';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { CommandPalette } from '@/components/ui/command-palette';
+import { KeyboardShortcutsProvider } from '@/components/keyboard-shortcuts-provider';
 import { ViewTransition } from '@/components/layout/ViewTransition';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
@@ -53,6 +54,7 @@ export default async function DashboardLayout({
       <BottomNav />
       <ScrollToTop />
       <CommandPalette />
+      <KeyboardShortcutsProvider />
       <ViewTransition />
       <FeedbackWidget />
     </div>

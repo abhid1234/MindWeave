@@ -146,6 +146,47 @@ const heroPills = [
   'Android App',
 ];
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: 'Mindweave',
+      url: 'https://www.mindweave.space',
+      description:
+        'AI-powered personal knowledge hub. Capture notes, links, and files — AI auto-tags, organizes, and lets you search by meaning.',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Mindweave',
+        url: 'https://www.mindweave.space',
+      },
+    },
+    {
+      '@type': 'WebApplication',
+      name: 'Mindweave',
+      url: 'https://www.mindweave.space',
+      description:
+        'Stop losing your best ideas. Capture notes, links, and files — AI auto-tags, organizes, and lets you search by meaning. Open source.',
+      applicationCategory: 'ProductivityApplication',
+      operatingSystem: 'Any',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      featureList: [
+        'AI Auto-Tagging',
+        'Semantic Search',
+        'Knowledge Q&A',
+        'Quick Capture',
+        'Smart Library',
+        'Chrome Extension',
+      ],
+      screenshot: 'https://www.mindweave.space/opengraph-image',
+    },
+  ],
+};
+
 export default async function Home() {
   const session = await auth();
 
@@ -155,6 +196,10 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 glass glass-dark border-b border-border/50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">

@@ -29,13 +29,11 @@ export const metadata: Metadata = {
     url: 'https://www.mindweave.space',
     siteName: 'Mindweave',
     type: 'website',
-    images: '/icons/icon-512.png',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Mindweave - AI-Powered Personal Knowledge Hub',
     description: 'Capture, organize, and rediscover your ideas, notes, bookmarks, and learnings',
-    images: '/icons/icon-512.png',
   },
   appleWebApp: {
     capable: true,
@@ -46,6 +44,10 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+    ],
     apple: '/icons/apple-touch-icon.png',
   },
 };
