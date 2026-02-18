@@ -426,6 +426,7 @@ export default async function Home() {
                 <video
                   controls
                   preload="metadata"
+                  poster="/videos/mindweave-explainer-poster.jpg"
                   className="w-full aspect-video bg-black"
                 >
                   <source src="/videos/mindweave-explainer.mp4" type="video/mp4" />
