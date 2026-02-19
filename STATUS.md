@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-18
+**Last Updated**: 2026-02-19
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -52,7 +52,14 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-18)**:
+**Latest Enhancement (2026-02-19)**:
+- [x] **SEO & Performance Optimization** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:14ae39b`). 3 optimizations for SEO and mobile performance:
+  - **Canonical URLs** — added `alternates.canonical` to root layout metadata, resolved relative to `metadataBase` for every page to prevent duplicate content issues.
+  - **Compressed mobile video** — created 720p version of explainer video (6.4 MB vs 19 MB original). Served to mobile devices via `<source media="(max-width: 768px)">`.
+  - **Video dimensions** — added explicit `width`/`height` to landing page video element to prevent CLS (Cumulative Layout Shift).
+  - **README links section** — added all product launch URLs (app, Chrome Extension, blog, Product Hunt, LinkedIn, video).
+
+**Previous Enhancement (2026-02-18)**:
 - [x] **OG Image, JSON-LD, Favicon & Keyboard Shortcuts** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0ca68b0`). 4 quick wins for social sharing, SEO, and power-user UX:
   - **Dynamic OG image** (1200x630) via `opengraph-image.tsx` using Next.js `ImageResponse` — dark gradient, branding, feature pills. Auto-injected for OpenGraph + Twitter Card.
   - **JSON-LD structured data** on landing page — `WebSite` + `WebApplication` schemas for rich search results.
