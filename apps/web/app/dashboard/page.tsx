@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { formatDateUTC } from '@/lib/utils';
 import { DashboardRecommendations } from '@/components/dashboard/DashboardRecommendations';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
+import { Zap, Search, Library, ArrowRight } from 'lucide-react';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -59,6 +60,36 @@ export default async function DashboardPage() {
     .orderBy(desc(content.createdAt))
     .limit(5);
 
+  const quickActions = [
+    {
+      href: '/dashboard/capture',
+      label: 'Quick Capture',
+      description: 'Save a note, link, or file',
+      icon: Zap,
+      iconBg: 'bg-amber-500/10',
+      iconColor: 'text-amber-600',
+      borderHover: 'hover:border-amber-500/30',
+    },
+    {
+      href: '/dashboard/search',
+      label: 'Search',
+      description: 'Find anything in your knowledge base',
+      icon: Search,
+      iconBg: 'bg-blue-500/10',
+      iconColor: 'text-blue-600',
+      borderHover: 'hover:border-blue-500/30',
+    },
+    {
+      href: '/dashboard/library',
+      label: 'Browse Library',
+      description: 'Explore all your content',
+      icon: Library,
+      iconBg: 'bg-green-500/10',
+      iconColor: 'text-green-600',
+      borderHover: 'hover:border-green-500/30',
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-8">
@@ -68,90 +99,98 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats */}
-      <DashboardStats totalCount={totalCount} tagCount={tagCount} thisWeekCount={thisWeekCount} favoritesCount={favoritesCount} />
-
-      {/* Recent Items */}
-      <div className="mt-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Recent Items</h2>
-          <Link href="/dashboard/library" className="text-sm text-primary hover:underline">
-            View All
-          </Link>
+      {/* Bento Grid */}
+      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+        {/* Left column - Stats */}
+        <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+          <DashboardStats totalCount={totalCount} tagCount={tagCount} thisWeekCount={thisWeekCount} favoritesCount={favoritesCount} />
         </div>
 
-        {latestItems.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-12 text-center">
-            <p className="text-muted-foreground">No content yet. Start capturing your ideas!</p>
+        {/* Right column - Quick Actions (stacked) */}
+        <div className="flex flex-col gap-3">
+          {quickActions.map((action, i) => (
             <Link
-              href="/dashboard/capture"
-              className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              key={action.href}
+              href={action.href}
+              className={`group flex items-center gap-4 rounded-xl border bg-card p-4 transition-all duration-200 animate-fade-up hover:shadow-soft-md hover:-translate-y-0.5 ${action.borderHover}`}
+              style={{ animationDelay: `${(i + 1) * 75}ms`, animationFillMode: 'backwards' }}
             >
-              Create Your First Note
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.iconBg}`}>
+                <action.icon className={`h-5 w-5 ${action.iconColor}`} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold">{action.label}</h3>
+                <p className="text-xs text-muted-foreground">{action.description}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
+            </Link>
+          ))}
+        </div>
+
+        {/* Recent Items - spans full left column */}
+        <div
+          className="animate-fade-up"
+          style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Recent Items</h2>
+            <Link href="/dashboard/library" className="text-sm text-primary hover:underline">
+              View All
             </Link>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {latestItems.map((item) => (
-              <Link key={item.id} href={`/dashboard/library?highlight=${item.id}`} className="block rounded-lg border bg-card p-4 transition-colors hover:bg-accent">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold">{item.title.split(/\s+/).slice(0, 10).join(' ')}{item.title.split(/\s+/).length > 10 ? '...' : ''}</h3>
-                    {item.body && (
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                        {item.body}
-                      </p>
-                    )}
-                    {(item.tags?.length ?? 0) > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {(item.tags ?? []).map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDateUTC(item.createdAt)}
-                  </span>
-                </div>
+
+          {latestItems.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-12 text-center">
+              <p className="text-muted-foreground">No content yet. Start capturing your ideas!</p>
+              <Link
+                href="/dashboard/capture"
+                className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                Create Your First Note
               </Link>
-            ))}
-          </div>
-        )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {latestItems.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/dashboard/library?highlight=${item.id}`}
+                  className="block rounded-xl border bg-card p-4 transition-all duration-200 hover:shadow-soft-md hover:-translate-y-0.5"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold">{item.title.split(/\s+/).slice(0, 10).join(' ')}{item.title.split(/\s+/).length > 10 ? '...' : ''}</h3>
+                      {item.body && (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {item.body}
+                        </p>
+                      )}
+                      {(item.tags?.length ?? 0) > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {(item.tags ?? []).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDateUTC(item.createdAt)}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Recommendations */}
+      {/* Recommendations - full width */}
       <DashboardRecommendations />
-
-      {/* Quick Actions */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <Link
-          href="/dashboard/capture"
-          className="rounded-lg border bg-card p-6 hover:bg-accent"
-        >
-          <h3 className="font-semibold">Quick Capture</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Save a note, link, or file</p>
-        </Link>
-        <Link
-          href="/dashboard/search"
-          className="rounded-lg border bg-card p-6 hover:bg-accent"
-        >
-          <h3 className="font-semibold">Search</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Find anything in your knowledge base</p>
-        </Link>
-        <Link
-          href="/dashboard/library"
-          className="rounded-lg border bg-card p-6 hover:bg-accent"
-        >
-          <h3 className="font-semibold">Browse Library</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Explore all your content</p>
-        </Link>
-      </div>
     </div>
   );
 }
