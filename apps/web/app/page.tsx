@@ -345,22 +345,6 @@ export default async function Home() {
                 ))}
               </div>
             </div>
-
-            {/* Hero Product Image */}
-            <ScrollReveal animation="scale-in">
-              <div className="mx-auto mt-16 max-w-5xl [perspective:1200px]">
-                <div className="rounded-xl border border-border/50 shadow-soft-lg overflow-hidden transition-transform duration-500 [transform:rotateX(2deg)] hover:[transform:rotateX(0deg)]">
-                  <Image
-                    src="/videos/mindweave-explainer-poster.jpg"
-                    alt="Mindweave dashboard preview"
-                    width={1200}
-                    height={675}
-                    priority
-                    className="w-full h-auto"
-                  />
-                </div>
-              </div>
-            </ScrollReveal>
           </div>
         </section>
 
@@ -408,27 +392,31 @@ export default async function Home() {
 
                   if (isLarge) {
                     return (
-                      <ScrollReveal key={feature.title} delay={i * 100} className="lg:col-span-2 lg:row-span-2">
+                      <ScrollReveal key={feature.title} delay={i * 100} className="sm:col-span-2">
                         <div
                           className={`group spotlight-card rounded-xl border ${feature.cardBorder} ${feature.cardBg} p-8 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}
                         >
-                          <div className={`inline-flex rounded-xl p-4 ${feature.bg} ${feature.border} border mb-5`}>
-                            <Icon className={`h-10 w-10 ${feature.color}`} />
+                          <div className="flex flex-col sm:flex-row sm:items-start gap-5">
+                            <div className={`inline-flex rounded-xl p-4 ${feature.bg} ${feature.border} border shrink-0`}>
+                              <Icon className={`h-8 w-8 ${feature.color}`} />
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                              <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                                {feature.description}
+                              </p>
+                              {'bullets' in feature && (
+                                <ul className="flex flex-wrap gap-x-4 gap-y-1.5">
+                                  {feature.bullets.map((bullet) => (
+                                    <li key={bullet} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                      <div className={`h-1.5 w-1.5 rounded-full ${feature.bg.replace('/10', '')} shrink-0`} />
+                                      {bullet}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
                           </div>
-                          <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
-                          <p className="text-base text-muted-foreground leading-relaxed mb-5">
-                            {feature.description}
-                          </p>
-                          {'bullets' in feature && (
-                            <ul className="space-y-2">
-                              {feature.bullets.map((bullet) => (
-                                <li key={bullet} className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <div className={`h-1.5 w-1.5 rounded-full ${feature.bg.replace('/10', '')} shrink-0`} />
-                                  {bullet}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
                         </div>
                       </ScrollReveal>
                     );
