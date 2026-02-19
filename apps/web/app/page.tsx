@@ -24,6 +24,7 @@ import {
   Chrome,
   Globe,
 } from 'lucide-react';
+import { ScrollReveal } from '@/components/ui/scroll-reveal';
 
 export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
@@ -39,6 +40,8 @@ const features = [
     color: 'text-yellow-500',
     bg: 'bg-yellow-500/10',
     border: 'border-yellow-500/20',
+    cardBg: 'bg-yellow-500/5',
+    cardBorder: 'border-yellow-500/15',
   },
   {
     icon: Tags,
@@ -47,6 +50,8 @@ const features = [
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/20',
+    cardBg: 'bg-blue-500/5',
+    cardBorder: 'border-blue-500/15',
   },
   {
     icon: Search,
@@ -55,6 +60,8 @@ const features = [
     color: 'text-green-500',
     bg: 'bg-green-500/10',
     border: 'border-green-500/20',
+    cardBg: 'bg-green-500/5',
+    cardBorder: 'border-green-500/15',
   },
   {
     icon: MessageCircleQuestion,
@@ -63,6 +70,8 @@ const features = [
     color: 'text-purple-500',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/20',
+    cardBg: 'bg-purple-500/5',
+    cardBorder: 'border-purple-500/15',
   },
   {
     icon: Library,
@@ -71,6 +80,8 @@ const features = [
     color: 'text-orange-500',
     bg: 'bg-orange-500/10',
     border: 'border-orange-500/20',
+    cardBg: 'bg-orange-500/5',
+    cardBorder: 'border-orange-500/15',
   },
   {
     icon: Shield,
@@ -79,6 +90,8 @@ const features = [
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
     border: 'border-emerald-500/20',
+    cardBg: 'bg-emerald-500/5',
+    cardBorder: 'border-emerald-500/15',
   },
 ];
 
@@ -92,6 +105,8 @@ const steps = [
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/20',
+    cardBg: 'bg-blue-500/5',
+    cardBorder: 'border-blue-500/15',
   },
   {
     number: '2',
@@ -102,6 +117,8 @@ const steps = [
     color: 'text-purple-500',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/20',
+    cardBg: 'bg-purple-500/5',
+    cardBorder: 'border-purple-500/15',
   },
   {
     number: '3',
@@ -112,6 +129,8 @@ const steps = [
     color: 'text-green-500',
     bg: 'bg-green-500/10',
     border: 'border-green-500/20',
+    cardBg: 'bg-green-500/5',
+    cardBorder: 'border-green-500/15',
   },
   {
     number: '4',
@@ -122,6 +141,8 @@ const steps = [
     color: 'text-orange-500',
     bg: 'bg-orange-500/10',
     border: 'border-orange-500/20',
+    cardBg: 'bg-orange-500/5',
+    cardBorder: 'border-orange-500/15',
   },
 ];
 
@@ -327,32 +348,35 @@ export default async function Home() {
         <section id="features" className="bg-muted/50 py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-5xl">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                  Everything you need to{' '}
-                  <span className="text-gradient">remember</span>
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Powered by Gemini AI and semantic search to help you capture, organize,
-                  and rediscover your knowledge effortlessly.
-                </p>
-              </div>
+              <ScrollReveal>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Everything you need to{' '}
+                    <span className="text-gradient">remember</span>
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Powered by Gemini AI and semantic search to help you capture, organize,
+                    and rediscover your knowledge effortlessly.
+                  </p>
+                </div>
+              </ScrollReveal>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {features.map((feature) => {
+                {features.map((feature, i) => {
                   const Icon = feature.icon;
                   return (
-                    <div
-                      key={feature.title}
-                      className="group spotlight-card rounded-xl border bg-card p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20"
-                    >
-                      <div className={`inline-flex rounded-xl p-3 ${feature.bg} ${feature.border} border mb-4`}>
-                        <Icon className={`h-6 w-6 ${feature.color}`} />
+                    <ScrollReveal key={feature.title} delay={i * 100}>
+                      <div
+                        className={`group spotlight-card rounded-xl border ${feature.cardBorder} ${feature.cardBg} p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}
+                      >
+                        <div className={`inline-flex rounded-xl p-3 ${feature.bg} ${feature.border} border mb-4`}>
+                          <Icon className={`h-6 w-6 ${feature.color}`} />
+                        </div>
+                        <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {feature.description}
+                        </p>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </div>
+                    </ScrollReveal>
                   );
                 })}
               </div>
@@ -364,48 +388,54 @@ export default async function Home() {
         <section id="how-it-works" className="py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-5xl">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                  Four steps.{' '}
-                  <span className="text-gradient">Total recall.</span>
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Save it once and let AI handle the rest.
-                </p>
-              </div>
+              <ScrollReveal>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Four steps.{' '}
+                    <span className="text-gradient">Total recall.</span>
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                    Save it once and let AI handle the rest.
+                  </p>
+                </div>
+              </ScrollReveal>
               <div className="grid gap-6 sm:grid-cols-2">
-                {steps.map((step) => {
+                {steps.map((step, i) => {
                   const StepIcon = step.icon;
                   return (
-                    <div key={step.number} className="group relative rounded-xl border bg-card p-8 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20">
-                      <div className="flex items-start gap-5">
-                        <div className="flex-shrink-0">
-                          <div className={`flex h-14 w-14 items-center justify-center rounded-xl ${step.bg} ${step.border} border`}>
-                            <StepIcon className={`h-6 w-6 ${step.color}`} />
+                    <ScrollReveal key={step.number} delay={i * 100}>
+                      <div className={`group relative rounded-xl border ${step.cardBorder} ${step.cardBg} p-8 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}>
+                        <div className="flex items-start gap-5">
+                          <div className="flex-shrink-0">
+                            <div className={`flex h-14 w-14 items-center justify-center rounded-xl ${step.bg} ${step.border} border`}>
+                              <StepIcon className={`h-6 w-6 ${step.color}`} />
+                            </div>
+                            <span className="mt-2 block text-center text-xs font-bold text-muted-foreground/60">
+                              {step.number}
+                            </span>
                           </div>
-                          <span className="mt-2 block text-center text-xs font-bold text-muted-foreground/60">
-                            {step.number}
-                          </span>
-                        </div>
-                        <div className="pt-1">
-                          <h3 className="text-xl font-semibold">{step.title}</h3>
-                          <p className="mt-0.5 text-sm font-medium text-primary/80">{step.subtitle}</p>
-                          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+                          <div className="pt-1">
+                            <h3 className="text-xl font-semibold">{step.title}</h3>
+                            <p className="mt-0.5 text-sm font-medium text-primary/80">{step.subtitle}</p>
+                            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </ScrollReveal>
                   );
                 })}
               </div>
-              <div className="mt-12 text-center">
-                <Link
-                  href="/login"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Try It Free
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
+              <ScrollReveal>
+                <div className="mt-12 text-center">
+                  <Link
+                    href="/login"
+                    className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Try It Free
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
@@ -414,28 +444,30 @@ export default async function Home() {
         <section className="bg-muted/50 py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                  See it in <span className="text-gradient">action</span>
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Watch how Mindweave helps you capture, organize, and rediscover your knowledge.
-                </p>
-              </div>
-              <div className="rounded-xl border bg-card overflow-hidden shadow-soft-md">
-                <video
-                  controls
-                  preload="metadata"
-                  poster="/videos/mindweave-explainer-poster.jpg"
-                  className="w-full aspect-video bg-black"
-                  width={1920}
-                  height={1080}
-                >
-                  <source src="/videos/mindweave-explainer-mobile.mp4" type="video/mp4" media="(max-width: 768px)" />
-                  <source src="/videos/mindweave-explainer.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
+              <ScrollReveal>
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    See it in <span className="text-gradient">action</span>
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground">
+                    Watch how Mindweave helps you capture, organize, and rediscover your knowledge.
+                  </p>
+                </div>
+                <div className="rounded-xl border bg-card overflow-hidden shadow-soft-md">
+                  <video
+                    controls
+                    preload="metadata"
+                    poster="/videos/mindweave-explainer-poster.jpg"
+                    className="w-full aspect-video bg-black"
+                    width={1920}
+                    height={1080}
+                  >
+                    <source src="/videos/mindweave-explainer-mobile.mp4" type="video/mp4" media="(max-width: 768px)" />
+                    <source src="/videos/mindweave-explainer.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
@@ -444,57 +476,65 @@ export default async function Home() {
         <section className="py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-5xl">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                  Available everywhere
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Capture knowledge from any device, any browser, anywhere.
-                </p>
-              </div>
+              <ScrollReveal>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Available everywhere
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground">
+                    Capture knowledge from any device, any browser, anywhere.
+                  </p>
+                </div>
+              </ScrollReveal>
               <div className="grid gap-6 sm:grid-cols-3">
                 {/* Web App */}
-                <div className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
-                  <div className="inline-flex rounded-xl p-4 bg-blue-500/10 border border-blue-500/20 mb-5">
-                    <Globe className="h-8 w-8 text-blue-500" />
+                <ScrollReveal delay={0}>
+                  <div className="group rounded-xl border border-blue-500/15 bg-blue-500/5 p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20 h-full">
+                    <div className="inline-flex rounded-xl p-4 bg-blue-500/10 border border-blue-500/20 mb-5">
+                      <Globe className="h-8 w-8 text-blue-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Web App</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Full-featured dashboard for capturing, searching, and managing your knowledge base from any browser.
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Web App</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Full-featured dashboard for capturing, searching, and managing your knowledge base from any browser.
-                  </p>
-                </div>
+                </ScrollReveal>
                 {/* Chrome Extension */}
-                <a
-                  href="https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20"
-                >
-                  <div className="inline-flex rounded-xl p-4 bg-green-500/10 border border-green-500/20 mb-5">
-                    <Chrome className="h-8 w-8 text-green-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Chrome Extension</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Save any webpage with one click. Auto-captures title, URL, and content — AI tags it instantly.
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
-                    Get it on Chrome Web Store
-                    <ArrowRight className="h-3 w-3" />
-                  </span>
-                </a>
+                <ScrollReveal delay={100}>
+                  <a
+                    href="https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group rounded-xl border border-green-500/15 bg-green-500/5 p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20 block h-full"
+                  >
+                    <div className="inline-flex rounded-xl p-4 bg-green-500/10 border border-green-500/20 mb-5">
+                      <Chrome className="h-8 w-8 text-green-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Chrome Extension</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Save any webpage with one click. Auto-captures title, URL, and content — AI tags it instantly.
+                    </p>
+                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                      Get it on Chrome Web Store
+                      <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </a>
+                </ScrollReveal>
                 {/* Android App */}
-                <div className="group relative rounded-xl border bg-card p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20">
-                  <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-amber-600">
-                    Coming Soon
-                  </span>
-                  <div className="inline-flex rounded-xl p-4 bg-purple-500/10 border border-purple-500/20 mb-5">
-                    <Smartphone className="h-8 w-8 text-purple-500" />
+                <ScrollReveal delay={200}>
+                  <div className="group relative rounded-xl border border-purple-500/15 bg-purple-500/5 p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20 h-full">
+                    <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-amber-600">
+                      Coming Soon
+                    </span>
+                    <div className="inline-flex rounded-xl p-4 bg-purple-500/10 border border-purple-500/20 mb-5">
+                      <Smartphone className="h-8 w-8 text-purple-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Android App</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Capture ideas on the go. Share links and notes directly from any app to your Mindweave knowledge base. Currently in Closed Testing.
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Android App</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Capture ideas on the go. Share links and notes directly from any app to your Mindweave knowledge base. Currently in Closed Testing.
-                  </p>
-                </div>
+                </ScrollReveal>
               </div>
             </div>
           </div>
@@ -504,28 +544,30 @@ export default async function Home() {
         <section id="tech-stack" className="bg-muted/50 py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                  Built with modern tech
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Production-grade stack for reliability and performance.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {techStack.map((tech) => {
-                  const TechIcon = tech.icon;
-                  return (
-                    <div
-                      key={tech.name}
-                      className="group flex flex-col items-center gap-3 rounded-xl border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20"
-                    >
-                      <TechIcon className={`h-8 w-8 ${tech.color} transition-transform group-hover:scale-110`} />
-                      <span className="text-sm font-semibold">{tech.name}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <ScrollReveal>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Built with modern tech
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground">
+                    Production-grade stack for reliability and performance.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  {techStack.map((tech) => {
+                    const TechIcon = tech.icon;
+                    return (
+                      <div
+                        key={tech.name}
+                        className="group flex flex-col items-center gap-3 rounded-xl border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-md hover:border-primary/20"
+                      >
+                        <TechIcon className={`h-8 w-8 ${tech.color} transition-transform group-hover:scale-110`} />
+                        <span className="text-sm font-semibold">{tech.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
@@ -533,83 +575,89 @@ export default async function Home() {
         {/* Open Source CTA */}
         <section className="py-24">
           <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-sm font-medium text-muted-foreground mb-8">
-                <Github className="h-4 w-4" />
-                Open Source
+            <ScrollReveal>
+              <div className="mx-auto max-w-3xl text-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-sm font-medium text-muted-foreground mb-8">
+                  <Github className="h-4 w-4" />
+                  Open Source
+                </div>
+                <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl mb-4">
+                  Built in the open
+                </h2>
+                <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+                  Mindweave is fully open source. Explore the code, contribute, or self-host your own instance.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <a
+                    href="https://github.com/abhid1234/MindWeave"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-base font-semibold hover:bg-accent transition-colors"
+                  >
+                    <Github className="h-5 w-5" />
+                    Star on GitHub
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </a>
+                </div>
+                <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                  <span>1,440+ tests passing</span>
+                  <span className="text-border">|</span>
+                  <span>TypeScript strict</span>
+                  <span className="text-border">|</span>
+                  <span>MIT License</span>
+                </div>
               </div>
-              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl mb-4">
-                Built in the open
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-                Mindweave is fully open source. Explore the code, contribute, or self-host your own instance.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a
-                  href="https://github.com/abhid1234/MindWeave"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-base font-semibold hover:bg-accent transition-colors"
-                >
-                  <Github className="h-5 w-5" />
-                  Star on GitHub
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </a>
-              </div>
-              <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                <span>1,440+ tests passing</span>
-                <span className="text-border">|</span>
-                <span>TypeScript strict</span>
-                <span className="text-border">|</span>
-                <span>MIT License</span>
-              </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* Soft Launch Notice */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-2xl rounded-xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
-              <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-600 mb-4">
-                Soft Launch
-              </span>
-              <h3 className="text-xl font-semibold mb-2">Help Us Improve</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                This is Mindweave&apos;s first soft launch. The product is live and fully functional,
-                but we expect to discover bugs as more users start using it. If you run into anything
-                unexpected, please report it on GitHub — every bug report helps!
-              </p>
-              <a
-                href="https://github.com/abhid1234/MindWeave/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-semibold hover:bg-accent transition-colors"
-              >
-                <Github className="h-4 w-4" />
-                Report a Bug on GitHub
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </a>
-            </div>
+            <ScrollReveal>
+              <div className="mx-auto max-w-2xl rounded-xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
+                <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-600 mb-4">
+                  Soft Launch
+                </span>
+                <h3 className="text-xl font-semibold mb-2">Help Us Improve</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  This is Mindweave&apos;s first soft launch. The product is live and fully functional,
+                  but we expect to discover bugs as more users start using it. If you run into anything
+                  unexpected, please report it on GitHub — every bug report helps!
+                </p>
+                <a
+                  href="https://github.com/abhid1234/MindWeave/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-semibold hover:bg-accent transition-colors"
+                >
+                  <Github className="h-4 w-4" />
+                  Report a Bug on GitHub
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </a>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* Final CTA */}
         <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-24">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl mb-4">
-              Stop losing your best ideas
-            </h2>
-            <p className="text-lg text-muted-foreground mb-10 max-w-lg mx-auto">
-              Start building your AI-powered knowledge base today. Free and open source.
-            </p>
-            <Link
-              href="/login"
-              className="group inline-flex items-center gap-2 rounded-lg bg-primary px-10 py-4 text-lg font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Get Started Free
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            <ScrollReveal>
+              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl mb-4">
+                Stop losing your best ideas
+              </h2>
+              <p className="text-lg text-muted-foreground mb-10 max-w-lg mx-auto">
+                Start building your AI-powered knowledge base today. Free and open source.
+              </p>
+              <Link
+                href="/login"
+                className="group inline-flex items-center gap-2 rounded-lg bg-primary px-10 py-4 text-lg font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Get Started Free
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </ScrollReveal>
           </div>
         </section>
       </main>

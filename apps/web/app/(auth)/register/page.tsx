@@ -116,14 +116,14 @@ export default async function RegisterPage({
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
+    <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
+      <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-1">
             <Image src="/icons/icon.svg" alt="Mindweave logo" width={40} height={40} className="rounded-lg" />
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
           </div>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             Create your account
           </p>
         </div>
@@ -140,14 +140,14 @@ export default async function RegisterPage({
               type="text"
               name="name"
               placeholder="Full name"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <input
               type="email"
               name="email"
               placeholder="Email address"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <div>
@@ -156,10 +156,10 @@ export default async function RegisterPage({
                 name="password"
                 placeholder="Password"
                 minLength={8}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 required
               />
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Min. 8 characters, with uppercase, lowercase, and a number.
               </p>
             </div>
@@ -168,21 +168,21 @@ export default async function RegisterPage({
               name="confirmPassword"
               placeholder="Confirm password"
               minLength={8}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <TurnstileWidget />
             <button
               type="submit"
-              className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700"
+              className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
             >
               Create account
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-600">
+          <p className="text-center text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/login" className="font-medium text-primary hover:text-primary/80">
               Sign in
             </Link>
           </p>
@@ -192,10 +192,10 @@ export default async function RegisterPage({
             <>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-300"></div>
+                  <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-2 text-slate-500">or</span>
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
                 </div>
               </div>
 
@@ -211,7 +211,7 @@ export default async function RegisterPage({
           )}
         </div>
 
-        <p className="mt-8 text-center text-xs text-slate-500">
+        <p className="mt-8 text-center text-xs text-muted-foreground">
           By continuing, you agree to Mindweave&apos;s Terms of Service and Privacy Policy
         </p>
       </div>

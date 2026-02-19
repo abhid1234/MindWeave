@@ -28,18 +28,18 @@ export default async function LoginPage({
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+    <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
+      <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
           Back to home
         </Link>
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-1">
             <Image src="/icons/icon.svg" alt="Mindweave logo" width={40} height={40} className="rounded-lg" />
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
           </div>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             Your AI-powered personal knowledge hub
           </p>
         </div>
@@ -82,10 +82,10 @@ export default async function LoginPage({
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-300"></div>
+                  <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-2 text-slate-500">or</span>
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
                 </div>
               </div>
             </>
@@ -147,33 +147,33 @@ export default async function LoginPage({
               type="email"
               name="email"
               placeholder="Email address"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <input
               type="password"
               name="password"
               placeholder="Password"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <TurnstileWidget />
             <button
               type="submit"
-              className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700"
+              className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
             >
               Sign in
             </button>
           </form>
 
-          <div className="flex flex-col items-center gap-3 pt-2 text-sm text-slate-600 sm:flex-row sm:justify-between sm:gap-0 sm:pt-0">
+          <div className="flex flex-col items-center gap-3 pt-2 text-sm text-muted-foreground sm:flex-row sm:justify-between sm:gap-0 sm:pt-0">
             <p>
               Don&apos;t have an account?{' '}
-              <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link href="/register" className="font-medium text-primary hover:text-primary/80">
                 Sign up
               </Link>
             </p>
-            <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/forgot-password" className="font-medium text-primary hover:text-primary/80">
               Forgot password?
             </Link>
           </div>
@@ -183,10 +183,10 @@ export default async function LoginPage({
             <>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-300"></div>
+                  <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-2 text-slate-500">or</span>
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
                 </div>
               </div>
 
@@ -202,7 +202,7 @@ export default async function LoginPage({
           )}
         </div>
 
-        <p className="mt-8 text-center text-xs text-slate-500">
+        <p className="mt-8 text-center text-xs text-muted-foreground">
           By continuing, you agree to Mindweave&apos;s Terms of Service and Privacy Policy
         </p>
       </div>

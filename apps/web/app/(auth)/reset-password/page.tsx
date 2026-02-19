@@ -20,17 +20,17 @@ export default async function ResetPasswordPage({
   // This prevents the token from being "used up" just by visiting the link.
   if (!token || !email) {
     return (
-      <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
+      <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
+        <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
           <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
-            <p className="mt-2 text-sm text-slate-600">Invalid reset link</p>
+            <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Invalid reset link</p>
           </div>
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center text-sm text-red-700">
             This password reset link is invalid. Please request a new one.
           </div>
-          <p className="text-center text-sm text-slate-600">
-            <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <p className="text-center text-sm text-muted-foreground">
+            <Link href="/forgot-password" className="font-medium text-primary hover:text-primary/80">
               Request new reset link
             </Link>
           </p>
@@ -76,11 +76,11 @@ export default async function ResetPasswordPage({
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
+    <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
+      <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
         <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
-          <p className="mt-2 text-sm text-slate-600">Set your new password</p>
+          <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Set your new password</p>
         </div>
 
         <div className="mt-8 space-y-4">
@@ -98,7 +98,7 @@ export default async function ResetPasswordPage({
               name="password"
               placeholder="New password (min. 8 characters)"
               minLength={8}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <input
@@ -106,19 +106,19 @@ export default async function ResetPasswordPage({
               name="confirmPassword"
               placeholder="Confirm new password"
               minLength={8}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <button
               type="submit"
-              className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700"
+              className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
             >
               Reset password
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-600">
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <p className="text-center text-sm text-muted-foreground">
+            <Link href="/login" className="font-medium text-primary hover:text-primary/80">
               Back to sign in
             </Link>
           </p>

@@ -29,11 +29,11 @@ export default async function ForgotPasswordPage({
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
+    <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
+      <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
         <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
-          <p className="mt-2 text-sm text-slate-600">Reset your password</p>
+          <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Reset your password</p>
         </div>
 
         <div className="mt-8 space-y-4">
@@ -43,27 +43,27 @@ export default async function ForgotPasswordPage({
             </div>
           ) : (
             <form action={handleSubmit} className="space-y-3">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Enter your email address and we&apos;ll send you a link to reset your password.
               </p>
               <input
                 type="email"
                 name="email"
                 placeholder="Email address"
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 required
               />
               <button
                 type="submit"
-                className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700"
+                className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
               >
                 Send reset link
               </button>
             </form>
           )}
 
-          <p className="text-center text-sm text-slate-600">
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <p className="text-center text-sm text-muted-foreground">
+            <Link href="/login" className="font-medium text-primary hover:text-primary/80">
               Back to sign in
             </Link>
           </p>

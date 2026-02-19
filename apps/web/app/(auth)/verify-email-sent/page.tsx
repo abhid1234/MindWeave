@@ -38,11 +38,11 @@ export default async function VerifyEmailSentPage({
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
+    <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
+      <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
         <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Mindweave</h1>
-          <p className="mt-2 text-sm text-slate-600">Check your email</p>
+          <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Check your email</p>
         </div>
 
         <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-center text-sm text-indigo-700">
@@ -75,15 +75,15 @@ export default async function VerifyEmailSentPage({
           <form action={resendEmail}>
             <button
               type="submit"
-              className="w-full rounded-lg border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-600 transition-all hover:bg-indigo-50"
+              className="w-full rounded-lg border border-primary/30 bg-card px-4 py-3 text-sm font-semibold text-primary transition-all hover:bg-primary/5"
             >
               Resend verification email
             </button>
           </form>
         )}
 
-        <p className="text-center text-sm text-slate-600">
-          <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+        <p className="text-center text-sm text-muted-foreground">
+          <Link href="/login" className="font-medium text-primary hover:text-primary/80">
             Back to sign in
           </Link>
         </p>
