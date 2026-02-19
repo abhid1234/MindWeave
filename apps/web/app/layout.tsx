@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
   description: 'Capture, organize, and rediscover your ideas, notes, bookmarks, and learnings',
   manifest: '/manifest.json',
+  alternates: {
+    canonical: './',
+  },
   openGraph: {
     title: 'Mindweave - AI-Powered Personal Knowledge Hub',
     description: 'Capture, organize, and rediscover your ideas, notes, bookmarks, and learnings',
