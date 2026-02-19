@@ -53,6 +53,15 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-19)**:
+- [x] **Enhanced Notion-Style Command Palette (Cmd+K)** - Commit `3995aa1`. Rewrote the command palette with Notion-style UX:
+  - **Inline content search** — debounced 300ms server action (`getContentAction`) fires when query ≥ 2 chars, shows up to 5 results with type badges (note/link/file). Selecting navigates to library with query.
+  - **Recent pages** — new `hooks/useRecentPages.ts` localStorage-backed hook tracks last 5 visited dashboard pages. Shown as top group with clock icon. `KeyboardShortcutsProvider` passively records route changes via `usePathname()`.
+  - **Keyboard shortcut badges** — all 9 navigation items (added Tasks) display right-aligned `kbd` badges (H, N, I, S, A, L, T, Y, P).
+  - **New global shortcuts** — added T (Tasks), I (Import), Y (Analytics), P (Profile) to `useKeyboardShortcuts`.
+  - **Actions group** — added "Keyboard Shortcuts" action that dispatches `open-help` custom event.
+  - **Help footer** — fixed bar below the list: `↑↓ Navigate  ↵ Select  Esc Close`.
+
+**Previous Enhancement (2026-02-19)**:
 - [x] **Animated Stats Counter & Persona Use-Case Cards** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:2c12d30`). Two new landing page sections for credibility and audience targeting:
   - **Animated stats counter** — new `components/landing/animated-stats.tsx` client component with 4 color-coded stat cards (1,440+ Tests Passing, 6 AI-Powered Features, 3 Platforms, 768 Vector Dimensions). Numbers count up from 0 on scroll using `requestAnimationFrame` with `easeOutCubic` easing over 2 seconds. `IntersectionObserver` triggers once. Respects `prefers-reduced-motion`. `tabular-nums` prevents digit-width jitter. Responsive `grid-cols-2 lg:grid-cols-4` layout.
   - **Persona use-case cards** — 6 cards in a `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` grid targeting Researchers, Developers, Students, Content Creators, Professionals, and Lifelong Learners. Reuses existing feature card markup pattern (`spotlight-card`, `cardBg`/`cardBorder`). Each card has a unique Lucide icon and color scheme.
