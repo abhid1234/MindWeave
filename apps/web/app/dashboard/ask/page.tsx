@@ -1,6 +1,12 @@
+import type { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { KnowledgeQA } from '@/components/search/KnowledgeQA';
+
+export const metadata: Metadata = {
+  title: 'Ask | Mindweave',
+  description: 'Ask questions and get AI-powered answers from your knowledge base',
+};
 
 export default async function AskPage() {
   const session = await auth();

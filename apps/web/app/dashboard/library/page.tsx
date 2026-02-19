@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { getContentAction } from '@/app/actions/content';
+
+export const metadata: Metadata = {
+  title: 'Library | Mindweave',
+  description: 'Browse and organize all your saved notes, links, and files',
+};
 import { FilterBar } from '@/components/library/FilterBar';
 import { SearchBar } from '@/components/library/SearchBar';
 import { LibraryContent } from '@/components/library/LibraryContent';

@@ -1,16 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  OverviewStats,
-  ContentGrowthChart,
-  TagDistributionChart,
-  CollectionUsageChart,
-  KnowledgeInsightsCard,
-  AnalyticsHeader,
-} from '@/components/analytics';
+import dynamic from 'next/dynamic';
+import { OverviewStats } from '@/components/analytics/OverviewStats';
+import { KnowledgeInsightsCard } from '@/components/analytics/KnowledgeInsightsCard';
+import { AnalyticsHeader } from '@/components/analytics/AnalyticsHeader';
 import { exportAnalyticsAction } from '@/app/actions/analytics';
 import { useToast } from '@/components/ui/toast';
+
+const ContentGrowthChart = dynamic(
+  () => import('@/components/analytics/ContentGrowthChart').then(m => ({ default: m.ContentGrowthChart })),
+  { ssr: false, loading: () => <div className="h-[350px] animate-pulse rounded-lg bg-muted" /> }
+);
+const TagDistributionChart = dynamic(
+  () => import('@/components/analytics/TagDistributionChart').then(m => ({ default: m.TagDistributionChart })),
+  { ssr: false, loading: () => <div className="h-[350px] animate-pulse rounded-lg bg-muted" /> }
+);
+const CollectionUsageChart = dynamic(
+  () => import('@/components/analytics/CollectionUsageChart').then(m => ({ default: m.CollectionUsageChart })),
+  { ssr: false, loading: () => <div className="h-[350px] animate-pulse rounded-lg bg-muted" /> }
+);
 
 export function AnalyticsPageContent() {
   const [isExporting, setIsExporting] = useState(false);

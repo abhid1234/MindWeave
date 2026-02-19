@@ -1,6 +1,12 @@
+import type { Metadata } from 'next';
 import { getTasksAction } from '@/app/actions/tasks';
 import { TaskFilterBar } from '@/components/tasks/TaskFilterBar';
 import { TaskList } from '@/components/tasks/TaskList';
+
+export const metadata: Metadata = {
+  title: 'Tasks | Mindweave',
+  description: 'Manage your tasks and track progress',
+};
 
 export default async function TasksPage({
   searchParams,

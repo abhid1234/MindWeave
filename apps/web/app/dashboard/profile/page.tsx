@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getProfile } from '@/app/actions/profile';
 import ProfileSettingsForm from '@/components/profile/ProfileSettingsForm';
+
+export const metadata: Metadata = {
+  title: 'Profile | Mindweave',
+  description: 'Manage your public profile and visibility settings',
+};
 
 export default async function ProfilePage() {
   const session = await auth();

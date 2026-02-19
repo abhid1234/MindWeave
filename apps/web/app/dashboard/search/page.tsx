@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
@@ -5,6 +6,11 @@ import { sql, ilike } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { SemanticSearchForm } from '@/components/search/SemanticSearchForm';
 import { SearchResultCard } from '@/components/search/SearchResultCard';
+
+export const metadata: Metadata = {
+  title: 'Search | Mindweave',
+  description: 'Search your knowledge base by keyword or meaning with semantic search',
+};
 
 type SearchMode = 'keyword' | 'semantic';
 
