@@ -15,9 +15,13 @@ export const shortcuts: Shortcut[] = [
   { key: '?', label: '?', description: 'Show keyboard shortcuts', category: 'General' },
   { key: 'H', label: 'H', description: 'Go to Dashboard', category: 'Navigation' },
   { key: 'N', label: 'N', description: 'New Capture', category: 'Navigation' },
+  { key: 'I', label: 'I', description: 'Import', category: 'Navigation' },
   { key: 'S', label: 'S', description: 'Search', category: 'Navigation' },
-  { key: 'L', label: 'L', description: 'Library', category: 'Navigation' },
   { key: 'A', label: 'A', description: 'Ask AI', category: 'Navigation' },
+  { key: 'L', label: 'L', description: 'Library', category: 'Navigation' },
+  { key: 'T', label: 'T', description: 'Tasks', category: 'Navigation' },
+  { key: 'Y', label: 'Y', description: 'Analytics', category: 'Navigation' },
+  { key: 'P', label: 'P', description: 'Profile', category: 'Navigation' },
 ];
 
 export function useKeyboardShortcuts(onOpenHelp: () => void) {
@@ -60,6 +64,22 @@ export function useKeyboardShortcuts(onOpenHelp: () => void) {
         case 'a':
           e.preventDefault();
           router.push('/dashboard/ask');
+          break;
+        case 't':
+          e.preventDefault();
+          router.push('/dashboard/tasks');
+          break;
+        case 'i':
+          e.preventDefault();
+          router.push('/dashboard/import');
+          break;
+        case 'y':
+          e.preventDefault();
+          router.push('/dashboard/analytics');
+          break;
+        case 'p':
+          e.preventDefault();
+          router.push('/dashboard/profile');
           break;
         case '?':
           e.preventDefault();
