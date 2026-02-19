@@ -25,6 +25,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
+import { FeatureTabs } from '@/components/landing/feature-tabs';
 
 export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
@@ -33,6 +34,18 @@ export const metadata: Metadata = {
 };
 
 const features = [
+  {
+    icon: Search,
+    title: 'Semantic Search',
+    description: 'Search by meaning, not just keywords. Find related ideas you forgot you had.',
+    color: 'text-green-500',
+    bg: 'bg-green-500/10',
+    border: 'border-green-500/20',
+    cardBg: 'bg-green-500/5',
+    cardBorder: 'border-green-500/15',
+    size: 'large' as const,
+    bullets: ['Search by meaning, not keywords', 'Find ideas you forgot you had', 'pgvector-powered similarity'],
+  },
   {
     icon: Zap,
     title: 'Quick Capture',
@@ -52,16 +65,6 @@ const features = [
     border: 'border-blue-500/20',
     cardBg: 'bg-blue-500/5',
     cardBorder: 'border-blue-500/15',
-  },
-  {
-    icon: Search,
-    title: 'Semantic Search',
-    description: 'Search by meaning, not just keywords. Find related ideas you forgot you had.',
-    color: 'text-green-500',
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
-    cardBg: 'bg-green-500/5',
-    cardBorder: 'border-green-500/15',
   },
   {
     icon: MessageCircleQuestion,
@@ -92,6 +95,7 @@ const features = [
     border: 'border-emerald-500/20',
     cardBg: 'bg-emerald-500/5',
     cardBorder: 'border-emerald-500/15',
+    size: 'banner' as const,
   },
 ];
 
@@ -341,6 +345,22 @@ export default async function Home() {
                 ))}
               </div>
             </div>
+
+            {/* Hero Product Image */}
+            <ScrollReveal animation="scale-in">
+              <div className="mx-auto mt-16 max-w-5xl [perspective:1200px]">
+                <div className="rounded-xl border border-border/50 shadow-soft-lg overflow-hidden transition-transform duration-500 [transform:rotateX(2deg)] hover:[transform:rotateX(0deg)]">
+                  <Image
+                    src="/videos/mindweave-explainer-poster.jpg"
+                    alt="Mindweave dashboard preview"
+                    width={1200}
+                    height={675}
+                    priority
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 
@@ -360,9 +380,60 @@ export default async function Home() {
                   </p>
                 </div>
               </ScrollReveal>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {features.map((feature, i) => {
                   const Icon = feature.icon;
+                  const isLarge = 'size' in feature && feature.size === 'large';
+                  const isBanner = 'size' in feature && feature.size === 'banner';
+
+                  if (isBanner) {
+                    return (
+                      <ScrollReveal key={feature.title} delay={i * 100} className="sm:col-span-2 lg:col-span-3">
+                        <div
+                          className={`group spotlight-card rounded-xl border ${feature.cardBorder} ${feature.cardBg} p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full flex items-center gap-6`}
+                        >
+                          <div className={`inline-flex rounded-xl p-3 ${feature.bg} ${feature.border} border shrink-0`}>
+                            <Icon className={`h-6 w-6 ${feature.color}`} />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold mb-1">{feature.title}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {feature.description}
+                            </p>
+                          </div>
+                        </div>
+                      </ScrollReveal>
+                    );
+                  }
+
+                  if (isLarge) {
+                    return (
+                      <ScrollReveal key={feature.title} delay={i * 100} className="lg:col-span-2 lg:row-span-2">
+                        <div
+                          className={`group spotlight-card rounded-xl border ${feature.cardBorder} ${feature.cardBg} p-8 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}
+                        >
+                          <div className={`inline-flex rounded-xl p-4 ${feature.bg} ${feature.border} border mb-5`}>
+                            <Icon className={`h-10 w-10 ${feature.color}`} />
+                          </div>
+                          <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+                          <p className="text-base text-muted-foreground leading-relaxed mb-5">
+                            {feature.description}
+                          </p>
+                          {'bullets' in feature && (
+                            <ul className="space-y-2">
+                              {feature.bullets.map((bullet) => (
+                                <li key={bullet} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <div className={`h-1.5 w-1.5 rounded-full ${feature.bg.replace('/10', '')} shrink-0`} />
+                                  {bullet}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </ScrollReveal>
+                    );
+                  }
+
                   return (
                     <ScrollReveal key={feature.title} delay={i * 100}>
                       <div
@@ -383,6 +454,9 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        {/* Feature Deep-Dive Tabs */}
+        <FeatureTabs />
 
         {/* How It Works */}
         <section id="how-it-works" className="py-24">
