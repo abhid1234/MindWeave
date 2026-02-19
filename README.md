@@ -4,6 +4,15 @@
 
 Mindweave helps you capture, organize, and rediscover your ideas, notes, bookmarks, and learnings using the power of AI.
 
+## Links
+
+- [Web App](https://mindweave.space) — Live at mindweave.space
+- [Chrome Extension](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp) — One-click capture from any webpage
+- [Blog Post](https://abhid.substack.com/p/i-built-an-ai-powered-second-brain) — "I Built an AI-Powered Second Brain"
+- [Product Hunt](https://www.producthunt.com/products/mindweave-2) — Upvote and follow
+- [LinkedIn Launch Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/) — Launch announcement
+- [Product Video](https://www.mindweave.space/videos/mindweave-explainer.mp4) — 2-minute explainer demo
+
 > **Soft Launch** — Mindweave is live and fully functional! We expect to discover bugs as more users start using it. If you run into anything unexpected, please [report it on GitHub](https://github.com/abhid1234/MindWeave/issues).
 
 ## Features
