@@ -23,9 +23,16 @@ import {
   Smartphone,
   Chrome,
   Globe,
+  Microscope,
+  Terminal,
+  GraduationCap,
+  PenTool,
+  Briefcase,
+  Lightbulb,
 } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
+import { AnimatedStats } from '@/components/landing/animated-stats';
 
 export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
@@ -169,6 +176,69 @@ const heroPills = [
   'Smart Library',
   'Chrome Extension',
   'Android App',
+];
+
+const useCases = [
+  {
+    icon: Microscope,
+    title: 'Researchers',
+    description: 'Organize papers, notes, and findings. Ask questions across your entire research corpus.',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/20',
+    cardBg: 'bg-blue-500/5',
+    cardBorder: 'border-blue-500/15',
+  },
+  {
+    icon: Terminal,
+    title: 'Developers',
+    description: 'Save code snippets, docs, and Stack Overflow answers. Semantic search finds the right solution fast.',
+    color: 'text-green-500',
+    bg: 'bg-green-500/10',
+    border: 'border-green-500/20',
+    cardBg: 'bg-green-500/5',
+    cardBorder: 'border-green-500/15',
+  },
+  {
+    icon: GraduationCap,
+    title: 'Students',
+    description: 'Capture lecture notes, readings, and study materials. AI-powered review when exams hit.',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+    cardBg: 'bg-purple-500/5',
+    cardBorder: 'border-purple-500/15',
+  },
+  {
+    icon: PenTool,
+    title: 'Content Creators',
+    description: 'Bookmark inspiration, draft ideas, and resurface references when creating new content.',
+    color: 'text-orange-500',
+    bg: 'bg-orange-500/10',
+    border: 'border-orange-500/20',
+    cardBg: 'bg-orange-500/5',
+    cardBorder: 'border-orange-500/15',
+  },
+  {
+    icon: Briefcase,
+    title: 'Professionals',
+    description: 'Track meeting notes, decisions, and project knowledge. Never lose institutional memory.',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
+    cardBg: 'bg-emerald-500/5',
+    cardBorder: 'border-emerald-500/15',
+  },
+  {
+    icon: Lightbulb,
+    title: 'Lifelong Learners',
+    description: 'Save articles, podcasts, and book highlights. Build a personal knowledge base that grows with you.',
+    color: 'text-yellow-500',
+    bg: 'bg-yellow-500/10',
+    border: 'border-yellow-500/20',
+    cardBg: 'bg-yellow-500/5',
+    cardBorder: 'border-yellow-500/15',
+  },
 ];
 
 const jsonLd = {
@@ -502,6 +572,9 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Animated Stats */}
+        <AnimatedStats />
+
         {/* See It In Action */}
         <section className="bg-muted/50 py-24">
           <div className="container mx-auto px-4">
@@ -530,6 +603,44 @@ export default async function Home() {
                   </video>
                 </div>
               </ScrollReveal>
+            </div>
+          </div>
+        </section>
+
+        {/* Who It's For */}
+        <section className="py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-5xl">
+              <ScrollReveal>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Built for <span className="text-gradient">curious minds</span>
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Anyone who saves, reads, and learns can benefit from a smarter knowledge base.
+                  </p>
+                </div>
+              </ScrollReveal>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {useCases.map((useCase, i) => {
+                  const Icon = useCase.icon;
+                  return (
+                    <ScrollReveal key={useCase.title} delay={i * 100}>
+                      <div
+                        className={`group spotlight-card rounded-xl border ${useCase.cardBorder} ${useCase.cardBg} p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}
+                      >
+                        <div className={`inline-flex rounded-xl p-3 ${useCase.bg} ${useCase.border} border mb-4`}>
+                          <Icon className={`h-6 w-6 ${useCase.color}`} />
+                        </div>
+                        <h3 className="text-lg font-semibold mb-2">{useCase.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {useCase.description}
+                        </p>
+                      </div>
+                    </ScrollReveal>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
