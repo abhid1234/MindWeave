@@ -53,7 +53,7 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-19)**:
-- [x] **Enhanced Notion-Style Command Palette (Cmd+K)** - Commit `3995aa1`. Rewrote the command palette with Notion-style UX:
+- [x] **Enhanced Notion-Style Command Palette (Cmd+K)** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:30a31e3`). Rewrote the command palette with Notion-style UX:
   - **Inline content search** — debounced 300ms server action (`getContentAction`) fires when query ≥ 2 chars, shows up to 5 results with type badges (note/link/file). Selecting navigates to library with query.
   - **Recent pages** — new `hooks/useRecentPages.ts` localStorage-backed hook tracks last 5 visited dashboard pages. Shown as top group with clock icon. `KeyboardShortcutsProvider` passively records route changes via `usePathname()`.
   - **Keyboard shortcut badges** — all 9 navigation items (added Tasks) display right-aligned `kbd` badges (H, N, I, S, A, L, T, Y, P).
