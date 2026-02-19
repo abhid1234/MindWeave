@@ -53,11 +53,13 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-19)**:
-- [x] **SEO & Performance Optimization** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:14ae39b`). 3 optimizations for SEO and mobile performance:
+- [x] **SEO & Performance Optimization** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d3c5405`). 7 optimizations for SEO, performance, and bundle size:
   - **Canonical URLs** — added `alternates.canonical` to root layout metadata, resolved relative to `metadataBase` for every page to prevent duplicate content issues.
   - **Compressed mobile video** — created 720p version of explainer video (6.4 MB vs 19 MB original). Served to mobile devices via `<source media="(max-width: 768px)">`.
   - **Video dimensions** — added explicit `width`/`height` to landing page video element to prevent CLS (Cumulative Layout Shift).
   - **README links section** — added all product launch URLs (app, Chrome Extension, blog, Product Hunt, LinkedIn, video).
+  - **Lazy-load Recharts** — dynamic import chart components with `ssr: false`, bypassed barrel file. Analytics page reduced from 230 kB to 118 kB (49% reduction).
+  - **Dashboard page metadata** — added title and description to Library, Search, Ask, Tasks, and Profile pages for better SEO.
 
 **Previous Enhancement (2026-02-18)**:
 - [x] **OG Image, JSON-LD, Favicon & Keyboard Shortcuts** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0ca68b0`). 4 quick wins for social sharing, SEO, and power-user UX:
