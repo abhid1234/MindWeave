@@ -33,6 +33,7 @@ import {
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
 import { AnimatedStats } from '@/components/landing/animated-stats';
+import { CommandPaletteShowcase } from '@/components/landing/command-palette-showcase';
 
 export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
@@ -712,6 +713,9 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        {/* Command Palette Showcase */}
+        <CommandPaletteShowcase />
 
         {/* Tech Stack */}
         <section id="tech-stack" className="bg-muted/50 py-24">
