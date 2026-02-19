@@ -53,6 +53,12 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-19)**:
+- [x] **Animated Stats Counter & Persona Use-Case Cards** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:2c12d30`). Two new landing page sections for credibility and audience targeting:
+  - **Animated stats counter** — new `components/landing/animated-stats.tsx` client component with 4 color-coded stat cards (1,440+ Tests Passing, 6 AI-Powered Features, 3 Platforms, 768 Vector Dimensions). Numbers count up from 0 on scroll using `requestAnimationFrame` with `easeOutCubic` easing over 2 seconds. `IntersectionObserver` triggers once. Respects `prefers-reduced-motion`. `tabular-nums` prevents digit-width jitter. Responsive `grid-cols-2 lg:grid-cols-4` layout.
+  - **Persona use-case cards** — 6 cards in a `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` grid targeting Researchers, Developers, Students, Content Creators, Professionals, and Lifelong Learners. Reuses existing feature card markup pattern (`spotlight-card`, `cardBg`/`cardBorder`). Each card has a unique Lucide icon and color scheme.
+  - **Section order** — Stats placed between "How It Works" and "See It In Action" (plain background). Personas placed between "See It In Action" and "Available Everywhere" (plain background).
+
+**Previous Enhancement (2026-02-19)**:
 - [x] **Bento Features, Feature Tabs & Grid Symmetry Fix** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:f3cad9a`). Landing page feature section overhaul:
   - **Bento feature grid** — replaced 6 equal-sized feature cards with asymmetric CSS Grid layout. Semantic Search is a wide card (`sm:col-span-2`) with horizontal icon+text layout and inline bullet points. Privacy First is a full-width banner (`lg:col-span-3`). Clean symmetric grid: 2+1 top row, 3 middle row, full-width bottom.
   - **Feature deep-dive tabs** — new `components/landing/feature-tabs.tsx` client component placed between Features and How It Works. 5 tabs (Capture, AI Tagging, Semantic Search, Knowledge Q&A, Smart Library) using `@radix-ui/react-tabs`. Each tab shows a two-column layout with description + bullet points on the left and a unique CSS mockup on the right (capture form, animated tag pills, search results, chat interface, library grid).
