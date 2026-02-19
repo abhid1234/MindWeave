@@ -53,6 +53,13 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-19)**:
+- [x] **Bento Grid Dashboard Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:c34d88e`). Notion-inspired bento grid layout with color-coded stats and enhanced quick actions:
+  - **Bento grid layout** — asymmetric CSS Grid (`1fr / 320px`) with stats on the left and quick actions stacked on the right on desktop; single-column stack on mobile.
+  - **Color-coded stat cards** — each stat (Total Items, Tags, This Week, Favorites) gets a unique Lucide icon with colored background circle (blue, purple, green, amber).
+  - **Enhanced quick actions** — redesigned as icon cards with colored backgrounds, hover border transitions, and animated arrow indicators.
+  - **Hover effects** — all interactive cards use `shadow-soft-md` lift and `-translate-y-0.5` on hover with staggered `animate-fade-up` entrance animations.
+
+**Previous Enhancement (2026-02-19)**:
 - [x] **SEO & Performance Optimization** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d3c5405`). 7 optimizations for SEO, performance, and bundle size:
   - **Canonical URLs** — added `alternates.canonical` to root layout metadata, resolved relative to `metadataBase` for every page to prevent duplicate content issues.
   - **Compressed mobile video** — created 720p version of explainer video (6.4 MB vs 19 MB original). Served to mobile devices via `<source media="(max-width: 768px)">`.
