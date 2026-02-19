@@ -53,6 +53,12 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-19)**:
+- [x] **Hero Image, Bento Features & Feature Tabs** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:f1b5b67`). Three Notion-inspired landing page enhancements:
+  - **Hero product image** — explainer poster displayed below CTAs with browser-window styling (`rounded-xl`, `shadow-soft-lg`), perspective tilt (`rotateX(2deg)` → `rotateX(0)` on hover), and `ScrollReveal` scale-in entrance animation.
+  - **Bento feature grid** — replaced 6 equal-sized feature cards with asymmetric CSS Grid layout. Semantic Search is a large card (`lg:col-span-2 lg:row-span-2`) with bigger icon, `text-2xl` title, and bullet points. Privacy First is a full-width banner (`lg:col-span-3`) with horizontal layout. 4 standard cards in between.
+  - **Feature deep-dive tabs** — new `components/landing/feature-tabs.tsx` client component placed between Features and How It Works. 5 tabs (Capture, AI Tagging, Semantic Search, Knowledge Q&A, Smart Library) using `@radix-ui/react-tabs`. Each tab shows a two-column layout with description + bullet points on the left and a unique CSS mockup on the right (capture form, animated tag pills, search results, chat interface, library grid).
+
+**Previous Enhancement (2026-02-19)**:
 - [x] **Scroll Animations, Color Cards & Auth Glassmorphism** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:03e6c58`). Three Notion-inspired enhancements for a premium feel:
   - **ScrollReveal component** — lightweight `'use client'` IntersectionObserver wrapper (`components/ui/scroll-reveal.tsx`) with `fade-up`, `fade-in`, and `scale-in` animation variants, staggered delay support, and `prefers-reduced-motion` respect.
   - **Scroll-triggered animations** — all landing page sections progressively reveal on scroll. Feature cards (6), step cards (4), and platform cards (3) stagger individually; standalone sections (video, open source, soft launch, final CTA) wrap as a whole.
