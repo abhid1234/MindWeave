@@ -53,7 +53,7 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-19)**:
-- [x] **Scroll Animations, Color Cards & Auth Glassmorphism** - Commit `eef63cb`. Three Notion-inspired enhancements for a premium feel:
+- [x] **Scroll Animations, Color Cards & Auth Glassmorphism** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:03e6c58`). Three Notion-inspired enhancements for a premium feel:
   - **ScrollReveal component** — lightweight `'use client'` IntersectionObserver wrapper (`components/ui/scroll-reveal.tsx`) with `fade-up`, `fade-in`, and `scale-in` animation variants, staggered delay support, and `prefers-reduced-motion` respect.
   - **Scroll-triggered animations** — all landing page sections progressively reveal on scroll. Feature cards (6), step cards (4), and platform cards (3) stagger individually; standalone sections (video, open source, soft launch, final CTA) wrap as a whole.
   - **Color-coded feature cards** — feature, step, and "Available Everywhere" cards use subtle color-tinted backgrounds (`bg-{color}-500/5`) and borders (`border-{color}-500/15`) matching their icon colors, replacing neutral `bg-card`.
