@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { ContentType } from '@/lib/db/schema';
+import { ViewToggle } from './ViewToggle';
 
 export type FilterBarProps = {
   allTags: string[];
@@ -42,20 +43,31 @@ export function FilterBar({ allTags }: FilterBarProps) {
 
     if (finalType) newParams.set('type', finalType);
     if (finalTag) newParams.set('tag', finalTag);
-    if (queryFilter) newParams.set('query', queryFilter); // Preserve search query
+    if (queryFilter) newParams.set('query', queryFilter);
     if (finalSortBy) newParams.set('sortBy', finalSortBy);
     if (finalSortOrder) newParams.set('sortOrder', finalSortOrder);
+
+    // Preserve other params
+    const collectionId = searchParams.get('collectionId');
+    const favorites = searchParams.get('favorites');
+    const view = searchParams.get('view');
+    const tab = searchParams.get('tab');
+    if (collectionId) newParams.set('collectionId', collectionId);
+    if (favorites) newParams.set('favorites', favorites);
+    if (view) newParams.set('view', view);
+    if (tab) newParams.set('tab', tab);
 
     return `/dashboard/library${newParams.toString() ? `?${newParams.toString()}` : ''}`;
   };
 
   return (
     <div className="mb-6 space-y-4">
-      {/* Type Filter */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Type</label>
-        <div className="flex flex-wrap gap-2">
-          {contentTypes.map((type) => (
+      {/* Type Filter and View Toggle */}
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Type</label>
+          <div className="flex flex-wrap gap-2">
+            {contentTypes.map((type) => (
             <Link
               key={type.value || 'all'}
               href={buildUrl({ type: type.value })}
@@ -68,7 +80,9 @@ export function FilterBar({ allTags }: FilterBarProps) {
               {type.label}
             </Link>
           ))}
+          </div>
         </div>
+        <ViewToggle />
       </div>
 
       {/* Sort Options */}

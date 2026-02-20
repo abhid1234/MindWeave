@@ -11,7 +11,10 @@ import { LibraryContent } from '@/components/library/LibraryContent';
 import { CollectionFilter } from '@/components/library/CollectionFilter';
 import { FavoritesToggle } from '@/components/library/FavoritesToggle';
 import { ContentClusters } from '@/components/library/ContentClusters';
+import { LibraryTabToggle } from '@/components/library/LibraryTabToggle';
+import { CollectionGrid } from '@/components/library/CollectionGrid';
 import type { ContentType } from '@/lib/db/schema';
+import type { ViewMode } from '@/components/library/ViewToggle';
 
 export default async function LibraryPage({
   searchParams,
@@ -24,10 +27,15 @@ export default async function LibraryPage({
     sortOrder?: 'asc' | 'desc';
     collectionId?: string;
     favorites?: string;
+    tab?: 'items' | 'collections';
+    view?: ViewMode;
   }>;
 }) {
   const params = await searchParams;
   const favoritesOnly = params.favorites === 'true';
+  const tab = params.tab || 'items';
+  const view = params.view || 'grid';
+  const isCollectionsTab = tab === 'collections';
 
   // Build filter params for infinite scroll
   const filterParams = {
@@ -40,11 +48,13 @@ export default async function LibraryPage({
     favoritesOnly,
   };
 
-  // Fetch initial content with filters and sorting
-  const { items, allTags, nextCursor, hasMore } = await getContentAction({
-    ...filterParams,
-    limit: 20,
-  });
+  // Only fetch content when on items tab
+  const { items, allTags, nextCursor, hasMore } = isCollectionsTab
+    ? { items: [], allTags: [], nextCursor: null, hasMore: false }
+    : await getContentAction({
+        ...filterParams,
+        limit: 20,
+      });
 
   const hasFilters = !!(params.type || params.tag || params.query || params.collectionId || favoritesOnly);
 
@@ -58,38 +68,52 @@ export default async function LibraryPage({
         </p>
       </div>
 
+      {/* Tab Toggle */}
+      <div className="mb-6">
+        <LibraryTabToggle />
+      </div>
+
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {/* Search and Collection Filter */}
-          <div className="mb-6 flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <SearchBar />
-            </div>
-            <FavoritesToggle />
-            <CollectionFilter />
-          </div>
+          {isCollectionsTab ? (
+            <CollectionGrid />
+          ) : (
+            <>
+              {/* Search and Collection Filter */}
+              <div className="mb-6 flex flex-wrap items-center gap-4">
+                <div className="flex-1 min-w-[200px]">
+                  <SearchBar />
+                </div>
+                <FavoritesToggle />
+                <CollectionFilter />
+              </div>
 
-          {/* Filters and Sorting */}
-          <FilterBar allTags={allTags} />
+              {/* Filters and Sorting */}
+              <FilterBar allTags={allTags} />
 
-          {/* Content Grid with Bulk Selection and Infinite Scroll */}
-          <LibraryContent
-            items={items}
-            allTags={allTags}
-            hasFilters={hasFilters}
-            initialCursor={nextCursor}
-            initialHasMore={hasMore}
-            filterParams={filterParams}
-          />
+              {/* Content with Bulk Selection and Infinite Scroll */}
+              <LibraryContent
+                items={items}
+                allTags={allTags}
+                hasFilters={hasFilters}
+                view={view}
+                initialCursor={nextCursor}
+                initialHasMore={hasMore}
+                filterParams={filterParams}
+              />
+            </>
+          )}
         </div>
 
-        {/* Sidebar with Clusters */}
-        <aside className="lg:w-72 shrink-0">
-          <div className="sticky top-4">
-            <ContentClusters />
-          </div>
-        </aside>
+        {/* Sidebar with Clusters (only on items tab) */}
+        {!isCollectionsTab && (
+          <aside className="lg:w-72 shrink-0">
+            <div className="sticky top-4">
+              <ContentClusters />
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

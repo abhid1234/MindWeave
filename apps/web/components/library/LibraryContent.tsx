@@ -11,9 +11,16 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import type { ContentType } from '@/lib/db/schema';
 import { getContentAction } from '@/app/actions/content';
+import type { ViewMode } from './ViewToggle';
 
-// Dynamic import for ExportDialog to reduce initial bundle size
+// Dynamic imports to reduce initial bundle size
 const ExportDialog = dynamic(() => import('./ExportDialog').then((mod) => mod.ExportDialog), {
+  loading: () => null,
+});
+const ContentListView = dynamic(() => import('./ContentListView').then((mod) => mod.ContentListView), {
+  loading: () => null,
+});
+const ContentBoardView = dynamic(() => import('./ContentBoardView').then((mod) => mod.ContentBoardView), {
   loading: () => null,
 });
 
@@ -43,6 +50,7 @@ type LibraryContentProps = {
   items: ContentItem[];
   allTags: string[];
   hasFilters: boolean;
+  view?: ViewMode;
   // Pagination props
   initialCursor?: string | null;
   initialHasMore?: boolean;
@@ -62,6 +70,7 @@ export function LibraryContent({
   items: initialItems,
   allTags: initialAllTags,
   hasFilters,
+  view = 'grid',
   initialCursor = null,
   initialHasMore = false,
   filterParams = {},
@@ -190,17 +199,27 @@ export function LibraryContent({
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pb-4">
-            {items.map((item, index) => (
-              <div
-                key={item.id}
-                className="animate-in fade-in-50 slide-in-from-bottom-4 duration-300"
-                style={{ animationDelay: `${Math.min(index * 50, 300)}ms`, animationFillMode: 'backwards' }}
-              >
-                <SelectableContentCard {...item} allTags={allTags} />
-              </div>
-            ))}
-          </div>
+          {view === 'list' ? (
+            <div className="pb-4">
+              <ContentListView items={items} allTags={allTags} />
+            </div>
+          ) : view === 'board' ? (
+            <div className="pb-4">
+              <ContentBoardView items={items} allTags={allTags} />
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pb-4">
+              {items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="animate-in fade-in-50 slide-in-from-bottom-4 duration-300"
+                  style={{ animationDelay: `${Math.min(index * 50, 300)}ms`, animationFillMode: 'backwards' }}
+                >
+                  <SelectableContentCard {...item} allTags={allTags} />
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Infinite scroll trigger */}
           <div
