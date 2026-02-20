@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-19
+**Last Updated**: 2026-02-20
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -52,7 +52,14 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-19)**:
+**Latest Enhancement (2026-02-20)**:
+- [x] **Enhanced Persona Cards with Scenarios & Workflow Bullets** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7e95cfa`). Notion-style richer "Who It's For" persona cards:
+  - **Scenario taglines** — each persona now has an italic tagline in its accent color (e.g. "From papers to breakthroughs", "Your personal Stack Overflow", "Build your second brain").
+  - **Workflow bullets** — 3 concrete workflow examples per persona with colored dot indicators, showing visitors exactly how they'd use Mindweave.
+  - **Updated section subtext** — changed from generic benefit statement to action-oriented "See how people like you use Mindweave every day."
+  - **Richer card layout** — increased padding (`p-8`), structured hierarchy: icon → title → scenario → description → bullets.
+
+**Previous Enhancement (2026-02-19)**:
 - [x] **Enhanced Notion-Style Command Palette (Cmd+K)** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:30a31e3`). Rewrote the command palette with Notion-style UX:
   - **Inline content search** — debounced 300ms server action (`getContentAction`) fires when query ≥ 2 chars, shows up to 5 results with type badges (note/link/file). Selecting navigates to library with query.
   - **Recent pages** — new `hooks/useRecentPages.ts` localStorage-backed hook tracks last 5 visited dashboard pages. Shown as top group with clock icon. `KeyboardShortcutsProvider` passively records route changes via `usePathname()`.
