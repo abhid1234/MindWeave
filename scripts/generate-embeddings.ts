@@ -11,6 +11,7 @@
  *   BATCH_SIZE=10       - Number of items to process per batch (default: 10)
  *   BATCH_DELAY_MS=1000 - Delay between batches in ms (default: 1000)
  *   DRY_RUN=true        - Preview what would be processed without making changes
+ *   FORCE=true          - Regenerate ALL embeddings, even if they already exist
  *
  * Make sure GOOGLE_AI_API_KEY is set in your environment.
  */
@@ -24,6 +25,7 @@ import { sql, notInArray } from 'drizzle-orm';
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || '10', 10);
 const BATCH_DELAY_MS = parseInt(process.env.BATCH_DELAY_MS || '1000', 10);
 const DRY_RUN = process.env.DRY_RUN === 'true';
+const FORCE = process.env.FORCE === 'true';
 
 interface ProcessingStats {
   total: number;
@@ -51,6 +53,13 @@ function printProgress(): void {
 
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function getAllContent(): Promise<Array<{ id: string; title: string }>> {
+  return db
+    .select({ id: content.id, title: content.title })
+    .from(content)
+    .orderBy(content.createdAt);
 }
 
 async function getContentWithoutEmbeddings(): Promise<Array<{ id: string; title: string }>> {
@@ -107,12 +116,13 @@ async function processBatch(items: Array<{ id: string; title: string }>): Promis
 }
 
 async function main(): Promise<void> {
-  console.log('🔍 Scanning for content without embeddings...');
+  console.log(FORCE ? '🔄 Regenerating ALL embeddings...' : '🔍 Scanning for content without embeddings...');
   console.log('');
   console.log(`Configuration:`);
   console.log(`  Batch size: ${BATCH_SIZE}`);
   console.log(`  Batch delay: ${BATCH_DELAY_MS}ms`);
   console.log(`  Dry run: ${DRY_RUN}`);
+  console.log(`  Force regenerate: ${FORCE}`);
   console.log('');
 
   // Check for API key
@@ -122,16 +132,18 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // Get content without embeddings
-  const contentToProcess = await getContentWithoutEmbeddings();
+  // Get content to process
+  const contentToProcess = FORCE
+    ? await getAllContent()
+    : await getContentWithoutEmbeddings();
   stats.total = contentToProcess.length;
 
   if (stats.total === 0) {
-    console.log('✅ All content already has embeddings. Nothing to do!');
+    console.log('✅ No content to process. Nothing to do!');
     process.exit(0);
   }
 
-  console.log(`📋 Found ${stats.total} content items without embeddings`);
+  console.log(`📋 Found ${stats.total} content items to ${FORCE ? 'regenerate' : 'generate'} embeddings for`);
   console.log('');
 
   // Process in batches

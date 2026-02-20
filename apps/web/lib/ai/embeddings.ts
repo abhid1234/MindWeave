@@ -7,8 +7,8 @@ import { eq, sql } from 'drizzle-orm';
  * Gemini Embedding Configuration
  *
  * Using Google's Gemini embedding model for semantic search
- * - Model: text-embedding-005
- * - Dimensions: 768
+ * - Model: gemini-embedding-001
+ * - Dimensions: 768 (reduced from 3072 via outputDimensionality)
  * - Cost: Free tier available, then $0.025 per 1M tokens
  * - Setup: Add GOOGLE_AI_API_KEY to .env.local
  */
@@ -28,7 +28,7 @@ export interface EmbeddingConfig {
 
 // Configuration for Gemini embeddings
 export const EMBEDDING_CONFIG: EmbeddingConfig = {
-  model: 'text-embedding-005',
+  model: 'gemini-embedding-001',
   dimensions: 768,
 };
 
@@ -44,10 +44,13 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   try {
     const model = genAI.getGenerativeModel({ model: EMBEDDING_CONFIG.model });
 
-    const result = await model.embedContent(text);
+    const result = await model.embedContent({
+      content: { parts: [{ text }], role: 'user' },
+      outputDimensionality: EMBEDDING_CONFIG.dimensions,
+    } as Parameters<typeof model.embedContent>[0]);
     const embedding = result.embedding;
 
-    return embedding.values;
+    return embedding.values.slice(0, EMBEDDING_CONFIG.dimensions);
   } catch (error) {
     console.error('Error generating embedding with Gemini:', error);
     // Return zero vector as fallback
