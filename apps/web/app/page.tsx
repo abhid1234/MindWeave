@@ -180,7 +180,13 @@ const useCases = [
   {
     icon: Microscope,
     title: 'Researchers',
+    scenario: 'From papers to breakthroughs',
     description: 'Organize papers, notes, and findings. Ask questions across your entire research corpus.',
+    bullets: [
+      'Save PDFs & annotate highlights',
+      'Ask questions across your entire corpus',
+      'Auto-tag by methodology, topic, and field',
+    ],
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/20',
@@ -190,7 +196,13 @@ const useCases = [
   {
     icon: Terminal,
     title: 'Developers',
+    scenario: 'Your personal Stack Overflow',
     description: 'Save code snippets, docs, and Stack Overflow answers. Semantic search finds the right solution fast.',
+    bullets: [
+      'Save code snippets, docs & error fixes',
+      'Semantic search finds the right solution fast',
+      'Never re-Google the same problem twice',
+    ],
     color: 'text-green-500',
     bg: 'bg-green-500/10',
     border: 'border-green-500/20',
@@ -200,7 +212,13 @@ const useCases = [
   {
     icon: GraduationCap,
     title: 'Students',
+    scenario: 'Study smarter, not harder',
     description: 'Capture lecture notes, readings, and study materials. AI-powered review when exams hit.',
+    bullets: [
+      'Capture lecture notes & reading highlights',
+      'AI-powered review when exam season hits',
+      'Organize by course, semester, and topic',
+    ],
     color: 'text-purple-500',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/20',
@@ -210,7 +228,13 @@ const useCases = [
   {
     icon: PenTool,
     title: 'Content Creators',
+    scenario: 'From inspiration to publication',
     description: 'Bookmark inspiration, draft ideas, and resurface references when creating new content.',
+    bullets: [
+      'Bookmark references, images & quotes',
+      'Resurface the perfect example when creating',
+      'Track ideas from spark to finished piece',
+    ],
     color: 'text-orange-500',
     bg: 'bg-orange-500/10',
     border: 'border-orange-500/20',
@@ -220,7 +244,13 @@ const useCases = [
   {
     icon: Briefcase,
     title: 'Professionals',
+    scenario: 'Never lose institutional knowledge',
     description: 'Track meeting notes, decisions, and project knowledge. Never lose institutional memory.',
+    bullets: [
+      'Track meeting notes & key decisions',
+      'Share curated knowledge with your team',
+      'Search across months of project history',
+    ],
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
     border: 'border-emerald-500/20',
@@ -230,7 +260,13 @@ const useCases = [
   {
     icon: Lightbulb,
     title: 'Lifelong Learners',
+    scenario: 'Build your second brain',
     description: 'Save articles, podcasts, and book highlights. Build a personal knowledge base that grows with you.',
+    bullets: [
+      'Save articles, podcasts & book highlights',
+      'Connect ideas across disciplines',
+      'Grow a knowledge base that compounds over time',
+    ],
     color: 'text-yellow-500',
     bg: 'bg-yellow-500/10',
     border: 'border-yellow-500/20',
@@ -560,7 +596,7 @@ export default async function Home() {
                     Built for <span className="text-gradient">curious minds</span>
                   </h2>
                   <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                    Anyone who saves, reads, and learns can benefit from a smarter knowledge base.
+                    See how people like you use Mindweave every day.
                   </p>
                 </div>
               </ScrollReveal>
@@ -570,15 +606,26 @@ export default async function Home() {
                   return (
                     <ScrollReveal key={useCase.title} delay={i * 100}>
                       <div
-                        className={`group spotlight-card rounded-xl border ${useCase.cardBorder} ${useCase.cardBg} p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}
+                        className={`group spotlight-card rounded-xl border ${useCase.cardBorder} ${useCase.cardBg} p-8 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}
                       >
                         <div className={`inline-flex rounded-xl p-3 ${useCase.bg} ${useCase.border} border mb-4`}>
                           <Icon className={`h-6 w-6 ${useCase.color}`} />
                         </div>
-                        <h3 className="text-lg font-semibold mb-2">{useCase.title}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <h3 className="text-lg font-semibold">{useCase.title}</h3>
+                        <p className={`text-sm italic ${useCase.color} opacity-80 mt-1 mb-3`}>
+                          {useCase.scenario}
+                        </p>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                           {useCase.description}
                         </p>
+                        <ul className="space-y-2">
+                          {useCase.bullets.map((bullet) => (
+                            <li key={bullet} className="flex items-start gap-2 text-sm text-muted-foreground">
+                              <span className={`mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0 ${useCase.color} opacity-60`} style={{ backgroundColor: 'currentColor' }} />
+                              {bullet}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </ScrollReveal>
                   );
