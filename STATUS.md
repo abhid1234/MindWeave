@@ -706,6 +706,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-20** - ✅ **Similar Content in Detail Dialog** — Added inline recommendations section to ContentDetailDialog so users discover related content while viewing an item. Reuses existing `getRecommendationsAction` and `RecommendationCard`. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:1b1f605`)
 - **2026-02-20** - ✅ **Symmetric Feature Grid** — Made all 6 feature cards equal-sized in a uniform 3×2 grid, removing the oversized Semantic Search and full-width Privacy First variants. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7f3c2e6`)
 - **2026-02-19** - ✅ **Command Palette Showcase** — New landing page section showcasing the Cmd+K command palette with feature bullets and static CSS mockup. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:b506e2a`)
 - **2026-02-14** - ✅ **File Card & Tag Editing Fixes** — File cards now have clickable "Open" links; tag edits save correctly when clicking Save without pressing Enter first; auto-save race condition prevented
