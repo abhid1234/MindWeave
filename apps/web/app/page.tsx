@@ -51,8 +51,6 @@ const features = [
     border: 'border-green-500/20',
     cardBg: 'bg-green-500/5',
     cardBorder: 'border-green-500/15',
-    size: 'large' as const,
-    bullets: ['Search by meaning, not keywords', 'Find ideas you forgot you had', 'pgvector-powered similarity'],
   },
   {
     icon: Zap,
@@ -103,7 +101,6 @@ const features = [
     border: 'border-emerald-500/20',
     cardBg: 'bg-emerald-500/5',
     cardBorder: 'border-emerald-500/15',
-    size: 'banner' as const,
   },
 ];
 
@@ -438,61 +435,6 @@ export default async function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {features.map((feature, i) => {
                   const Icon = feature.icon;
-                  const isLarge = 'size' in feature && feature.size === 'large';
-                  const isBanner = 'size' in feature && feature.size === 'banner';
-
-                  if (isBanner) {
-                    return (
-                      <ScrollReveal key={feature.title} delay={i * 100} className="sm:col-span-2 lg:col-span-3">
-                        <div
-                          className={`group spotlight-card rounded-xl border ${feature.cardBorder} ${feature.cardBg} p-6 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full flex items-center gap-6`}
-                        >
-                          <div className={`inline-flex rounded-xl p-3 ${feature.bg} ${feature.border} border shrink-0`}>
-                            <Icon className={`h-6 w-6 ${feature.color}`} />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold mb-1">{feature.title}</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {feature.description}
-                            </p>
-                          </div>
-                        </div>
-                      </ScrollReveal>
-                    );
-                  }
-
-                  if (isLarge) {
-                    return (
-                      <ScrollReveal key={feature.title} delay={i * 100} className="sm:col-span-2">
-                        <div
-                          className={`group spotlight-card rounded-xl border ${feature.cardBorder} ${feature.cardBg} p-8 transition-all duration-300 hover:shadow-soft-md hover:-translate-y-1 hover:border-primary/20 h-full`}
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-                            <div className={`inline-flex rounded-xl p-4 ${feature.bg} ${feature.border} border shrink-0`}>
-                              <Icon className={`h-8 w-8 ${feature.color}`} />
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                              <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                                {feature.description}
-                              </p>
-                              {'bullets' in feature && (
-                                <ul className="flex flex-wrap gap-x-4 gap-y-1.5">
-                                  {feature.bullets.map((bullet) => (
-                                    <li key={bullet} className="flex items-center gap-2 text-sm text-muted-foreground">
-                                      <div className={`h-1.5 w-1.5 rounded-full ${feature.bg.replace('/10', '')} shrink-0`} />
-                                      {bullet}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </ScrollReveal>
-                    );
-                  }
-
                   return (
                     <ScrollReveal key={feature.title} delay={i * 100}>
                       <div
