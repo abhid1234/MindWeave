@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink, Sparkles } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
+import { getRecommendationsAction } from '@/app/actions/search';
+import type { RecommendationResult } from '@/app/actions/search';
+import { RecommendationCard } from './RecommendationCard';
 import {
   Dialog,
   DialogContent,
@@ -76,11 +80,36 @@ export function ContentDetailDialog({
   open,
   onOpenChange,
 }: ContentDetailDialogProps) {
+  const router = useRouter();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [recommendations, setRecommendations] = useState<RecommendationResult[]>([]);
+  const [recsLoading, setRecsLoading] = useState(false);
 
   const { id, type, title, body, url, tags, autoTags, createdAt, isFavorite, isShared, shareId, metadata } = content;
+
+  useEffect(() => {
+    if (!open) {
+      setRecommendations([]);
+      return;
+    }
+
+    let cancelled = false;
+    setRecsLoading(true);
+
+    getRecommendationsAction(id, 4, 0.4).then((result) => {
+      if (cancelled) return;
+      if (result.success) {
+        setRecommendations(result.recommendations);
+      }
+      setRecsLoading(false);
+    }).catch(() => {
+      if (!cancelled) setRecsLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [open, id]);
 
   return (
     <>
@@ -205,6 +234,40 @@ export function ContentDetailDialog({
                     {tag} (AI)
                   </span>
                 ))}
+              </div>
+            )}
+
+            {/* Similar Content */}
+            {(recsLoading || recommendations.length > 0) && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  Similar Content
+                </div>
+                {recsLoading ? (
+                  <div className="space-y-2">
+                    <div className="h-14 rounded-lg bg-muted animate-pulse" />
+                    <div className="h-14 rounded-lg bg-muted animate-pulse" />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {recommendations.map((rec) => (
+                      <RecommendationCard
+                        key={rec.id}
+                        id={rec.id}
+                        title={rec.title}
+                        type={rec.type}
+                        body={rec.body}
+                        tags={[...rec.tags, ...rec.autoTags]}
+                        similarity={rec.similarity}
+                        onClick={() => {
+                          onOpenChange(false);
+                          router.push(`/dashboard/library?highlight=${rec.id}`);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
