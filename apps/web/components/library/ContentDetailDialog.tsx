@@ -98,7 +98,7 @@ export function ContentDetailDialog({
     let cancelled = false;
     setRecsLoading(true);
 
-    getRecommendationsAction(id, 4, 0.4).then((result) => {
+    getRecommendationsAction(id, 4, 0.3).then((result) => {
       if (cancelled) return;
       if (result.success) {
         setRecommendations(result.recommendations);
@@ -238,38 +238,38 @@ export function ContentDetailDialog({
             )}
 
             {/* Similar Content */}
-            {(recsLoading || recommendations.length > 0) && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                  <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  Similar Content
-                </div>
-                {recsLoading ? (
-                  <div className="space-y-2">
-                    <div className="h-14 rounded-lg bg-muted animate-pulse" />
-                    <div className="h-14 rounded-lg bg-muted animate-pulse" />
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {recommendations.map((rec) => (
-                      <RecommendationCard
-                        key={rec.id}
-                        id={rec.id}
-                        title={rec.title}
-                        type={rec.type}
-                        body={rec.body}
-                        tags={[...rec.tags, ...rec.autoTags]}
-                        similarity={rec.similarity}
-                        onClick={() => {
-                          onOpenChange(false);
-                          router.push(`/dashboard/library?highlight=${rec.id}`);
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                Similar Content
               </div>
-            )}
+              {recsLoading ? (
+                <div className="space-y-2">
+                  <div className="h-14 rounded-lg bg-muted animate-pulse" />
+                  <div className="h-14 rounded-lg bg-muted animate-pulse" />
+                </div>
+              ) : recommendations.length > 0 ? (
+                <div className="space-y-2">
+                  {recommendations.map((rec) => (
+                    <RecommendationCard
+                      key={rec.id}
+                      id={rec.id}
+                      title={rec.title}
+                      type={rec.type}
+                      body={rec.body}
+                      tags={[...rec.tags, ...rec.autoTags]}
+                      similarity={rec.similarity}
+                      onClick={() => {
+                        onOpenChange(false);
+                        router.push(`/dashboard/library?highlight=${rec.id}`);
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No similar content found yet. Add more items to see recommendations.</p>
+              )}
+            </div>
 
             {/* Action buttons */}
             <div className="flex gap-2 pt-2 border-t">
