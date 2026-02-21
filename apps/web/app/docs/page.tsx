@@ -50,7 +50,7 @@ export default function DocsPage() {
   return (
     <div className="space-y-10">
       {/* Hero */}
-      <section>
+      <section className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
         <h1 className="text-4xl font-bold mb-3">Mindweave Documentation</h1>
         <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
           Mindweave is an AI-powered personal knowledge hub that helps you capture, organize,
@@ -60,7 +60,7 @@ export default function DocsPage() {
       </section>
 
       {/* Quick start CTA */}
-      <section className="rounded-xl border bg-primary/5 p-6">
+      <section className="rounded-xl border bg-primary/5 p-6 animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
         <div className="flex items-start gap-4">
           <div className="rounded-lg bg-primary/10 p-2.5">
             <BookOpen className="h-5 w-5 text-primary" />
@@ -82,7 +82,7 @@ export default function DocsPage() {
       </section>
 
       {/* Feature grid */}
-      <section>
+      <section className="animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
         <h2 className="text-2xl font-semibold mb-4">Explore Features</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {quickLinks.map((link) => (
@@ -102,7 +102,7 @@ export default function DocsPage() {
       </section>
 
       {/* Additional links */}
-      <section className="border-t pt-8">
+      <section className="border-t pt-8 animate-fade-up" style={{ animationDelay: '225ms', animationFillMode: 'backwards' }}>
         <h2 className="text-2xl font-semibold mb-4">More Resources</h2>
         <ul className="space-y-2">
           <li>

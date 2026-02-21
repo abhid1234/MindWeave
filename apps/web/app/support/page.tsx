@@ -37,13 +37,15 @@ export default function Support() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-3xl px-4 py-16">
-        <h1 className="text-4xl font-bold mb-2">Support</h1>
-        <p className="text-muted-foreground mb-12">
-          Need help with Mindweave? Find answers below or reach out to us directly.
-        </p>
+        <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+          <h1 className="text-4xl font-bold mb-2">Support</h1>
+          <p className="text-muted-foreground mb-12">
+            Need help with Mindweave? Find answers below or reach out to us directly.
+          </p>
+        </div>
 
         {/* Contact */}
-        <section className="mb-16">
+        <section className="mb-16 animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
           <div className="rounded-xl border bg-card p-6 flex items-start gap-4">
             <div className="inline-flex rounded-lg bg-primary/10 p-2.5">
               <Mail className="h-5 w-5 text-primary" />
@@ -65,7 +67,7 @@ export default function Support() {
 
         {/* FAQ */}
         <section>
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-8 animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
             <div className="inline-flex rounded-lg bg-purple-500/10 p-2.5">
               <MessageCircleQuestion className="h-5 w-5 text-purple-500" />
             </div>
@@ -73,8 +75,8 @@ export default function Support() {
           </div>
 
           <div className="space-y-4">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="rounded-xl border bg-card p-5">
+            {faqs.map((faq, index) => (
+              <div key={faq.question} className="rounded-xl border bg-card p-5 animate-fade-up" style={{ animationDelay: `${225 + index * 50}ms`, animationFillMode: 'backwards' }}>
                 <h3 className="font-semibold mb-2">{faq.question}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
               </div>

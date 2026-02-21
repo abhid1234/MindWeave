@@ -18,14 +18,14 @@ export default async function VerifyEmailPage({
     return (
       <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
         <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
-          <div className="text-center">
+          <div className="text-center animate-fade-up" style={{ animationFillMode: 'backwards' }}>
             <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
             <p className="mt-2 text-sm text-muted-foreground">Invalid verification link</p>
           </div>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center text-sm text-red-700">
+          <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-center text-sm text-destructive animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
             This verification link is invalid. Please request a new one.
           </div>
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
             <Link href="/verify-email-sent" className="font-medium text-primary hover:text-primary/80">
               Resend verification email
             </Link>
@@ -41,14 +41,14 @@ export default async function VerifyEmailPage({
     return (
       <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
         <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
-          <div className="text-center">
+          <div className="text-center animate-fade-up" style={{ animationFillMode: 'backwards' }}>
             <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
             <p className="mt-2 text-sm text-muted-foreground">Link expired</p>
           </div>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center text-sm text-red-700">
+          <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-center text-sm text-destructive animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
             This verification link has expired or already been used. Please request a new one.
           </div>
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
             <Link href="/verify-email-sent" className="font-medium text-primary hover:text-primary/80">
               Resend verification email
             </Link>

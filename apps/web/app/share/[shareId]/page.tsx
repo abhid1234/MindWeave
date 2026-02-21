@@ -92,9 +92,9 @@ export default async function SharePage({ params }: Props) {
   if (!result.success || !result.content) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <div className="rounded-full bg-muted p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <FileText className="h-8 w-8 text-muted-foreground" />
+        <div className="text-center max-w-md px-4 animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+          <div className="rounded-full bg-primary/10 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <FileText className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold mb-2">Content Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -116,7 +116,7 @@ export default async function SharePage({ params }: Props) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b bg-card animate-fade-up" style={{ animationFillMode: 'backwards' }}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-xl font-bold">
@@ -131,7 +131,7 @@ export default async function SharePage({ params }: Props) {
 
       {/* Content */}
       <main className="container mx-auto px-4 py-8 max-w-3xl">
-        <article className="bg-card rounded-lg border shadow-sm">
+        <article className="bg-card rounded-xl border shadow-soft animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
           {/* Header */}
           <div className="p-6 border-b">
             <div className="flex items-start gap-3">
@@ -236,7 +236,7 @@ export default async function SharePage({ params }: Props) {
         </article>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-8 text-center text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
           <p>
             Shared via{' '}
             <Link href="/" className="text-primary hover:underline">

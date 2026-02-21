@@ -12,6 +12,8 @@ import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { passwordSchema } from '@/lib/validations';
 import { checkUnauthenticatedRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default async function RegisterPage({
   searchParams,
@@ -118,7 +120,7 @@ export default async function RegisterPage({
   return (
     <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
       <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
-        <div className="text-center">
+        <div className="text-center animate-fade-up" style={{ animationFillMode: 'backwards' }}>
           <div className="flex items-center justify-center gap-3 mb-1">
             <Image src="/icons/icon.svg" alt="Mindweave logo" width={40} height={40} className="rounded-lg" />
             <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
@@ -128,56 +130,49 @@ export default async function RegisterPage({
           </p>
         </div>
 
-        <div className="mt-8 space-y-4">
+        <div className="mt-8 space-y-4 animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
           {params.error && errorMessages[params.error] && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-700">
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-sm text-destructive">
               {errorMessages[params.error]}
             </div>
           )}
 
           <form action={register} className="space-y-3">
-            <input
+            <Input
               type="text"
               name="name"
               placeholder="Full name"
-              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
-            <input
+            <Input
               type="email"
               name="email"
               placeholder="Email address"
-              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <div>
-              <input
+              <Input
                 type="password"
                 name="password"
                 placeholder="Password"
                 minLength={8}
-                className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 required
               />
               <p className="mt-1 text-xs text-muted-foreground">
                 Min. 8 characters, with uppercase, lowercase, and a number.
               </p>
             </div>
-            <input
+            <Input
               type="password"
               name="confirmPassword"
               placeholder="Confirm password"
               minLength={8}
-              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <TurnstileWidget />
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
-            >
+            <Button type="submit" className="w-full" size="lg">
               Create account
-            </button>
+            </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
@@ -189,8 +184,8 @@ export default async function RegisterPage({
 
           {/* Google OAuth - hidden in Android WebView due to disallowed_useragent issue */}
           {!isWebView && (
-            <>
-              <div className="relative">
+            <div className="animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
+              <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border"></div>
                 </div>
@@ -207,7 +202,7 @@ export default async function RegisterPage({
               >
                 <GoogleSignInButton />
               </form>
-            </>
+            </div>
           )}
         </div>
 

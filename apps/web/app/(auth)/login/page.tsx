@@ -8,6 +8,8 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { checkUnauthenticatedRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default async function LoginPage({
   searchParams,
@@ -30,21 +32,23 @@ export default async function LoginPage({
   return (
     <main id="main-content" tabIndex={-1} className="w-full max-w-md px-4">
       <div className="w-full space-y-8 rounded-2xl bg-card border border-border p-10 shadow-soft-lg">
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-          Back to home
-        </Link>
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-1">
-            <Image src="/icons/icon.svg" alt="Mindweave logo" width={40} height={40} className="rounded-lg" />
-            <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
+        <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+          <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            Back to home
+          </Link>
+          <div className="text-center mt-8">
+            <div className="flex items-center justify-center gap-3 mb-1">
+              <Image src="/icons/icon.svg" alt="Mindweave logo" width={40} height={40} className="rounded-lg" />
+              <h1 className="text-4xl font-bold tracking-tight">Mindweave</h1>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Your AI-powered personal knowledge hub
+            </p>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your AI-powered personal knowledge hub
-          </p>
         </div>
 
-        <div className="mt-8 space-y-4">
+        <div className="mt-8 space-y-4 animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
           {/* Development-only test login */}
           {isDevelopment && (
             <>
@@ -93,13 +97,13 @@ export default async function LoginPage({
 
           {/* Email/Password Login */}
           {params.verified === 'true' && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center text-sm text-green-700">
+            <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-3 text-center text-sm text-green-600 dark:text-green-400">
               Email verified successfully! You can now sign in.
             </div>
           )}
 
           {params.error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-700">
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-sm text-destructive">
               {params.error === 'CredentialsSignin'
                 ? 'Invalid email or password.'
                 : params.error === 'TurnstileFailed'
@@ -143,27 +147,22 @@ export default async function LoginPage({
             }}
             className="space-y-3"
           >
-            <input
+            <Input
               type="email"
               name="email"
               placeholder="Email address"
-              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
-            <input
+            <Input
               type="password"
               name="password"
               placeholder="Password"
-              className="w-full rounded-lg border border-input px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               required
             />
             <TurnstileWidget />
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
-            >
+            <Button type="submit" className="w-full" size="lg">
               Sign in
-            </button>
+            </Button>
           </form>
 
           <div className="flex flex-col items-center gap-3 pt-2 text-sm text-muted-foreground sm:flex-row sm:justify-between sm:gap-0 sm:pt-0">
@@ -180,8 +179,8 @@ export default async function LoginPage({
 
           {/* Google OAuth - hidden in Android WebView due to disallowed_useragent issue */}
           {!isWebView && (
-            <>
-              <div className="relative">
+            <div className="animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
+              <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border"></div>
                 </div>
@@ -198,7 +197,7 @@ export default async function LoginPage({
               >
                 <GoogleSignInButton />
               </form>
-            </>
+            </div>
           )}
         </div>
 
