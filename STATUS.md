@@ -53,6 +53,17 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-21)**:
+- [x] **Notion-Inspired Remaining Dashboard Pages Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:73c9c2f`). Applied consistent Notion-inspired design language to all 6 remaining dashboard pages (Dashboard, Ask, Analytics, Import, Tasks, Profile):
+  - **Header icon badges** — `LayoutDashboard`, `MessageCircleQuestion`, `BarChart3`, `Import`, `CheckSquare`, `User` icons in `bg-primary/10 rounded-lg` badges with flex layout.
+  - **Staggered entrance animations** — `animate-fade-up` with 0ms/75ms/150ms/225ms delays and `animationFillMode: 'backwards'` on all page sections.
+  - **Card-wrapped filter bars** — TaskFilterBar and Analytics filters wrapped in `Card` + `CardContent`, labels styled as `text-xs font-medium uppercase tracking-wide text-muted-foreground`.
+  - **Polished empty states** — Task list empty state upgraded from `border-dashed` to `rounded-xl border bg-card shadow-soft` with `bg-primary/10` icon circle; Dashboard empty state similarly upgraded.
+  - **Card-wrapped tips** — Ask page tips section wrapped in `Card` + `CardContent` with styled heading.
+  - **`cn()` class merging** — Import page StepIndicator refactored from template literals to `cn()`.
+  - **New loading skeletons** — Created `loading.tsx` for Tasks and Profile pages; updated Dashboard, Ask, Import loading skeletons with icon badge skeletons and proper `animationDelay` styles (replaced `stagger-N` classes).
+  - **All 40 targeted tests pass** — TaskFilterBar (9), TaskList (20), AnalyticsHeader (11). Full suite: 1501 pass.
+
+**Previous Enhancement (2026-02-21)**:
 - [x] **Notion-Inspired Library Page Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7ec7cd7`). Complete visual overhaul of the `/dashboard/library` page to match the capture and search pages' polish level:
   - **Pill segmented tab toggle** — replaced plain `<button>` row with `inline-flex rounded-lg bg-muted p-1` pill container, `rounded-md` inner buttons, active state `bg-primary shadow-sm`, inactive `bg-secondary` preserved for test compatibility, using `cn()` for class merging.
   - **Pill segmented view toggle** — same pill pattern (`bg-muted p-0.5`) for grid/list/board view buttons, `rounded-md`, `transition-all duration-200`.
