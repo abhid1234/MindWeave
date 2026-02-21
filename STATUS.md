@@ -52,7 +52,15 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-20)**:
+**Latest Enhancement (2026-02-21)**:
+- [x] **Drag & Drop on Board View** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0725837`). Added @dnd-kit-based drag and drop to the kanban-style board view:
+  - **Reorder within columns** — drag cards to rearrange within their type column (Notes/Links/Files), order persisted to localStorage via new `useBoardSortOrder` hook with reconciliation for added/removed items.
+  - **Drag to collection drop zones** — a horizontal row of droppable collection targets slides in during drag; dropping a card calls `addToCollectionAction` with success/warning toast feedback.
+  - **Smart interaction model** — drag disabled during bulk selection mode, 5px activation distance prevents accidental drags on button clicks, DragOverlay with rotated card follows cursor.
+  - **Custom collision detection** — checks collection zones first (`pointerWithin`), falls back to `closestCenter` for sortable items.
+  - **42 new tests** across 4 test files (useBoardSortOrder 11, SortableContentCard 7, CollectionDropZones 9, ContentBoardView 15).
+
+**Previous Enhancement (2026-02-20)**:
 - [x] **Enhanced Persona Cards with Scenarios & Workflow Bullets** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7e95cfa`). Notion-style richer "Who It's For" persona cards:
   - **Scenario taglines** — each persona now has an italic tagline in its accent color (e.g. "From papers to breakthroughs", "Your personal Stack Overflow", "Build your second brain").
   - **Workflow bullets** — 3 concrete workflow examples per persona with colored dot indicators, showing visitors exactly how they'd use Mindweave.
@@ -706,6 +714,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-21** - ✅ **Drag & Drop on Board View** — Added @dnd-kit drag and drop to ContentBoardView: reorder within columns (localStorage-persisted), drag to collection drop zones, smart collision detection, disabled in selection mode. New components: SortableContentCard, CollectionDropZones, useBoardSortOrder hook. 42 new tests. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0725837`)
 - **2026-02-21** - ✅ **Collections Tab & Multiple Library Views** — Added first-class collections browsing via tab toggle and three content view modes (grid, list, board). New components: ViewToggle, LibraryTabToggle, CollectionGrid, ContentListView (compact rows), ContentBoardView (kanban by type). Fixed FilterBar param preservation bug. 49 new tests across 5 test files (ViewToggle 9, LibraryTabToggle 8, CollectionGrid 12, ContentListView 11, ContentBoardView 9). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:3c89d31`)
 - **2026-02-20** - ✅ **Fix Embedding Model & Regenerate All** — Switched from deprecated `text-embedding-005` to `gemini-embedding-001` with 768-dim reduction. Regenerated all 356 production embeddings (0 failures). Added `FORCE=true` flag to generate-embeddings script. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:28268c1`)
 - **2026-02-20** - ✅ **Similar Content in Detail Dialog** — Added inline recommendations section to ContentDetailDialog with empty state fallback and lowered similarity threshold to 0.3. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:353d1ea`)
