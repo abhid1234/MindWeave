@@ -3,13 +3,88 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ContentBoardView } from './ContentBoardView';
 
-// Mock SelectableContentCard
-vi.mock('./SelectableContentCard', () => ({
-  SelectableContentCard: ({ title, type }: { title: string; type: string }) => (
-    <div data-testid={`card-${type}`}>
-      <span data-testid="card-title">{title}</span>
+// Mock dnd-kit
+vi.mock('@dnd-kit/core', () => ({
+  DndContext: ({ children }: { children: React.ReactNode }) => <div data-testid="dnd-context">{children}</div>,
+  DragOverlay: ({ children }: { children: React.ReactNode }) => <div data-testid="drag-overlay">{children}</div>,
+  PointerSensor: vi.fn(),
+  KeyboardSensor: vi.fn(),
+  useSensor: vi.fn().mockReturnValue({}),
+  useSensors: vi.fn().mockReturnValue([]),
+  pointerWithin: vi.fn(),
+  closestCenter: vi.fn(),
+  useDroppable: vi.fn().mockReturnValue({ setNodeRef: vi.fn() }),
+}));
+
+vi.mock('@dnd-kit/sortable', () => ({
+  SortableContext: ({ children }: { children: React.ReactNode }) => <div data-testid="sortable-context">{children}</div>,
+  verticalListSortingStrategy: {},
+  sortableKeyboardCoordinates: vi.fn(),
+  useSortable: vi.fn().mockReturnValue({
+    attributes: {},
+    listeners: {},
+    setNodeRef: vi.fn(),
+    transform: null,
+    transition: null,
+    isDragging: false,
+  }),
+}));
+
+vi.mock('@dnd-kit/utilities', () => ({
+  CSS: {
+    Transform: {
+      toString: () => undefined,
+    },
+  },
+}));
+
+// Mock SortableContentCard to render like original SelectableContentCard mock
+vi.mock('./SortableContentCard', () => ({
+  SortableContentCard: ({ item, disabled }: { item: { title: string; type: string }; disabled: boolean }) => (
+    <div data-testid={`card-${item.type}`} data-disabled={disabled}>
+      <span data-testid="card-title">{item.title}</span>
     </div>
   ),
+}));
+
+// Mock CollectionDropZones
+vi.mock('./CollectionDropZones', () => ({
+  CollectionDropZones: ({ isDragging }: { isDragging: boolean }) => (
+    isDragging ? <div data-testid="collection-drop-zones" /> : null
+  ),
+}));
+
+// Mock ContentCard (used in DragOverlay)
+vi.mock('./ContentCard', () => ({
+  ContentCard: ({ title }: { title: string }) => (
+    <div data-testid="overlay-card">{title}</div>
+  ),
+}));
+
+// Mock BulkSelectionContext
+const mockUseBulkSelection = vi.fn().mockReturnValue({ isSelectionMode: false });
+vi.mock('./BulkSelectionContext', () => ({
+  useBulkSelection: () => mockUseBulkSelection(),
+}));
+
+// Mock useBoardSortOrder
+vi.mock('@/hooks/useBoardSortOrder', () => ({
+  useBoardSortOrder: () => ({
+    getOrderedItems: (_type: string, items: unknown[]) => items,
+    handleReorder: vi.fn(),
+    resetOrder: vi.fn(),
+  }),
+}));
+
+// Mock useToast
+vi.mock('@/components/ui/toast', () => ({
+  useToast: () => ({ addToast: vi.fn() }),
+}));
+
+// Mock addToCollectionAction
+vi.mock('@/app/actions/collections', () => ({
+  addToCollectionAction: vi.fn(),
+  getCollectionsAction: vi.fn().mockResolvedValue({ success: true, collections: [] }),
 }));
 
 const createItem = (overrides: Partial<{
@@ -34,6 +109,7 @@ const createItem = (overrides: Partial<{
 describe('ContentBoardView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseBulkSelection.mockReturnValue({ isSelectionMode: false });
   });
 
   it('should render three columns', () => {
@@ -53,9 +129,7 @@ describe('ContentBoardView', () => {
 
     render(<ContentBoardView items={items} allTags={[]} />);
 
-    // Counts are rendered as text nodes next to the column label
     const counts = screen.getAllByText(/^[0-3]$/);
-    // Note: 2 notes, 1 link, 0 files
     expect(counts).toHaveLength(3);
   });
 
@@ -116,21 +190,70 @@ describe('ContentBoardView', () => {
   });
 
   it('should render with horizontal scroll container', () => {
-    const { container } = render(<ContentBoardView items={[]} allTags={[]} />);
+    render(<ContentBoardView items={[]} allTags={[]} />);
 
-    const scrollContainer = container.firstChild as HTMLElement;
-    expect(scrollContainer.className).toContain('overflow-x-auto');
-    expect(scrollContainer.className).toContain('flex');
+    const dndContext = screen.getByTestId('dnd-context');
+    const scrollContainer = dndContext.querySelector('.overflow-x-auto');
+    expect(scrollContainer).toBeInTheDocument();
+    expect(scrollContainer?.className).toContain('flex');
   });
 
-  it('should use SelectableContentCard for items', () => {
+  it('should use SortableContentCard for items', () => {
     const items = [
       createItem({ id: '1', type: 'note', title: 'Test Note' }),
     ];
 
     render(<ContentBoardView items={items} allTags={[]} />);
 
-    // The mocked SelectableContentCard renders with data-testid
     expect(screen.getByTestId('card-note')).toBeInTheDocument();
+  });
+
+  it('should wrap content in DndContext', () => {
+    render(<ContentBoardView items={[]} allTags={[]} />);
+
+    expect(screen.getByTestId('dnd-context')).toBeInTheDocument();
+  });
+
+  it('should include DragOverlay', () => {
+    render(<ContentBoardView items={[]} allTags={[]} />);
+
+    expect(screen.getByTestId('drag-overlay')).toBeInTheDocument();
+  });
+
+  it('should include SortableContext for each column', () => {
+    render(<ContentBoardView items={[]} allTags={[]} />);
+
+    const sortableContexts = screen.getAllByTestId('sortable-context');
+    expect(sortableContexts).toHaveLength(3);
+  });
+
+  it('should pass disabled=true to SortableContentCard when in selection mode', () => {
+    mockUseBulkSelection.mockReturnValue({ isSelectionMode: true });
+    const items = [
+      createItem({ id: '1', type: 'note', title: 'Note' }),
+    ];
+
+    render(<ContentBoardView items={items} allTags={[]} />);
+
+    const card = screen.getByTestId('card-note');
+    expect(card.getAttribute('data-disabled')).toBe('true');
+  });
+
+  it('should pass disabled=false to SortableContentCard when not in selection mode', () => {
+    mockUseBulkSelection.mockReturnValue({ isSelectionMode: false });
+    const items = [
+      createItem({ id: '1', type: 'note', title: 'Note' }),
+    ];
+
+    render(<ContentBoardView items={items} allTags={[]} />);
+
+    const card = screen.getByTestId('card-note');
+    expect(card.getAttribute('data-disabled')).toBe('false');
+  });
+
+  it('should not show collection drop zones when not dragging', () => {
+    render(<ContentBoardView items={[]} allTags={[]} />);
+
+    expect(screen.queryByTestId('collection-drop-zones')).not.toBeInTheDocument();
   });
 });
