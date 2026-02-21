@@ -53,6 +53,15 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-21)**:
+- [x] **Notion-Inspired Public Pages Polish** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7ceadc1`). Brought all public-facing pages to the same Notion-inspired design standard as the dashboard:
+  - **shadcn component upgrade** — Replaced raw `<input>` with `Input` and raw `<button>` with `Button` across all auth pages (login, register, forgot-password, reset-password, verify-email-sent).
+  - **Dark-mode-safe alerts** — Replaced hardcoded `bg-red-50 text-red-700` / `bg-green-50 text-green-700` / `bg-indigo-50 text-indigo-700` with `border-destructive/20 bg-destructive/10 text-destructive`, `border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400`, and `border-primary/20 bg-primary/10 text-primary`.
+  - **Staggered entrance animations** — `animate-fade-up` with 0ms/75ms/150ms delays and `animationFillMode: 'backwards'` on auth pages (logo → form → OAuth sections), share page (header → article → footer), docs home (hero → CTA → grid → resources at 225ms), and support page (header → contact → FAQ heading → per-card stagger).
+  - **Share page upgrades** — Error state icon upgraded to `bg-primary/10 text-primary`, article card `rounded-lg` → `rounded-xl` + `shadow-sm` → `shadow-soft`.
+  - **Auth layout** — `{children}` wrapper gets `animate-fade-up` so every auth page fades in.
+  - **10 files changed** — No test regressions (1501 pass, 8 pre-existing embedding test failures unrelated).
+
+**Previous Enhancement (2026-02-21)**:
 - [x] **Notion-Inspired Remaining Dashboard Pages Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:73c9c2f`). Applied consistent Notion-inspired design language to all 6 remaining dashboard pages (Dashboard, Ask, Analytics, Import, Tasks, Profile):
   - **Header icon badges** — `LayoutDashboard`, `MessageCircleQuestion`, `BarChart3`, `Import`, `CheckSquare`, `User` icons in `bg-primary/10 rounded-lg` badges with flex layout.
   - **Staggered entrance animations** — `animate-fade-up` with 0ms/75ms/150ms/225ms delays and `animationFillMode: 'backwards'` on all page sections.
