@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Library } from 'lucide-react';
 import { getContentAction } from '@/app/actions/content';
 
 export const metadata: Metadata = {
@@ -61,19 +62,26 @@ export default async function LibraryPage({
   return (
     <div className="mx-auto max-w-7xl">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Library</h1>
-        <p className="mt-2 text-muted-foreground">
-          Browse and organize all your saved content
-        </p>
+      <div className="mb-8 animate-fade-up">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Library className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Library</h1>
+            <p className="text-muted-foreground">
+              Browse and organize all your saved content
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Tab Toggle */}
-      <div className="mb-6">
+      <div className="mb-6 animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
         <LibraryTabToggle />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-6 animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {isCollectionsTab ? (

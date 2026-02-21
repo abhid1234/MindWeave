@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Library, FolderOpen } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export type LibraryTab = 'items' | 'collections';
 
@@ -28,17 +29,18 @@ export function LibraryTabToggle() {
   ];
 
   return (
-    <div className="flex gap-2">
+    <div className="inline-flex rounded-lg bg-muted p-1">
       {tabs.map(({ value, icon: Icon, label }) => (
         <button
           key={value}
           type="button"
           onClick={() => handleTabChange(value)}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          className={cn(
+            'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200',
             currentTab === value
-              ? 'bg-primary text-primary-foreground'
+              ? 'bg-primary text-primary-foreground shadow-sm'
               : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-          }`}
+          )}
           aria-pressed={currentTab === value}
         >
           <Icon className="h-4 w-4" />

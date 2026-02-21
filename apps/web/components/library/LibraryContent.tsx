@@ -174,12 +174,12 @@ export function LibraryContent({
 
       {/* Content Grid */}
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-16 text-center animate-in fade-in-50 duration-300">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+        <div className="rounded-xl border bg-card p-16 text-center shadow-soft animate-fade-up">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
             {hasFilters ? (
-              <Search className="h-7 w-7 text-muted-foreground" />
+              <Search className="h-7 w-7 text-primary" />
             ) : (
-              <Library className="h-7 w-7 text-muted-foreground" />
+              <Library className="h-7 w-7 text-primary" />
             )}
           </div>
           <h3 className="text-lg font-semibold mb-1">
@@ -192,7 +192,7 @@ export function LibraryContent({
           </p>
           <Link
             href="/dashboard/capture"
-            className="mt-6 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="mt-6 inline-flex h-12 items-center justify-center rounded-lg bg-primary px-6 text-base font-medium text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
           >
             {hasFilters ? 'Clear Filters' : 'Create Your First Item'}
           </Link>
@@ -212,7 +212,7 @@ export function LibraryContent({
               {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className="animate-in fade-in-50 slide-in-from-bottom-4 duration-300"
+                  className="animate-fade-up"
                   style={{ animationDelay: `${Math.min(index * 50, 300)}ms`, animationFillMode: 'backwards' }}
                 >
                   <SelectableContentCard {...item} allTags={allTags} />
