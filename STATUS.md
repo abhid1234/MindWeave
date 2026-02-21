@@ -53,6 +53,17 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-21)**:
+- [x] **Notion-Inspired Library Page Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7ec7cd7`). Complete visual overhaul of the `/dashboard/library` page to match the capture and search pages' polish level:
+  - **Pill segmented tab toggle** — replaced plain `<button>` row with `inline-flex rounded-lg bg-muted p-1` pill container, `rounded-md` inner buttons, active state `bg-primary shadow-sm`, inactive `bg-secondary` preserved for test compatibility, using `cn()` for class merging.
+  - **Pill segmented view toggle** — same pill pattern (`bg-muted p-0.5`) for grid/list/board view buttons, `rounded-md`, `transition-all duration-200`.
+  - **Card-wrapped filter bar** — filters wrapped in `Card` + `CardContent` for visual containment and elevation, labels styled as `text-xs font-medium uppercase tracking-wide text-muted-foreground`, `transition-colors` on clear tag button.
+  - **Enhanced empty state** — replaced `border-dashed` with `bg-card shadow-soft` card, icon container `bg-primary/10` with `text-primary` icons, upgraded CTA link to button-style with `h-12 shadow-sm hover:shadow-md`.
+  - **Staggered entrance animations** — header (0ms), tab toggle (75ms), content area (150ms) with `animate-fade-up`, per-card staggered delays in grid view.
+  - **Header icon badge** — `Library` icon in `bg-primary/10 rounded-lg` badge next to heading, flex layout with title/subtitle stacked.
+  - **Loading skeleton consistency** — fixed `max-w-6xl` → `max-w-7xl`, added icon badge skeleton, pill toggle skeleton, Card-wrapped filter skeleton, sidebar skeleton, staggered `animate-fade-up` matching page delays.
+  - **All 39 library component tests pass** — `bg-secondary` on inactive toggles preserved, all `<Link>` elements in FilterBar preserved, aria attributes unchanged.
+
+**Previous Enhancement (2026-02-21)**:
 - [x] **Notion-Inspired Search Page Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:8ce0514`). Complete visual overhaul of the `/dashboard/search` page to match the capture page's polish level:
   - **Pill segmented mode toggle** — replaced plain `<button>` pair with `bg-muted rounded-lg p-1` pill container, `TextSearch`/`Sparkles` Lucide icons, active state `bg-primary shadow-sm`, inactive `text-muted-foreground`, using `cn()` for class merging.
   - **Card-wrapped search form** — form wrapped in `Card` + `CardContent` for visual elevation, submit button replaced with shadcn `Button` component + `Search` icon.
