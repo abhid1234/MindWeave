@@ -2,8 +2,13 @@
 
 import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { TextSearch, Sparkles, Search, FileQuestion } from 'lucide-react';
 import { semanticSearchAction, type SemanticSearchResult } from '@/app/actions/search';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { SearchSuggestions } from './SearchSuggestions';
 import { SearchResultCard } from './SearchResultCard';
 
@@ -140,76 +145,114 @@ export function SemanticSearchForm({
 
   return (
     <div>
-      {/* Search Mode Toggle */}
-      <div className="mb-4 flex gap-2">
+      {/* Search Mode Toggle — Pill Segmented Control */}
+      <div className="mb-4 inline-flex rounded-lg bg-muted p-1">
         <button
           type="button"
           onClick={() => handleModeChange('keyword')}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          className={cn(
+            'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200',
             mode === 'keyword'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-          }`}
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
         >
+          <TextSearch className="h-4 w-4" />
           Keyword Search
         </button>
         <button
           type="button"
           onClick={() => handleModeChange('semantic')}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          className={cn(
+            'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200',
             mode === 'semantic'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-          }`}
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
         >
+          <Sparkles className="h-4 w-4" />
           Semantic Search (AI)
         </button>
       </div>
 
-      {/* Search Form */}
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="flex gap-2">
-          <div className="relative flex-1" ref={inputContainerRef}>
-            <Input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              placeholder={
-                mode === 'keyword'
-                  ? 'Search by keywords...'
-                  : 'Describe what you\'re looking for...'
-              }
-              className="w-full"
-              autoFocus
-            />
-            <SearchSuggestions
-              query={query}
-              onSelect={handleSuggestionSelect}
-              isVisible={isFocused && !hasSearched}
-              recentSearches={recentSearches}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isPending || !query.trim()}
-            className="rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isPending ? 'Searching...' : 'Search'}
-          </button>
-        </div>
-        {mode === 'semantic' && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Semantic search finds content by meaning, not just exact keywords.
-            Try describing what you&apos;re looking for in natural language.
-          </p>
-        )}
-      </form>
+      {/* Search Form — Wrapped in Card */}
+      <Card className="mb-6">
+        <CardContent className="p-4">
+          <form onSubmit={handleSubmit}>
+            <div className="flex gap-2">
+              <div className="relative flex-1" ref={inputContainerRef}>
+                <Input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  placeholder={
+                    mode === 'keyword'
+                      ? 'Search by keywords...'
+                      : 'Describe what you\'re looking for...'
+                  }
+                  className="w-full"
+                  autoFocus
+                />
+                <SearchSuggestions
+                  query={query}
+                  onSelect={handleSuggestionSelect}
+                  isVisible={isFocused && !hasSearched}
+                  recentSearches={recentSearches}
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={isPending || !query.trim()}
+              >
+                <Search className="h-4 w-4" />
+                {isPending ? 'Searching...' : 'Search'}
+              </Button>
+            </div>
+            {mode === 'semantic' && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Semantic search finds content by meaning, not just exact keywords.
+                Try describing what you&apos;re looking for in natural language.
+              </p>
+            )}
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Error Message */}
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
           {error}
+        </div>
+      )}
+
+      {/* Loading Skeletons (semantic search) */}
+      {mode === 'semantic' && isPending && (
+        <div className="space-y-4">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="animate-fade-up"
+              style={{ animationDelay: `${i * 75}ms`, animationFillMode: 'backwards' }}
+            >
+              <Card className="border-l-4 border-l-muted p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-5 w-48" />
+                      <Skeleton className="h-5 w-14 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-32" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </Card>
+            </div>
+          ))}
         </div>
       )}
 
@@ -222,9 +265,13 @@ export function SemanticSearchForm({
           </p>
 
           {results.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-12 text-center animate-in fade-in-50 duration-300">
-              <p className="text-muted-foreground">
-                No results found. Try rephrasing your search or use keyword search.
+            <div className="rounded-xl border bg-card p-12 text-center shadow-soft animate-fade-up">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <FileQuestion className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="font-semibold">No results found</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Try rephrasing your search or use keyword search.
               </p>
             </div>
           ) : (
@@ -232,7 +279,7 @@ export function SemanticSearchForm({
               {results.map((item, index) => (
                 <div
                   key={item.id}
-                  className="animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
+                  className="animate-fade-up"
                   style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}
                 >
                   <SearchResultCard
