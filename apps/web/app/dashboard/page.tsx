@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { formatDateUTC } from '@/lib/utils';
 import { DashboardRecommendations } from '@/components/dashboard/DashboardRecommendations';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import { Zap, Search, Library, ArrowRight } from 'lucide-react';
+import { Zap, Search, Library, ArrowRight, LayoutDashboard, PenLine } from 'lucide-react';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -92,11 +92,18 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Welcome back, {session.user?.name?.split(' ')[0]}!</h1>
-        <p className="mt-2 text-muted-foreground">
-          Here&apos;s what&apos;s happening with your knowledge hub
-        </p>
+      <div className="mb-8 animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <LayoutDashboard className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Welcome back, {session.user?.name?.split(' ')[0]}!</h1>
+            <p className="text-muted-foreground">
+              Here&apos;s what&apos;s happening with your knowledge hub
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Bento Grid */}
@@ -140,11 +147,15 @@ export default async function DashboardPage() {
           </div>
 
           {latestItems.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-12 text-center">
-              <p className="text-muted-foreground">No content yet. Start capturing your ideas!</p>
+            <div className="rounded-xl border bg-card p-12 text-center shadow-soft">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <PenLine className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold">No content yet</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Start capturing your ideas!</p>
               <Link
                 href="/dashboard/capture"
-                className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                className="mt-4 inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Create Your First Note
               </Link>

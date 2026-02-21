@@ -11,7 +11,8 @@ import {
 } from '@/components/import';
 import { ImportSource, ParseResult, ImportResult, ImportItem } from '@/lib/import/types';
 import { importContentAction } from '@/app/actions/import';
-import { ArrowLeft, ArrowRight, Upload } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Upload, Import } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type Step = 'source' | 'upload' | 'preview' | 'importing' | 'complete';
 
@@ -116,23 +117,35 @@ export default function ImportPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Import Content</h1>
-        <p className="text-muted-foreground">
-          Import your bookmarks, notes, and saved articles from other services.
-        </p>
+      <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Import className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Import Content</h1>
+            <p className="text-muted-foreground">
+              Import your bookmarks, notes, and saved articles from other services.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Step indicator */}
       {step !== 'complete' && step !== 'importing' && (
-        <StepIndicator
-          steps={['Select Source', 'Upload File', 'Preview & Import']}
-          currentStep={step === 'source' ? 0 : step === 'upload' ? 1 : 2}
-        />
+        <div className="animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
+          <StepIndicator
+            steps={['Select Source', 'Upload File', 'Preview & Import']}
+            currentStep={step === 'source' ? 0 : step === 'upload' ? 1 : 2}
+          />
+        </div>
       )}
 
       {/* Step content */}
-      <div className="min-h-[400px]">
+      <div
+        className="min-h-[400px] animate-fade-up"
+        style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}
+      >
         {step === 'source' && (
           <div className="space-y-6">
             <ImportSourceSelector selected={selectedSource} onSelect={handleSourceSelect} />
@@ -229,18 +242,20 @@ function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
       {steps.map((step, index) => (
         <div key={step} className="flex items-center">
           <div
-            className={`flex items-center gap-2 ${
+            className={cn(
+              'flex items-center gap-2',
               index <= currentStep ? 'text-primary' : 'text-muted-foreground'
-            }`}
+            )}
           >
             <span
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
                 index < currentStep
                   ? 'bg-primary text-primary-foreground'
                   : index === currentStep
                     ? 'border-2 border-primary'
                     : 'border-2 border-muted-foreground/30'
-              }`}
+              )}
             >
               {index < currentStep ? '✓' : index + 1}
             </span>
@@ -248,9 +263,10 @@ function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
           </div>
           {index < steps.length - 1 && (
             <div
-              className={`mx-4 h-0.5 w-8 sm:w-16 ${
+              className={cn(
+                'mx-4 h-0.5 w-8 sm:w-16',
                 index < currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
-              }`}
+              )}
             />
           )}
         </div>

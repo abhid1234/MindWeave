@@ -28,8 +28,10 @@ export function TaskList({ items }: TaskListProps) {
       </div>
 
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-          <ClipboardList className="mb-4 h-12 w-12 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center rounded-xl border bg-card p-12 text-center shadow-soft">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <ClipboardList className="h-6 w-6 text-primary" />
+          </div>
           <h3 className="text-lg font-medium">No tasks yet</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Create your first task to get started.

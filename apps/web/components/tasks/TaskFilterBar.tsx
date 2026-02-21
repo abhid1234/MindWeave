@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const statuses = [
   { value: '', label: 'All' },
@@ -34,37 +35,41 @@ export function TaskFilterBar() {
   }
 
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-4">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-muted-foreground">Status:</span>
-        <div className="flex gap-1">
-          {statuses.map((s) => (
-            <Button
-              key={s.value}
-              variant={currentStatus === s.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => updateFilter('status', s.value)}
-            >
-              {s.label}
-            </Button>
-          ))}
+    <Card className="mb-6">
+      <CardContent className="pt-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Status:</span>
+            <div className="flex gap-1">
+              {statuses.map((s) => (
+                <Button
+                  key={s.value}
+                  variant={currentStatus === s.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => updateFilter('status', s.value)}
+                >
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Priority:</span>
+            <div className="flex gap-1">
+              {priorities.map((p) => (
+                <Button
+                  key={p.value}
+                  variant={currentPriority === p.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => updateFilter('priority', p.value)}
+                >
+                  {p.label}
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-muted-foreground">Priority:</span>
-        <div className="flex gap-1">
-          {priorities.map((p) => (
-            <Button
-              key={p.value}
-              variant={currentPriority === p.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => updateFilter('priority', p.value)}
-            >
-              {p.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

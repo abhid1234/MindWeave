@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Calendar, Filter } from 'lucide-react';
+import { Download, Calendar, Filter, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export type ContentTypeFilter = 'all' | 'note' | 'link' | 'file';
@@ -52,11 +52,16 @@ export function AnalyticsHeader({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Analytics</h1>
-          <p className="mt-1 text-muted-foreground">
-            Insights and statistics about your knowledge base
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <BarChart3 className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Analytics</h1>
+            <p className="mt-1 text-muted-foreground">
+              Insights and statistics about your knowledge base
+            </p>
+          </div>
         </div>
 
         <div className="flex gap-2">
@@ -90,7 +95,7 @@ export function AnalyticsHeader({
       {showFilters && (
         <div className="flex flex-wrap gap-4 rounded-lg border bg-muted/50 p-4">
           <div>
-            <label className="mb-2 block text-sm font-medium">
+            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Calendar className="mr-1 inline h-4 w-4" />
               Date Range
             </label>
@@ -109,7 +114,7 @@ export function AnalyticsHeader({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium">Content Type</label>
+            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">Content Type</label>
             <div className="flex flex-wrap gap-1">
               {contentTypes.map((type) => (
                 <Button

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getProfile } from '@/app/actions/profile';
 import ProfileSettingsForm from '@/components/profile/ProfileSettingsForm';
+import { User } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Profile | Mindweave',
@@ -24,20 +25,29 @@ export default async function ProfilePage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Profile Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your public profile and visibility settings.
-        </p>
+      <div className="mb-6 animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <User className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Profile Settings</h1>
+            <p className="text-muted-foreground">
+              Manage your public profile and visibility settings.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <ProfileSettingsForm
-        initialData={{
-          username: profile.username,
-          bio: profile.bio,
-          isProfilePublic: profile.isProfilePublic,
-        }}
-      />
+      <div className="animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
+        <ProfileSettingsForm
+          initialData={{
+            username: profile.username,
+            bio: profile.bio,
+            isProfilePublic: profile.isProfilePublic,
+          }}
+        />
+      </div>
     </div>
   );
 }

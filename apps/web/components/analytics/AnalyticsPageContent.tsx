@@ -69,16 +69,20 @@ export function AnalyticsPageContent() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <AnalyticsHeader onExport={handleExport} isExporting={isExporting} />
+      <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+        <AnalyticsHeader onExport={handleExport} isExporting={isExporting} />
+      </div>
 
-      <OverviewStats />
+      <div className="animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
+        <OverviewStats />
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
         <ContentGrowthChart initialPeriod="month" />
         <TagDistributionChart />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '225ms', animationFillMode: 'backwards' }}>
         <CollectionUsageChart />
         <KnowledgeInsightsCard />
       </div>
