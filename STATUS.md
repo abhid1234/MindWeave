@@ -53,6 +53,17 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-21)**:
+- [x] **Notion-Inspired Search Page Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:8ce0514`). Complete visual overhaul of the `/dashboard/search` page to match the capture page's polish level:
+  - **Pill segmented mode toggle** — replaced plain `<button>` pair with `bg-muted rounded-lg p-1` pill container, `TextSearch`/`Sparkles` Lucide icons, active state `bg-primary shadow-sm`, inactive `text-muted-foreground`, using `cn()` for class merging.
+  - **Card-wrapped search form** — form wrapped in `Card` + `CardContent` for visual elevation, submit button replaced with shadcn `Button` component + `Search` icon.
+  - **SearchResultCard redesign** — `Card` component with colored left border (`border-l-4`) per content type (blue=note, green=link, purple=file) via `TYPE_ACCENTS` color map, accent-colored type badges, green dot indicator on similarity badges, refined tag pill styling (`px-2.5 py-0.5`), `hover:shadow-soft-md hover:-translate-y-0.5` effect.
+  - **Loading skeletons** — 3 shimmer skeleton cards during semantic search `isPending` state, using existing `Skeleton` component with staggered `animate-fade-up` entrance.
+  - **Enhanced empty states** — replaced `border-dashed` boxes with card-style containers featuring `FileQuestion`/`Search` icons in rounded circles, structured heading + description text.
+  - **Staggered entrance animations** — header (0ms), form (75ms), results (150ms) with `animate-fade-up`, per-card staggered delays for both keyword and semantic results.
+  - **Header icon badge** — `Search` icon in `bg-primary/10` rounded badge next to heading.
+  - **All 21 SemanticSearchForm tests pass** — all test selectors preserved (button names, `toHaveClass('bg-primary')`, text content).
+
+**Previous Enhancement (2026-02-21)**:
 - [x] **Notion-Inspired Capture Page Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:efd35bb`). Complete visual overhaul of the `/dashboard/capture` page:
   - **Visual type selector cards** — replaced `<select>` dropdown with 3 horizontal radio cards (Note/Link/File) featuring Lucide icons, accent colors (blue/green/purple), selected state with colored border + tinted bg + ring + shadow, and proper `role="radio"` + `aria-checked` accessibility.
   - **Card-wrapped form** — all form fields wrapped in `Card` + `CardContent` for visual containment and elevation.
