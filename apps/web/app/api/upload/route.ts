@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import {
@@ -10,6 +8,7 @@ import {
   rateLimitExceededResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit';
+import { isGCSConfigured, uploadToGCS } from '@/lib/storage';
 
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -159,18 +158,28 @@ export async function POST(request: NextRequest) {
     const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `${uniqueId}-${safeFileName}`;
 
-    // SECURITY: Store files outside public/ so they are only accessible via /api/files (authenticated)
-    const uploadDir = path.join(process.cwd(), 'uploads', session.user.id);
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    let publicPath: string;
+
+    if (isGCSConfigured()) {
+      // Production: upload to Google Cloud Storage
+      const objectPath = `uploads/${session.user.id}/${fileName}`;
+      const contentType = file.type || getMimeType(path.extname(file.name).toLowerCase());
+      publicPath = await uploadToGCS(objectPath, buffer, contentType);
+    } else {
+      // Dev fallback: write to local filesystem
+      const { writeFile, mkdir } = await import('fs/promises');
+      const { existsSync } = await import('fs');
+
+      const uploadDir = path.join(process.cwd(), 'uploads', session.user.id);
+      if (!existsSync(uploadDir)) {
+        await mkdir(uploadDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadDir, fileName);
+      await writeFile(filePath, buffer);
+
+      publicPath = `/api/files/${session.user.id}/${fileName}`;
     }
-
-    // Write file to disk (buffer already read above for signature verification)
-    const filePath = path.join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
-
-    // Return authenticated file serving path
-    const publicPath = `/api/files/${session.user.id}/${fileName}`;
 
     return NextResponse.json(
       {

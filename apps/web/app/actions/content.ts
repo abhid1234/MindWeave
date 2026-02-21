@@ -14,6 +14,7 @@ import { revalidateTag } from 'next/cache';
 import { CacheTags } from '@/lib/cache';
 import { randomBytes } from 'crypto';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath } from '@/lib/storage';
 
 export type ActionResult = {
   success: boolean;
@@ -483,9 +484,9 @@ export async function deleteContentAction(contentId: string): Promise<ActionResu
       };
     }
 
-    // Verify content exists and belongs to the user
+    // Verify content exists and belongs to the user (fetch metadata for GCS cleanup)
     const existingContent = await db
-      .select({ id: content.id })
+      .select({ id: content.id, metadata: content.metadata })
       .from(content)
       .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
       .limit(1);
@@ -499,6 +500,20 @@ export async function deleteContentAction(contentId: string): Promise<ActionResu
 
     // Delete the content (embeddings cascade automatically via FK)
     await db.delete(content).where(eq(content.id, contentId));
+
+    // Clean up GCS object if applicable (non-blocking)
+    if (isGCSConfigured()) {
+      const meta = existingContent[0].metadata as Record<string, unknown> | null;
+      const filePath = meta?.filePath as string | undefined;
+      if (filePath) {
+        const objectPath = extractGCSObjectPath(filePath);
+        if (objectPath) {
+          deleteFromGCS(objectPath).catch((err) => {
+            console.error('Failed to delete GCS object:', objectPath, err);
+          });
+        }
+      }
+    }
 
     // Revalidate relevant pages and cache tags
     revalidatePath('/dashboard/library');
@@ -961,6 +976,20 @@ export async function bulkDeleteContentAction(
       };
     }
 
+    // Fetch metadata before deleting (for GCS cleanup)
+    let fileMetadata: { id: string; metadata: unknown }[] = [];
+    if (isGCSConfigured()) {
+      fileMetadata = await db
+        .select({ id: content.id, metadata: content.metadata })
+        .from(content)
+        .where(
+          and(
+            inArray(content.id, contentIds),
+            eq(content.userId, session.user.id)
+          )
+        );
+    }
+
     // Delete all matching content in a single batch query
     const result = await db
       .delete(content)
@@ -974,6 +1003,24 @@ export async function bulkDeleteContentAction(
 
     const successCount = result.length;
     const failedCount = contentIds.length - successCount;
+
+    // Clean up GCS objects for deleted items (non-blocking)
+    if (isGCSConfigured() && fileMetadata.length > 0) {
+      const deletedIds = new Set(result.map((r) => r.id));
+      for (const item of fileMetadata) {
+        if (!deletedIds.has(item.id)) continue;
+        const meta = item.metadata as Record<string, unknown> | null;
+        const filePath = meta?.filePath as string | undefined;
+        if (filePath) {
+          const objectPath = extractGCSObjectPath(filePath);
+          if (objectPath) {
+            deleteFromGCS(objectPath).catch((err) => {
+              console.error('Failed to delete GCS object:', objectPath, err);
+            });
+          }
+        }
+      }
+    }
 
     revalidatePath('/dashboard/library');
 

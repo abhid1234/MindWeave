@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
 import path from 'path';
 import { checkRateLimit, rateLimitExceededResponse, RATE_LIMITS } from '@/lib/rate-limit';
+import { isGCSConfigured, getPublicUrl } from '@/lib/storage';
 
 /**
  * GET /api/files/[userId]/[filename]
  *
- * SECURITY: Authenticated file serving route.
+ * Backward-compatible file serving route.
+ * - GCS mode: 302 redirect to the public GCS URL
+ * - Local mode (dev): streams the file from disk
  * - Requires a valid session
- * - Only serves files from the authenticated user's own upload directory
+ * - Only allows users to access their own files
  * - Prevents path traversal via strict validation
  */
 export async function GET(
@@ -54,6 +55,17 @@ export async function GET(
     ) {
       return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
     }
+
+    if (isGCSConfigured()) {
+      // Production: redirect to GCS public URL
+      const objectPath = `uploads/${requestedUserId}/${fileName}`;
+      const gcsUrl = getPublicUrl(objectPath);
+      return NextResponse.redirect(gcsUrl, 302);
+    }
+
+    // Dev fallback: serve from local filesystem
+    const { readFile } = await import('fs/promises');
+    const { existsSync } = await import('fs');
 
     // Build the absolute file path (uploads/ is outside public/)
     const filePath = path.join(process.cwd(), 'uploads', requestedUserId, fileName);

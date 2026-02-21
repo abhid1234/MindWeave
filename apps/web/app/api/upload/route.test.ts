@@ -15,21 +15,12 @@ vi.mock('@/lib/rate-limit', () => ({
   RATE_LIMITS: { upload: { maxRequests: 10, windowMs: 60000 } },
 }));
 
-// Mock fs functions
-vi.mock('fs/promises', () => ({
-  default: {
-    writeFile: vi.fn().mockResolvedValue(undefined),
-    mkdir: vi.fn().mockResolvedValue(undefined),
-  },
-  writeFile: vi.fn().mockResolvedValue(undefined),
-  mkdir: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock('fs', () => ({
-  default: {
-    existsSync: vi.fn().mockReturnValue(true),
-  },
-  existsSync: vi.fn().mockReturnValue(true),
+// Mock GCS storage module — simulate GCS being configured
+vi.mock('@/lib/storage', () => ({
+  isGCSConfigured: vi.fn().mockReturnValue(true),
+  uploadToGCS: vi.fn().mockImplementation((objectPath: string) =>
+    Promise.resolve(`https://storage.googleapis.com/mindweave-uploads/${objectPath}`)
+  ),
 }));
 
 import { POST } from './route';
@@ -177,7 +168,7 @@ describe('Upload API Route', () => {
       vi.mocked(auth).mockResolvedValue({ user: { id: 'user123' } } as never);
     });
 
-    it('should upload text file successfully', async () => {
+    it('should upload text file successfully via GCS', async () => {
       const formData = new FormData();
       formData.append(
         'file',
@@ -195,7 +186,7 @@ describe('Upload API Route', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.fileName).toBe('notes.txt');
-      expect(data.data.filePath).toContain('/api/files/');
+      expect(data.data.filePath).toContain('https://storage.googleapis.com/mindweave-uploads/uploads/user123/');
     });
 
     it('should upload markdown file successfully', async () => {
@@ -236,28 +227,6 @@ describe('Upload API Route', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-    });
-
-    it('should create upload directory if not exists', async () => {
-      const { existsSync } = await import('fs');
-      vi.mocked(existsSync).mockReturnValueOnce(false);
-
-      const formData = new FormData();
-      formData.append(
-        'file',
-        new File(['text content'], 'file.txt', { type: 'text/plain' })
-      );
-
-      const request = new NextRequest('http://localhost/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(200);
-
-      const { mkdir } = await import('fs/promises');
-      expect(mkdir).toHaveBeenCalled();
     });
   });
 });

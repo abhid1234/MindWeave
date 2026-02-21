@@ -53,7 +53,7 @@ steps:
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_APP_URL=${_APP_URL},AUTH_URL=${_APP_URL},CLOUD_SQL_CONNECTION_NAME=${_CLOUD_SQL_INSTANCE},NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAACa3eqmrh0p5DsBc'
+      - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_APP_URL=${_APP_URL},AUTH_URL=${_APP_URL},CLOUD_SQL_CONNECTION_NAME=${_CLOUD_SQL_INSTANCE},NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAACa3eqmrh0p5DsBc,GCS_BUCKET_NAME=${_GCS_BUCKET_NAME}'
       - '--add-cloudsql-instances=${_CLOUD_SQL_INSTANCE}'
       - '--set-secrets=DATABASE_URL=database-url:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest,RESEND_API_KEY=resend-api-key:latest,TURNSTILE_SECRET_KEY=turnstile-secret-key:latest'
       - '--min-instances=0'
@@ -75,6 +75,7 @@ substitutions:
   _DATABASE_URL: 'postgresql://user:password@host:5432/db'
   _APP_URL: 'https://mindweave.space'
   _CLOUD_SQL_INSTANCE: 'mindweave-prod:us-central1:mindweave-db'
+  _GCS_BUCKET_NAME: 'mindweave-uploads'
 
 # Images to be pushed to GCR
 images:
