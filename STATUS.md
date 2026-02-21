@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-20
+**Last Updated**: 2026-02-21
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -706,6 +706,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-21** - ✅ **Collections Tab & Multiple Library Views** — Added first-class collections browsing via tab toggle and three content view modes (grid, list, board). New components: ViewToggle, LibraryTabToggle, CollectionGrid, ContentListView (compact rows), ContentBoardView (kanban by type). Fixed FilterBar param preservation bug. 49 new tests across 5 test files (ViewToggle 9, LibraryTabToggle 8, CollectionGrid 12, ContentListView 11, ContentBoardView 9). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:1b1f32e`)
 - **2026-02-20** - ✅ **Fix Embedding Model & Regenerate All** — Switched from deprecated `text-embedding-005` to `gemini-embedding-001` with 768-dim reduction. Regenerated all 356 production embeddings (0 failures). Added `FORCE=true` flag to generate-embeddings script. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:28268c1`)
 - **2026-02-20** - ✅ **Similar Content in Detail Dialog** — Added inline recommendations section to ContentDetailDialog with empty state fallback and lowered similarity threshold to 0.3. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:353d1ea`)
 - **2026-02-20** - ✅ **Symmetric Feature Grid** — Made all 6 feature cards equal-sized in a uniform 3×2 grid, removing the oversized Semantic Search and full-width Privacy First variants. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7f3c2e6`)

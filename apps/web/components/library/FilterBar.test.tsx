@@ -2,11 +2,12 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { FilterBar } from './FilterBar';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn(),
+  useRouter: vi.fn(),
 }));
 
 describe('FilterBar', () => {
@@ -19,6 +20,7 @@ describe('FilterBar', () => {
     mockSearchParams.delete('sortBy');
     mockSearchParams.delete('sortOrder');
     vi.mocked(useSearchParams).mockReturnValue(mockSearchParams as any);
+    vi.mocked(useRouter).mockReturnValue({ push: vi.fn() } as any);
   });
 
   describe('Type Filter', () => {
