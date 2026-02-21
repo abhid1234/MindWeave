@@ -27,10 +27,10 @@ describe('CapturePage', () => {
       render(<CapturePage />);
 
       expect(screen.getByRole('heading', { name: /capture/i })).toBeInTheDocument();
-      expect(screen.getByLabelText(/type/i)).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /note/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/content/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/tags/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/content \(optional\)/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Add tags...')).toBeInTheDocument();
       // URL field is not shown for note type
       expect(screen.queryByLabelText(/^url$/i)).not.toBeInTheDocument();
     });
@@ -38,8 +38,8 @@ describe('CapturePage', () => {
     it('should render all form fields with correct default values', () => {
       render(<CapturePage />);
 
-      const typeSelect = screen.getByLabelText(/type/i) as HTMLSelectElement;
-      expect(typeSelect.value).toBe('note');
+      const noteCard = screen.getByRole('radio', { name: /note/i });
+      expect(noteCard).toHaveAttribute('aria-checked', 'true');
 
       expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /cancel/i })).toBeInTheDocument();
@@ -48,13 +48,12 @@ describe('CapturePage', () => {
     it('should render content type options', () => {
       render(<CapturePage />);
 
-      const typeSelect = screen.getByLabelText(/type/i);
-      const options = typeSelect.querySelectorAll('option');
-      const optionValues = Array.from(options).map(opt => opt.value);
+      const radios = screen.getAllByRole('radio');
+      expect(radios).toHaveLength(3);
 
-      expect(optionValues).toContain('note');
-      expect(optionValues).toContain('link');
-      expect(optionValues).toContain('file');
+      expect(screen.getByRole('radio', { name: /note/i })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /link/i })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /file/i })).toBeInTheDocument();
     });
 
     it('should render submit and cancel buttons', () => {
@@ -80,7 +79,7 @@ describe('CapturePage', () => {
       const user = userEvent.setup();
       render(<CapturePage />);
 
-      const bodyTextarea = screen.getByLabelText(/content/i);
+      const bodyTextarea = screen.getByLabelText(/content \(optional\)/i);
       await user.type(bodyTextarea, 'This is my note content');
 
       expect(bodyTextarea).toHaveValue('This is my note content');
@@ -91,8 +90,8 @@ describe('CapturePage', () => {
       render(<CapturePage />);
 
       // Select link type first to show URL field
-      const typeSelect = screen.getByLabelText(/type/i);
-      await user.selectOptions(typeSelect, 'link');
+      const linkCard = screen.getByRole('radio', { name: /link/i });
+      await user.click(linkCard);
 
       const urlInput = screen.getByLabelText(/^url$/i);
       await user.type(urlInput, 'https://example.com');
@@ -100,34 +99,36 @@ describe('CapturePage', () => {
       expect(urlInput).toHaveValue('https://example.com');
     });
 
-    it('should allow typing in tags field', async () => {
+    it('should allow adding tags via TagInput', async () => {
       const user = userEvent.setup();
       render(<CapturePage />);
 
-      const tagsInput = screen.getByLabelText(/tags/i);
-      await user.type(tagsInput, 'tag1, tag2, tag3');
+      const tagsInput = screen.getByPlaceholderText('Add tags...');
+      await user.type(tagsInput, 'tag1{Enter}');
 
-      expect(tagsInput).toHaveValue('tag1, tag2, tag3');
+      // Badge should appear for the tag
+      expect(screen.getByText('tag1')).toBeInTheDocument();
     });
 
     it('should allow changing content type', async () => {
       const user = userEvent.setup();
       render(<CapturePage />);
 
-      const typeSelect = screen.getByLabelText(/type/i) as HTMLSelectElement;
-      await user.selectOptions(typeSelect, 'link');
+      const linkCard = screen.getByRole('radio', { name: /link/i });
+      await user.click(linkCard);
 
-      expect(typeSelect.value).toBe('link');
+      expect(linkCard).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('radio', { name: /note/i })).toHaveAttribute('aria-checked', 'false');
     });
 
     it('should show file upload when file type is selected', async () => {
       const user = userEvent.setup();
       render(<CapturePage />);
 
-      const typeSelect = screen.getByLabelText(/type/i) as HTMLSelectElement;
-      await user.selectOptions(typeSelect, 'file');
+      const fileCard = screen.getByRole('radio', { name: /file/i });
+      await user.click(fileCard);
 
-      expect(typeSelect.value).toBe('file');
+      expect(fileCard).toHaveAttribute('aria-checked', 'true');
       // File upload area should be visible
       expect(screen.getByText(/click or drag file to upload/i)).toBeInTheDocument();
       // Description field should show instead of content
@@ -138,14 +139,14 @@ describe('CapturePage', () => {
       const user = userEvent.setup();
       render(<CapturePage />);
 
-      const typeSelect = screen.getByLabelText(/type/i) as HTMLSelectElement;
-
       // Switch to link type
-      await user.selectOptions(typeSelect, 'link');
+      const linkCard = screen.getByRole('radio', { name: /link/i });
+      await user.click(linkCard);
       expect(screen.getByLabelText(/^url$/i)).toBeInTheDocument();
 
       // Switch back to note type
-      await user.selectOptions(typeSelect, 'note');
+      const noteCard = screen.getByRole('radio', { name: /note/i });
+      await user.click(noteCard);
       expect(screen.queryByLabelText(/^url$/i)).not.toBeInTheDocument();
     });
   });
@@ -183,18 +184,18 @@ describe('CapturePage', () => {
     it('should have proper labels for all form fields (note type)', () => {
       render(<CapturePage />);
 
-      expect(screen.getByLabelText(/type/i)).toBeInTheDocument();
+      expect(screen.getByRole('radiogroup', { name: /content type/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/content/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/tags/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/content \(optional\)/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Add tags...')).toBeInTheDocument();
     });
 
     it('should show URL field when link type is selected', async () => {
       const user = userEvent.setup();
       render(<CapturePage />);
 
-      const typeSelect = screen.getByLabelText(/type/i);
-      await user.selectOptions(typeSelect, 'link');
+      const linkCard = screen.getByRole('radio', { name: /link/i });
+      await user.click(linkCard);
 
       expect(screen.getByLabelText(/^url$/i)).toBeInTheDocument();
     });
