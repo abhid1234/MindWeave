@@ -53,6 +53,17 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-21)**:
+- [x] **Notion-Inspired Capture Page Redesign** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:efd35bb`). Complete visual overhaul of the `/dashboard/capture` page:
+  - **Visual type selector cards** — replaced `<select>` dropdown with 3 horizontal radio cards (Note/Link/File) featuring Lucide icons, accent colors (blue/green/purple), selected state with colored border + tinted bg + ring + shadow, and proper `role="radio"` + `aria-checked` accessibility.
+  - **Card-wrapped form** — all form fields wrapped in `Card` + `CardContent` for visual containment and elevation.
+  - **shadcn components** — replaced raw `<input>` with `Input` component for title/URL, `Button` (lg) for Save, consistent hover/focus states.
+  - **TagInput with badges** — replaced comma-separated text input with `TagInput` component (badges, autocomplete, keyboard support), hidden input preserves FormData contract, `commitPending()` called before submit.
+  - **Enhanced textarea** — `rows={10}`, `min-h-[200px]`, `leading-relaxed`, `px-4 py-3`, matching Input component hover/focus states via `cn()`.
+  - **Header icon badge** — `PenLine` icon in `bg-primary/10` rounded badge next to heading.
+  - **Staggered entrance animations** — header, type cards, form Card, action buttons each get `animate-fade-up` with 0/75/150/225ms delays.
+  - **Updated tests** — all 14 tests updated for new component structure (radio cards, TagInput, aria-checked).
+
+**Previous Enhancement (2026-02-21)**:
 - [x] **Drag & Drop on Board View** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0725837`). Added @dnd-kit-based drag and drop to the kanban-style board view:
   - **Reorder within columns** — drag cards to rearrange within their type column (Notes/Links/Files), order persisted to localStorage via new `useBoardSortOrder` hook with reconciliation for added/removed items.
   - **Drag to collection drop zones** — a horizontal row of droppable collection targets slides in during drag; dropping a card calls `addToCollectionAction` with success/warning toast feedback.
