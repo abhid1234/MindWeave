@@ -254,7 +254,7 @@ function ListRow({ item, allTags: _allTags }: { item: ContentItem; allTags: stri
         onOpenChange={setIsDeleteOpen}
       />
       <ContentEditDialog
-        content={{ id: item.id, type: item.type, title: item.title, body: item.body, url: item.url }}
+        content={{ id: item.id, type: item.type, title: item.title, body: item.body, url: item.url, metadata: item.metadata }}
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
       />

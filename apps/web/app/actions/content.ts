@@ -297,6 +297,7 @@ export type UpdateContentParams = {
   title?: string;
   body?: string;
   url?: string;
+  metadata?: Record<string, string | number | boolean | null>;
 };
 
 export async function updateContentAction(params: UpdateContentParams): Promise<ActionResult> {
@@ -347,6 +348,7 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
         title: content.title,
         url: content.url,
         type: content.type,
+        metadata: content.metadata,
       })
       .from(content)
       .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
@@ -366,6 +368,7 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
       title: string;
       body: string | null;
       url: string | null;
+      metadata: Record<string, unknown>;
       updatedAt: Date;
     }> = {
       updatedAt: new Date(),
@@ -379,6 +382,11 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
     }
     if (validatedData.url !== undefined) {
       updateData.url = validatedData.url || null;
+    }
+    if (validatedData.metadata !== undefined) {
+      // Merge new metadata with existing metadata
+      const existingMeta = (currentContent as unknown as { metadata?: Record<string, unknown> }).metadata || {};
+      updateData.metadata = { ...existingMeta, ...validatedData.metadata };
     }
 
     // Update the content

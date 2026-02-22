@@ -304,7 +304,7 @@ export function ContentDetailDialog({
       </Dialog>
 
       <ContentEditDialog
-        content={{ id, type, title, body, url }}
+        content={{ id, type, title, body, url, metadata }}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
       />

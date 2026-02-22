@@ -335,7 +335,7 @@ export function ContentCard({
       />
 
       <ContentEditDialog
-        content={{ id, type, title, body, url }}
+        content={{ id, type, title, body, url, metadata }}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
       />
