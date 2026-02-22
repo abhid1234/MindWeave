@@ -26,7 +26,7 @@ import {
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
 import { CommandPaletteShowcase } from '@/components/landing/command-palette-showcase';
-import { HeroProductMockup } from '@/components/landing/hero-product-mockup';
+
 
 export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
@@ -437,10 +437,7 @@ export default async function Home() {
                 </a>
               </div>
 
-              {/* Product Mockup */}
-              <div className="mt-12">
-                <HeroProductMockup />
-              </div>
+
             </div>
           </div>
         </section>
