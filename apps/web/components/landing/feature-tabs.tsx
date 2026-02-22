@@ -260,7 +260,7 @@ export function FeatureTabs() {
   const [activeTab, setActiveTab] = useState('capture');
 
   return (
-    <section className="py-24">
+    <section id="features" className="py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-5xl">
           <ScrollReveal>
