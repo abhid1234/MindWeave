@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-21
+**Last Updated**: 2026-02-22
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -52,7 +52,19 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-21)**:
+**Latest Enhancement (2026-02-22)**:
+- [x] **Google Cloud Storage File Migration** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:6cb89f4`). Migrated file storage from ephemeral local filesystem to persistent GCS bucket, fixing file loss on Cloud Run redeploys and broken shared file links:
+  - **New `lib/storage.ts` module** — singleton `Storage` client with `uploadToGCS()`, `deleteFromGCS()`, `getPublicUrl()`, `extractGCSObjectPath()`, and `isGCSConfigured()`. Uses Application Default Credentials (no keys needed on Cloud Run).
+  - **Upload route (`/api/upload`)** — writes to GCS when `GCS_BUCKET_NAME` is set, returns public `https://storage.googleapis.com/...` URL as `filePath`. Falls back to local `fs` for dev.
+  - **File serving route (`/api/files/`)** — now returns **302 redirect** to GCS public URL for backward compatibility with old content. Local filesystem fallback for dev.
+  - **Delete actions** — `deleteContentAction` and `bulkDeleteContentAction` now clean up GCS objects non-blocking after DB delete, extracting object path from `metadata.filePath`.
+  - **Shared files fix** — files on `/share/[shareId]` pages now work for unauthenticated visitors since GCS URLs are publicly accessible (per-object `makePublic()`).
+  - **GCS bucket setup** — `mindweave-uploads` bucket created in `us-central1` with uniform bucket-level access. Compute SA granted `storage.objectAdmin`, `allUsers` granted `storage.objectViewer`.
+  - **Config updates** — `storage.googleapis.com` added to `next.config.js` image `remotePatterns`; `GCS_BUCKET_NAME` added to `cloudbuild.yaml`, `cloud-run-service.yaml`, and `.env.example`.
+  - **Updated tests** — upload route tests mock `@/lib/storage` instead of `fs/promises`+`fs`, assertions expect GCS URLs. All 10 tests pass.
+  - **11 files changed** — No test regressions (1500 pass, 8 pre-existing embedding test failures unrelated).
+
+**Previous Enhancement (2026-02-21)**:
 - [x] **Notion-Inspired Public Pages Polish** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7ceadc1`). Brought all public-facing pages to the same Notion-inspired design standard as the dashboard:
   - **shadcn component upgrade** — Replaced raw `<input>` with `Input` and raw `<button>` with `Button` across all auth pages (login, register, forgot-password, reset-password, verify-email-sent).
   - **Dark-mode-safe alerts** — Replaced hardcoded `bg-red-50 text-red-700` / `bg-green-50 text-green-700` / `bg-indigo-50 text-indigo-700` with `border-destructive/20 bg-destructive/10 text-destructive`, `border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400`, and `border-primary/20 bg-primary/10 text-primary`.
