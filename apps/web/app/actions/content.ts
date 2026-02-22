@@ -14,8 +14,7 @@ import { revalidateTag } from 'next/cache';
 import { CacheTags } from '@/lib/cache';
 import { randomBytes } from 'crypto';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
-import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath, downloadFromGCS, getFileBuffer } from '@/lib/storage';
-import path from 'path';
+import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath, getFileBuffer } from '@/lib/storage';
 
 export type ActionResult = {
   success: boolean;
