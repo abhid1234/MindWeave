@@ -112,6 +112,42 @@ Please answer the question using the information from the knowledge base. If the
 }
 
 /**
+ * Extract text from an image using Gemini Flash multimodal capabilities
+ */
+export async function extractTextFromImage(
+  imageBuffer: Buffer,
+  mimeType: string
+): Promise<string> {
+  if (!genAI) {
+    console.warn('Skipping image text extraction - GOOGLE_AI_API_KEY not set');
+    return '';
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: imageBuffer.toString('base64'),
+          mimeType,
+        },
+      },
+      'Extract all text from this image. If there is no text, provide a detailed description of the image content.',
+    ]);
+    const text = result.response.text();
+
+    if (text) {
+      return text;
+    }
+
+    return '';
+  } catch (error) {
+    console.error('Error extracting text from image:', error);
+    return '';
+  }
+}
+
+/**
  * Summarize a piece of content using Gemini Flash
  */
 export async function summarizeContent(text: string): Promise<string> {

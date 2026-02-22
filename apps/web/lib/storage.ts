@@ -1,4 +1,5 @@
 import { Storage } from '@google-cloud/storage';
+import path from 'path';
 
 const GCS_BUCKET_NAME = process.env.GCS_BUCKET_NAME;
 
@@ -65,6 +66,15 @@ export function getPublicUrl(objectPath: string): string {
 }
 
 /**
+ * Download a file from GCS as a buffer.
+ */
+export async function downloadFromGCS(objectPath: string): Promise<Buffer> {
+  const bucket = getStorage().bucket(GCS_BUCKET_NAME!);
+  const [buffer] = await bucket.file(objectPath).download();
+  return buffer;
+}
+
+/**
  * Extract the GCS object path from either:
  *  - A full GCS public URL: https://storage.googleapis.com/{bucket}/uploads/...
  *  - A legacy /api/files/{userId}/{filename} path
@@ -93,5 +103,48 @@ export function extractGCSObjectPath(filePath: string): string | null {
     return `uploads/${rest}`;
   }
 
+  return null;
+}
+
+/**
+ * Retrieve a file buffer from GCS or local storage, enforcing security checks.
+ */
+export async function getFileBuffer(filePath: string, userId: string): Promise<Buffer | null> {
+  if (!filePath) return null;
+
+  if (isGCSConfigured()) {
+    const objectPath = extractGCSObjectPath(filePath);
+    if (objectPath) {
+      // Security check: ensure object path belongs to user
+      if (!objectPath.startsWith(`uploads/${userId}/`)) {
+        console.error('Security warning: Attempted to access unauthorized file', objectPath);
+        throw new Error('Invalid file path: Access denied');
+      }
+      return await downloadFromGCS(objectPath);
+    }
+  } else {
+    // Local file logic
+    const legacyPrefix = '/api/files/';
+    if (filePath.startsWith(legacyPrefix)) {
+      const relativePath = 'uploads/' + filePath.slice(legacyPrefix.length);
+      const fullPath = path.join(process.cwd(), relativePath);
+
+      // Security check: ensure path is within user's upload directory
+      const userUploadDir = path.join(process.cwd(), 'uploads', userId);
+      const normalizedPath = path.normalize(fullPath);
+
+      if (!normalizedPath.startsWith(userUploadDir)) {
+        console.error('Security warning: Attempted to access unauthorized file', normalizedPath);
+        throw new Error('Invalid file path: Access denied');
+      }
+
+      const fs = await import('fs/promises');
+      try {
+        return await fs.readFile(normalizedPath);
+      } catch (e) {
+        console.error('Failed to read local file:', normalizedPath, e);
+      }
+    }
+  }
   return null;
 }

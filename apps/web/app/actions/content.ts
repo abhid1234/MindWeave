@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content, contentCollections, type ContentType } from '@/lib/db/schema';
 import { createContentSchema, updateContentSchema } from '@/lib/validations';
-import { generateTags } from '@/lib/ai/claude';
+import { generateTags, extractTextFromImage } from '@/lib/ai/claude';
 import { generateSummary } from '@/lib/ai/summarization';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
@@ -14,7 +14,7 @@ import { revalidateTag } from 'next/cache';
 import { CacheTags } from '@/lib/cache';
 import { randomBytes } from 'crypto';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
-import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath } from '@/lib/storage';
+import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath, getFileBuffer } from '@/lib/storage';
 
 export type ActionResult = {
   success: boolean;
@@ -75,6 +75,25 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
     }
 
     const validatedData = validationResult.data;
+
+    // AI Text Extraction for Images
+    if (validatedData.type === 'file' && validatedData.metadata?.fileType && String(validatedData.metadata.fileType).startsWith('image/')) {
+      try {
+        const filePath = validatedData.metadata.filePath as string;
+        const imageBuffer = await getFileBuffer(filePath, session.user.id);
+
+        if (imageBuffer) {
+          const extractedText = await extractTextFromImage(imageBuffer, validatedData.metadata.fileType as string);
+          if (extractedText) {
+            validatedData.body = validatedData.body
+              ? `${validatedData.body}\n\n--- AI Extracted Content ---\n${extractedText}`
+              : extractedText;
+          }
+        }
+      } catch (error) {
+        console.error('Error extracting text from image:', error);
+      }
+    }
 
     // Generate auto-tags and summary using Claude AI in parallel
     let autoTags: string[] = [];

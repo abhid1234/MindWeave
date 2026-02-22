@@ -1,21 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createMockGoogleGenerativeAI } from './test-utils';
 
 // Mock Google Generative AI before importing the module
-vi.mock('@google/generative-ai', () => {
-  const mockGenerateContent = vi.fn().mockResolvedValue({
-    response: {
-      text: () => 'This is a test summary of the content.',
-    },
-  });
-
-  return {
-    GoogleGenerativeAI: class MockGoogleGenerativeAI {
-      getGenerativeModel() {
-        return { generateContent: mockGenerateContent };
-      }
-    },
-  };
-});
+vi.mock('@google/generative-ai', () =>
+  createMockGoogleGenerativeAI('This is a test summary of the content.')
+);
 
 // Import after mocking
 import { generateSummary, regenerateSummary } from './summarization';
