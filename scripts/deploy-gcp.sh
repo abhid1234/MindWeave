@@ -97,12 +97,16 @@ if [ ${#MISSING_SECRETS[@]} -ne 0 ]; then
     fi
 fi
 
+# Get git short SHA for image tag
+SHORT_SHA=$(git rev-parse --short HEAD)
+echo "📌 Git SHA: $SHORT_SHA"
+
 # Submit build to Cloud Build
 echo ""
 echo "🏗️  Submitting build to Cloud Build..."
 gcloud builds submit \
   --config=cloudbuild.yaml \
-  --substitutions=_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION \
+  --substitutions=_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,SHORT_SHA=$SHORT_SHA \
   --project=$PROJECT_ID
 
 echo ""
