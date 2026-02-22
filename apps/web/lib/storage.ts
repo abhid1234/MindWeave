@@ -20,7 +20,9 @@ export function isGCSConfigured(): boolean {
 }
 
 /**
- * Upload a buffer to GCS and make the object publicly readable.
+ * Upload a buffer to GCS. Objects are publicly readable via uniform
+ * bucket-level access (allUsers → storage.objectViewer), so no
+ * per-object makePublic() call is needed.
  * Returns the public URL.
  */
 export async function uploadToGCS(
@@ -35,8 +37,6 @@ export async function uploadToGCS(
     contentType,
     resumable: false, // files are ≤10 MB, skip resumable overhead
   });
-
-  await file.makePublic();
 
   return getPublicUrl(objectPath);
 }
