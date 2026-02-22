@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content, contentCollections, type ContentType } from '@/lib/db/schema';
 import { createContentSchema, updateContentSchema } from '@/lib/validations';
-import { generateTags } from '@/lib/ai/claude';
+import { generateTags, extractTextFromImage } from '@/lib/ai/claude';
 import { generateSummary } from '@/lib/ai/summarization';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
@@ -14,7 +14,8 @@ import { revalidateTag } from 'next/cache';
 import { CacheTags } from '@/lib/cache';
 import { randomBytes } from 'crypto';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
-import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath } from '@/lib/storage';
+import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath, downloadFromGCS } from '@/lib/storage';
+import path from 'path';
 
 export type ActionResult = {
   success: boolean;
@@ -75,6 +76,64 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
     }
 
     const validatedData = validationResult.data;
+
+    // AI Text Extraction for Images
+    if (validatedData.type === 'file' && validatedData.metadata?.fileType && String(validatedData.metadata.fileType).startsWith('image/')) {
+      try {
+        let imageBuffer: Buffer | null = null;
+        const filePath = validatedData.metadata.filePath as string;
+
+        if (filePath) {
+          if (isGCSConfigured()) {
+            const objectPath = extractGCSObjectPath(filePath);
+            if (objectPath) {
+              // Security check: ensure object path belongs to user
+              if (!objectPath.startsWith(`uploads/${session.user.id}/`)) {
+                 console.error('Security warning: Attempted to access unauthorized file', objectPath);
+                 throw new Error('Invalid file path: Access denied');
+              }
+              imageBuffer = await downloadFromGCS(objectPath);
+            }
+          } else {
+            // Local file logic
+            // filePath is /api/files/{userId}/{fileName}
+            // We need uploads/{userId}/{fileName} relative to project root
+            const legacyPrefix = '/api/files/';
+            if (filePath.startsWith(legacyPrefix)) {
+               const relativePath = 'uploads/' + filePath.slice(legacyPrefix.length);
+               const fullPath = path.join(process.cwd(), relativePath);
+
+               // Security check: ensure path is within user's upload directory
+               const userUploadDir = path.join(process.cwd(), 'uploads', session.user.id);
+               const normalizedPath = path.normalize(fullPath);
+
+               if (!normalizedPath.startsWith(userUploadDir)) {
+                 console.error('Security warning: Attempted to access unauthorized file', normalizedPath);
+                 throw new Error('Invalid file path: Access denied');
+               }
+
+               const fs = await import('fs/promises');
+               try {
+                 imageBuffer = await fs.readFile(normalizedPath);
+               } catch (e) {
+                 console.error('Failed to read local file:', normalizedPath, e);
+               }
+            }
+          }
+
+          if (imageBuffer) {
+            const extractedText = await extractTextFromImage(imageBuffer, validatedData.metadata.fileType as string);
+            if (extractedText) {
+              validatedData.body = validatedData.body
+                ? `${validatedData.body}\n\n--- AI Extracted Content ---\n${extractedText}`
+                : extractedText;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error extracting text from image:', error);
+      }
+    }
 
     // Generate auto-tags and summary using Claude AI in parallel
     let autoTags: string[] = [];

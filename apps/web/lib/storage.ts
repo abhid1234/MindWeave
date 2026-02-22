@@ -65,6 +65,15 @@ export function getPublicUrl(objectPath: string): string {
 }
 
 /**
+ * Download a file from GCS as a buffer.
+ */
+export async function downloadFromGCS(objectPath: string): Promise<Buffer> {
+  const bucket = getStorage().bucket(GCS_BUCKET_NAME!);
+  const [buffer] = await bucket.file(objectPath).download();
+  return buffer;
+}
+
+/**
  * Extract the GCS object path from either:
  *  - A full GCS public URL: https://storage.googleapis.com/{bucket}/uploads/...
  *  - A legacy /api/files/{userId}/{filename} path
