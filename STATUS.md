@@ -53,12 +53,21 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-22)**:
-- [x] **Google Cloud Storage File Migration** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:6cb89f4`). Migrated file storage from ephemeral local filesystem to persistent GCS bucket, fixing file loss on Cloud Run redeploys and broken shared file links:
+- [x] **File Re-Upload in Edit Dialog** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:b49b357`). When editing file-type content, the dialog now shows the current file and allows replacing it:
+  - **Current file display** — shows file icon (image/PDF/generic), file name, and size in a styled card within the edit dialog.
+  - **"Replace file" button** — opens native file picker, uploads via `/api/upload`, shows spinner during upload and error on failure.
+  - **"New" badge with undo** — green indicator when a new file is staged; X button to revert before saving.
+  - **Metadata merge on save** — `updateContentAction` now accepts `metadata` param, merging new file metadata (path, type, size, name) with existing content metadata.
+  - **3 call sites updated** — `ContentCard`, `ContentDetailDialog`, and `ContentListView` now pass `metadata` to `ContentEditDialog`.
+  - **5 files changed** — All 431 library component tests pass, build succeeds.
+
+**Previous Enhancement (2026-02-22)**:
+- [x] **Google Cloud Storage File Migration** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:7eb0b5b`). Migrated file storage from ephemeral local filesystem to persistent GCS bucket, fixing file loss on Cloud Run redeploys and broken shared file links:
   - **New `lib/storage.ts` module** — singleton `Storage` client with `uploadToGCS()`, `deleteFromGCS()`, `getPublicUrl()`, `extractGCSObjectPath()`, and `isGCSConfigured()`. Uses Application Default Credentials (no keys needed on Cloud Run).
   - **Upload route (`/api/upload`)** — writes to GCS when `GCS_BUCKET_NAME` is set, returns public `https://storage.googleapis.com/...` URL as `filePath`. Falls back to local `fs` for dev.
   - **File serving route (`/api/files/`)** — now returns **302 redirect** to GCS public URL for backward compatibility with old content. Local filesystem fallback for dev.
   - **Delete actions** — `deleteContentAction` and `bulkDeleteContentAction` now clean up GCS objects non-blocking after DB delete, extracting object path from `metadata.filePath`.
-  - **Shared files fix** — files on `/share/[shareId]` pages now work for unauthenticated visitors since GCS URLs are publicly accessible (per-object `makePublic()`).
+  - **Shared files fix** — files on `/share/[shareId]` pages now work for unauthenticated visitors since GCS URLs are publicly accessible via uniform bucket-level access.
   - **GCS bucket setup** — `mindweave-uploads` bucket created in `us-central1` with uniform bucket-level access. Compute SA granted `storage.objectAdmin`, `allUsers` granted `storage.objectViewer`.
   - **Config updates** — `storage.googleapis.com` added to `next.config.js` image `remotePatterns`; `GCS_BUCKET_NAME` added to `cloudbuild.yaml`, `cloud-run-service.yaml`, and `.env.example`.
   - **Updated tests** — upload route tests mock `@/lib/storage` instead of `fs/promises`+`fs`, assertions expect GCS URLs. All 10 tests pass.
