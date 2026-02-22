@@ -2,11 +2,8 @@
 
 export function HeroProductMockup() {
   return (
-    <div className="hidden sm:block" aria-hidden="true">
-      <div
-        className="relative rounded-xl border border-border/60 bg-card shadow-2xl overflow-hidden"
-        style={{ transform: 'perspective(1200px) rotateY(-3deg)', transformOrigin: 'left center' }}
-      >
+    <div className="mx-auto max-w-3xl" aria-hidden="true">
+      <div className="relative rounded-xl border border-border/60 bg-card shadow-2xl overflow-hidden">
         {/* Browser chrome */}
         <div className="flex items-center gap-2 border-b border-border/50 bg-muted/50 px-4 py-2.5">
           <div className="flex gap-1.5">

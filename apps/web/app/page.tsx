@@ -372,76 +372,75 @@ export default async function Home() {
           />
 
           <div className="container relative mx-auto px-4 py-24 sm:py-32 lg:py-40">
-            <div className="grid lg:grid-cols-[1fr_1.1fr] items-center gap-12 lg:gap-16">
-              {/* Text column */}
-              <div className="animate-fade-up text-center lg:text-left">
-                <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-                  Your AI-Powered
-                  <br />
-                  <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                    Knowledge Hub
-                  </span>
-                </h1>
-                <p className="mt-6 text-lg leading-8 text-muted-foreground sm:text-xl max-w-2xl lg:max-w-none">
-                  You read 100 articles a week.{' '}
-                  <span className="text-foreground font-medium">How many can you recall?</span>
-                  <br className="hidden sm:block" />
-                  Capture, organize, and rediscover everything with AI.
-                </p>
+            <div className="mx-auto max-w-4xl text-center animate-fade-up">
+              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">
+                Your AI-Powered
+                <br />
+                <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                  Knowledge Hub
+                </span>
+              </h1>
+              <p className="mt-6 text-lg leading-8 text-muted-foreground sm:text-xl lg:text-2xl max-w-2xl mx-auto">
+                You read 100 articles a week.{' '}
+                <span className="text-foreground font-medium">How many can you recall?</span>
+                <br className="hidden sm:block" />
+                Capture, organize, and rediscover everything with AI.
+              </p>
 
-                <div className="mt-10 flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-4">
-                  <Link
-                    href="/login"
-                    className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    Start Your Knowledge Base
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                  <a
-                    href="https://github.com/abhid1234/MindWeave"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-flex items-center gap-2 rounded-lg border border-border px-8 py-3.5 text-base font-semibold hover:bg-accent transition-colors"
-                  >
-                    <Github className="h-4 w-4" />
-                    View on GitHub
-                  </a>
-                </div>
-                <p className="mt-3 text-sm text-muted-foreground lg:text-left text-center">
-                  Free forever. No credit card required.
-                </p>
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/login"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Start Your Knowledge Base
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <a
+                  href="https://github.com/abhid1234/MindWeave"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 rounded-lg border border-border px-8 py-3.5 text-base font-semibold hover:bg-accent transition-colors"
+                >
+                  <Github className="h-4 w-4" />
+                  View on GitHub
+                </a>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Free forever. No credit card required.
+              </p>
 
-                {/* Social Proof Strip */}
-                <div className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    {gitHubStars} GitHub stars
-                  </span>
-                  <span className="text-border">|</span>
-                  <span>1,500+ tests passing</span>
-                  <span className="text-border">|</span>
-                  <span>Open source &amp; free</span>
-                </div>
-
-                {/* Product Hunt */}
-                <div className="mt-6 flex lg:justify-start justify-center">
-                  <a
-                    href="https://www.producthunt.com/products/mindweave-2"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/5 px-5 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 transition-colors"
-                  >
-                    <svg className="h-4 w-4" viewBox="0 0 40 40" fill="currentColor" aria-hidden="true">
-                      <path d="M22.667 20H17.333V13.333H22.667C24.507 13.333 26 14.827 26 16.667C26 18.507 24.507 20 22.667 20ZM22.667 10H14V30H17.333V23.333H22.667C26.347 23.333 29.333 20.347 29.333 16.667C29.333 12.987 26.347 10 22.667 10Z" />
-                    </svg>
-                    Live on Product Hunt
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
-                </div>
+              {/* Social Proof Strip */}
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  {gitHubStars} GitHub stars
+                </span>
+                <span className="text-border">|</span>
+                <span>1,500+ tests passing</span>
+                <span className="text-border">|</span>
+                <span>Open source &amp; free</span>
               </div>
 
-              {/* Product Mockup column */}
-              <HeroProductMockup />
+              {/* Product Hunt */}
+              <div className="mt-6 flex justify-center">
+                <a
+                  href="https://www.producthunt.com/products/mindweave-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/5 px-5 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 transition-colors"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 40 40" fill="currentColor" aria-hidden="true">
+                    <path d="M22.667 20H17.333V13.333H22.667C24.507 13.333 26 14.827 26 16.667C26 18.507 24.507 20 22.667 20ZM22.667 10H14V30H17.333V23.333H22.667C26.347 23.333 29.333 20.347 29.333 16.667C29.333 12.987 26.347 10 22.667 10Z" />
+                  </svg>
+                  Live on Product Hunt
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+
+              {/* Product Mockup */}
+              <div className="mt-12">
+                <HeroProductMockup />
+              </div>
             </div>
           </div>
         </section>
