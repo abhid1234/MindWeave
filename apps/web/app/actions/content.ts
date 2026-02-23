@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { content, contentCollections, type ContentType } from '@/lib/db/schema';
+import { content, contentCollections, contentVersions, type ContentType } from '@/lib/db/schema';
 import { createContentSchema, updateContentSchema } from '@/lib/validations';
 import { generateTags } from '@/lib/ai/claude';
 import { generateSummary } from '@/lib/ai/summarization';
@@ -362,6 +362,39 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
     }
 
     const currentContent = existingContent[0];
+
+    // Snapshot current state as a version before updating
+    const lastVersion = await db
+      .select({ versionNumber: contentVersions.versionNumber })
+      .from(contentVersions)
+      .where(eq(contentVersions.contentId, contentId))
+      .orderBy(desc(contentVersions.versionNumber))
+      .limit(1);
+
+    const nextVersionNumber = (lastVersion[0]?.versionNumber ?? 0) + 1;
+
+    await db.insert(contentVersions).values({
+      contentId,
+      title: currentContent.title,
+      body: currentContent.body,
+      url: currentContent.url,
+      metadata: currentContent.metadata,
+      versionNumber: nextVersionNumber,
+    });
+
+    // Auto-prune: keep only the 50 most recent versions
+    const oldVersions = await db
+      .select({ id: contentVersions.id })
+      .from(contentVersions)
+      .where(eq(contentVersions.contentId, contentId))
+      .orderBy(desc(contentVersions.versionNumber))
+      .offset(50);
+
+    if (oldVersions.length > 0) {
+      await db
+        .delete(contentVersions)
+        .where(inArray(contentVersions.id, oldVersions.map((v) => v.id)));
+    }
 
     // Build update object with only provided fields
     const updateData: Partial<{
@@ -1372,5 +1405,149 @@ export async function toggleFavoriteAction(
       success: false,
       message: 'Failed to toggle favorite. Please try again.',
     };
+  }
+}
+
+// Content Versioning
+
+export type ContentVersionItem = {
+  id: string;
+  versionNumber: number;
+  title: string;
+  body: string | null;
+  url: string | null;
+  createdAt: Date;
+};
+
+export type GetContentVersionsResult = {
+  success: boolean;
+  message?: string;
+  versions: ContentVersionItem[];
+};
+
+export async function getContentVersionsAction(
+  contentId: string
+): Promise<GetContentVersionsResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized.', versions: [] };
+    }
+
+    // Verify content belongs to user
+    const [existing] = await db
+      .select({ id: content.id })
+      .from(content)
+      .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
+      .limit(1);
+
+    if (!existing) {
+      return { success: false, message: 'Content not found.', versions: [] };
+    }
+
+    const versions = await db
+      .select({
+        id: contentVersions.id,
+        versionNumber: contentVersions.versionNumber,
+        title: contentVersions.title,
+        body: contentVersions.body,
+        url: contentVersions.url,
+        createdAt: contentVersions.createdAt,
+      })
+      .from(contentVersions)
+      .where(eq(contentVersions.contentId, contentId))
+      .orderBy(desc(contentVersions.versionNumber));
+
+    return { success: true, versions };
+  } catch (error) {
+    console.error('Error fetching versions:', error);
+    return { success: false, message: 'Failed to load versions.', versions: [] };
+  }
+}
+
+export async function revertToVersionAction(
+  contentId: string,
+  versionId: string
+): Promise<ActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized.' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'revertVersion', RATE_LIMITS.serverAction);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
+    // Verify content belongs to user
+    const [existing] = await db
+      .select({
+        id: content.id,
+        title: content.title,
+        body: content.body,
+        url: content.url,
+        metadata: content.metadata,
+      })
+      .from(content)
+      .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
+      .limit(1);
+
+    if (!existing) {
+      return { success: false, message: 'Content not found.' };
+    }
+
+    // Get the version to revert to
+    const [version] = await db
+      .select()
+      .from(contentVersions)
+      .where(
+        and(
+          eq(contentVersions.id, versionId),
+          eq(contentVersions.contentId, contentId)
+        )
+      )
+      .limit(1);
+
+    if (!version) {
+      return { success: false, message: 'Version not found.' };
+    }
+
+    // Snapshot current state before reverting
+    const lastVersion = await db
+      .select({ versionNumber: contentVersions.versionNumber })
+      .from(contentVersions)
+      .where(eq(contentVersions.contentId, contentId))
+      .orderBy(desc(contentVersions.versionNumber))
+      .limit(1);
+
+    const nextVersionNumber = (lastVersion[0]?.versionNumber ?? 0) + 1;
+
+    await db.insert(contentVersions).values({
+      contentId,
+      title: existing.title,
+      body: existing.body,
+      url: existing.url,
+      metadata: existing.metadata,
+      versionNumber: nextVersionNumber,
+    });
+
+    // Apply the version
+    await db
+      .update(content)
+      .set({
+        title: version.title,
+        body: version.body,
+        url: version.url,
+        updatedAt: new Date(),
+      })
+      .where(eq(content.id, contentId));
+
+    revalidatePath('/dashboard/library');
+
+    return { success: true, message: 'Reverted to version successfully.' };
+  } catch (error) {
+    console.error('Error reverting version:', error);
+    return { success: false, message: 'Failed to revert.' };
   }
 }

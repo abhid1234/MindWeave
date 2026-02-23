@@ -50,6 +50,12 @@ vi.mock('@/components/editor/MarkdownRenderer', () => ({
   ),
 }));
 
+vi.mock('./VersionHistoryPanel', () => ({
+  VersionHistoryPanel: () => (
+    <div data-testid="version-history">Version History</div>
+  ),
+}));
+
 vi.mock('@/app/actions/search', () => ({
   getRecommendationsAction: vi.fn().mockResolvedValue({ success: true, recommendations: [] }),
 }));

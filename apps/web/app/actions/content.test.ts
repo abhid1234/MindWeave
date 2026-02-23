@@ -54,6 +54,16 @@ vi.mock('@/lib/db/schema', () => ({
     contentId: 'contentId',
     collectionId: 'collectionId',
   },
+  contentVersions: {
+    id: 'id',
+    contentId: 'contentId',
+    title: 'title',
+    body: 'body',
+    url: 'url',
+    metadata: 'metadata',
+    versionNumber: 'versionNumber',
+    createdAt: 'createdAt',
+  },
 }));
 
 vi.mock('@/lib/validations', () => ({
@@ -572,8 +582,21 @@ describe('Content Actions', () => {
     });
 
     it('should update content successfully', async () => {
+      // 1st mockWhere: fetch existing content
       mockWhere.mockReturnValueOnce({
-        limit: vi.fn().mockResolvedValue([{ id: 'id-1', body: 'old', title: 'Old', url: null, type: 'note' }]),
+        limit: vi.fn().mockResolvedValue([{ id: 'id-1', body: 'old', title: 'Old', url: null, type: 'note', metadata: null }]),
+      });
+      // 2nd mockWhere: fetch last version number
+      mockWhere.mockReturnValueOnce({
+        orderBy: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
+      });
+      // 3rd mockWhere: prune old versions
+      mockWhere.mockReturnValueOnce({
+        orderBy: vi.fn().mockReturnValue({
+          offset: vi.fn().mockResolvedValue([]),
+        }),
       });
       mockUpdate.mockReturnValue({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
 
@@ -590,8 +613,21 @@ describe('Content Actions', () => {
         data: { body: 'New body text' },
       } as any);
 
+      // 1st mockWhere: fetch existing content
       mockWhere.mockReturnValueOnce({
-        limit: vi.fn().mockResolvedValue([{ id: 'id-1', body: 'Old body', title: 'Title', url: null, type: 'note' }]),
+        limit: vi.fn().mockResolvedValue([{ id: 'id-1', body: 'Old body', title: 'Title', url: null, type: 'note', metadata: null }]),
+      });
+      // 2nd mockWhere: fetch last version number
+      mockWhere.mockReturnValueOnce({
+        orderBy: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
+      });
+      // 3rd mockWhere: prune old versions
+      mockWhere.mockReturnValueOnce({
+        orderBy: vi.fn().mockReturnValue({
+          offset: vi.fn().mockResolvedValue([]),
+        }),
       });
       mockUpdate.mockReturnValue({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
 

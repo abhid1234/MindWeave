@@ -212,6 +212,30 @@ export const tasks = pgTable(
   })
 );
 
+// Content Versions table (edit history)
+export const contentVersions = pgTable(
+  'content_versions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    body: text('body'),
+    url: text('url'),
+    metadata: jsonb('metadata'),
+    versionNumber: integer('version_number').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    contentIdIdx: index('content_versions_content_id_idx').on(table.contentId),
+    contentCreatedAtIdx: index('content_versions_content_created_at_idx').on(
+      table.contentId,
+      table.createdAt
+    ),
+  })
+);
+
 // Embeddings table (for semantic search)
 export const embeddings = pgTable(
   'embeddings',
@@ -246,6 +270,7 @@ export const contentRelations = relations(content, ({ one, many }) => ({
   }),
   embeddings: many(embeddings),
   contentCollections: many(contentCollections),
+  versions: many(contentVersions),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -293,6 +318,13 @@ export const contentCollectionsRelations = relations(contentCollections, ({ one 
   collection: one(collections, {
     fields: [contentCollections.collectionId],
     references: [collections.id],
+  }),
+}));
+
+export const contentVersionsRelations = relations(contentVersions, ({ one }) => ({
+  content: one(content, {
+    fields: [contentVersions.contentId],
+    references: [content.id],
   }),
 }));
 
@@ -353,3 +385,6 @@ export type NewTask = typeof tasks.$inferInsert;
 
 export type Feedback = typeof feedback.$inferSelect;
 export type NewFeedback = typeof feedback.$inferInsert;
+
+export type ContentVersion = typeof contentVersions.$inferSelect;
+export type NewContentVersion = typeof contentVersions.$inferInsert;

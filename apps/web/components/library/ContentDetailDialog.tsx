@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink, Sparkles } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
+import { VersionHistoryPanel } from './VersionHistoryPanel';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
@@ -235,6 +236,12 @@ export function ContentDetailDialog({
                 ))}
               </div>
             )}
+
+            {/* Version History */}
+            <VersionHistoryPanel
+              contentId={id}
+              onReverted={() => onOpenChange(false)}
+            />
 
             {/* Similar Content */}
             <div className="space-y-2">
