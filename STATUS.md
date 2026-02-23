@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-22
+**Last Updated**: 2026-02-23
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -52,7 +52,19 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-22)**:
+**Latest Enhancement (2026-02-23)**:
+- [x] **Landing Page Conversion Improvements** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:85425e0`). Major restructure of the landing page to improve conversion and reduce scroll fatigue (15 sections → 11):
+  - **Social proof strip in hero** — Server-side GitHub stars fetch (1hr revalidation), "1,500+ tests passing", "Open source & free" displayed below CTA buttons.
+  - **Video moved to position 2** — "See it in action" explainer video promoted from position 6 to immediately after hero, with tighter `py-16` padding.
+  - **Competitor comparison table** — New section between How It Works and Use Cases. 7-feature comparison vs Notion, Evernote, and Obsidian (desktop: full table with checkmarks/X; mobile: simplified advantages list).
+  - **4 sections removed** — Features cards (redundant with FeatureTabs), AnimatedStats (absorbed into social proof), Tech Stack (collapsed to pill row in Open Source section), Soft Launch Notice (moved to footer note).
+  - **CTA copy strengthened** — "Get Started Free" → "Start Your Knowledge Base" (hero), "Try It Free" → "Try It Now — It's Free" (how-it-works), "Stop losing your best ideas" → "Your ideas deserve a second brain" (final CTA), "Create Your Free Account" (final button). Added "Free forever. No credit card required." micro-text.
+  - **Tech names merged into Open Source section** — 8 tech stack pills (Next.js 15, TypeScript, etc.) below credibility stats.
+  - **`id="features"` moved to FeatureTabs** — Header nav anchor now points to the interactive feature tabs instead of removed cards section.
+  - **Deploy script fix** — `SHORT_SHA` now resolved from `git rev-parse --short HEAD` for manual deploys.
+  - **3 files changed** — `page.tsx` (major restructure), `feature-tabs.tsx` (anchor), `deploy-gcp.sh` (fix). All 1,513 tests pass, build succeeds.
+
+**Previous Enhancement (2026-02-22)**:
 - [x] **File Re-Upload in Edit Dialog** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:b49b357`). When editing file-type content, the dialog now shows the current file and allows replacing it:
   - **Current file display** — shows file icon (image/PDF/generic), file name, and size in a styled card within the edit dialog.
   - **"Replace file" button** — opens native file picker, uploads via `/api/upload`, shows spinner during upload and error on failure.
