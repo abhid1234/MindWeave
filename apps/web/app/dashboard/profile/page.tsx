@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { getProfile } from '@/app/actions/profile';
 import ProfileSettingsForm from '@/components/profile/ProfileSettingsForm';
 import { ApiKeysManager } from '@/components/profile/ApiKeysManager';
+import { DigestSettingsForm } from '@/components/profile/DigestSettingsForm';
 import { User } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -53,6 +54,12 @@ export default async function ProfilePage() {
       <div className="mt-8 animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
         <div className="rounded-xl border bg-card p-6">
           <ApiKeysManager />
+        </div>
+      </div>
+
+      <div className="mt-8 animate-fade-up" style={{ animationDelay: '225ms', animationFillMode: 'backwards' }}>
+        <div className="rounded-xl border bg-card p-6">
+          <DigestSettingsForm />
         </div>
       </div>
     </div>

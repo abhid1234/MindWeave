@@ -259,6 +259,20 @@ export const apiKeys = pgTable(
   })
 );
 
+// Digest Settings table (for email digest preferences)
+export const digestSettings = pgTable('digest_settings', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  enabled: boolean('enabled').notNull().default(false),
+  frequency: varchar('frequency', { length: 10 }).notNull().default('weekly'),
+  preferredDay: integer('preferred_day').notNull().default(1), // 0=Sun, 1=Mon, ...
+  preferredHour: integer('preferred_hour').notNull().default(9), // 0-23 UTC
+  lastSentAt: timestamp('last_sent_at', { mode: 'date' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Embeddings table (for semantic search)
 export const embeddings = pgTable(
   'embeddings',
@@ -277,7 +291,7 @@ export const embeddings = pgTable(
 );
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   content: many(content),
   accounts: many(accounts),
   sessions: many(sessions),
@@ -285,6 +299,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   devices: many(devices),
   tasks: many(tasks),
   apiKeys: many(apiKeys),
+  digestSettings: one(digestSettings),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -359,6 +374,13 @@ export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
   }),
 }));
 
+export const digestSettingsRelations = relations(digestSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [digestSettings.userId],
+    references: [users.id],
+  }),
+}));
+
 // Feedback table
 export const feedbackTypeEnum = ['bug', 'feature', 'improvement', 'other'] as const;
 export type FeedbackType = (typeof feedbackTypeEnum)[number];
@@ -422,3 +444,6 @@ export type NewContentVersion = typeof contentVersions.$inferInsert;
 
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type NewApiKey = typeof apiKeys.$inferInsert;
+
+export type DigestSetting = typeof digestSettings.$inferSelect;
+export type NewDigestSetting = typeof digestSettings.$inferInsert;
