@@ -5,7 +5,7 @@
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2, 3, 4, 5, 6 & 7 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, and comprehensive AI enhancements.
+✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, and email digests.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -38,6 +38,10 @@
   - Chrome extension (Manifest V3) for one-click capture
   - API endpoints for session check and content capture
   - Dark mode support in popup UI
+- **Rich Text Editor** - Tiptap-based editor with markdown rendering
+- **Version History** - Automatic snapshots, view/compare/revert previous versions
+- **API Keys** - REST API (/api/v1/content) with key-based auth for external integrations
+- **Email Digest** - Configurable weekly/daily summaries via Cloud Scheduler cron
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -53,6 +57,32 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-23)**:
+- [x] **Rich Text Editor** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:94f5296`). Replaced plain text editing with Tiptap-based rich text editor:
+  - **TiptapEditor component** — rich text editing with headings, bold, italic, lists, code blocks, and blockquotes. `EditorToolbar` with formatting buttons.
+  - **MarkdownRenderer component** — renders content body as formatted markdown in ContentDetailDialog, share pages, and capture form.
+  - **ContentEditDialog updated** — uses TiptapEditor instead of plain textarea for editing content body.
+  - **12 files changed** — 3 new editor components, capture page, edit dialog, share page, detail dialog, package.json. All 1,513 tests pass, build succeeds.
+
+- [x] **Version History** - Content edit history with automatic snapshots:
+  - **contentVersions table** — stores title, body, URL, metadata, and version number per content item. Auto-prunes to 50 most recent versions.
+  - **VersionHistoryPanel component** — view previous versions, compare changes, and revert to any earlier state from ContentDetailDialog.
+  - **getContentVersionsAction / revertToVersionAction** — server actions for fetching and restoring versions.
+  - **6 files changed** — new VersionHistoryPanel, content actions, schema. Post-deploy: `content_versions` table created via `db:push`.
+
+- [x] **API Keys** - External integrations via REST API:
+  - **ApiKeysManager component** — create, view, and revoke API keys from the profile page. Key shown once on creation, stored as SHA-256 hash.
+  - **/api/v1/content endpoint** — RESTful API for creating content with API key authentication (GET list, POST create).
+  - **api-key-auth module** — validates `X-API-Key` header, checks expiration and active status, updates `lastUsedAt`.
+  - **Extension capture route** — now also accepts API key auth alongside session auth.
+  - **8 files changed** — new actions, auth module, API route, profile component, rate-limit, schema. Post-deploy: `api_keys` table created via `db:push`.
+
+- [x] **Email Digest** - Configurable email summaries of recent captures:
+  - **DigestSettingsForm component** — opt in to weekly or daily digests, choose preferred day and hour (UTC), managed from profile page.
+  - **/api/cron/digest endpoint** — hourly cron handler finds eligible users by frequency/day/hour, sends digest emails, updates `lastSentAt`. Auth via `CRON_SECRET` bearer token.
+  - **Cloud Scheduler job** — `mindweave-digest-cron` fires every hour at :00 UTC, `CRON_SECRET` stored in Secret Manager and bound to Cloud Run.
+  - **6 files changed** — new actions, cron route, profile component, email sender, schema. Post-deploy: `digest_settings` table created via `db:push`.
+
+**Previous Enhancement (2026-02-23)**:
 - [x] **Landing Page Conversion Improvements** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:85425e0`). Major restructure of the landing page to improve conversion and reduce scroll fatigue (15 sections → 11):
   - **Social proof strip in hero** — Server-side GitHub stars fetch (1hr revalidation), "1,500+ tests passing", "Open source & free" displayed below CTA buttons.
   - **Video moved to position 2** — "See it in action" explainer video promoted from position 6 to immediately after hero, with tighter `py-16` padding.
@@ -796,10 +826,50 @@ None - Ready for feature development
 - [x] All quality checks passing (tests, types, lint, build, E2E)
 - [x] Commits: 467e5a2, b66d9b7
 
+### Phase 11: Rich Editing, Versioning & Integrations ✅ COMPLETE
+- [x] **Rich Text Editor** - Tiptap-based editor replacing plain text
+  - TiptapEditor component with headings, bold, italic, lists, code blocks, blockquotes
+  - EditorToolbar with formatting buttons
+  - MarkdownRenderer for rendering body content in detail/share views
+  - Integrated into capture page and ContentEditDialog
+  - 12 files changed, 3 new editor components
+  - Commit: 3e0b7ab
+- [x] **Version History** - Automatic edit history with revert
+  - contentVersions table (id, contentId, title, body, url, metadata, versionNumber)
+  - Automatic snapshot on every save, auto-prunes to 50 most recent
+  - VersionHistoryPanel in ContentDetailDialog to view/compare/revert versions
+  - getContentVersionsAction and revertToVersionAction server actions
+  - 6 files changed, 1 new component
+  - Commit: 92e0b0b
+- [x] **API Keys** - REST API for external integrations
+  - apiKeys table with SHA-256 hashed keys, prefix display, expiration, active status
+  - ApiKeysManager component on profile page (create/view/revoke)
+  - /api/v1/content REST endpoint (GET list, POST create) with API key auth
+  - api-key-auth module validates X-API-Key header, checks expiry, updates lastUsedAt
+  - Browser extension capture route now also accepts API key auth
+  - Rate limiting on API endpoints
+  - 8 files changed, 4 new files
+  - Commit: 5a4c9f1
+- [x] **Email Digest** - Configurable email summaries
+  - digestSettings table (frequency, preferredDay, preferredHour, lastSentAt)
+  - DigestSettingsForm on profile page (daily/weekly, day, hour)
+  - /api/cron/digest endpoint with CRON_SECRET bearer auth
+  - Cloud Scheduler job (mindweave-digest-cron) fires hourly at :00 UTC
+  - CRON_SECRET stored in Secret Manager, bound to Cloud Run env
+  - 6 files changed, 3 new files
+  - Commit: 94f5296
+- [x] **Database tables created**: content_versions, api_keys, digest_settings (via db:push)
+- [x] All quality checks passing (tests, types, lint, build)
+- [x] Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:94f5296`)
+
 ## 🐛 Known Issues
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-23** - ✅ **Rich Text Editor** — Tiptap-based editor with headings, bold, italic, lists, code blocks. MarkdownRenderer for detail/share views. 12 files, 3 new components. Commit: 3e0b7ab
+- **2026-02-23** - ✅ **Version History** — Automatic snapshots on save, view/compare/revert from ContentDetailDialog. Auto-prunes to 50 versions. contentVersions table. Commit: 92e0b0b
+- **2026-02-23** - ✅ **API Keys** — REST API (/api/v1/content) with API key auth. ApiKeysManager on profile page. Extension capture supports API keys. apiKeys table. Commit: 5a4c9f1
+- **2026-02-23** - ✅ **Email Digest** — Weekly/daily email summaries. Cloud Scheduler hourly cron. DigestSettingsForm on profile. CRON_SECRET in Secret Manager. digestSettings table. Commit: 94f5296. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:94f5296`)
 - **2026-02-21** - ✅ **Drag & Drop on Board View** — Added @dnd-kit drag and drop to ContentBoardView: reorder within columns (localStorage-persisted), drag to collection drop zones, smart collision detection, disabled in selection mode. New components: SortableContentCard, CollectionDropZones, useBoardSortOrder hook. 42 new tests. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:0725837`)
 - **2026-02-21** - ✅ **Collections Tab & Multiple Library Views** — Added first-class collections browsing via tab toggle and three content view modes (grid, list, board). New components: ViewToggle, LibraryTabToggle, CollectionGrid, ContentListView (compact rows), ContentBoardView (kanban by type). Fixed FilterBar param preservation bug. 49 new tests across 5 test files (ViewToggle 9, LibraryTabToggle 8, CollectionGrid 12, ContentListView 11, ContentBoardView 9). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:3c89d31`)
 - **2026-02-20** - ✅ **Fix Embedding Model & Regenerate All** — Switched from deprecated `text-embedding-005` to `gemini-embedding-001` with 768-dim reduction. Regenerated all 356 production embeddings (0 failures). Added `FORCE=true` flag to generate-embeddings script. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:28268c1`)
