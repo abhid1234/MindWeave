@@ -17,6 +17,30 @@ vi.mock('@/app/actions/content', () => ({
   createContentAction: vi.fn(),
 }));
 
+// Mock TiptapEditor since it relies on ProseMirror which doesn't work in jsdom
+vi.mock('@/components/editor/TiptapEditor', () => ({
+  TiptapEditor: ({
+    content,
+    onChange,
+    placeholder,
+    disabled,
+  }: {
+    content?: string;
+    onChange?: (val: string) => void;
+    placeholder?: string;
+    disabled?: boolean;
+  }) => (
+    <textarea
+      aria-label="Content (Optional)"
+      value={content}
+      onChange={(e) => onChange?.(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      data-testid="tiptap-editor"
+    />
+  ),
+}));
+
 describe('CapturePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();

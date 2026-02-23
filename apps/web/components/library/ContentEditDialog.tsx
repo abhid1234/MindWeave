@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Upload, File, FileText, Image as ImageIcon, X, Check } from 'lucide-react';
 import { updateContentAction } from '@/app/actions/content';
+import { TiptapEditor } from '@/components/editor/TiptapEditor';
 import type { ContentType } from '@/lib/db/schema';
 
 export type ContentEditDialogProps = {
@@ -198,7 +199,7 @@ export function ContentEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Edit Content</DialogTitle>
@@ -311,18 +312,15 @@ export function ContentEditDialog({
             </div>
 
             <div className="grid gap-2">
-              <label htmlFor="body" className="text-sm font-medium">
+              <label className="text-sm font-medium">
                 Content
               </label>
-              <textarea
-                id="body"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
+              <TiptapEditor
+                content={body}
+                onChange={setBody}
                 placeholder="Enter content (optional)"
-                rows={5}
                 disabled={isSubmitting}
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-invalid={!!errors.body}
+                minHeight="150px"
               />
               {errors.body && (
                 <p className="text-sm text-destructive">{errors.body[0]}</p>

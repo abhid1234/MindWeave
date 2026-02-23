@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink, Sparkles } from 'lucide-react';
+import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
@@ -210,9 +211,7 @@ export function ContentDetailDialog({
 
             {/* Body text */}
             {body && (
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap text-sm text-foreground">{body}</p>
-              </div>
+              <MarkdownRenderer content={body} />
             )}
 
             {/* Tags */}

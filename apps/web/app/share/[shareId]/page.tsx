@@ -4,6 +4,7 @@ import { FileText, Link as LinkIcon, File, Image as ImageIcon, ExternalLink } fr
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { formatDateLongUTC } from '@/lib/utils';
+import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 
 type Props = {
   params: Promise<{ shareId: string }>;
@@ -201,12 +202,10 @@ export default async function SharePage({ params }: Props) {
             )}
 
             {/* Content body */}
-            {/* SECURITY: content.body is rendered as text via React's JSX interpolation,
-                which auto-escapes HTML/JS. Do NOT switch to dangerouslySetInnerHTML. */}
+            {/* SECURITY: MarkdownRenderer uses react-markdown which renders Markdown safely
+                without dangerouslySetInnerHTML. HTML in markdown is NOT rendered. */}
             {content.body && (
-              <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
-                {content.body}
-              </div>
+              <MarkdownRenderer content={content.body} />
             )}
 
             {/* Tags */}

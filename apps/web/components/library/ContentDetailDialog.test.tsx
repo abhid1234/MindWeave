@@ -44,6 +44,16 @@ vi.mock('./ShareDialog', () => ({
     ) : null,
 }));
 
+vi.mock('@/components/editor/MarkdownRenderer', () => ({
+  MarkdownRenderer: ({ content }: { content: string }) => (
+    <div data-testid="markdown-renderer">{content}</div>
+  ),
+}));
+
+vi.mock('@/app/actions/search', () => ({
+  getRecommendationsAction: vi.fn().mockResolvedValue({ success: true, recommendations: [] }),
+}));
+
 const baseContent: ContentDetailDialogProps['content'] = {
   id: '1',
   type: 'note',

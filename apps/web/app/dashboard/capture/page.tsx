@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { TagInput, type TagInputHandle } from '@/components/ui/tag-input';
+import { TiptapEditor } from '@/components/editor/TiptapEditor';
 import { cn } from '@/lib/utils';
 
 type ContentType = 'note' | 'link' | 'file';
@@ -71,6 +72,7 @@ export default function CapturePage() {
   const [contentType, setContentType] = useState<ContentType>('note');
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [tags, setTags] = useState<string[]>([]);
+  const [body, setBody] = useState('');
   const tagInputRef = useRef<TagInputHandle>(null);
   const router = useRouter();
   const { addToast } = useToast();
@@ -256,30 +258,21 @@ export default function CapturePage() {
             {/* Body - hide for file type */}
             {contentType !== 'file' && (
               <div>
-                <label htmlFor="body" className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium mb-2">
                   {contentType === 'link' ? 'Description (Optional)' : 'Content (Optional)'}
                 </label>
-                <textarea
-                  id="body"
-                  name="body"
-                  rows={10}
+                <TiptapEditor
+                  content={body}
+                  onChange={setBody}
                   placeholder={
                     contentType === 'link'
                       ? 'Add notes about this link...'
                       : 'Add your notes, thoughts, or content...'
                   }
-                  className={cn(
-                    'w-full min-h-[200px] rounded-lg border border-input bg-background px-4 py-3 text-sm leading-relaxed',
-                    'transition-all duration-200 ease-smooth',
-                    'ring-offset-background',
-                    'placeholder:text-muted-foreground',
-                    'hover:border-primary/50',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    'focus-visible:border-primary',
-                    'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-input'
-                  )}
                   disabled={isPending}
+                  minHeight="200px"
                 />
+                <input type="hidden" name="body" value={body} />
                 {errors.body && (
                   <p className="mt-1 text-sm text-red-600">{errors.body[0]}</p>
                 )}
