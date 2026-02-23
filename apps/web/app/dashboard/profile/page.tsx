@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getProfile } from '@/app/actions/profile';
 import ProfileSettingsForm from '@/components/profile/ProfileSettingsForm';
+import { ApiKeysManager } from '@/components/profile/ApiKeysManager';
 import { User } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -47,6 +48,12 @@ export default async function ProfilePage() {
             isProfilePublic: profile.isProfilePublic,
           }}
         />
+      </div>
+
+      <div className="mt-8 animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
+        <div className="rounded-xl border bg-card p-6">
+          <ApiKeysManager />
+        </div>
       </div>
     </div>
   );

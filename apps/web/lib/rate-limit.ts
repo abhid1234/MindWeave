@@ -266,6 +266,11 @@ export const RATE_LIMITS = {
     maxRequests: 200,
     windowMs: 60 * 1000,
   },
+  // API key: 100 requests per minute
+  apiKey: {
+    maxRequests: 100,
+    windowMs: 60 * 1000,
+  },
 } as const;
 
 /**

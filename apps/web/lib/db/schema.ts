@@ -236,6 +236,29 @@ export const contentVersions = pgTable(
   })
 );
 
+// API Keys table (for external integrations)
+export const apiKeys = pgTable(
+  'api_keys',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 100 }).notNull(),
+    keyPrefix: varchar('key_prefix', { length: 8 }).notNull(),
+    keyHash: text('key_hash').unique().notNull(),
+    lastUsedAt: timestamp('last_used_at', { mode: 'date' }),
+    expiresAt: timestamp('expires_at', { mode: 'date' }),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('api_keys_user_id_idx').on(table.userId),
+    keyHashIdx: index('api_keys_key_hash_idx').on(table.keyHash),
+    isActiveIdx: index('api_keys_is_active_idx').on(table.isActive),
+  })
+);
+
 // Embeddings table (for semantic search)
 export const embeddings = pgTable(
   'embeddings',
@@ -261,6 +284,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   collections: many(collections),
   devices: many(devices),
   tasks: many(tasks),
+  apiKeys: many(apiKeys),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -328,6 +352,13 @@ export const contentVersionsRelations = relations(contentVersions, ({ one }) => 
   }),
 }));
 
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, {
+    fields: [apiKeys.userId],
+    references: [users.id],
+  }),
+}));
+
 // Feedback table
 export const feedbackTypeEnum = ['bug', 'feature', 'improvement', 'other'] as const;
 export type FeedbackType = (typeof feedbackTypeEnum)[number];
@@ -388,3 +419,6 @@ export type NewFeedback = typeof feedback.$inferInsert;
 
 export type ContentVersion = typeof contentVersions.$inferSelect;
 export type NewContentVersion = typeof contentVersions.$inferInsert;
+
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type NewApiKey = typeof apiKeys.$inferInsert;

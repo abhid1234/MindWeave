@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { authenticateApiKey } from '@/lib/api-key-auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import { generateTags } from '@/lib/ai/claude';
@@ -41,9 +42,22 @@ export async function POST(request: NextRequest) {
       return new NextResponse(response.body, { status: 429, headers });
     }
 
-    const session = await auth();
+    // Try API key auth first, then fall back to session auth
+    let userId: string | null = null;
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer mw_')) {
+      const apiKeyResult = await authenticateApiKey(request);
+      if (apiKeyResult.success) {
+        userId = apiKeyResult.userId;
+      }
+    }
 
-    if (!session?.user?.id) {
+    if (!userId) {
+      const session = await auth();
+      userId = session?.user?.id ?? null;
+    }
+
+    if (!userId) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
         {
@@ -104,7 +118,7 @@ export async function POST(request: NextRequest) {
     const [newContent] = await db
       .insert(content)
       .values({
-        userId: session.user.id,
+        userId,
         type: validatedData.type,
         title: validatedData.title,
         body: validatedData.body || null,
