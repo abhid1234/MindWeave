@@ -71,8 +71,8 @@ describe('Embeddings Module', () => {
   });
 
   describe('EMBEDDING_CONFIG', () => {
-    it('should have model set to text-embedding-005', () => {
-      expect(EMBEDDING_CONFIG.model).toBe('text-embedding-005');
+    it('should have model set to gemini-embedding-001', () => {
+      expect(EMBEDDING_CONFIG.model).toBe('gemini-embedding-001');
     });
 
     it('should have dimensions set to 768', () => {
@@ -98,7 +98,12 @@ describe('Embeddings Module', () => {
       const testText = 'Hello, this is a test message';
       await generateEmbedding(testText);
 
-      expect(mockEmbedContent).toHaveBeenCalledWith(testText);
+      expect(mockEmbedContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: { parts: [{ text: testText }], role: 'user' },
+          outputDimensionality: 768,
+        })
+      );
     });
 
     it('should return zero vector on error', async () => {
@@ -114,7 +119,11 @@ describe('Embeddings Module', () => {
       const result = await generateEmbedding('');
 
       expect(result.length).toBe(768);
-      expect(mockEmbedContent).toHaveBeenCalledWith('');
+      expect(mockEmbedContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: { parts: [{ text: '' }], role: 'user' },
+        })
+      );
     });
 
     it('should handle long text input', async () => {
@@ -146,7 +155,7 @@ describe('Embeddings Module', () => {
       const insertData = mockInsert.mock.calls[0][0];
       expect(insertData.contentId).toBe('content-123');
       expect(insertData.embedding.length).toBe(768);
-      expect(insertData.model).toBe('text-embedding-005');
+      expect(insertData.model).toBe('gemini-embedding-001');
     });
 
     it('should update existing embedding', async () => {
@@ -160,7 +169,7 @@ describe('Embeddings Module', () => {
       expect(mockUpdate).toHaveBeenCalled();
       const updateData = mockUpdate.mock.calls[0][0];
       expect(updateData.embedding.length).toBe(768);
-      expect(updateData.model).toBe('text-embedding-005');
+      expect(updateData.model).toBe('gemini-embedding-001');
     });
 
     it('should throw error when content not found', async () => {
@@ -179,7 +188,8 @@ describe('Embeddings Module', () => {
       await upsertContentEmbedding('content-123');
 
       expect(mockEmbedContent).toHaveBeenCalled();
-      const embedText = mockEmbedContent.mock.calls[0][0];
+      const embedArg = mockEmbedContent.mock.calls[0][0];
+      const embedText = embedArg.content.parts[0].text;
       expect(embedText).toContain('Test Title');
       expect(embedText).toContain('Test body content');
       expect(embedText).toContain('tag1');
@@ -234,7 +244,11 @@ describe('Embeddings Module', () => {
 
       await searchSimilarContent('my search query', 'user-123', 10);
 
-      expect(mockEmbedContent).toHaveBeenCalledWith('my search query');
+      expect(mockEmbedContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: { parts: [{ text: 'my search query' }], role: 'user' },
+        })
+      );
     });
 
     it('should respect limit parameter', async () => {
@@ -387,6 +401,6 @@ describe('Embeddings Module - Missing API Key', () => {
 
     // Verify EMBEDDING_CONFIG is always available
     expect(EMBEDDING_CONFIG.dimensions).toBe(768);
-    expect(EMBEDDING_CONFIG.model).toBe('text-embedding-005');
+    expect(EMBEDDING_CONFIG.model).toBe('gemini-embedding-001');
   });
 });

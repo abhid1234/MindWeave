@@ -2,8 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { logger } from './logger';
 
 describe('logger', () => {
-  const originalEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -12,12 +10,12 @@ describe('logger', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   describe('development mode', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
     });
 
     it('logs info messages with prefix', () => {
@@ -58,7 +56,7 @@ describe('logger', () => {
 
   describe('production mode', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       // Re-import to get production behavior
       vi.resetModules();
     });

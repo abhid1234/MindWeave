@@ -42,7 +42,8 @@
 - **Version History** - Automatic snapshots, view/compare/revert previous versions
 - **API Keys** - REST API (/api/v1/content) with key-based auth for external integrations
 - **Email Digest** - Configurable weekly/daily summaries via Cloud Scheduler cron
-- **Content Discovery** - View tracking, blended scoring (similarity + recency + novelty), Discover page with 3 recommendation sections
+- **Content Discovery** - View tracking, blended scoring (similarity + recency + novelty), Discover page with 4 recommendation sections
+- **Content Intelligence** - Summary display in cards/dialogs, Knowledge Graph visualization, Smart Collections from AI clustering
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -58,6 +59,14 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-24)**:
+- [x] **Content Intelligence — Summary Display, Knowledge Graph, Smart Collections** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fa88b11`). Surfaces AI summaries, adds a force-directed knowledge graph, and connects clustering to collections:
+  - **Summary display** — existing `summary` field now rendered in `ContentCard` (2-line preview) and `ContentDetailDialog` (accent-bordered block). "Generate Summary" button for older content without summaries calls `generateSummaryAction` → Gemini summarization → DB update.
+  - **Knowledge Graph (`/dashboard/graph`)** — force-directed network visualization using `react-force-graph-2d`. Server action `getContentGraphAction` performs pgvector cosine self-join to find content relationships. Similarity threshold slider (0.3–0.9) with 500ms debounce. Node colors by type (blue=note, green=link, orange=file), click-to-navigate to library.
+  - **Smart Collections on Discover page** — `SmartCollections` component calls `getClustersAction` (k-means++ clustering) and displays clusters with "Create Collection" button. One-click creates a collection and bulk-adds all cluster items using existing `createCollectionAction` + `bulkAddToCollectionAction`.
+  - **Navigation updated** — Network icon + "Graph" nav item added (11 nav items total). Discover page now has 4 sections.
+  - **22 files changed** (11 new, 11 modified) — tests pass, build succeeds.
+
+**Previous Enhancement (2026-02-24)**:
 - [x] **Content Discovery with View Tracking & Discover Page** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:02a4e51`). Added behavioral signals to content recommendations and a dedicated Discover page for exploring the knowledge base:
   - **`content_views` table** — new schema table tracking user content views with debounced inserts (30s), 4 composite indexes for efficient querying. `trackContentViewAction` fires on ContentDetailDialog open.
   - **Blended scoring algorithm** — `calculateBlendedScore()` in `lib/recommendations.ts` combines vector similarity (50%), content recency with 90-day exponential decay (20%), and novelty bonus based on view history (30%). Never-viewed content gets highest novelty; content viewed today gets zero.

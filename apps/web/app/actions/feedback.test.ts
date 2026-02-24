@@ -124,7 +124,7 @@ describe('feedback actions', () => {
   describe('getFeedbackAction', () => {
     it('requires authentication', async () => {
       const { auth } = await import('@/lib/auth');
-      vi.mocked(auth).mockResolvedValueOnce(null);
+      vi.mocked(auth).mockResolvedValueOnce(null as any);
 
       const result = await getFeedbackAction();
 
