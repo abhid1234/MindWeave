@@ -11,6 +11,7 @@ import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
 import { getRecommendationsAction } from '@/app/actions/search';
 import type { RecommendationResult } from '@/app/actions/search';
+import { trackContentViewAction } from '@/app/actions/views';
 import { RecommendationCard } from './RecommendationCard';
 import {
   Dialog,
@@ -96,6 +97,9 @@ export function ContentDetailDialog({
       setRecommendations([]);
       return;
     }
+
+    // Fire-and-forget view tracking
+    trackContentViewAction(id).catch(() => {});
 
     let cancelled = false;
     setRecsLoading(true);

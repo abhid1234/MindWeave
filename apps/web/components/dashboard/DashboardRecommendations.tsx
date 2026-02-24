@@ -114,10 +114,10 @@ export function DashboardRecommendations() {
         </h2>
         {recommendations.length > 0 && (
           <Link
-            href="/dashboard/library"
+            href="/dashboard/discover"
             className="text-sm text-primary hover:underline"
           >
-            View Library
+            View all
           </Link>
         )}
       </div>

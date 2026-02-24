@@ -8,6 +8,7 @@ import { content } from '@/lib/db/schema';
 import type { ContentType } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { getBlendedRecommendationsAction } from './discover';
 
 export type SemanticSearchResult = {
   id: string;
@@ -317,77 +318,36 @@ export type DashboardRecommendationsResponse = {
 };
 
 /**
- * Get recommendations for the dashboard widget
- * Fetches recommendations from user's 3 most recent content items,
- * deduplicates, and returns top 6
+ * Get recommendations for the dashboard widget.
+ * Delegates to blended recommendations for enhanced scoring
+ * that incorporates view history and novelty signals.
  */
 export async function getDashboardRecommendationsAction(): Promise<DashboardRecommendationsResponse> {
   try {
-    // Check authentication
-    const session = await auth();
-    if (!session?.user?.id) {
+    const blended = await getBlendedRecommendationsAction(6);
+
+    if (!blended.success) {
       return {
         success: false,
-        message: 'Unauthorized. Please log in.',
+        message: blended.message ?? 'Failed to get recommendations. Please try again.',
         recommendations: [],
       };
     }
 
-    // Rate limit (AI-intensive)
-    const rateCheck = checkServerActionRateLimit(session.user.id, 'dashboardRecommendations', RATE_LIMITS.serverActionAI);
-    if (!rateCheck.success) {
-      return { success: false, message: rateCheck.message!, recommendations: [] };
-    }
+    // Map DiscoverResult back to RecommendationResult
+    const recommendations: RecommendationResult[] = blended.results.map((r) => ({
+      id: r.id,
+      title: r.title,
+      body: r.body,
+      type: r.type,
+      tags: r.tags,
+      autoTags: r.autoTags,
+      url: r.url,
+      createdAt: r.createdAt,
+      similarity: r.similarity,
+    }));
 
-    // Get user's 3 most recent content items
-    const recentContent = await db
-      .select({ id: content.id })
-      .from(content)
-      .where(eq(content.userId, session.user.id))
-      .orderBy(desc(content.createdAt))
-      .limit(3);
-
-    if (recentContent.length === 0) {
-      return {
-        success: true,
-        recommendations: [],
-      };
-    }
-
-    // Get recommendations for each recent content item
-    const allRecommendations: RecommendationResult[] = [];
-    const seenIds = new Set<string>();
-
-    // Include source content IDs so we don't recommend items that are source items
-    for (const item of recentContent) {
-      seenIds.add(item.id);
-    }
-
-    for (const item of recentContent) {
-      const recommendations = await getRecommendations(
-        item.id,
-        session.user.id,
-        4, // Get a few from each source
-        0.3
-      );
-
-      for (const rec of recommendations) {
-        if (!seenIds.has(rec.id)) {
-          seenIds.add(rec.id);
-          allRecommendations.push(rec as RecommendationResult);
-        }
-      }
-    }
-
-    // Sort by similarity and return top 6
-    const topRecommendations = allRecommendations
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 6);
-
-    return {
-      success: true,
-      recommendations: topRecommendations,
-    };
+    return { success: true, recommendations };
   } catch (error) {
     console.error('Error getting dashboard recommendations:', error);
     return {

@@ -300,6 +300,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   tasks: many(tasks),
   apiKeys: many(apiKeys),
   digestSettings: one(digestSettings),
+  contentViews: many(contentViews),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -310,6 +311,7 @@ export const contentRelations = relations(content, ({ one, many }) => ({
   embeddings: many(embeddings),
   contentCollections: many(contentCollections),
   versions: many(contentVersions),
+  views: many(contentViews),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -381,6 +383,31 @@ export const digestSettingsRelations = relations(digestSettings, ({ one }) => ({
   }),
 }));
 
+// Content Views table (for view tracking / behavioral signals)
+export const contentViews = pgTable(
+  'content_views',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    viewedAt: timestamp('viewed_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('content_views_user_id_idx').on(table.userId),
+    contentIdIdx: index('content_views_content_id_idx').on(table.contentId),
+    userViewedAtIdx: index('content_views_user_viewed_at_idx').on(table.userId, table.viewedAt),
+    userContentViewedAtIdx: index('content_views_user_content_viewed_at_idx').on(
+      table.userId,
+      table.contentId,
+      table.viewedAt
+    ),
+  })
+);
+
 // Feedback table
 export const feedbackTypeEnum = ['bug', 'feature', 'improvement', 'other'] as const;
 export type FeedbackType = (typeof feedbackTypeEnum)[number];
@@ -406,6 +433,17 @@ export const feedback = pgTable(
     createdAtIdx: index('feedback_created_at_idx').on(table.createdAt),
   })
 );
+
+export const contentViewsRelations = relations(contentViews, ({ one }) => ({
+  user: one(users, {
+    fields: [contentViews.userId],
+    references: [users.id],
+  }),
+  content: one(content, {
+    fields: [contentViews.contentId],
+    references: [content.id],
+  }),
+}));
 
 export const feedbackRelations = relations(feedback, ({ one }) => ({
   user: one(users, {
@@ -447,3 +485,6 @@ export type NewApiKey = typeof apiKeys.$inferInsert;
 
 export type DigestSetting = typeof digestSettings.$inferSelect;
 export type NewDigestSetting = typeof digestSettings.$inferInsert;
+
+export type ContentView = typeof contentViews.$inferSelect;
+export type NewContentView = typeof contentViews.$inferInsert;

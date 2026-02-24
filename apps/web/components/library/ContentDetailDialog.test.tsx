@@ -60,6 +60,11 @@ vi.mock('@/app/actions/search', () => ({
   getRecommendationsAction: vi.fn().mockResolvedValue({ success: true, recommendations: [] }),
 }));
 
+const mockTrackContentViewAction = vi.fn().mockResolvedValue({ success: true });
+vi.mock('@/app/actions/views', () => ({
+  trackContentViewAction: (...args: unknown[]) => mockTrackContentViewAction(...args),
+}));
+
 const baseContent: ContentDetailDialogProps['content'] = {
   id: '1',
   type: 'note',
@@ -197,6 +202,16 @@ describe('ContentDetailDialog', () => {
     );
 
     expect(screen.getByRole('button', { name: /Manage Share/i })).toBeInTheDocument();
+  });
+
+  it('tracks content view when dialog opens', () => {
+    mockTrackContentViewAction.mockClear();
+
+    render(
+      <ContentDetailDialog content={baseContent} open={true} onOpenChange={() => {}} />
+    );
+
+    expect(mockTrackContentViewAction).toHaveBeenCalledWith('1');
   });
 
   it('does not render when not open', () => {

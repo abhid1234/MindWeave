@@ -139,7 +139,7 @@ describe('DashboardRecommendations', () => {
       });
     });
 
-    it('should show View Library link when recommendations exist', async () => {
+    it('should show View all link when recommendations exist', async () => {
       mockGetDashboardRecommendationsAction.mockResolvedValue({
         success: true,
         recommendations: [
@@ -150,7 +150,7 @@ describe('DashboardRecommendations', () => {
       render(<DashboardRecommendations />);
 
       await waitFor(() => {
-        expect(screen.getByRole('link', { name: 'View Library' })).toHaveAttribute('href', '/dashboard/library');
+        expect(screen.getByRole('link', { name: 'View all' })).toHaveAttribute('href', '/dashboard/discover');
       });
     });
   });

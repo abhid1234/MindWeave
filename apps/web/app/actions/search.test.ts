@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Use vi.hoisted for mock functions
-const { mockAuth, mockSearchSimilarContent, mockGetRecommendations, mockAnswerQuestion, mockDbQuery, mockDbSelect } = vi.hoisted(() => ({
+const { mockAuth, mockSearchSimilarContent, mockGetRecommendations, mockAnswerQuestion, mockDbQuery, mockDbSelect, mockGetBlendedRecommendationsAction } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockSearchSimilarContent: vi.fn(),
   mockGetRecommendations: vi.fn(),
@@ -10,6 +10,7 @@ const { mockAuth, mockSearchSimilarContent, mockGetRecommendations, mockAnswerQu
     content: { findFirst: vi.fn() },
   },
   mockDbSelect: vi.fn(),
+  mockGetBlendedRecommendationsAction: vi.fn(),
 }));
 
 // Mock the auth module
@@ -42,6 +43,11 @@ vi.mock('@/lib/ai/embeddings', () => ({
 // Mock the claude module
 vi.mock('@/lib/ai/claude', () => ({
   answerQuestion: (...args: any[]) => mockAnswerQuestion(...args),
+}));
+
+// Mock the discover module (for delegated dashboard recommendations)
+vi.mock('./discover', () => ({
+  getBlendedRecommendationsAction: (...args: any[]) => mockGetBlendedRecommendationsAction(...args),
 }));
 
 // Import after mocks are set up
@@ -313,33 +319,29 @@ describe('Semantic Search Actions', () => {
   });
 
   describe('getDashboardRecommendationsAction', () => {
-    it('should return recommendations from recent content', async () => {
-      mockDbSelect.mockResolvedValueOnce([
-        { id: 'content-1' },
-        { id: 'content-2' },
-        { id: 'content-3' },
-      ]);
-      mockGetRecommendations
-        .mockResolvedValueOnce([
-          { id: 'rec-1', title: 'Rec 1', similarity: 0.9, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-        ])
-        .mockResolvedValueOnce([
-          { id: 'rec-2', title: 'Rec 2', similarity: 0.85, body: null, type: 'link', tags: [], autoTags: [], url: null, createdAt: new Date() },
-        ])
-        .mockResolvedValueOnce([
-          { id: 'rec-3', title: 'Rec 3', similarity: 0.8, body: null, type: 'file', tags: [], autoTags: [], url: null, createdAt: new Date() },
-        ]);
+    it('should return recommendations from blended action', async () => {
+      mockGetBlendedRecommendationsAction.mockResolvedValueOnce({
+        success: true,
+        results: [
+          { id: 'rec-1', title: 'Rec 1', similarity: 0.9, score: 0.85, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date(), lastViewedAt: null },
+          { id: 'rec-2', title: 'Rec 2', similarity: 0.85, score: 0.8, body: null, type: 'link', tags: [], autoTags: [], url: null, createdAt: new Date(), lastViewedAt: null },
+        ],
+      });
 
       const result = await getDashboardRecommendationsAction();
 
       expect(result.success).toBe(true);
-      expect(result.recommendations).toHaveLength(3);
-      // Should be sorted by similarity
+      expect(result.recommendations).toHaveLength(2);
       expect(result.recommendations[0].similarity).toBe(0.9);
+      expect(mockGetBlendedRecommendationsAction).toHaveBeenCalledWith(6);
     });
 
-    it('should return error when not authenticated', async () => {
-      mockAuth.mockResolvedValueOnce(null);
+    it('should return error when blended action fails', async () => {
+      mockGetBlendedRecommendationsAction.mockResolvedValueOnce({
+        success: false,
+        message: 'Unauthorized.',
+        results: [],
+      });
 
       const result = await getDashboardRecommendationsAction();
 
@@ -348,8 +350,11 @@ describe('Semantic Search Actions', () => {
       expect(result.recommendations).toEqual([]);
     });
 
-    it('should return empty array when user has no content', async () => {
-      mockDbSelect.mockResolvedValueOnce([]);
+    it('should return empty array when blended returns no results', async () => {
+      mockGetBlendedRecommendationsAction.mockResolvedValueOnce({
+        success: true,
+        results: [],
+      });
 
       const result = await getDashboardRecommendationsAction();
 
@@ -357,85 +362,39 @@ describe('Semantic Search Actions', () => {
       expect(result.recommendations).toEqual([]);
     });
 
-    it('should deduplicate recommendations across sources', async () => {
-      mockDbSelect.mockResolvedValueOnce([
-        { id: 'content-1' },
-        { id: 'content-2' },
-      ]);
-      // Same recommendation from both sources
-      mockGetRecommendations
-        .mockResolvedValueOnce([
-          { id: 'rec-1', title: 'Rec 1', similarity: 0.9, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-        ])
-        .mockResolvedValueOnce([
-          { id: 'rec-1', title: 'Rec 1', similarity: 0.85, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-        ]);
-
-      const result = await getDashboardRecommendationsAction();
-
-      expect(result.success).toBe(true);
-      // Should only have one copy of rec-1
-      expect(result.recommendations).toHaveLength(1);
-    });
-
-    it('should not recommend source content items', async () => {
-      mockDbSelect.mockResolvedValueOnce([
-        { id: 'content-1' },
-      ]);
-      // Recommendation includes source content (shouldn't happen in real usage but testing the filter)
-      mockGetRecommendations.mockResolvedValueOnce([
-        { id: 'content-1', title: 'Source', similarity: 1.0, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-        { id: 'rec-1', title: 'Rec 1', similarity: 0.9, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-      ]);
-
-      const result = await getDashboardRecommendationsAction();
-
-      expect(result.success).toBe(true);
-      // Should only have rec-1, not content-1
-      expect(result.recommendations.map(r => r.id)).not.toContain('content-1');
-    });
-
-    it('should limit to top 6 recommendations', async () => {
-      mockDbSelect.mockResolvedValueOnce([
-        { id: 'content-1' },
-        { id: 'content-2' },
-        { id: 'content-3' },
-      ]);
-      // Many recommendations
-      const manyRecs = Array.from({ length: 4 }, (_, i) => ({
-        id: `rec-${i}`,
-        title: `Rec ${i}`,
-        similarity: 0.9 - i * 0.05,
-        body: null,
-        type: 'note' as const,
-        tags: [],
-        autoTags: [],
-        url: null,
-        createdAt: new Date(),
-      }));
-      mockGetRecommendations
-        .mockResolvedValueOnce(manyRecs.slice(0, 2))
-        .mockResolvedValueOnce(manyRecs.slice(2, 4))
-        .mockResolvedValueOnce([
-          { id: 'rec-4', title: 'Rec 4', similarity: 0.65, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-          { id: 'rec-5', title: 'Rec 5', similarity: 0.6, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-          { id: 'rec-6', title: 'Rec 6', similarity: 0.55, body: null, type: 'note', tags: [], autoTags: [], url: null, createdAt: new Date() },
-        ]);
-
-      const result = await getDashboardRecommendationsAction();
-
-      expect(result.success).toBe(true);
-      expect(result.recommendations).toHaveLength(6);
-    });
-
     it('should handle errors gracefully', async () => {
-      mockDbSelect.mockRejectedValueOnce(new Error('Database error'));
+      mockGetBlendedRecommendationsAction.mockRejectedValueOnce(new Error('Network error'));
 
       const result = await getDashboardRecommendationsAction();
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Failed to get recommendations');
       expect(result.recommendations).toEqual([]);
+    });
+
+    it('should map DiscoverResult to RecommendationResult correctly', async () => {
+      const createdAt = new Date('2025-06-15');
+      mockGetBlendedRecommendationsAction.mockResolvedValueOnce({
+        success: true,
+        results: [
+          { id: 'rec-1', title: 'Rec 1', similarity: 0.9, score: 0.85, body: 'body', type: 'note', tags: ['tag1'], autoTags: ['ai-tag'], url: null, createdAt, lastViewedAt: new Date() },
+        ],
+      });
+
+      const result = await getDashboardRecommendationsAction();
+
+      expect(result.success).toBe(true);
+      expect(result.recommendations[0]).toEqual({
+        id: 'rec-1',
+        title: 'Rec 1',
+        body: 'body',
+        type: 'note',
+        tags: ['tag1'],
+        autoTags: ['ai-tag'],
+        url: null,
+        createdAt,
+        similarity: 0.9,
+      });
     });
   });
 
