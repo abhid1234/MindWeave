@@ -58,7 +58,7 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-24)**:
-- [x] **Content Discovery with View Tracking & Discover Page** - Added behavioral signals to content recommendations and a dedicated Discover page for exploring the knowledge base:
+- [x] **Content Discovery with View Tracking & Discover Page** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:02a4e51`). Added behavioral signals to content recommendations and a dedicated Discover page for exploring the knowledge base:
   - **`content_views` table** — new schema table tracking user content views with debounced inserts (30s), 4 composite indexes for efficient querying. `trackContentViewAction` fires on ContentDetailDialog open.
   - **Blended scoring algorithm** — `calculateBlendedScore()` in `lib/recommendations.ts` combines vector similarity (50%), content recency with 90-day exponential decay (20%), and novelty bonus based on view history (30%). Never-viewed content gets highest novelty; content viewed today gets zero.
   - **4 discover server actions** — `getActivityBasedRecommendationsAction` (seeds from 5 most-recently-viewed items), `getUnexploredTopicsAction` (content with tags not in recent views), `getRediscoverAction` (old content >30d not viewed in 30d), `getBlendedRecommendationsAction` (enhanced dashboard scoring).
