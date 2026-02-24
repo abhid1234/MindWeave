@@ -440,9 +440,9 @@ export async function createTestUser(data: Partial<User>) {
 
 ```typescript
 import { vi } from 'vitest';
-import * as claude from '@/lib/ai/claude';
+import * as claude from '@/lib/ai/gemini';
 
-vi.mock('@/lib/ai/claude', () => ({
+vi.mock('@/lib/ai/gemini', () => ({
   generateTags: vi.fn().mockResolvedValue(['ai', 'testing']),
   answerQuestion: vi.fn().mockResolvedValue('Mocked answer'),
 }));

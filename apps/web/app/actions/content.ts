@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { content, contentCollections, contentVersions, type ContentType } from '@/lib/db/schema';
 import { createContentSchema, updateContentSchema } from '@/lib/validations';
-import { generateTags } from '@/lib/ai/claude';
+import { generateTags } from '@/lib/ai/gemini';
 import { generateSummary } from '@/lib/ai/summarization';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';

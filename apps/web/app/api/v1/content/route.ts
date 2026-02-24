@@ -4,7 +4,7 @@ import { authenticateApiKey } from '@/lib/api-key-auth';
 import { db } from '@/lib/db/client';
 import { content, type ContentType } from '@/lib/db/schema';
 import { createContentSchema } from '@/lib/validations';
-import { generateTags } from '@/lib/ai/claude';
+import { generateTags } from '@/lib/ai/gemini';
 import { generateSummary } from '@/lib/ai/summarization';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { eq, desc, and, lt } from 'drizzle-orm';

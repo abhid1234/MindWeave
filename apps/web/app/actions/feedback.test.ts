@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { submitFeedbackAction, getFeedbackAction } from './feedback';
+import { submitFeedbackAction, getFeedbackAction, getAdminFeedbackAction, updateFeedbackStatusAction } from './feedback';
 
 // Mock dependencies
 const mockSelectChain = {
@@ -28,6 +28,11 @@ vi.mock('@/lib/db/client', () => ({
       }
       return mockSelectChain;
     }),
+    update: vi.fn(() => ({
+      set: vi.fn(() => ({
+        where: vi.fn().mockResolvedValue(undefined),
+      })),
+    })),
   },
 }));
 
@@ -163,6 +168,95 @@ describe('feedback actions', () => {
       });
 
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('getAdminFeedbackAction', () => {
+    it('returns error for unauthenticated user', async () => {
+      const { auth } = await import('@/lib/auth');
+      vi.mocked(auth).mockResolvedValueOnce(null as any);
+
+      const result = await getAdminFeedbackAction();
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Unauthorized');
+      expect(result.items).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+
+    it('returns error for non-admin user', async () => {
+      // Default mock user is test@example.com, not in ADMIN_EMAILS
+      const result = await getAdminFeedbackAction();
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Unauthorized');
+    });
+
+    it('returns items for admin user', async () => {
+      const { auth } = await import('@/lib/auth');
+      process.env.ADMIN_EMAILS = 'admin@test.com';
+      vi.mocked(auth).mockResolvedValueOnce({
+        user: { id: 'admin-id', email: 'admin@test.com' },
+        expires: '',
+      } as any);
+
+      const result = await getAdminFeedbackAction();
+
+      expect(result.success).toBe(true);
+      expect(Array.isArray(result.items)).toBe(true);
+
+      // Clean up
+      delete process.env.ADMIN_EMAILS;
+    });
+  });
+
+  describe('updateFeedbackStatusAction', () => {
+    it('returns error for unauthenticated user', async () => {
+      const { auth } = await import('@/lib/auth');
+      vi.mocked(auth).mockResolvedValueOnce(null as any);
+
+      const result = await updateFeedbackStatusAction('fb-1', 'resolved');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Unauthorized');
+    });
+
+    it('returns error for non-admin user', async () => {
+      const result = await updateFeedbackStatusAction('fb-1', 'resolved');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Unauthorized');
+    });
+
+    it('returns error for invalid status', async () => {
+      const { auth } = await import('@/lib/auth');
+      process.env.ADMIN_EMAILS = 'admin@test.com';
+      vi.mocked(auth).mockResolvedValueOnce({
+        user: { id: 'admin-id', email: 'admin@test.com' },
+        expires: '',
+      } as any);
+
+      const result = await updateFeedbackStatusAction('fb-1', 'invalid_status');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Invalid status');
+
+      delete process.env.ADMIN_EMAILS;
+    });
+
+    it('updates status successfully for admin', async () => {
+      const { auth } = await import('@/lib/auth');
+      process.env.ADMIN_EMAILS = 'admin@test.com';
+      vi.mocked(auth).mockResolvedValueOnce({
+        user: { id: 'admin-id', email: 'admin@test.com' },
+        expires: '',
+      } as any);
+
+      const result = await updateFeedbackStatusAction('fb-1', 'resolved');
+
+      expect(result.success).toBe(true);
+
+      delete process.env.ADMIN_EMAILS;
     });
   });
 });

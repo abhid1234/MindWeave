@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client';
 import { digestSettings, users } from '@/lib/db/schema';
 import { eq, and, or, isNull, lt } from 'drizzle-orm';
 import { sendDigestEmail } from '@/lib/email';
+import { sendPushNotification } from '@/lib/push-notifications';
 
 /**
  * POST /api/cron/digest
@@ -72,6 +73,12 @@ export async function POST(request: NextRequest) {
             .set({ lastSentAt: now })
             .where(eq(digestSettings.userId, user.userId));
           sentCount++;
+          // Fire-and-forget push notification
+          sendPushNotification(
+            user.userId,
+            'Your Mindweave Digest',
+            'Your weekly digest is ready. Check your email!'
+          ).catch((err) => console.error('[Digest] Push notification failed:', err));
         } else {
           skippedCount++; // Nothing new to report
         }

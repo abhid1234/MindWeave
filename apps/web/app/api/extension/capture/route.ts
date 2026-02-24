@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { authenticateApiKey } from '@/lib/api-key-auth';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
-import { generateTags } from '@/lib/ai/claude';
+import { generateTags } from '@/lib/ai/gemini';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';

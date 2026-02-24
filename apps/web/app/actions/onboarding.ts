@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { users, content, tasks } from '@/lib/db/schema';
 import { eq, count } from 'drizzle-orm';
-import { generateTags } from '@/lib/ai/claude';
+import { generateTags } from '@/lib/ai/gemini';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 
 type OnboardingResult = {

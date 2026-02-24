@@ -75,7 +75,7 @@ vi.mock('@/lib/db/client', () => ({
 }));
 
 // Mock Claude AI (auto-tagging)
-vi.mock('@/lib/ai/claude', () => ({
+vi.mock('@/lib/ai/gemini', () => ({
   generateTags: vi.fn().mockResolvedValue(['auto-tag-1', 'auto-tag-2']),
 }));
 

@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { searchSimilarContent, getRecommendations } from '@/lib/ai/embeddings';
-import { answerQuestion } from '@/lib/ai/claude';
+import { answerQuestion } from '@/lib/ai/gemini';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import type { ContentType } from '@/lib/db/schema';

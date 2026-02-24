@@ -54,7 +54,7 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
   if (error) {
     console.error('[Password Reset] Resend API error:', JSON.stringify(error));
   } else {
-    console.warn('[Password Reset] Email sent successfully, id:', data?.id);
+    console.log('[Password Reset] Email sent successfully, id:', data?.id);
   }
 }
 
@@ -91,7 +91,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
   if (error) {
     console.error('[Email Verification] Resend API error:', JSON.stringify(error));
   } else {
-    console.warn('[Email Verification] Email sent successfully, id:', data?.id);
+    console.log('[Email Verification] Email sent successfully, id:', data?.id);
   }
 }
 

@@ -78,7 +78,7 @@ vi.mock('@/lib/validations', () => ({
   updateContentSchema: { safeParse: vi.fn() },
 }));
 
-vi.mock('@/lib/ai/claude', () => ({
+vi.mock('@/lib/ai/gemini', () => ({
   generateTags: vi.fn().mockResolvedValue([]),
 }));
 

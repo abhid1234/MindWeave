@@ -7,6 +7,14 @@ import { z } from 'zod';
 import { desc, eq, and, count } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
+function getAdminEmails(): string[] {
+  return (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+}
+
+function isAdmin(email: string | null | undefined): boolean {
+  return !!email && getAdminEmails().includes(email);
+}
+
 const feedbackSchema = z.object({
   type: z.enum(['bug', 'feature', 'improvement', 'other']),
   message: z.string().min(10, 'Message must be at least 10 characters').max(2000),
@@ -116,5 +124,86 @@ export async function getFeedbackAction(options?: {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     return { success: false, error: 'Failed to load feedback', items: [] };
+  }
+}
+
+/**
+ * Get all feedback (admin only)
+ */
+export async function getAdminFeedbackAction(options?: {
+  status?: string;
+  type?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const session = await auth();
+  if (!session?.user?.id || !isAdmin(session.user.email)) {
+    return { success: false, error: 'Unauthorized', items: [], total: 0 };
+  }
+
+  const conditions: ReturnType<typeof eq>[] = [];
+
+  if (options?.status) {
+    conditions.push(eq(feedback.status, options.status));
+  }
+
+  if (options?.type) {
+    conditions.push(eq(feedback.type, options.type as FeedbackType));
+  }
+
+  try {
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const items = await db
+      .select()
+      .from(feedback)
+      .where(whereClause)
+      .orderBy(desc(feedback.createdAt))
+      .limit(options?.limit || 50)
+      .offset(options?.offset || 0);
+
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(feedback)
+      .where(whereClause);
+
+    return { success: true, items, total };
+  } catch (error) {
+    logger.error('Failed to get admin feedback', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    return { success: false, error: 'Failed to load feedback', items: [], total: 0 };
+  }
+}
+
+/**
+ * Update feedback status (admin only)
+ */
+export async function updateFeedbackStatusAction(
+  feedbackId: string,
+  status: string
+): Promise<{ success: boolean; error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id || !isAdmin(session.user.email)) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const validStatuses = ['new', 'reviewed', 'in_progress', 'resolved', 'dismissed'];
+  if (!validStatuses.includes(status)) {
+    return { success: false, error: 'Invalid status' };
+  }
+
+  try {
+    await db
+      .update(feedback)
+      .set({ status })
+      .where(eq(feedback.id, feedbackId));
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Failed to update feedback status', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    return { success: false, error: 'Failed to update status' };
   }
 }

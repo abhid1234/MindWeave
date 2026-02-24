@@ -64,7 +64,7 @@ vi.mock('@/lib/rate-limit', () => ({
   },
 }));
 
-vi.mock('@/lib/ai/claude', () => ({
+vi.mock('@/lib/ai/gemini', () => ({
   generateTags: (...args: unknown[]) => mockGenerateTags(...args),
 }));
 

@@ -41,7 +41,7 @@ vi.mock('@/lib/ai/embeddings', () => ({
 }));
 
 // Mock the claude module
-vi.mock('@/lib/ai/claude', () => ({
+vi.mock('@/lib/ai/gemini', () => ({
   answerQuestion: (...args: any[]) => mockAnswerQuestion(...args),
 }));
 

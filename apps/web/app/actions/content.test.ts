@@ -81,7 +81,7 @@ vi.mock('@/lib/validations', () => ({
   },
 }));
 
-vi.mock('@/lib/ai/claude', () => ({
+vi.mock('@/lib/ai/gemini', () => ({
   generateTags: vi.fn().mockResolvedValue(['tag1']),
 }));
 

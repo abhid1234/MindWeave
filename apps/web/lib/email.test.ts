@@ -139,7 +139,7 @@ describe('Email Functions', () => {
 
     it('should log success when email sends', async () => {
       const { sendVerificationEmail } = await import('./email');
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       await sendVerificationEmail('user@example.com');
 

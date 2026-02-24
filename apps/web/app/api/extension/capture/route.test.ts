@@ -3,7 +3,7 @@ import { POST, OPTIONS } from './route';
 import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { generateTags } from '@/lib/ai/claude';
+import { generateTags } from '@/lib/ai/gemini';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
 
 // Mock auth
@@ -23,7 +23,7 @@ vi.mock('@/lib/db/client', () => ({
 }));
 
 // Mock AI functions
-vi.mock('@/lib/ai/claude', () => ({
+vi.mock('@/lib/ai/gemini', () => ({
   generateTags: vi.fn(),
 }));
 
