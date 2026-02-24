@@ -5,7 +5,7 @@
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, and content discovery with view tracking.
+✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, and admin feedback management.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -44,6 +44,8 @@
 - **Email Digest** - Configurable weekly/daily summaries via Cloud Scheduler cron
 - **Content Discovery** - View tracking, blended scoring (similarity + recency + novelty), Discover page with 4 recommendation sections
 - **Content Intelligence** - Summary display in cards/dialogs, Knowledge Graph visualization, Smart Collections from AI clustering
+- **Push Notifications** - FCM-based push to mobile devices after digest emails
+- **Admin Feedback** - Admin-only feedback management page with status workflow
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -59,6 +61,22 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-24)**:
+- [x] **Codebase Improvements — 270 New Tests, Push Notifications, Admin Feedback** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fa2fb5b`). Comprehensive audit-driven improvements: bug fixes, test coverage, and two new features:
+  - **Bug fixes** — `console.warn` → `console.log` for success messages in `lib/email.ts`; renamed `lib/ai/claude.ts` → `lib/ai/gemini.ts` (correct SDK naming) with all 14 imports updated.
+  - **Push notifications** — new `lib/push-notifications.ts` sends FCM HTTP v1 notifications to active devices. Integrated fire-and-forget into digest cron route after successful email sends. Deactivates stale tokens on 404.
+  - **Admin feedback page** — `ADMIN_EMAILS` env var for access control. `getAdminFeedbackAction` (all feedback, no user filter) and `updateFeedbackStatusAction` (status dropdown: new/reviewed/in_progress/resolved/dismissed). Server component page at `/dashboard/admin/feedback` with `FeedbackTable` client component.
+  - **270 new tests across 21 test files** (1,622 → 1,892 passing, 0 failures):
+    - Security: `api-key-auth` (17), `mobile-auth` (10), `api-keys` actions (18)
+    - API: `v1/content` route (25)
+    - Storage: GCS upload/delete/URL (19)
+    - Un-skipped: analytics actions (28, was 5 skip), SearchSuggestions (9, was 9 skip)
+    - Editor components: TiptapEditor (11), EditorToolbar (14), MarkdownRenderer (5)
+    - Profile components: ApiKeysManager (16), DigestSettingsForm (10), ProfileSettingsForm (15)
+    - Import/Onboarding/PWA: ImportFileUpload (18), ImportSourceSelector (5), OnboardingFlow (16), InstallPrompt (9)
+    - Features: push-notifications (12), admin FeedbackTable (5), feedback actions (7 new)
+  - **44 files changed** (21 new, 23 modified) — 0 TS errors, 0 lint errors, build succeeds.
+
+**Previous Enhancement (2026-02-24)**:
 - [x] **Content Intelligence — Summary Display, Knowledge Graph, Smart Collections** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fa88b11`). Surfaces AI summaries, adds a force-directed knowledge graph, and connects clustering to collections:
   - **Summary display** — existing `summary` field now rendered in `ContentCard` (2-line preview) and `ContentDetailDialog` (accent-bordered block). "Generate Summary" button for older content without summaries calls `generateSummaryAction` → Gemini summarization → DB update.
   - **Knowledge Graph (`/dashboard/graph`)** — force-directed network visualization using `react-force-graph-2d`. Server action `getContentGraphAction` performs pgvector cosine self-join to find content relationships. Similarity threshold slider (0.3–0.9) with 500ms debounce. Node colors by type (blue=note, green=link, orange=file), click-to-navigate to library.
@@ -66,7 +84,7 @@
   - **Navigation updated** — Network icon + "Graph" nav item added (11 nav items total). Discover page now has 4 sections.
   - **22 files changed** (11 new, 11 modified) — tests pass, build succeeds.
 
-**Previous Enhancement (2026-02-24)**:
+**Previous Enhancement (2026-02-24 — earlier)**:
 - [x] **Content Discovery with View Tracking & Discover Page** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:02a4e51`). Added behavioral signals to content recommendations and a dedicated Discover page for exploring the knowledge base:
   - **`content_views` table** — new schema table tracking user content views with debounced inserts (30s), 4 composite indexes for efficient querying. `trackContentViewAction` fires on ContentDetailDialog open.
   - **Blended scoring algorithm** — `calculateBlendedScore()` in `lib/recommendations.ts` combines vector similarity (50%), content recency with 90-day exponential decay (20%), and novelty bonus based on view history (30%). Never-viewed content gets highest novelty; content viewed today gets zero.
