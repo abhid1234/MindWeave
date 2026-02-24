@@ -1,11 +1,11 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-23
+**Last Updated**: 2026-02-24
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, and email digests.
+✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, and content discovery with view tracking.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -42,6 +42,7 @@
 - **Version History** - Automatic snapshots, view/compare/revert previous versions
 - **API Keys** - REST API (/api/v1/content) with key-based auth for external integrations
 - **Email Digest** - Configurable weekly/daily summaries via Cloud Scheduler cron
+- **Content Discovery** - View tracking, blended scoring (similarity + recency + novelty), Discover page with 3 recommendation sections
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -56,7 +57,18 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-23)**:
+**Latest Enhancement (2026-02-24)**:
+- [x] **Content Discovery with View Tracking & Discover Page** - Added behavioral signals to content recommendations and a dedicated Discover page for exploring the knowledge base:
+  - **`content_views` table** — new schema table tracking user content views with debounced inserts (30s), 4 composite indexes for efficient querying. `trackContentViewAction` fires on ContentDetailDialog open.
+  - **Blended scoring algorithm** — `calculateBlendedScore()` in `lib/recommendations.ts` combines vector similarity (50%), content recency with 90-day exponential decay (20%), and novelty bonus based on view history (30%). Never-viewed content gets highest novelty; content viewed today gets zero.
+  - **4 discover server actions** — `getActivityBasedRecommendationsAction` (seeds from 5 most-recently-viewed items), `getUnexploredTopicsAction` (content with tags not in recent views), `getRediscoverAction` (old content >30d not viewed in 30d), `getBlendedRecommendationsAction` (enhanced dashboard scoring).
+  - **Discover page (`/dashboard/discover`)** — server component with auth guard, 3 client-side sections: "Based on your activity", "Unexplored topics", "Rediscover". Each section loads independently with skeleton states.
+  - **5 new components** — `DiscoverSection` (reusable wrapper with loading/empty states), `DiscoverCard` (enhanced card with "New to you" badge, similarity %, body preview, time ago), `ActivityRecommendations`, `UnexploredTopics`, `RediscoverContent`.
+  - **Dashboard widget upgraded** — `getDashboardRecommendationsAction` now delegates to blended scoring; "View Library" link changed to "View all" → `/dashboard/discover`.
+  - **Navigation updated** — Compass icon + "Discover" nav item added after "Ask AI" (10 nav items total).
+  - **28 files changed** (19 new, 9 modified) — 1,587 tests pass, build succeeds. Post-deploy: `content_views` table created via `db:push`.
+
+**Previous Enhancement (2026-02-23)**:
 - [x] **Rich Text Editor** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:94f5296`). Replaced plain text editing with Tiptap-based rich text editor:
   - **TiptapEditor component** — rich text editing with headings, bold, italic, lists, code blocks, and blockquotes. `EditorToolbar` with formatting buttons.
   - **MarkdownRenderer component** — renders content body as formatted markdown in ContentDetailDialog, share pages, and capture form.
