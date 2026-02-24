@@ -466,6 +466,26 @@ describe('ContentCard', () => {
     });
   });
 
+  describe('Summary', () => {
+    it('should render summary when provided', () => {
+      render(<ContentCard {...baseProps} summary="This is a summary of the content." />);
+      expect(screen.getByText('This is a summary of the content.')).toBeInTheDocument();
+    });
+
+    it('should not render summary when null', () => {
+      render(<ContentCard {...baseProps} summary={null} />);
+      expect(screen.queryByText(/summary/i)).not.toBeInTheDocument();
+    });
+
+    it('should not render summary when undefined', () => {
+      render(<ContentCard {...baseProps} />);
+      // No summary text should appear
+      const card = screen.getByRole('article');
+      const summaryElements = card.querySelectorAll('.line-clamp-2');
+      expect(summaryElements).toHaveLength(0);
+    });
+  });
+
   describe('Sharing indicator', () => {
     it('should show Shared badge when content is shared', () => {
       render(<ContentCard {...baseProps} isShared={true} shareId="abc123" />);

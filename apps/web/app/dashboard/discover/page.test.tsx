@@ -28,6 +28,10 @@ vi.mock('@/components/discover/RediscoverContent', () => ({
   RediscoverContent: () => <div data-testid="rediscover-content">Rediscover Content</div>,
 }));
 
+vi.mock('@/components/discover/SmartCollections', () => ({
+  SmartCollections: () => <div data-testid="smart-collections">Smart Collections</div>,
+}));
+
 import DiscoverPage from './page';
 
 describe('DiscoverPage', () => {
@@ -51,7 +55,7 @@ describe('DiscoverPage', () => {
     expect(screen.getByText('Explore your knowledge base with personalized recommendations')).toBeInTheDocument();
   });
 
-  it('should render all three discover sections', async () => {
+  it('should render all four discover sections', async () => {
     mockAuth.mockResolvedValue({
       user: { id: 'user-123', email: 'test@example.com' },
     });
@@ -62,5 +66,6 @@ describe('DiscoverPage', () => {
     expect(screen.getByTestId('activity-recommendations')).toBeInTheDocument();
     expect(screen.getByTestId('unexplored-topics')).toBeInTheDocument();
     expect(screen.getByTestId('rediscover-content')).toBeInTheDocument();
+    expect(screen.getByTestId('smart-collections')).toBeInTheDocument();
   });
 });

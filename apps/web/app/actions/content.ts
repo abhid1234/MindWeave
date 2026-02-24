@@ -1465,6 +1465,69 @@ export async function getContentVersionsAction(
   }
 }
 
+export type GenerateSummaryResult = {
+  success: boolean;
+  message: string;
+  summary?: string;
+};
+
+export async function generateSummaryAction(contentId: string): Promise<GenerateSummaryResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized. Please log in.' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'generateSummary', RATE_LIMITS.serverActionAI);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
+    if (!contentId || typeof contentId !== 'string') {
+      return { success: false, message: 'Invalid content ID.' };
+    }
+
+    // Verify content exists and belongs to the user
+    const existingContent = await db
+      .select({
+        id: content.id,
+        title: content.title,
+        body: content.body,
+        url: content.url,
+        type: content.type,
+      })
+      .from(content)
+      .where(and(eq(content.id, contentId), eq(content.userId, session.user.id)))
+      .limit(1);
+
+    if (existingContent.length === 0) {
+      return { success: false, message: 'Content not found or access denied.' };
+    }
+
+    const item = existingContent[0];
+
+    const summary = await generateSummary({
+      title: item.title,
+      body: item.body,
+      url: item.url,
+      type: item.type,
+    });
+
+    if (!summary) {
+      return { success: false, message: 'Could not generate summary. Content may be too short.' };
+    }
+
+    await db.update(content).set({ summary }).where(eq(content.id, contentId));
+
+    revalidatePath('/dashboard/library');
+
+    return { success: true, message: 'Summary generated successfully!', summary };
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    return { success: false, message: 'Failed to generate summary. Please try again.' };
+  }
+}
+
 export async function revertToVersionAction(
   contentId: string,
   versionId: string

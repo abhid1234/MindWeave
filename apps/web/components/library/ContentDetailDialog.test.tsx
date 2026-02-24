@@ -60,6 +60,11 @@ vi.mock('@/app/actions/search', () => ({
   getRecommendationsAction: vi.fn().mockResolvedValue({ success: true, recommendations: [] }),
 }));
 
+const mockGenerateSummaryAction = vi.fn();
+vi.mock('@/app/actions/content', () => ({
+  generateSummaryAction: (...args: unknown[]) => mockGenerateSummaryAction(...args),
+}));
+
 const mockTrackContentViewAction = vi.fn().mockResolvedValue({ success: true });
 vi.mock('@/app/actions/views', () => ({
   trackContentViewAction: (...args: unknown[]) => mockTrackContentViewAction(...args),
@@ -220,6 +225,41 @@ describe('ContentDetailDialog', () => {
     );
 
     expect(screen.queryByText('Test Note Title')).not.toBeInTheDocument();
+  });
+
+  it('renders summary when provided', () => {
+    const contentWithSummary = { ...baseContent, summary: 'This is an AI-generated summary.' };
+
+    render(
+      <ContentDetailDialog content={contentWithSummary} open={true} onOpenChange={() => {}} />
+    );
+
+    expect(screen.getByText('This is an AI-generated summary.')).toBeInTheDocument();
+  });
+
+  it('shows Generate Summary button when summary is null', () => {
+    const contentNoSummary = { ...baseContent, summary: null };
+
+    render(
+      <ContentDetailDialog content={contentNoSummary} open={true} onOpenChange={() => {}} />
+    );
+
+    expect(screen.getByTestId('generate-summary-btn')).toBeInTheDocument();
+    expect(screen.getByText('Generate Summary')).toBeInTheDocument();
+  });
+
+  it('calls generateSummaryAction when Generate Summary button is clicked', async () => {
+    mockGenerateSummaryAction.mockResolvedValue({ success: true, summary: 'Generated summary' });
+    const user = userEvent.setup();
+
+    render(
+      <ContentDetailDialog content={{ ...baseContent, summary: null }} open={true} onOpenChange={() => {}} />
+    );
+
+    const btn = screen.getByTestId('generate-summary-btn');
+    await user.click(btn);
+
+    expect(mockGenerateSummaryAction).toHaveBeenCalledWith('1');
   });
 
   it('renders file info for file type content', () => {

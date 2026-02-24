@@ -64,6 +64,7 @@ export type ContentCardProps = {
   isShared?: boolean;
   shareId?: string | null;
   isFavorite?: boolean;
+  summary?: string | null;
 };
 
 function getFileIcon(fileType?: string) {
@@ -98,6 +99,7 @@ export function ContentCard({
   isShared: initialIsShared = false,
   shareId: initialShareId = null,
   isFavorite: initialIsFavorite = false,
+  summary,
 }: ContentCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -279,6 +281,10 @@ export function ContentCard({
         >
           <h3 id={`content-title-${id}`} className="font-semibold line-clamp-1 mb-2 pl-2">{title}</h3>
 
+          {summary && (
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-1 pl-2">{summary}</p>
+          )}
+
           {/* File preview for file type */}
           {type === 'file' && metadata?.filePath && (
             <div className="mb-3 pl-2">
@@ -377,6 +383,7 @@ export function ContentCard({
           isShared,
           shareId,
           metadata,
+          summary,
         }}
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}

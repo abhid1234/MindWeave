@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink, Sparkles } from 'lucide-react';
+import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 import { VersionHistoryPanel } from './VersionHistoryPanel';
 import NextImage from 'next/image';
@@ -12,6 +12,7 @@ import { formatDateUTC } from '@/lib/utils';
 import { getRecommendationsAction } from '@/app/actions/search';
 import type { RecommendationResult } from '@/app/actions/search';
 import { trackContentViewAction } from '@/app/actions/views';
+import { generateSummaryAction } from '@/app/actions/content';
 import { RecommendationCard } from './RecommendationCard';
 import {
   Dialog,
@@ -48,6 +49,7 @@ export type ContentDetailDialogProps = {
     isFavorite?: boolean;
     isShared?: boolean;
     shareId?: string | null;
+    summary?: string | null;
     metadata?: {
       fileType?: string;
       fileSize?: number;
@@ -89,8 +91,28 @@ export function ContentDetailDialog({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationResult[]>([]);
   const [recsLoading, setRecsLoading] = useState(false);
+  const [currentSummary, setCurrentSummary] = useState(content.summary);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
   const { id, type, title, body, url, tags, autoTags, createdAt, isFavorite, isShared, shareId, metadata } = content;
+
+  useEffect(() => {
+    setCurrentSummary(content.summary);
+  }, [content.summary, content.id]);
+
+  const handleGenerateSummary = async () => {
+    setIsGeneratingSummary(true);
+    try {
+      const result = await generateSummaryAction(id);
+      if (result.success && result.summary) {
+        setCurrentSummary(result.summary);
+      }
+    } catch {
+      // Error handled silently
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) {
@@ -152,6 +174,28 @@ export function ContentDetailDialog({
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Summary */}
+            {currentSummary ? (
+              <p className="text-sm italic text-muted-foreground border-l-2 border-primary/30 pl-3">
+                {currentSummary}
+              </p>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateSummary}
+                disabled={isGeneratingSummary}
+                data-testid="generate-summary-btn"
+              >
+                {isGeneratingSummary ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Generate Summary
+              </Button>
+            )}
+
             {/* URL for links */}
             {url && type !== 'file' && (
               <a

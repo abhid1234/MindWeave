@@ -243,6 +243,7 @@ function ListRow({ item, allTags: _allTags }: { item: ContentItem; allTags: stri
           isShared,
           shareId,
           metadata: item.metadata,
+          summary: item.summary,
         }}
         open={isDetailOpen}
         onOpenChange={setIsDetailOpen}

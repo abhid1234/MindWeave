@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { ActivityRecommendations } from '@/components/discover/ActivityRecommendations';
 import { UnexploredTopics } from '@/components/discover/UnexploredTopics';
 import { RediscoverContent } from '@/components/discover/RediscoverContent';
+import { SmartCollections } from '@/components/discover/SmartCollections';
 
 export const metadata: Metadata = {
   title: 'Discover | Mindweave',
@@ -45,6 +46,9 @@ export default async function DiscoverPage() {
         </div>
         <div className="animate-fade-up" style={{ animationDelay: '225ms', animationFillMode: 'backwards' }}>
           <RediscoverContent />
+        </div>
+        <div className="animate-fade-up" style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}>
+          <SmartCollections />
         </div>
       </div>
     </div>
