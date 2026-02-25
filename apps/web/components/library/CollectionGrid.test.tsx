@@ -20,6 +20,11 @@ vi.mock('./CollectionDialog', () => ({
     open ? <div data-testid="collection-dialog">Collection Dialog</div> : null,
 }));
 
+vi.mock('./ShareCollectionDialog', () => ({
+  ShareCollectionDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="share-dialog">Share Dialog</div> : null,
+}));
+
 vi.mock('@/components/ui/toast', () => ({
   useToast: () => ({ addToast: vi.fn() }),
 }));

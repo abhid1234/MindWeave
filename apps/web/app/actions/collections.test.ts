@@ -10,6 +10,12 @@ import {
   getContentCollectionsAction,
 } from './collections';
 
+// Mock collection-sharing
+const mockCheckCollectionAccess = vi.fn();
+vi.mock('./collection-sharing', () => ({
+  checkCollectionAccess: (...args: unknown[]) => mockCheckCollectionAccess(...args),
+}));
+
 // Mock auth
 vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
@@ -113,7 +119,11 @@ describe('Collection Actions', () => {
 
       const mockReturning = vi.fn().mockResolvedValue([mockCollection]);
       const mockValues = vi.fn().mockReturnValue({ returning: mockReturning });
-      vi.mocked(db.insert).mockReturnValue({ values: mockValues } as never);
+      // First insert: collection, second insert: collectionMembers
+      const mockMemberValues = vi.fn().mockResolvedValue(undefined);
+      vi.mocked(db.insert)
+        .mockReturnValueOnce({ values: mockValues } as never)
+        .mockReturnValueOnce({ values: mockMemberValues } as never);
 
       const result = await createCollectionAction({
         name: 'Test Collection',
@@ -149,7 +159,8 @@ describe('Collection Actions', () => {
       const mockOrderBy = vi.fn().mockResolvedValue(mockCollections);
       const mockGroupBy = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
       const mockWhere = vi.fn().mockReturnValue({ groupBy: mockGroupBy });
-      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere });
+      const mockLeftJoin2 = vi.fn().mockReturnValue({ where: mockWhere });
+      const mockLeftJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin2 });
       const mockFrom = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin });
       vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
 
@@ -229,9 +240,7 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
-      const mockWhere = vi.fn().mockResolvedValue([]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+      mockCheckCollectionAccess.mockResolvedValue(null);
 
       const result = await addToCollectionAction('c1', 'nonexistent');
       expect(result.success).toBe(false);
@@ -244,10 +253,10 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
-      // First call: collection ownership check
-      // Second call: check existing membership
+      mockCheckCollectionAccess.mockResolvedValue('owner');
+
+      // Check existing membership
       const mockWhere = vi.fn()
-        .mockResolvedValueOnce([{ id: 'col-1' }])
         .mockResolvedValueOnce([{ contentId: 'c1', collectionId: 'col-1' }]);
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
       vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
@@ -263,9 +272,9 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
-      const mockWhere = vi.fn()
-        .mockResolvedValueOnce([{ id: 'col-1' }])
-        .mockResolvedValueOnce([]);
+      mockCheckCollectionAccess.mockResolvedValue('owner');
+
+      const mockWhere = vi.fn().mockResolvedValueOnce([]);
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
       vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
 
@@ -293,9 +302,7 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
-      const mockWhere = vi.fn().mockResolvedValue([]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+      mockCheckCollectionAccess.mockResolvedValue(null);
 
       const result = await removeFromCollectionAction('c1', 'nonexistent');
       expect(result.success).toBe(false);
@@ -308,9 +315,7 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
-      const mockWhere = vi.fn().mockResolvedValue([{ id: 'col-1' }]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+      mockCheckCollectionAccess.mockResolvedValue('owner');
       vi.mocked(db.delete).mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) } as never);
 
       const result = await removeFromCollectionAction('c1', 'col-1');
@@ -362,9 +367,7 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
-      const mockWhere = vi.fn().mockResolvedValue([]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
+      mockCheckCollectionAccess.mockResolvedValue(null);
 
       const result = await bulkAddToCollectionAction(['c1'], 'nonexistent');
       expect(result.success).toBe(false);
@@ -377,8 +380,9 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
+      mockCheckCollectionAccess.mockResolvedValue('owner');
+
       const mockWhere = vi.fn()
-        .mockResolvedValueOnce([{ id: 'col-1' }])
         .mockResolvedValueOnce([{ contentId: 'c1' }]);
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
       vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
@@ -394,9 +398,9 @@ describe('Collection Actions', () => {
         expires: '',
       } as never);
 
-      const mockWhere = vi.fn()
-        .mockResolvedValueOnce([{ id: 'col-1' }])
-        .mockResolvedValueOnce([]);
+      mockCheckCollectionAccess.mockResolvedValue('owner');
+
+      const mockWhere = vi.fn().mockResolvedValueOnce([]);
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
       vi.mocked(db.select).mockReturnValue({ from: mockFrom } as never);
 

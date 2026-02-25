@@ -3,8 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { collections, contentCollections, content } from '@/lib/db/schema';
-import { eq, and, inArray, sql } from 'drizzle-orm';
+import { collections, contentCollections, content, collectionMembers } from '@/lib/db/schema';
+import { eq, and, inArray, sql, or } from 'drizzle-orm';
+import { checkCollectionAccess } from './collection-sharing';
 import { z } from 'zod';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -81,6 +82,13 @@ export async function createCollectionAction(
       })
       .returning();
 
+    // Add creator as owner in collectionMembers
+    await db.insert(collectionMembers).values({
+      collectionId: newCollection.id,
+      userId: session.user.id,
+      role: 'owner',
+    });
+
     revalidatePath('/dashboard/library');
     revalidatePath('/dashboard/collections');
 
@@ -106,7 +114,7 @@ export async function getCollectionsAction(): Promise<GetCollectionsResult> {
       return { success: false, collections: [], message: 'Unauthorized' };
     }
 
-    // Single query with LEFT JOIN and COUNT to avoid N+1 query problem
+    // Get collections owned by user OR where user is a member
     const collectionsWithCounts = await db
       .select({
         id: collections.id,
@@ -122,7 +130,19 @@ export async function getCollectionsAction(): Promise<GetCollectionsResult> {
         contentCollections,
         eq(collections.id, contentCollections.collectionId)
       )
-      .where(eq(collections.userId, session.user.id))
+      .leftJoin(
+        collectionMembers,
+        and(
+          eq(collections.id, collectionMembers.collectionId),
+          eq(collectionMembers.userId, session.user.id)
+        )
+      )
+      .where(
+        or(
+          eq(collections.userId, session.user.id),
+          eq(collectionMembers.userId, session.user.id)
+        )
+      )
       .groupBy(collections.id)
       .orderBy(collections.name);
 
@@ -246,15 +266,9 @@ export async function addToCollectionAction(
       return { success: false, message: rateCheck.message! };
     }
 
-    // Verify collection ownership
-    const [collection] = await db
-      .select()
-      .from(collections)
-      .where(
-        and(eq(collections.id, collectionId), eq(collections.userId, session.user.id))
-      );
-
-    if (!collection) {
+    // Verify collection access (owner or editor)
+    const access = await checkCollectionAccess(collectionId, session.user.id);
+    if (!access || access === 'viewer') {
       return { success: false, message: 'Collection not found' };
     }
 
@@ -304,15 +318,9 @@ export async function removeFromCollectionAction(
       return { success: false, message: rateCheck.message! };
     }
 
-    // Verify collection ownership
-    const [collection] = await db
-      .select()
-      .from(collections)
-      .where(
-        and(eq(collections.id, collectionId), eq(collections.userId, session.user.id))
-      );
-
-    if (!collection) {
+    // Verify collection access (owner or editor)
+    const access = await checkCollectionAccess(collectionId, session.user.id);
+    if (!access || access === 'viewer') {
       return { success: false, message: 'Collection not found' };
     }
 
@@ -351,15 +359,9 @@ export async function bulkAddToCollectionAction(
       return { success: false, message: rateCheck.message! };
     }
 
-    // Verify collection ownership
-    const [collection] = await db
-      .select()
-      .from(collections)
-      .where(
-        and(eq(collections.id, collectionId), eq(collections.userId, session.user.id))
-      );
-
-    if (!collection) {
+    // Verify collection access (owner or editor)
+    const access = await checkCollectionAccess(collectionId, session.user.id);
+    if (!access || access === 'viewer') {
       return { success: false, message: 'Collection not found' };
     }
 

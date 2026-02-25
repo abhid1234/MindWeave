@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Library, MoreHorizontal, Pencil, Trash2, Plus, FolderOpen } from 'lucide-react';
+import { Library, MoreHorizontal, Pencil, Trash2, Plus, FolderOpen, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CollectionDialog } from './CollectionDialog';
+import { ShareCollectionDialog } from './ShareCollectionDialog';
 import { getCollectionsAction, deleteCollectionAction } from '@/app/actions/collections';
 import { useToast } from '@/components/ui/toast';
 
@@ -32,6 +33,8 @@ export function CollectionGrid() {
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCollection, setEditingCollection] = useState<CollectionWithCount | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [sharingCollection, setSharingCollection] = useState<CollectionWithCount | null>(null);
 
   const fetchCollections = useCallback(async () => {
     const result = await getCollectionsAction();
@@ -158,6 +161,13 @@ export function CollectionGrid() {
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      setSharingCollection(collection);
+                      setShareDialogOpen(true);
+                    }}>
+                      <Users className="mr-2 h-4 w-4" />
+                      Share
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleDelete(collection.id)}
                       className="text-destructive focus:text-destructive"
@@ -191,6 +201,16 @@ export function CollectionGrid() {
         collection={editingCollection}
         onSuccess={handleDialogSuccess}
       />
+
+      {sharingCollection && (
+        <ShareCollectionDialog
+          collectionId={sharingCollection.id}
+          collectionName={sharingCollection.name}
+          isOwner={true}
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+        />
+      )}
     </>
   );
 }

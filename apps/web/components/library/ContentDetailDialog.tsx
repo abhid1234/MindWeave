@@ -14,6 +14,7 @@ import type { RecommendationResult } from '@/app/actions/search';
 import { trackContentViewAction } from '@/app/actions/views';
 import { generateSummaryAction } from '@/app/actions/content';
 import { RecommendationCard } from './RecommendationCard';
+import { ReminderButton } from '@/components/reminders/ReminderButton';
 import {
   Dialog,
   DialogContent,
@@ -343,6 +344,7 @@ export function ContentDetailDialog({
                 <Share2 className="mr-1.5 h-3.5 w-3.5" />
                 {isShared ? 'Manage Share' : 'Share'}
               </Button>
+              <ReminderButton contentId={id} />
               <Button
                 variant="outline"
                 size="sm"

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { formatDateUTC } from '@/lib/utils';
 import { DashboardRecommendations } from '@/components/dashboard/DashboardRecommendations';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
+import { DailyHighlight } from '@/components/dashboard/DailyHighlight';
+import { DashboardReminders } from '@/components/dashboard/DashboardReminders';
 import { Zap, Search, Library, ArrowRight, LayoutDashboard, PenLine } from 'lucide-react';
 
 export default async function DashboardPage() {
@@ -113,8 +115,9 @@ export default async function DashboardPage() {
           <DashboardStats totalCount={totalCount} tagCount={tagCount} thisWeekCount={thisWeekCount} favoritesCount={favoritesCount} />
         </div>
 
-        {/* Right column - Quick Actions (stacked) */}
+        {/* Right column - Daily Highlight + Quick Actions */}
         <div className="flex flex-col gap-3">
+          <DailyHighlight />
           {quickActions.map((action, i) => (
             <Link
               key={action.href}
@@ -199,6 +202,9 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Reminders */}
+      <DashboardReminders />
 
       {/* Recommendations - full width */}
       <DashboardRecommendations />

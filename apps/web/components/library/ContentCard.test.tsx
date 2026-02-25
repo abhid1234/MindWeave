@@ -131,6 +131,11 @@ vi.mock('@/app/actions/content', () => ({
   toggleFavoriteAction: vi.fn().mockResolvedValue({ success: true, isFavorite: true }),
 }));
 
+// Mock setReminderAction
+vi.mock('@/app/actions/reminders', () => ({
+  setReminderAction: vi.fn().mockResolvedValue({ success: true, message: 'Reminder set' }),
+}));
+
 describe('ContentCard', () => {
   const baseProps: ContentCardProps = {
     id: '1',

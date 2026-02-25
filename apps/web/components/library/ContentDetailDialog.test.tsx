@@ -70,6 +70,12 @@ vi.mock('@/app/actions/views', () => ({
   trackContentViewAction: (...args: unknown[]) => mockTrackContentViewAction(...args),
 }));
 
+vi.mock('@/components/reminders/ReminderButton', () => ({
+  ReminderButton: ({ contentId }: { contentId: string }) => (
+    <button data-testid="reminder-button">Remind Me</button>
+  ),
+}));
+
 const baseContent: ContentDetailDialogProps['content'] = {
   id: '1',
   type: 'note',

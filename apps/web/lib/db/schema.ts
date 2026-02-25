@@ -312,6 +312,95 @@ export const generatedPosts = pgTable(
   })
 );
 
+// Reminders table (spaced repetition)
+export const reminders = pgTable(
+  'reminders',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    interval: varchar('interval', { length: 10 }).notNull(), // '1d' | '3d' | '7d' | '30d'
+    nextRemindAt: timestamp('next_remind_at').notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('active'), // 'active' | 'completed' | 'snoozed'
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('reminders_user_id_idx').on(table.userId),
+    contentIdIdx: index('reminders_content_id_idx').on(table.contentId),
+    statusIdx: index('reminders_status_idx').on(table.status),
+    nextRemindAtIdx: index('reminders_next_remind_at_idx').on(table.nextRemindAt),
+  })
+);
+
+// Collection Members table (collaborative collections)
+export const collectionMembers = pgTable(
+  'collection_members',
+  {
+    collectionId: uuid('collection_id')
+      .notNull()
+      .references(() => collections.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: varchar('role', { length: 20 }).notNull(), // 'owner' | 'editor' | 'viewer'
+    joinedAt: timestamp('joined_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.collectionId, table.userId] }),
+    collectionIdIdx: index('collection_members_collection_id_idx').on(table.collectionId),
+    userIdIdx: index('collection_members_user_id_idx').on(table.userId),
+  })
+);
+
+// Collection Invitations table
+export const collectionInvitations = pgTable(
+  'collection_invitations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    collectionId: uuid('collection_id')
+      .notNull()
+      .references(() => collections.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    role: varchar('role', { length: 20 }).notNull(), // 'editor' | 'viewer'
+    token: varchar('token', { length: 64 }).unique().notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('pending'), // 'pending' | 'accepted' | 'declined'
+    invitedBy: uuid('invited_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+  },
+  (table) => ({
+    collectionIdIdx: index('collection_invitations_collection_id_idx').on(table.collectionId),
+    tokenIdx: index('collection_invitations_token_idx').on(table.token),
+    emailIdx: index('collection_invitations_email_idx').on(table.email),
+    statusIdx: index('collection_invitations_status_idx').on(table.status),
+  })
+);
+
+// Daily Highlights table
+export const dailyHighlights = pgTable(
+  'daily_highlights',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    insight: text('insight').notNull(),
+    date: varchar('date', { length: 10 }).notNull(), // 'YYYY-MM-DD'
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    dateIdx: index('daily_highlights_date_idx').on(table.date),
+  })
+);
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   content: many(content),
@@ -324,6 +413,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   digestSettings: one(digestSettings),
   contentViews: many(contentViews),
   generatedPosts: many(generatedPosts),
+  reminders: many(reminders),
+  collectionMemberships: many(collectionMembers),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -335,6 +426,7 @@ export const contentRelations = relations(content, ({ one, many }) => ({
   contentCollections: many(contentCollections),
   versions: many(contentVersions),
   views: many(contentViews),
+  reminders: many(reminders),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -365,6 +457,8 @@ export const collectionsRelations = relations(collections, ({ one, many }) => ({
     references: [users.id],
   }),
   contentCollections: many(contentCollections),
+  members: many(collectionMembers),
+  invitations: many(collectionInvitations),
 }));
 
 export const tasksRelations = relations(tasks, ({ one }) => ({
@@ -482,6 +576,50 @@ export const feedbackRelations = relations(feedback, ({ one }) => ({
   }),
 }));
 
+export const remindersRelations = relations(reminders, ({ one }) => ({
+  user: one(users, {
+    fields: [reminders.userId],
+    references: [users.id],
+  }),
+  content: one(content, {
+    fields: [reminders.contentId],
+    references: [content.id],
+  }),
+}));
+
+export const collectionMembersRelations = relations(collectionMembers, ({ one }) => ({
+  collection: one(collections, {
+    fields: [collectionMembers.collectionId],
+    references: [collections.id],
+  }),
+  user: one(users, {
+    fields: [collectionMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const collectionInvitationsRelations = relations(collectionInvitations, ({ one }) => ({
+  collection: one(collections, {
+    fields: [collectionInvitations.collectionId],
+    references: [collections.id],
+  }),
+  inviter: one(users, {
+    fields: [collectionInvitations.invitedBy],
+    references: [users.id],
+  }),
+}));
+
+export const dailyHighlightsRelations = relations(dailyHighlights, ({ one }) => ({
+  user: one(users, {
+    fields: [dailyHighlights.userId],
+    references: [users.id],
+  }),
+  content: one(content, {
+    fields: [dailyHighlights.contentId],
+    references: [content.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -521,3 +659,15 @@ export type NewContentView = typeof contentViews.$inferInsert;
 
 export type GeneratedPost = typeof generatedPosts.$inferSelect;
 export type NewGeneratedPost = typeof generatedPosts.$inferInsert;
+
+export type Reminder = typeof reminders.$inferSelect;
+export type NewReminder = typeof reminders.$inferInsert;
+
+export type CollectionMember = typeof collectionMembers.$inferSelect;
+export type NewCollectionMember = typeof collectionMembers.$inferInsert;
+
+export type CollectionInvitation = typeof collectionInvitations.$inferSelect;
+export type NewCollectionInvitation = typeof collectionInvitations.$inferInsert;
+
+export type DailyHighlight = typeof dailyHighlights.$inferSelect;
+export type NewDailyHighlight = typeof dailyHighlights.$inferInsert;

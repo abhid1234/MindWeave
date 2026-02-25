@@ -150,6 +150,44 @@ export async function summarizeContent(text: string): Promise<string> {
   }
 }
 
+export interface GenerateHighlightInsightInput {
+  title: string;
+  body?: string;
+  tags: string[];
+}
+
+/**
+ * Generate a short insight about why a piece of knowledge is worth revisiting
+ */
+export async function generateHighlightInsight(input: GenerateHighlightInsightInput): Promise<string> {
+  if (!genAI) {
+    return `"${input.title}" — a great piece to revisit today.`;
+  }
+
+  try {
+    const prompt = `You are a knowledge coach. Given the following content from a user's personal knowledge base, write ONE short sentence (max 20 words) explaining why this knowledge is worth revisiting today. Be specific and insightful, not generic.
+
+Title: ${input.title}
+${input.body ? `Content: ${input.body.slice(0, 500)}` : ''}
+Tags: ${input.tags.join(', ')}
+
+Output ONLY the sentence, no quotes, no preamble.`;
+
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    if (text) {
+      return text.trim();
+    }
+
+    return `"${input.title}" — a great piece to revisit today.`;
+  } catch (error) {
+    console.error('Error generating highlight insight:', error);
+    return `"${input.title}" — a great piece to revisit today.`;
+  }
+}
+
 /**
  * Generate a LinkedIn post from user's knowledge base content using Gemini Flash
  */

@@ -2,12 +2,13 @@
 
 import { useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles, Bell } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
 import { EditableTags } from './EditableTags';
 import { toggleFavoriteAction } from '@/app/actions/content';
+import { setReminderAction } from '@/app/actions/reminders';
 import { useToast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -258,6 +259,13 @@ export function ContentCard({
                 <DropdownMenuItem onClick={() => setIsRecommendationsDialogOpen(true)}>
                   <Sparkles className="mr-2 h-4 w-4" />
                   View Similar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={async () => {
+                  const result = await setReminderAction({ contentId: id, interval: '1d' });
+                  addToast({ variant: result.success ? 'success' : 'error', title: result.message });
+                }}>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Remind Me
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

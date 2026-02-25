@@ -272,3 +272,46 @@ export const generatePostSchema = z.object({
 });
 
 export type GeneratePostInput = z.infer<typeof generatePostSchema>;
+
+/**
+ * Reminder validation schemas
+ */
+export const setReminderSchema = z.object({
+  contentId: z.string().uuid('Invalid content ID'),
+  interval: z.enum(['1d', '3d', '7d', '30d']),
+});
+
+export type SetReminderInput = z.infer<typeof setReminderSchema>;
+
+export const snoozeReminderSchema = z.object({
+  reminderId: z.string().uuid('Invalid reminder ID'),
+  duration: z.enum(['1d', '3d', '7d']),
+});
+
+export type SnoozeReminderInput = z.infer<typeof snoozeReminderSchema>;
+
+/**
+ * Collection sharing validation schemas
+ */
+export const inviteToCollectionSchema = z.object({
+  collectionId: z.string().uuid('Invalid collection ID'),
+  email: z.string().email('Invalid email address'),
+  role: z.enum(['editor', 'viewer']),
+});
+
+export type InviteToCollectionInput = z.infer<typeof inviteToCollectionSchema>;
+
+export const updateMemberRoleSchema = z.object({
+  collectionId: z.string().uuid('Invalid collection ID'),
+  userId: z.string().uuid('Invalid user ID'),
+  role: z.enum(['editor', 'viewer']),
+});
+
+export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;
+
+export const removeMemberSchema = z.object({
+  collectionId: z.string().uuid('Invalid collection ID'),
+  userId: z.string().uuid('Invalid user ID'),
+});
+
+export type RemoveMemberInput = z.infer<typeof removeMemberSchema>;
