@@ -290,6 +290,28 @@ export const embeddings = pgTable(
   })
 );
 
+// Generated Posts table (LinkedIn post generator)
+export const generatedPosts = pgTable(
+  'generated_posts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    postContent: text('post_content').notNull(),
+    tone: varchar('tone', { length: 20 }).notNull(),
+    length: varchar('length', { length: 20 }).notNull(),
+    includeHashtags: boolean('include_hashtags').notNull().default(true),
+    sourceContentIds: jsonb('source_content_ids').$type<string[]>().notNull(),
+    sourceContentTitles: jsonb('source_content_titles').$type<string[]>().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('generated_posts_user_id_idx').on(table.userId),
+    createdAtIdx: index('generated_posts_created_at_idx').on(table.createdAt),
+  })
+);
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   content: many(content),
@@ -301,6 +323,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   apiKeys: many(apiKeys),
   digestSettings: one(digestSettings),
   contentViews: many(contentViews),
+  generatedPosts: many(generatedPosts),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -445,6 +468,13 @@ export const contentViewsRelations = relations(contentViews, ({ one }) => ({
   }),
 }));
 
+export const generatedPostsRelations = relations(generatedPosts, ({ one }) => ({
+  user: one(users, {
+    fields: [generatedPosts.userId],
+    references: [users.id],
+  }),
+}));
+
 export const feedbackRelations = relations(feedback, ({ one }) => ({
   user: one(users, {
     fields: [feedback.userId],
@@ -488,3 +518,6 @@ export type NewDigestSetting = typeof digestSettings.$inferInsert;
 
 export type ContentView = typeof contentViews.$inferSelect;
 export type NewContentView = typeof contentViews.$inferInsert;
+
+export type GeneratedPost = typeof generatedPosts.$inferSelect;
+export type NewGeneratedPost = typeof generatedPosts.$inferInsert;

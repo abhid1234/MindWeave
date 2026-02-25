@@ -57,6 +57,13 @@
       "when": 1769885730320,
       "tag": "0007_flippant_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1771984052327,
+      "tag": "0008_far_puff_adder",
+      "breakpoints": true
     }
   ]
 }

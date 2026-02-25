@@ -17,6 +17,19 @@ export interface GenerateTagsInput {
   type: 'note' | 'link' | 'file';
 }
 
+export interface GenerateLinkedInPostInput {
+  content: Array<{
+    title: string;
+    body?: string;
+    url?: string;
+    type: 'note' | 'link' | 'file';
+    tags: string[];
+  }>;
+  tone: 'professional' | 'casual' | 'storytelling';
+  length: 'short' | 'medium' | 'long';
+  includeHashtags: boolean;
+}
+
 export interface AnswerQuestionInput {
   question: string;
   context: Array<{
@@ -133,6 +146,70 @@ export async function summarizeContent(text: string): Promise<string> {
     return '';
   } catch (error) {
     console.error('Error summarizing content:', error);
+    throw error;
+  }
+}
+
+/**
+ * Generate a LinkedIn post from user's knowledge base content using Gemini Flash
+ */
+export async function generateLinkedInPost(input: GenerateLinkedInPostInput): Promise<string> {
+  if (!genAI) {
+    throw new Error('GOOGLE_AI_API_KEY not set');
+  }
+
+  const toneInstructions: Record<string, string> = {
+    professional:
+      'Write in a professional, authoritative tone. Use clear, direct language. Include data-driven insights where possible. Position the author as a thought leader.',
+    casual:
+      'Write in a conversational, approachable tone. Use first person. Be relatable and authentic. Include personal reflections or opinions.',
+    storytelling:
+      'Write as a narrative. Start with a hook or anecdote. Build tension or curiosity. End with a takeaway or lesson learned.',
+  };
+
+  const lengthRanges: Record<string, string> = {
+    short: '50-100 words (2-3 short paragraphs)',
+    medium: '100-200 words (3-4 paragraphs)',
+    long: '200-300 words (4-6 paragraphs)',
+  };
+
+  const contentText = input.content
+    .map((item, idx) => {
+      const body = item.body ? item.body.slice(0, 2000) : '';
+      return `[${idx + 1}] Title: ${item.title}
+Type: ${item.type}
+${body ? `Content: ${body}` : ''}
+${item.url ? `URL: ${item.url}` : ''}
+Tags: ${item.tags.join(', ')}`;
+    })
+    .join('\n\n');
+
+  const prompt = `You are a LinkedIn post writer. Generate a LinkedIn post based on the following knowledge base content.
+
+${toneInstructions[input.tone]}
+
+Target length: ${lengthRanges[input.length]}
+
+${input.includeHashtags ? 'Include 3-5 relevant hashtags at the end of the post.' : 'Do NOT include any hashtags.'}
+
+Source content:
+
+${contentText}
+
+Write the LinkedIn post now. Output ONLY the post text, no preamble, no explanation, no quotes around it.`;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    if (text) {
+      return text.trim();
+    }
+
+    throw new Error('Empty response from AI');
+  } catch (error) {
+    console.error('Error generating LinkedIn post:', error);
     throw error;
   }
 }

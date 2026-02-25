@@ -257,3 +257,18 @@ export const taskQuerySchema = z.object({
 });
 
 export type TaskQueryInput = z.infer<typeof taskQuerySchema>;
+
+/**
+ * Post generation validation schema
+ */
+export const generatePostSchema = z.object({
+  contentIds: z
+    .array(z.string().uuid('Invalid content ID'))
+    .min(1, 'Select at least one content item')
+    .max(5, 'Maximum 5 content items allowed'),
+  tone: z.enum(['professional', 'casual', 'storytelling']),
+  length: z.enum(['short', 'medium', 'long']),
+  includeHashtags: z.boolean().default(true),
+});
+
+export type GeneratePostInput = z.infer<typeof generatePostSchema>;
