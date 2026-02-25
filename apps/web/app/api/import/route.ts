@@ -23,6 +23,8 @@ import {
   isEvernoteFile,
   parseTwitterBookmarks,
   isTwitterBookmarksFile,
+  parseRaindrop,
+  isRaindropFile,
 } from '@/lib/import/parsers';
 import {
   checkRateLimit,
@@ -159,6 +161,20 @@ export async function POST(request: NextRequest) {
             );
           }
           return parseTwitterBookmarks(content);
+        }
+
+        case 'raindrop': {
+          const content = await file.text();
+          if (!isRaindropFile(content)) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: 'This does not appear to be a valid Raindrop.io CSV export.',
+              },
+              { status: 400 }
+            );
+          }
+          return parseRaindrop(content);
         }
 
         default:

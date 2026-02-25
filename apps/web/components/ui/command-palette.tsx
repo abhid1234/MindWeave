@@ -21,6 +21,11 @@ import {
   Link2,
   File,
   Keyboard,
+  Users,
+  BookOpen,
+  Newspaper,
+  GraduationCap,
+  Lightbulb,
   type LucideIcon,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -286,6 +291,56 @@ export function CommandPalette() {
             >
               <MessageCircleQuestion className="h-4 w-4 text-muted-foreground" />
               Ask AI
+            </Command.Item>
+            <Command.Item
+              value="New Meeting Notes"
+              onSelect={() =>
+                runCommand(() => router.push('/dashboard/capture?template=meeting-notes'))
+              }
+              className={itemClass}
+            >
+              <Users className="h-4 w-4 text-muted-foreground" />
+              New Meeting Notes
+            </Command.Item>
+            <Command.Item
+              value="New Book Highlights"
+              onSelect={() =>
+                runCommand(() => router.push('/dashboard/capture?template=book-highlights'))
+              }
+              className={itemClass}
+            >
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+              New Book Highlights
+            </Command.Item>
+            <Command.Item
+              value="New Article Summary"
+              onSelect={() =>
+                runCommand(() => router.push('/dashboard/capture?template=article-summary'))
+              }
+              className={itemClass}
+            >
+              <Newspaper className="h-4 w-4 text-muted-foreground" />
+              New Article Summary
+            </Command.Item>
+            <Command.Item
+              value="New Learning Journal"
+              onSelect={() =>
+                runCommand(() => router.push('/dashboard/capture?template=learning-journal'))
+              }
+              className={itemClass}
+            >
+              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+              New Learning Journal
+            </Command.Item>
+            <Command.Item
+              value="New Project Idea"
+              onSelect={() =>
+                runCommand(() => router.push('/dashboard/capture?template=project-idea'))
+              }
+              className={itemClass}
+            >
+              <Lightbulb className="h-4 w-4 text-muted-foreground" />
+              New Project Idea
             </Command.Item>
             <Command.Item
               value="Keyboard Shortcuts"

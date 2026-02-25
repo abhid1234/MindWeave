@@ -1,7 +1,7 @@
 'use client';
 
 import { createContentAction } from '@/app/actions/content';
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FileText, LinkIcon, Upload, Loader2, PenLine, Sparkles } from 'lucide-react';
@@ -13,6 +13,9 @@ import { Button } from '@/components/ui/button';
 import { TagInput, type TagInputHandle } from '@/components/ui/tag-input';
 import { TiptapEditor } from '@/components/editor/TiptapEditor';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
+import { getTemplate, fillTemplatePlaceholders } from '@/lib/templates';
+import { TemplateSelector } from '@/components/capture/TemplateSelector';
 
 type ContentType = 'note' | 'link' | 'file';
 
@@ -76,6 +79,35 @@ export default function CapturePage() {
   const tagInputRef = useRef<TagInputHandle>(null);
   const router = useRouter();
   const { addToast } = useToast();
+  const searchParams = useSearchParams();
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
+  // Auto-select template from URL params
+  useEffect(() => {
+    const templateParam = searchParams.get('template');
+    if (templateParam) {
+      handleTemplateSelect(templateParam);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const handleTemplateSelect = (templateId: string | null) => {
+    setSelectedTemplate(templateId);
+    if (!templateId) return;
+
+    const template = getTemplate(templateId);
+    if (!template) return;
+
+    setContentType(template.type);
+    setBody(fillTemplatePlaceholders(template.bodyTemplate));
+    setTags(template.defaultTags);
+
+    // Set title via DOM since it's an uncontrolled input
+    const titleInput = document.getElementById('title') as HTMLInputElement | null;
+    if (titleInput) {
+      titleInput.value = fillTemplatePlaceholders(template.defaultTitle);
+    }
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -152,6 +184,17 @@ export default function CapturePage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Template Selector */}
+      <div
+        className="mb-6 animate-fade-up"
+        style={{ animationDelay: '50ms', animationFillMode: 'backwards' }}
+      >
+        <TemplateSelector
+          onSelect={handleTemplateSelect}
+          selectedTemplate={selectedTemplate}
+        />
       </div>
 
       {/* Type Selector Cards */}

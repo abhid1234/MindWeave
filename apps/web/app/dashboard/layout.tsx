@@ -12,6 +12,7 @@ import { ViewTransition } from '@/components/layout/ViewTransition';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { FeedbackWidget } from '@/components/feedback/FeedbackWidget';
+import { QuickCaptureDialog } from '@/components/layout/QuickCaptureDialog';
 
 export default async function DashboardLayout({
   children,
@@ -57,6 +58,7 @@ export default async function DashboardLayout({
       <KeyboardShortcutsProvider />
       <ViewTransition />
       <FeedbackWidget />
+      <QuickCaptureDialog />
     </div>
   );
 }

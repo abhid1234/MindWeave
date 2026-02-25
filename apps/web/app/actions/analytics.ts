@@ -486,3 +486,188 @@ export async function exportAnalyticsAction(): Promise<
     return { success: false, message: 'Failed to export analytics data' };
   }
 }
+
+// Cached internal function for streak data
+const getCachedStreakData = unstable_cache(
+  async (userId: string) => {
+    // Get daily activity for last 90 days
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+    const result = await db.execute<{ day: string; count: string }>(sql`
+      SELECT DATE(created_at) as day, COUNT(*) as count
+      FROM ${content}
+      WHERE user_id = ${userId}
+        AND created_at >= ${ninetyDaysAgo.toISOString()}::timestamp
+      GROUP BY DATE(created_at)
+      ORDER BY day DESC
+    `);
+
+    const rows = result as unknown as { day: string; count: string }[];
+
+    // Build heatmap
+    const heatmap: { date: string; count: number }[] = [];
+    const activityMap = new Map<string, number>();
+    for (const row of rows) {
+      activityMap.set(row.day, parseInt(row.count, 10));
+    }
+
+    // Fill 90 days
+    const today = new Date();
+    for (let i = 89; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      heatmap.push({ date: dateStr, count: activityMap.get(dateStr) || 0 });
+    }
+
+    // Compute streaks
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let totalActiveDays = 0;
+
+    // Walk heatmap from most recent to oldest
+    for (let i = heatmap.length - 1; i >= 0; i--) {
+      if (heatmap[i].count > 0) {
+        totalActiveDays++;
+        tempStreak++;
+        if (i === heatmap.length - 1 || (i < heatmap.length - 1 && heatmap[i + 1].count > 0)) {
+          // continuing a streak from the end
+        }
+      } else {
+        if (tempStreak > longestStreak) longestStreak = tempStreak;
+        tempStreak = 0;
+      }
+    }
+    if (tempStreak > longestStreak) longestStreak = tempStreak;
+
+    // Current streak: count from today backwards
+    currentStreak = 0;
+    for (let i = heatmap.length - 1; i >= 0; i--) {
+      if (heatmap[i].count > 0) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    return { currentStreak, longestStreak, totalActiveDays, heatmap };
+  },
+  ['analytics', 'streaks'],
+  { revalidate: CacheDuration.MEDIUM, tags: [CacheTags.ANALYTICS] }
+);
+
+/**
+ * Get streak data for the analytics dashboard
+ */
+export async function getStreakDataAction(): Promise<AnalyticsActionResult<import('@/types/analytics').StreakData>> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const data = await getCachedStreakData(session.user.id);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error getting streak data:', error);
+    return { success: false, message: 'Failed to fetch streak data' };
+  }
+}
+
+// Cached internal function for knowledge gaps
+const getCachedKnowledgeGaps = unstable_cache(
+  async (userId: string) => {
+    const result = await db.execute<{ tag: string; count: string; last_added: string }>(sql`
+      SELECT LOWER(tag) as tag, COUNT(*) as count, MAX(created_at) as last_added
+      FROM (
+        SELECT UNNEST(tags || auto_tags) as tag, created_at
+        FROM ${content}
+        WHERE user_id = ${userId}
+      ) as all_tags
+      WHERE tag IS NOT NULL AND tag != ''
+      GROUP BY LOWER(tag)
+      HAVING COUNT(*) < 3
+         OR MAX(created_at) < NOW() - INTERVAL '30 days'
+      ORDER BY count ASC, last_added ASC
+      LIMIT 20
+    `);
+
+    const rows = result as unknown as { tag: string; count: string; last_added: string }[];
+    return rows.map((row) => ({
+      tag: row.tag,
+      count: parseInt(row.count, 10),
+      lastAdded: new Date(row.last_added),
+    }));
+  },
+  ['analytics', 'knowledge-gaps'],
+  { revalidate: CacheDuration.LONG, tags: [CacheTags.ANALYTICS] }
+);
+
+/**
+ * Get knowledge gaps - tags with sparse or stale content
+ */
+export async function getKnowledgeGapsAction(): Promise<AnalyticsActionResult<import('@/types/analytics').KnowledgeGap[]>> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const data = await getCachedKnowledgeGaps(session.user.id);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error getting knowledge gaps:', error);
+    return { success: false, message: 'Failed to fetch knowledge gaps' };
+  }
+}
+
+// Cached internal function for content type breakdown
+const getCachedContentTypeBreakdown = unstable_cache(
+  async (userId: string) => {
+    const result = await db.execute<{ type: string; count: string }>(sql`
+      SELECT type, COUNT(*) as count
+      FROM ${content}
+      WHERE user_id = ${userId}
+      GROUP BY type
+    `);
+
+    const rows = result as unknown as { type: string; count: string }[];
+    const breakdown = { notes: 0, links: 0, files: 0 };
+    for (const row of rows) {
+      switch (row.type) {
+        case 'note':
+          breakdown.notes = parseInt(row.count, 10);
+          break;
+        case 'link':
+          breakdown.links = parseInt(row.count, 10);
+          break;
+        case 'file':
+          breakdown.files = parseInt(row.count, 10);
+          break;
+      }
+    }
+    return breakdown;
+  },
+  ['analytics', 'content-type-breakdown'],
+  { revalidate: CacheDuration.MEDIUM, tags: [CacheTags.ANALYTICS] }
+);
+
+/**
+ * Get content type breakdown
+ */
+export async function getContentTypeBreakdownAction(): Promise<AnalyticsActionResult<import('@/types/analytics').ContentTypeBreakdown>> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const data = await getCachedContentTypeBreakdown(session.user.id);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error getting content type breakdown:', error);
+    return { success: false, message: 'Failed to fetch content type breakdown' };
+  }
+}

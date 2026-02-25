@@ -20,6 +20,18 @@ const CollectionUsageChart = dynamic(
   () => import('@/components/analytics/CollectionUsageChart').then(m => ({ default: m.CollectionUsageChart })),
   { ssr: false, loading: () => <div className="h-[350px] animate-pulse rounded-lg bg-muted" /> }
 );
+const StreakCard = dynamic(
+  () => import('@/components/analytics/StreakCard').then(m => ({ default: m.StreakCard })),
+  { ssr: false, loading: () => <div className="h-[200px] animate-pulse rounded-lg bg-muted" /> }
+);
+const ContentBreakdown = dynamic(
+  () => import('@/components/analytics/ContentBreakdown').then(m => ({ default: m.ContentBreakdown })),
+  { ssr: false, loading: () => <div className="h-[350px] animate-pulse rounded-lg bg-muted" /> }
+);
+const KnowledgeGaps = dynamic(
+  () => import('@/components/analytics/KnowledgeGaps').then(m => ({ default: m.KnowledgeGaps })),
+  { ssr: false, loading: () => <div className="h-[350px] animate-pulse rounded-lg bg-muted" /> }
+);
 
 export function AnalyticsPageContent() {
   const [isExporting, setIsExporting] = useState(false);
@@ -77,6 +89,10 @@ export function AnalyticsPageContent() {
         <OverviewStats />
       </div>
 
+      <div className="animate-fade-up" style={{ animationDelay: '112ms', animationFillMode: 'backwards' }}>
+        <StreakCard />
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
         <ContentGrowthChart initialPeriod="month" />
         <TagDistributionChart />
@@ -85,6 +101,11 @@ export function AnalyticsPageContent() {
       <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '225ms', animationFillMode: 'backwards' }}>
         <CollectionUsageChart />
         <KnowledgeInsightsCard />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}>
+        <ContentBreakdown />
+        <KnowledgeGaps />
       </div>
     </div>
   );

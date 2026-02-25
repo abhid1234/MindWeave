@@ -2,7 +2,7 @@
  * Import feature type definitions
  */
 
-export type ImportSource = 'bookmarks' | 'pocket' | 'notion' | 'evernote' | 'twitter';
+export type ImportSource = 'bookmarks' | 'pocket' | 'notion' | 'evernote' | 'twitter' | 'raindrop';
 
 export type ContentType = 'note' | 'link';
 
@@ -176,6 +176,15 @@ export const IMPORT_SOURCES: ImportSourceConfig[] = [
     acceptedMimeTypes: ['text/javascript', 'application/javascript'],
     maxFileSize: 50 * 1024 * 1024, // 50MB
     icon: 'Twitter',
+  },
+  {
+    id: 'raindrop',
+    name: 'Raindrop.io',
+    description: 'Import bookmarks from Raindrop.io (CSV export)',
+    acceptedExtensions: ['.csv'],
+    acceptedMimeTypes: ['text/csv'],
+    maxFileSize: 50 * 1024 * 1024, // 50MB
+    icon: 'CloudRain',
   },
 ];
 

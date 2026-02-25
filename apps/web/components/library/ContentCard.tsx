@@ -44,6 +44,7 @@ const ContentDetailDialog = dynamic(
   () => import('./ContentDetailDialog').then((mod) => mod.ContentDetailDialog),
   { loading: () => null }
 );
+import { RelatedItemsBadge } from './RelatedItemsBadge';
 
 export type ContentCardProps = {
   id: string;
@@ -212,6 +213,7 @@ export function ContentCard({
             <span className="text-xs text-muted-foreground">
               <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
             </span>
+            <RelatedItemsBadge contentId={id} />
             <Button
               variant="ghost"
               size="sm"

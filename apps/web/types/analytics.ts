@@ -67,3 +67,31 @@ export interface AnalyticsActionResult<T> {
   data?: T;
   message?: string;
 }
+
+/**
+ * Streak data for activity tracking
+ */
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  totalActiveDays: number;
+  heatmap: { date: string; count: number }[];
+}
+
+/**
+ * Knowledge gap - tags with sparse or stale content
+ */
+export interface KnowledgeGap {
+  tag: string;
+  count: number;
+  lastAdded: Date;
+}
+
+/**
+ * Content type breakdown
+ */
+export interface ContentTypeBreakdown {
+  notes: number;
+  links: number;
+  files: number;
+}
