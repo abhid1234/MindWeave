@@ -1,11 +1,11 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-24
+**Last Updated**: 2026-02-25
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, and admin feedback management.
+✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, and Knowledge-to-Post Generator.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -46,6 +46,7 @@
 - **Content Intelligence** - Summary display in cards/dialogs, Knowledge Graph visualization, Smart Collections from AI clustering
 - **Push Notifications** - FCM-based push to mobile devices after digest emails
 - **Admin Feedback** - Admin-only feedback management page with status workflow
+- **Knowledge-to-Post Generator** - Turn saved knowledge into polished LinkedIn posts with AI
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -60,7 +61,21 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-24)**:
+**Latest Enhancement (2026-02-25)**:
+- [x] **Knowledge-to-Post Generator** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:3a6f0b8`). Turn saved knowledge into polished LinkedIn posts — a content repurposing tool for professional thought leadership:
+  - **`generated_posts` table** — new schema table storing generated posts with tone, length, hashtag preferences, and source content references. Indexes on `userId` and `createdAt`.
+  - **`generateLinkedInPost` AI function** — Gemini Flash generates posts with 3 tone modes (Professional, Casual, Storytelling), 3 length options (Short/Medium/Long), optional hashtags. Body truncated to 2000 chars per source item.
+  - **4 server actions** — `generatePostAction` (AI rate-limited, validates ownership, saves to DB), `getPostHistoryAction` (paginated DESC), `deletePostAction` (ownership check), `getContentForSelectionAction` (search-filterable content picker, limit 50).
+  - **Dashboard page (`/dashboard/create-post`)** — server component with auth guard, PenSquare icon header. Two-step inline flow: select content → configure options → generate → preview/edit/copy.
+  - **5 new components** — `PostGenerator` (orchestrator with Generate/History tabs), `ContentSelector` (mini-library picker with checkbox selection, search, 1-5 item limit, removable chips), `PostOptions` (tone cards, length pills, hashtag toggle), `PostPreview` (LinkedIn-style card, editable textarea, 3000 char counter, copy/regenerate/back), `PostHistory` (post list with preview, tone/length badges, copy/delete actions).
+  - **Navigation updated** — PenSquare icon + "Create Post" nav item added after "Discover" (12 nav items total). Not added to mobile BottomNav.
+  - **34 new tests across 3 test files** (1,892 → 1,926 passing, 0 failures):
+    - Server actions: 16 tests (auth, rate limit, validation, ownership, AI call, DB save, error handling)
+    - AI module: 10 tests (tone instructions, hashtag toggle, truncation, multi-source, API errors)
+    - Component: 8 tests (rendering, selection flow, 5-item limit, tab switching, history)
+  - **18 files changed** (10 new, 4 modified, 1 test updated) — 0 TS errors, 0 lint errors, build succeeds.
+
+**Previous Enhancement (2026-02-24)**:
 - [x] **Codebase Improvements — 270 New Tests, Push Notifications, Admin Feedback** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fa2fb5b`). Comprehensive audit-driven improvements: bug fixes, test coverage, and two new features:
   - **Bug fixes** — `console.warn` → `console.log` for success messages in `lib/email.ts`; renamed `lib/ai/claude.ts` → `lib/ai/gemini.ts` (correct SDK naming) with all 14 imports updated.
   - **Push notifications** — new `lib/push-notifications.ts` sends FCM HTTP v1 notifications to active devices. Integrated fire-and-forget into digest cron route after successful email sends. Deactivates stale tokens on 404.
