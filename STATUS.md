@@ -5,7 +5,7 @@
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, and Knowledge-to-Post Generator.
+✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, and daily highlights.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -47,6 +47,9 @@
 - **Push Notifications** - FCM-based push to mobile devices after digest emails
 - **Admin Feedback** - Admin-only feedback management page with status workflow
 - **Knowledge-to-Post Generator** - Turn saved knowledge into polished LinkedIn posts with AI
+- **Reminders & Spaced Repetition** - Schedule content review reminders with automatic interval progression (1d→3d→7d→30d)
+- **Collaborative Collections** - Share collections with role-based access (owner/editor/viewer), email invitations, member management
+- **Daily Highlights** - AI-powered daily content spotlight with Gemini-generated insights
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -62,6 +65,20 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-25)**:
+- [x] **Reminders, Collaborative Collections, and Daily Highlights** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d0f1f3e`). Three new features for content revisiting, team collaboration, and daily discovery:
+  - **Reminders & Spaced Repetition** — `reminders` table with interval progression (1d→3d→7d→30d→completed). 4 server actions (`setReminderAction`, `dismissReminderAction`, `snoozeReminderAction`, `getActiveRemindersAction`). Cron endpoint `/api/cron/reminders` processes due reminders with push notifications and auto-advances intervals. `ReminderButton` dropdown in ContentCard and ContentDetailDialog. `DashboardReminders` widget shows due/upcoming reminders with snooze/dismiss actions.
+  - **Collaborative Collections** — `collection_members` (composite PK, roles: owner/editor/viewer) and `collection_invitations` (token-based, 7-day expiry) tables. 8 server actions including `checkCollectionAccess` (role-based gate used by all collection mutations), `inviteToCollectionAction`, `acceptInvitationAction`, member/invitation management. `ShareCollectionDialog` for invite management. Invite acceptance page at `/dashboard/invite/[token]`. Existing collection actions updated to support shared access.
+  - **Daily Highlights** — `daily_highlights` table (per-user daily cache). `getDailyHighlightAction` picks content deterministically via `md5(id || date)` ordering, generates AI insight via `generateHighlightInsight` (Gemini Flash). `DailyHighlight` widget on dashboard with warm gradient styling and dismiss action.
+  - **4 new DB tables** — `reminders`, `collection_members`, `collection_invitations`, `daily_highlights` with indexes and foreign keys.
+  - **`lib/reminder-utils.ts`** — Extracted interval helpers (`getNextRemindAt`, `getNextInterval`) from server action file (Next.js requires all `'use server'` exports to be async).
+  - **73 new tests across 7 test files** (1,926 → 1,999 passing, 0 failures):
+    - Server actions: reminders (19), collection-sharing (25), highlights (10)
+    - API: cron/reminders route (6)
+    - Components: DailyHighlight (5), DashboardReminders (5)
+    - AI: generateHighlightInsight (3)
+  - **30 files changed** (18 new, 12 modified) — 0 TS errors, 0 lint errors, build succeeds.
+
+**Previous Enhancement (2026-02-25)**:
 - [x] **Knowledge-to-Post Generator** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:3a6f0b8`). Turn saved knowledge into polished LinkedIn posts — a content repurposing tool for professional thought leadership:
   - **`generated_posts` table** — new schema table storing generated posts with tone, length, hashtag preferences, and source content references. Indexes on `userId` and `createdAt`.
   - **`generateLinkedInPost` AI function** — Gemini Flash generates posts with 3 tone modes (Professional, Casual, Storytelling), 3 length options (Short/Medium/Long), optional hashtags. Body truncated to 2000 chars per source item.
