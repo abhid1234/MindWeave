@@ -5,7 +5,7 @@
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, and daily highlights.
+✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, and Raindrop.io import.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -50,6 +50,10 @@
 - **Reminders & Spaced Repetition** - Schedule content review reminders with automatic interval progression (1d→3d→7d→30d)
 - **Collaborative Collections** - Share collections with role-based access (owner/editor/viewer), email invitations, member management
 - **Daily Highlights** - AI-powered daily content spotlight with Gemini-generated insights
+- **Content Templates** - 5 templates (Meeting Notes, Book Highlights, Article Summary, Learning Journal, Project Idea) with quick capture dialog (Ctrl+N) and command palette integration
+- **AI Related Items** - Sparkles badge on content cards with lazy-loaded popover showing top 3 related items with similarity %
+- **Enhanced Analytics** - Activity streak heatmap, knowledge gaps detection (sparse/stale topics), content type breakdown donut chart
+- **Raindrop.io Import** - CSV parser with folder-to-tag mapping and enhanced progress bar UI
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -65,6 +69,20 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-25)**:
+- [x] **Content Templates, AI Related Items, Analytics Enhancements, Raindrop.io Import** — Four new features for faster capture, visible AI connections, deeper analytics, and broader import support:
+  - **Content Templates & Quick Capture** — 5 templates (`meeting-notes`, `book-highlights`, `article-summary`, `learning-journal`, `project-idea`) in `lib/templates.ts` with `{date}`/`{time}` placeholders. `TemplateSelector` grid component on capture page. `QuickCaptureDialog` opens with `Ctrl+N`/`Cmd+N` from any dashboard page. 5 template commands added to command palette (e.g., "New Meeting Notes" → `/dashboard/capture?template=meeting-notes`). URL param `?template=` auto-selects and pre-fills form.
+  - **AI Related Items Badge** — `RelatedItemsBadge` component on every `ContentCard` in the library grid. Sparkles icon button lazy-fetches `getRecommendationsAction(contentId, 3)` on click (not on mount — avoids N+1). Positioned popover shows top 3 related items with type icon, title, and similarity percentage. Loading, empty, and error states.
+  - **Analytics Dashboard Enhancement** — 3 new cached server actions: `getStreakDataAction` (90-day daily activity → current/longest streak + heatmap), `getKnowledgeGapsAction` (tags with <3 items or stale >30 days), `getContentTypeBreakdownAction` (note/link/file counts). 3 new components: `StreakCard` (flame icon stats + 13-col CSS grid heatmap with color intensity), `KnowledgeGaps` (sparse/stale topic pills with "Capture more" link), `ContentBreakdown` (Recharts donut chart). All integrated into `AnalyticsPageContent` via `dynamic()` imports.
+  - **Raindrop.io Import** — `parseRaindrop` CSV parser handles all 11 Raindrop.io columns (title, note, excerpt, url, folder, tags, created, cover, highlights, important, broken). Builds body from note+excerpt+highlights, merges explicit tags with `folderPathToTags`. `isRaindropFile` detection. `ImportProgress` enhanced with optional progress bar (`imported`/`skipped`/`failed`/`total` props) and colored stat counters — fully backward compatible.
+  - **3 new types** in `types/analytics.ts`: `StreakData`, `KnowledgeGap`, `ContentTypeBreakdown`.
+  - **75 new tests across 9 test files** (1,999 → 2,030+ passing):
+    - `lib/templates.test.ts` (12), `TemplateSelector.test.tsx` (7), `QuickCaptureDialog.test.tsx` (9)
+    - `RelatedItemsBadge.test.tsx` (8)
+    - `StreakCard.test.tsx` (5), `KnowledgeGaps.test.tsx` (5), `ContentBreakdown.test.tsx` (5)
+    - `raindrop.test.ts` (15), `ImportProgress.test.tsx` (9)
+  - **29 files changed** (17 new, 12 modified) — 0 TS errors, 0 lint errors, 2,030+ tests passing.
+
+**Previous Enhancement (2026-02-25)**:
 - [x] **Reminders, Collaborative Collections, and Daily Highlights** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d0f1f3e`). Three new features for content revisiting, team collaboration, and daily discovery:
   - **Reminders & Spaced Repetition** — `reminders` table with interval progression (1d→3d→7d→30d→completed). 4 server actions (`setReminderAction`, `dismissReminderAction`, `snoozeReminderAction`, `getActiveRemindersAction`). Cron endpoint `/api/cron/reminders` processes due reminders with push notifications and auto-advances intervals. `ReminderButton` dropdown in ContentCard and ContentDetailDialog. `DashboardReminders` widget shows due/upcoming reminders with snooze/dismiss actions.
   - **Collaborative Collections** — `collection_members` (composite PK, roles: owner/editor/viewer) and `collection_invitations` (token-based, 7-day expiry) tables. 8 server actions including `checkCollectionAccess` (role-based gate used by all collection mutations), `inviteToCollectionAction`, `acceptInvitationAction`, member/invitation management. `ShareCollectionDialog` for invite management. Invite acceptance page at `/dashboard/invite/[token]`. Existing collection actions updated to support shared access.
@@ -78,7 +96,7 @@
     - AI: generateHighlightInsight (3)
   - **30 files changed** (18 new, 12 modified) — 0 TS errors, 0 lint errors, build succeeds.
 
-**Previous Enhancement (2026-02-25)**:
+**Previous Enhancement (2026-02-25 — earlier)**:
 - [x] **Knowledge-to-Post Generator** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:3a6f0b8`). Turn saved knowledge into polished LinkedIn posts — a content repurposing tool for professional thought leadership:
   - **`generated_posts` table** — new schema table storing generated posts with tone, length, hashtag preferences, and source content references. Indexes on `userId` and `createdAt`.
   - **`generateLinkedInPost` AI function** — Gemini Flash generates posts with 3 tone modes (Professional, Casual, Storytelling), 3 length options (Short/Medium/Long), optional hashtags. Body truncated to 2000 chars per source item.
