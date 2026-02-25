@@ -416,7 +416,7 @@ export default async function Home() {
                   {gitHubStars} GitHub stars
                 </span>
                 <span className="text-border">|</span>
-                <span>1,890+ tests passing</span>
+                <span>1,999+ tests passing</span>
                 <span className="text-border">|</span>
                 <span>Open source &amp; free</span>
               </div>
@@ -744,7 +744,7 @@ export default async function Home() {
                   </a>
                 </div>
                 <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                  <span>1,890+ tests passing</span>
+                  <span>1,999+ tests passing</span>
                   <span className="text-border">|</span>
                   <span>TypeScript strict</span>
                   <span className="text-border">|</span>
