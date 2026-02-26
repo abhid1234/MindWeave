@@ -403,6 +403,76 @@ export async function bulkAddToCollectionAction(
   }
 }
 
+// Bulk move content from one collection to another
+export async function bulkMoveToCollectionAction(
+  contentIds: string[],
+  fromCollectionId: string,
+  toCollectionId: string
+): Promise<ActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'bulkMoveToCollection', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return { success: false, message: 'No content selected.' };
+    }
+
+    if (fromCollectionId === toCollectionId) {
+      return { success: false, message: 'Source and destination collections are the same.' };
+    }
+
+    // Verify user has editor+ access to both collections
+    const fromAccess = await checkCollectionAccess(fromCollectionId, session.user.id);
+    if (!fromAccess || fromAccess === 'viewer') {
+      return { success: false, message: 'No edit access to source collection.' };
+    }
+
+    const toAccess = await checkCollectionAccess(toCollectionId, session.user.id);
+    if (!toAccess || toAccess === 'viewer') {
+      return { success: false, message: 'No edit access to destination collection.' };
+    }
+
+    // Remove from source collection
+    await db
+      .delete(contentCollections)
+      .where(
+        and(
+          inArray(contentCollections.contentId, contentIds),
+          eq(contentCollections.collectionId, fromCollectionId)
+        )
+      );
+
+    // Insert into destination collection (ignore duplicates)
+    const values = contentIds.map((contentId) => ({
+      contentId,
+      collectionId: toCollectionId,
+    }));
+
+    await db
+      .insert(contentCollections)
+      .values(values)
+      .onConflictDoNothing();
+
+    revalidatePath('/dashboard/library');
+    revalidatePath('/dashboard/collections');
+
+    return {
+      success: true,
+      message: `Moved ${contentIds.length} item${contentIds.length !== 1 ? 's' : ''} to collection.`,
+    };
+  } catch (error) {
+    console.error('Bulk move to collection error:', error);
+    return { success: false, message: 'Failed to move content.' };
+  }
+}
+
 // Get collections for a specific content item
 export async function getContentCollectionsAction(
   contentId: string

@@ -315,3 +315,29 @@ export const removeMemberSchema = z.object({
 });
 
 export type RemoveMemberInput = z.infer<typeof removeMemberSchema>;
+
+// Webhook schemas
+export const webhookCaptureSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(500),
+  body: z.string().optional(),
+  url: z.string().url('Invalid URL').optional(),
+  tags: z.array(z.string()).optional(),
+  type: z.enum(['note', 'link', 'file']).optional(),
+});
+
+export type WebhookCaptureInput = z.infer<typeof webhookCaptureSchema>;
+
+export const createWebhookConfigSchema = z.object({
+  type: z.enum(['generic', 'slack', 'discord']),
+  name: z.string().min(1, 'Name is required').max(100),
+  secret: z.string().optional(),
+  config: z
+    .object({
+      channels: z.array(z.string()).optional(),
+      defaultTags: z.array(z.string()).optional(),
+      contentType: z.enum(['note', 'link']).optional(),
+    })
+    .optional(),
+});
+
+export type CreateWebhookConfigInput = z.infer<typeof createWebhookConfigSchema>;

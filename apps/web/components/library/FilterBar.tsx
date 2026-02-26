@@ -66,7 +66,7 @@ export function FilterBar({ allTags }: FilterBarProps) {
     <Card className="mb-6">
       <CardContent className="pt-6 space-y-6">
         {/* Type Filter and View Toggle */}
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
           <div>
             <label className="block text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">Type</label>
             <div className="flex flex-wrap gap-2">
@@ -98,7 +98,7 @@ export function FilterBar({ allTags }: FilterBarProps) {
                 key={option.value}
                 href={buildUrl({ sortBy: option.sortBy, sortOrder: option.sortOrder })}
                 className={cn(
-                  'rounded-lg border px-3 py-1.5 text-sm transition-all duration-200',
+                  'rounded-lg border px-3 py-1.5 text-xs sm:text-sm transition-all duration-200',
                   currentSort === option.value
                     ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                     : 'hover:bg-accent hover:border-primary/30 hover:shadow-sm'
@@ -114,7 +114,7 @@ export function FilterBar({ allTags }: FilterBarProps) {
         {allTags.length > 0 && (
           <div>
             <label className="block text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">Filter by Tag</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex overflow-x-auto flex-nowrap sm:flex-wrap gap-2">
               {tagFilter && (
                 <button
                   type="button"

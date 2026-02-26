@@ -64,6 +64,13 @@
       "when": 1771984052327,
       "tag": "0008_far_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1772082125223,
+      "tag": "0009_giant_gunslinger",
+      "breakpoints": true
     }
   ]
 }

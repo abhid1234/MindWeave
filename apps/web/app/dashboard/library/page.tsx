@@ -90,7 +90,7 @@ export default async function LibraryPage({
             <>
               {/* Search and Collection Filter */}
               <div className="mb-6 flex flex-wrap items-center gap-4">
-                <div className="flex-1 min-w-[200px]">
+                <div className="flex-1 min-w-0 w-full sm:min-w-[200px] sm:w-auto">
                   <SearchBar />
                 </div>
                 <FavoritesToggle />

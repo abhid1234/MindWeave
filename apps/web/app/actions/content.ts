@@ -1341,6 +1341,66 @@ export async function bulkUnshareContentAction(
   }
 }
 
+// Bulk toggle favorite status
+export async function bulkToggleFavoriteAction(
+  contentIds: string[],
+  favorite: boolean
+): Promise<BulkActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized. Please log in.' };
+    }
+
+    const rateCheck = checkServerActionRateLimit(session.user.id, 'bulkToggleFavorite', RATE_LIMITS.serverActionBulk);
+    if (!rateCheck.success) {
+      return { success: false, message: rateCheck.message! };
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return { success: false, message: 'No content selected.' };
+    }
+
+    const result = await db
+      .update(content)
+      .set({ isFavorite: favorite, updatedAt: new Date() })
+      .where(
+        and(
+          inArray(content.id, contentIds),
+          eq(content.userId, session.user.id)
+        )
+      )
+      .returning({ id: content.id });
+
+    const successCount = result.length;
+    const failedCount = contentIds.length - successCount;
+
+    revalidatePath('/dashboard/library');
+
+    if (successCount === 0) {
+      return {
+        success: false,
+        message: `Failed to ${favorite ? 'favorite' : 'unfavorite'} any content.`,
+        successCount,
+        failedCount,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Successfully ${favorite ? 'favorited' : 'unfavorited'} ${successCount} item${successCount !== 1 ? 's' : ''}.`,
+      successCount,
+      failedCount,
+    };
+  } catch (error) {
+    console.error('Error bulk toggling favorite:', error);
+    return {
+      success: false,
+      message: `Failed to ${favorite ? 'favorite' : 'unfavorite'} content. Please try again.`,
+    };
+  }
+}
+
 // Toggle favorite status
 export type ToggleFavoriteResult = {
   success: boolean;

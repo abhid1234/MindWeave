@@ -382,6 +382,38 @@ export const collectionInvitations = pgTable(
   })
 );
 
+// Webhook Configurations table
+export const webhookTypeEnum = ['generic', 'slack', 'discord'] as const;
+export type WebhookType = (typeof webhookTypeEnum)[number];
+
+export const webhookConfigs = pgTable(
+  'webhook_configs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: varchar('type', { length: 20 }).notNull().$type<WebhookType>(),
+    name: varchar('name', { length: 100 }).notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    secret: text('secret'), // Signing secret for verification
+    config: jsonb('config').$type<{
+      channels?: string[];
+      defaultTags?: string[];
+      contentType?: string;
+    }>(),
+    lastReceivedAt: timestamp('last_received_at', { mode: 'date' }),
+    totalReceived: integer('total_received').notNull().default(0),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('webhook_configs_user_id_idx').on(table.userId),
+    typeIdx: index('webhook_configs_type_idx').on(table.type),
+    isActiveIdx: index('webhook_configs_is_active_idx').on(table.isActive),
+  })
+);
+
 // Daily Highlights table
 export const dailyHighlights = pgTable(
   'daily_highlights',
@@ -415,6 +447,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   generatedPosts: many(generatedPosts),
   reminders: many(reminders),
   collectionMemberships: many(collectionMembers),
+  webhookConfigs: many(webhookConfigs),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -609,6 +642,13 @@ export const collectionInvitationsRelations = relations(collectionInvitations, (
   }),
 }));
 
+export const webhookConfigsRelations = relations(webhookConfigs, ({ one }) => ({
+  user: one(users, {
+    fields: [webhookConfigs.userId],
+    references: [users.id],
+  }),
+}));
+
 export const dailyHighlightsRelations = relations(dailyHighlights, ({ one }) => ({
   user: one(users, {
     fields: [dailyHighlights.userId],
@@ -671,3 +711,6 @@ export type NewCollectionInvitation = typeof collectionInvitations.$inferInsert;
 
 export type DailyHighlight = typeof dailyHighlights.$inferSelect;
 export type NewDailyHighlight = typeof dailyHighlights.$inferInsert;
+
+export type WebhookConfig = typeof webhookConfigs.$inferSelect;
+export type NewWebhookConfig = typeof webhookConfigs.$inferInsert;

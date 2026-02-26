@@ -799,4 +799,83 @@ describe('Content Actions', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('bulkToggleFavoriteAction', () => {
+    it('should return unauthorized when not logged in', async () => {
+      mockAuth.mockResolvedValue(null);
+      const { bulkToggleFavoriteAction } = await import('./content');
+      const result = await bulkToggleFavoriteAction(['1'], true);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Unauthorized');
+    });
+
+    it('should return error when no content IDs provided', async () => {
+      const { bulkToggleFavoriteAction } = await import('./content');
+      const result = await bulkToggleFavoriteAction([], true);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('No content selected');
+    });
+
+    it('should successfully favorite multiple items', async () => {
+      mockUpdate.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: '1' }, { id: '2' }]),
+          }),
+        }),
+      });
+
+      const { bulkToggleFavoriteAction } = await import('./content');
+      const result = await bulkToggleFavoriteAction(['1', '2'], true);
+      expect(result.success).toBe(true);
+      expect(result.successCount).toBe(2);
+      expect(result.failedCount).toBe(0);
+      expect(result.message).toContain('favorited');
+    });
+
+    it('should successfully unfavorite multiple items', async () => {
+      mockUpdate.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: '1' }, { id: '2' }, { id: '3' }]),
+          }),
+        }),
+      });
+
+      const { bulkToggleFavoriteAction } = await import('./content');
+      const result = await bulkToggleFavoriteAction(['1', '2', '3'], false);
+      expect(result.success).toBe(true);
+      expect(result.successCount).toBe(3);
+      expect(result.failedCount).toBe(0);
+      expect(result.message).toContain('unfavorited');
+    });
+
+    it('should handle rate limiting', async () => {
+      const { resetRateLimitStore } = await import('@/lib/rate-limit');
+      resetRateLimitStore();
+
+      mockUpdate.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: '1' }]),
+          }),
+        }),
+      });
+
+      const { bulkToggleFavoriteAction } = await import('./content');
+
+      // Exhaust the rate limit (serverActionBulk: 10 requests per minute)
+      for (let i = 0; i < 10; i++) {
+        await bulkToggleFavoriteAction(['1'], true);
+      }
+
+      // The 11th call should be rate limited
+      const result = await bulkToggleFavoriteAction(['1'], true);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Rate limit exceeded');
+
+      // Clean up rate limit store for other tests
+      resetRateLimitStore();
+    });
+  });
 });

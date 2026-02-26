@@ -149,6 +149,7 @@ export function LibraryContent({
   }, [hasMore, loadMore]);
 
   const allIds = items.map((item) => item.id);
+  const hasActiveFilters = !!(filterParams.type || filterParams.tag || filterParams.query || filterParams.collectionId);
 
   return (
     <BulkSelectionProvider>
@@ -158,14 +159,14 @@ export function LibraryContent({
           <span className="text-sm text-muted-foreground">
             Showing {items.length} item{items.length !== 1 ? 's' : ''}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowExportDialog(true)}
             >
               <Download className="mr-2 h-4 w-4" />
-              Export All
+              {hasActiveFilters ? 'Export' : 'Export All'}
             </Button>
             <SelectionToggle allIds={allIds} />
           </div>
@@ -249,6 +250,12 @@ export function LibraryContent({
         open={showExportDialog}
         onOpenChange={setShowExportDialog}
         itemCount={items.length}
+        collectionId={filterParams.collectionId}
+        filters={{
+          type: filterParams.type,
+          tag: filterParams.tag,
+          query: filterParams.query,
+        }}
       />
     </BulkSelectionProvider>
   );

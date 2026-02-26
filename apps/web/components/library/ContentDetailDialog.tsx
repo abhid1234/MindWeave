@@ -290,6 +290,7 @@ export function ContentDetailDialog({
             <VersionHistoryPanel
               contentId={id}
               onReverted={() => onOpenChange(false)}
+              currentContent={{ title, body, url }}
             />
 
             {/* Similar Content */}
@@ -327,7 +328,7 @@ export function ContentDetailDialog({
             </div>
 
             {/* Action buttons */}
-            <div className="flex gap-2 pt-2 border-t">
+            <div className="flex flex-wrap gap-2 pt-2 border-t">
               <Button
                 variant="outline"
                 size="sm"

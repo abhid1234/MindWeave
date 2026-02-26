@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { content } from '@/lib/db/schema';
-import { eq, and, inArray } from 'drizzle-orm';
+import { content, contentCollections } from '@/lib/db/schema';
+import { eq, and, inArray, sql, ilike, or } from 'drizzle-orm';
 import {
   checkRateLimit,
   rateLimitHeaders,
@@ -29,15 +29,50 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { contentIds, format = 'json' } = body as {
+    const { contentIds, format = 'json', collectionId, type: typeFilter, tag, query } = body as {
       contentIds?: string[];
       format?: ExportFormat;
+      collectionId?: string;
+      type?: string;
+      tag?: string;
+      query?: string;
     };
 
     // Build query conditions
     const conditions = [eq(content.userId, session.user.id)];
     if (contentIds && contentIds.length > 0) {
       conditions.push(inArray(content.id, contentIds));
+    }
+    if (typeFilter && ['note', 'link', 'file'].includes(typeFilter)) {
+      conditions.push(eq(content.type, typeFilter as 'note' | 'link' | 'file'));
+    }
+    if (tag) {
+      conditions.push(sql`${content.tags} @> ARRAY[${tag}]::text[]`);
+    }
+    if (query) {
+      const pattern = `%${query}%`;
+      conditions.push(
+        or(
+          ilike(content.title, pattern),
+          ilike(content.body, pattern)
+        )!
+      );
+    }
+
+    // Filter by collection if specified
+    if (collectionId) {
+      const collectionContentIds = await db
+        .select({ contentId: contentCollections.contentId })
+        .from(contentCollections)
+        .where(eq(contentCollections.collectionId, collectionId));
+      const ids = collectionContentIds.map((r) => r.contentId);
+      if (ids.length === 0) {
+        return NextResponse.json(
+          { success: false, message: 'No content found to export' },
+          { status: 404 }
+        );
+      }
+      conditions.push(inArray(content.id, ids));
     }
 
     // Fetch content

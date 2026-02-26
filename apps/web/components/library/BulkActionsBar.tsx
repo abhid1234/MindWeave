@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { X, Trash2, Share2, Tag, Lock, Download, FolderPlus, Loader2 } from 'lucide-react';
+import { X, Trash2, Share2, Tag, Lock, Download, FolderPlus, Loader2, Star, MoreHorizontal, ArrowRightLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import {
@@ -12,14 +12,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useBulkSelection } from './BulkSelectionContext';
 import { ExportDialog } from './ExportDialog';
 import { CollectionSelector } from './CollectionSelector';
+import { MoveCollectionDialog } from './MoveCollectionDialog';
 import {
   bulkDeleteContentAction,
   bulkAddTagsAction,
   bulkShareContentAction,
   bulkUnshareContentAction,
+  bulkToggleFavoriteAction,
 } from '@/app/actions/content';
 
 export function BulkActionsBar() {
@@ -29,6 +37,7 @@ export function BulkActionsBar() {
   const [showTagDialog, setShowTagDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showCollectionDialog, setShowCollectionDialog] = useState(false);
+  const [showMoveDialog, setShowMoveDialog] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const { addToast } = useToast();
 
@@ -97,6 +106,17 @@ export function BulkActionsBar() {
     });
   };
 
+  const handleBulkFavorite = (favorite: boolean) => {
+    startTransition(async () => {
+      const result = await bulkToggleFavoriteAction(Array.from(selectedIds), favorite);
+      if (result.success) {
+        addToast({ variant: 'success', title: favorite ? 'Favorited' : 'Unfavorited', description: result.message });
+      } else {
+        addToast({ variant: 'error', title: 'Failed', description: result.message });
+      }
+    });
+  };
+
   const handleCancel = () => {
     deselectAll();
     toggleSelectionMode();
@@ -123,55 +143,134 @@ export function BulkActionsBar() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTagDialog(true)}
-                disabled={isPending}
-              >
-                <Tag className="mr-2 h-4 w-4" />
-                Add Tags
-              </Button>
+              {/* Desktop buttons — hidden on mobile */}
+              <div className="hidden sm:flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkFavorite(true)}
+                  disabled={isPending}
+                >
+                  <Star className="mr-2 h-4 w-4" />
+                  Favorite
+                </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCollectionDialog(true)}
-                disabled={isPending}
-              >
-                <FolderPlus className="mr-2 h-4 w-4" />
-                Add to Collection
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkFavorite(false)}
+                  disabled={isPending}
+                >
+                  <Star className="mr-2 h-4 w-4" />
+                  Unfavorite
+                </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBulkShare}
-                disabled={isPending}
-              >
-                <Share2 className="mr-2 h-4 w-4" />
-                Share All
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTagDialog(true)}
+                  disabled={isPending}
+                >
+                  <Tag className="mr-2 h-4 w-4" />
+                  Add Tags
+                </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBulkUnshare}
-                disabled={isPending}
-              >
-                <Lock className="mr-2 h-4 w-4" />
-                Unshare All
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCollectionDialog(true)}
+                  disabled={isPending}
+                >
+                  <FolderPlus className="mr-2 h-4 w-4" />
+                  Add to Collection
+                </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowExportDialog(true)}
-                disabled={isPending}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowMoveDialog(true)}
+                  disabled={isPending}
+                >
+                  <ArrowRightLeft className="mr-2 h-4 w-4" />
+                  Move
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkShare}
+                  disabled={isPending}
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share All
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkUnshare}
+                  disabled={isPending}
+                >
+                  <Lock className="mr-2 h-4 w-4" />
+                  Unshare All
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowExportDialog(true)}
+                  disabled={isPending}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export
+                </Button>
+              </div>
+
+              {/* Mobile overflow menu — visible only on small screens */}
+              <div className="sm:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={isPending}>
+                      <MoreHorizontal className="mr-2 h-4 w-4" />
+                      Actions
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleBulkFavorite(true)} disabled={isPending}>
+                      <Star className="mr-2 h-4 w-4" />
+                      Favorite
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleBulkFavorite(false)} disabled={isPending}>
+                      <Star className="mr-2 h-4 w-4" />
+                      Unfavorite
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowTagDialog(true)} disabled={isPending}>
+                      <Tag className="mr-2 h-4 w-4" />
+                      Add Tags
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowCollectionDialog(true)} disabled={isPending}>
+                      <FolderPlus className="mr-2 h-4 w-4" />
+                      Add to Collection
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowMoveDialog(true)} disabled={isPending}>
+                      <ArrowRightLeft className="mr-2 h-4 w-4" />
+                      Move
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleBulkShare} disabled={isPending}>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share All
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleBulkUnshare} disabled={isPending}>
+                      <Lock className="mr-2 h-4 w-4" />
+                      Unshare All
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowExportDialog(true)} disabled={isPending}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Export
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
               <Button
                 variant="destructive"
@@ -265,6 +364,17 @@ export function BulkActionsBar() {
         contentIds={Array.from(selectedIds)}
         onSuccess={() => {
           addToast({ variant: 'success', title: 'Added to collection', description: 'Content added to collection successfully.' });
+        }}
+      />
+
+      {/* Move Collection Dialog */}
+      <MoveCollectionDialog
+        open={showMoveDialog}
+        onOpenChange={setShowMoveDialog}
+        contentIds={Array.from(selectedIds)}
+        onSuccess={() => {
+          deselectAll();
+          toggleSelectionMode();
         }}
       />
     </>

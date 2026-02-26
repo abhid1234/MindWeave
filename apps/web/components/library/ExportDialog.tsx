@@ -19,6 +19,13 @@ type ExportDialogProps = {
   onOpenChange: (open: boolean) => void;
   contentIds?: string[];
   itemCount?: number;
+  collectionId?: string;
+  collectionName?: string;
+  filters?: {
+    type?: string;
+    tag?: string;
+    query?: string;
+  };
 };
 
 const formatOptions: { value: ExportFormat; label: string; description: string; icon: React.ReactNode }[] = [
@@ -47,6 +54,9 @@ export function ExportDialog({
   onOpenChange,
   contentIds,
   itemCount,
+  collectionId,
+  collectionName,
+  filters,
 }: ExportDialogProps) {
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
   const [isExporting, setIsExporting] = useState(false);
@@ -63,6 +73,10 @@ export function ExportDialog({
         body: JSON.stringify({
           contentIds,
           format: selectedFormat,
+          collectionId,
+          ...(filters?.type && { type: filters.type }),
+          ...(filters?.tag && { tag: filters.tag }),
+          ...(filters?.query && { query: filters.query }),
         }),
       });
 
@@ -97,7 +111,11 @@ export function ExportDialog({
 
   const exportLabel = contentIds
     ? `${itemCount ?? contentIds.length} selected item${(itemCount ?? contentIds.length) !== 1 ? 's' : ''}`
-    : 'all content';
+    : collectionName
+      ? `collection "${collectionName}"`
+      : (filters?.type || filters?.tag || filters?.query)
+        ? 'filtered results'
+        : 'all content';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -142,7 +160,7 @@ export function ExportDialog({
           </p>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="flex-col-reverse sm:flex-row">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}

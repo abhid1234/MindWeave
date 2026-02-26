@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Library, MoreHorizontal, Pencil, Trash2, Plus, FolderOpen, Users } from 'lucide-react';
+import { Library, MoreHorizontal, Pencil, Trash2, Plus, FolderOpen, Users, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { CollectionDialog } from './CollectionDialog';
 import { ShareCollectionDialog } from './ShareCollectionDialog';
+import { ExportDialog } from './ExportDialog';
 import { getCollectionsAction, deleteCollectionAction } from '@/app/actions/collections';
 import { useToast } from '@/components/ui/toast';
 
@@ -35,6 +36,8 @@ export function CollectionGrid() {
   const [editingCollection, setEditingCollection] = useState<CollectionWithCount | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [sharingCollection, setSharingCollection] = useState<CollectionWithCount | null>(null);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportingCollection, setExportingCollection] = useState<CollectionWithCount | null>(null);
 
   const fetchCollections = useCallback(async () => {
     const result = await getCollectionsAction();
@@ -149,7 +152,7 @@ export function CollectionGrid() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-8 w-8 p-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                       onClick={(e) => e.stopPropagation()}
                       aria-label="Collection actions"
                     >
@@ -167,6 +170,13 @@ export function CollectionGrid() {
                     }}>
                       <Users className="mr-2 h-4 w-4" />
                       Share
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      setExportingCollection(collection);
+                      setExportDialogOpen(true);
+                    }}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Export
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleDelete(collection.id)}
@@ -209,6 +219,15 @@ export function CollectionGrid() {
           isOwner={true}
           open={shareDialogOpen}
           onOpenChange={setShareDialogOpen}
+        />
+      )}
+
+      {exportingCollection && (
+        <ExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          collectionId={exportingCollection.id}
+          collectionName={exportingCollection.name}
         />
       )}
     </>

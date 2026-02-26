@@ -271,6 +271,11 @@ export const RATE_LIMITS = {
     maxRequests: 100,
     windowMs: 60 * 1000,
   },
+  // Webhook: 60 requests per minute
+  webhook: {
+    maxRequests: 60,
+    windowMs: 60 * 1000,
+  },
 } as const;
 
 /**

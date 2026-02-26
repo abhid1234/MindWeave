@@ -94,18 +94,18 @@ export function AnalyticsPageContent() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
-        <ContentGrowthChart initialPeriod="month" />
-        <TagDistributionChart />
+        <div className="min-w-0"><ContentGrowthChart initialPeriod="month" /></div>
+        <div className="min-w-0"><TagDistributionChart /></div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '225ms', animationFillMode: 'backwards' }}>
-        <CollectionUsageChart />
-        <KnowledgeInsightsCard />
+        <div className="min-w-0"><CollectionUsageChart /></div>
+        <div className="min-w-0"><KnowledgeInsightsCard /></div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 animate-fade-up" style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}>
-        <ContentBreakdown />
-        <KnowledgeGaps />
+        <div className="min-w-0"><ContentBreakdown /></div>
+        <div className="min-w-0"><KnowledgeGaps /></div>
       </div>
     </div>
   );
