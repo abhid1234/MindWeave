@@ -43,7 +43,7 @@
 - **API Keys** - REST API (/api/v1/content) with key-based auth for external integrations
 - **Email Digest** - Configurable weekly/daily summaries via Cloud Scheduler cron
 - **Content Discovery** - View tracking, blended scoring (similarity + recency + novelty), Discover page with 4 recommendation sections
-- **Content Intelligence** - Summary display in cards/dialogs, Knowledge Graph visualization, Smart Collections from AI clustering
+- **Content Intelligence** - Summary display in cards/dialogs, Knowledge Graph visualization (Neo4j AuraDB + Sigma.js WebGL), Smart Collections from AI clustering
 - **Push Notifications** - FCM-based push to mobile devices after digest emails
 - **Admin Feedback** - Admin-only feedback management page with status workflow
 - **Knowledge-to-Post Generator** - Turn saved knowledge into polished LinkedIn posts with AI
@@ -74,6 +74,25 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-26)**:
+- [x] **Knowledge Graph Upgrade: Neo4j AuraDB + Sigma.js** — Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:dd98c01`). Complete rewrite of the Knowledge Graph with professional WebGL-accelerated visualization and optional Neo4j graph database layer:
+  - **Neo4j AuraDB Integration** — Optional graph database layer with graceful pgvector fallback. Singleton client (`lib/neo4j/client.ts`) with `withNeo4jSession()` wrapper, 10-connection pool, 5s timeout. Graph model: `(:Content)-[:SIMILAR_TO {score}]-(:Content)` and `(:Content)-[:TAGGED_WITH]->(:Tag)`. Cypher queries for full graph, node neighborhood (N-hop traversal), shortest path, and tag clusters.
+  - **Automatic Graph Sync** — Fire-and-forget sync wired into all content CRUD actions. `syncContentToNeo4j` on create/update/tag-edit (MERGE nodes, recreate TAGGED_WITH edges). `deleteContentFromNeo4j` on delete (DETACH DELETE). `syncSimilarityEdges` after embedding upsert (pgvector top-50 → SIMILAR_TO edges). `fullSyncUserGraph` for initial setup/recovery via POST `/api/neo4j/sync` (session auth or CRON_SECRET bearer).
+  - **Sigma.js WebGL Visualization** — Replaces `react-force-graph-2d` with `sigma` (WebGL) + `graphology` ecosystem. Louvain community detection assigns nodes to color-coded clusters (10 distinct hues). PageRank computes node importance → maps to size (4px–20px). ForceAtlas2 force-directed layout (100 iterations). Edge opacity/width scales with similarity score. Hover highlights node + neighbors, dims others. Click opens detail panel. Double-click navigates to library.
+  - **Graph UI Components** — `SigmaGraph` main component with data fetch, graph build, algorithm pipeline, and Sigma renderer lifecycle. `GraphControls` with similarity threshold slider, type filter buttons (all/note/link/file), labels toggle, node/edge/community count stats. `GraphDetailPanel` absolute-positioned panel showing title, type, community color, PageRank importance %, connection count, and tags with "View in Library" navigation. `NodeSearch` for filtering/highlighting nodes by title or tag match.
+  - **Dependencies** — Added: `neo4j-driver`, `graphology`, `graphology-types`, `graphology-communities-louvain`, `graphology-metrics`, `graphology-layout-forceatlas2`, `sigma`. Removed: `react-force-graph-2d`. `serverExternalPackages: ['neo4j-driver']` in next.config.js.
+  - **3 new server actions** — `getContentGraphAction` (Neo4j-first with pgvector fallback), `getNodeNeighborhoodAction` (N-hop neighborhood via Cypher), `getShortestPathAction` (shortest path between two content nodes).
+  - **48 new tests across 7 test files** (2,101 → 2,145 passing):
+    - `lib/neo4j/client.test.ts` (6): singleton, env checks, session wrapper, fallback, connectivity
+    - `lib/neo4j/sync.test.ts` (10): all 4 sync functions with configured/unconfigured/error paths
+    - `lib/neo4j/queries.test.ts` (8): full graph, neighborhood, shortest path, tag clusters
+    - `components/graph/SigmaGraph.test.tsx` (8): loading, empty, error, data rendering, controls, legend
+    - `components/graph/GraphControls.test.tsx` (6): slider, type filters, labels toggle, stats
+    - `components/graph/GraphDetailPanel.test.tsx` (5): title, type, tags, close, navigate
+    - `app/api/neo4j/sync/route.test.ts` (5): auth checks, session/cron auth, sync results, errors
+  - **25 files changed** (15 new, 5 modified, 2 deleted + 3 test updates) — 0 TS errors, 0 new lint errors, build succeeds.
+  - **Environment variables** — `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD` (optional; graph works without Neo4j via pgvector fallback).
+
+**Previous Enhancement (2026-02-26)**:
 - [x] **Mobile Responsiveness, Bulk Ops, Filtered Export, Version Diffing, Webhook Integrations** — Five features deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:edaa320`). Enhances mobile UX, bulk workflows, export flexibility, version comparison, and external integrations:
   - **Mobile-Responsive Improvements** — CSS-only changes across 8 files. Touch-friendly dropdown triggers (always visible on mobile via `sm:opacity-0 sm:group-hover:opacity-100`). FilterBar stacks vertically on small screens (`flex-col sm:flex-row`). Search input full-width on mobile. Action bars and dialog footers wrap gracefully. Chart containers prevent flex overflow with `min-w-0`.
   - **Enhanced Bulk Operations** — `bulkToggleFavoriteAction` for bulk favorite/unfavorite. `bulkMoveToCollectionAction` for moving content between collections (with editor+ access checks on both). New `MoveCollectionDialog` with from/to collection selectors. `BulkActionsBar` redesigned: desktop shows full button row (`hidden sm:flex`), mobile shows `DropdownMenu` overflow menu (`sm:hidden`). Delete button always visible.
@@ -151,7 +170,7 @@
 **Previous Enhancement (2026-02-24)**:
 - [x] **Content Intelligence — Summary Display, Knowledge Graph, Smart Collections** - Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:fa88b11`). Surfaces AI summaries, adds a force-directed knowledge graph, and connects clustering to collections:
   - **Summary display** — existing `summary` field now rendered in `ContentCard` (2-line preview) and `ContentDetailDialog` (accent-bordered block). "Generate Summary" button for older content without summaries calls `generateSummaryAction` → Gemini summarization → DB update.
-  - **Knowledge Graph (`/dashboard/graph`)** — force-directed network visualization using `react-force-graph-2d`. Server action `getContentGraphAction` performs pgvector cosine self-join to find content relationships. Similarity threshold slider (0.3–0.9) with 500ms debounce. Node colors by type (blue=note, green=link, orange=file), click-to-navigate to library.
+  - **Knowledge Graph (`/dashboard/graph`)** — *(Originally: force-directed visualization using react-force-graph-2d. Upgraded 2026-02-26 to Neo4j AuraDB + Sigma.js WebGL with Louvain community detection, PageRank node sizing, ForceAtlas2 layout, and interactive detail panels — see latest enhancement above.)* Server action `getContentGraphAction` performs pgvector cosine self-join to find content relationships. Similarity threshold slider (0.3–0.9) with 500ms debounce. Node colors by type (blue=note, green=link, orange=file), click-to-navigate to library.
   - **Smart Collections on Discover page** — `SmartCollections` component calls `getClustersAction` (k-means++ clustering) and displays clusters with "Create Collection" button. One-click creates a collection and bulk-adds all cluster items using existing `createCollectionAction` + `bulkAddToCollectionAction`.
   - **Navigation updated** — Network icon + "Graph" nav item added (11 nav items total). Discover page now has 4 sections.
   - **22 files changed** (11 new, 11 modified) — tests pass, build succeeds.
