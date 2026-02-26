@@ -7,6 +7,7 @@ import { createContentSchema, updateContentSchema } from '@/lib/validations';
 import { generateTags } from '@/lib/ai/gemini';
 import { generateSummary } from '@/lib/ai/summarization';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
+import { syncContentToNeo4j, deleteContentFromNeo4j } from '@/lib/neo4j/sync';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { eq, desc, asc, and, or, sql, inArray, type SQL } from 'drizzle-orm';
@@ -126,6 +127,11 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
     // Generate embedding asynchronously (non-blocking)
     upsertContentEmbedding(newContent.id).catch((error) => {
       console.error('Failed to generate embedding for content:', newContent.id, error);
+    });
+
+    // Sync to Neo4j graph (non-blocking)
+    syncContentToNeo4j(newContent.id).catch((error) => {
+      console.error('Failed to sync content to Neo4j:', newContent.id, error);
     });
 
     // Revalidate relevant pages and cache tags
@@ -273,6 +279,11 @@ export async function updateContentTagsAction(
     // Regenerate embedding with new tags (non-blocking)
     upsertContentEmbedding(contentId).catch((error) => {
       console.error('Failed to refresh embedding after tag update:', contentId, error);
+    });
+
+    // Sync to Neo4j graph (non-blocking)
+    syncContentToNeo4j(contentId).catch((error) => {
+      console.error('Failed to sync content to Neo4j after tag update:', contentId, error);
     });
 
     // Revalidate relevant pages and cache tags
@@ -471,6 +482,11 @@ export async function updateContentAction(params: UpdateContentParams): Promise<
       upsertContentEmbedding(contentId).catch((error) => {
         console.error('Failed to regenerate embedding:', contentId, error);
       });
+
+      // Sync to Neo4j graph (non-blocking)
+      syncContentToNeo4j(contentId).catch((error) => {
+        console.error('Failed to sync content to Neo4j after update:', contentId, error);
+      });
     }
 
     // Revalidate relevant pages and cache tags
@@ -541,6 +557,11 @@ export async function deleteContentAction(contentId: string): Promise<ActionResu
 
     // Delete the content (embeddings cascade automatically via FK)
     await db.delete(content).where(eq(content.id, contentId));
+
+    // Remove from Neo4j graph (non-blocking)
+    deleteContentFromNeo4j(contentId).catch((error) => {
+      console.error('Failed to delete content from Neo4j:', contentId, error);
+    });
 
     // Clean up GCS object if applicable (non-blocking)
     if (isGCSConfigured()) {

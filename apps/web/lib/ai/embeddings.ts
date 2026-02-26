@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { db } from '@/lib/db/client';
 import { embeddings, content } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
+import { syncSimilarityEdges } from '@/lib/neo4j/sync';
 
 /**
  * Gemini Embedding Configuration
@@ -108,6 +109,11 @@ export async function upsertContentEmbedding(contentId: string): Promise<void> {
         model: EMBEDDING_CONFIG.model,
       });
     }
+
+    // Sync similarity edges to Neo4j (non-blocking)
+    syncSimilarityEdges(contentId, contentItem.userId).catch((error) => {
+      console.error('Failed to sync similarity edges to Neo4j:', contentId, error);
+    });
   } catch (error) {
     console.error('Error upserting embedding:', error);
     throw error;

@@ -11,6 +11,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   transpilePackages: [],
+  serverExternalPackages: ['neo4j-driver'],
   output: 'standalone', // Enable standalone output for Docker/Cloud Run
   experimental: {
     serverActions: {

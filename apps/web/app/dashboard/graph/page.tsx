@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Network } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { KnowledgeGraph } from '@/components/graph/KnowledgeGraph';
+import { SigmaGraph } from '@/components/graph/SigmaGraph';
 
 export const metadata: Metadata = {
   title: 'Knowledge Graph | Mindweave',
@@ -35,7 +35,7 @@ export default async function GraphPage() {
 
       {/* Graph */}
       <div className="animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
-        <KnowledgeGraph />
+        <SigmaGraph />
       </div>
     </div>
   );

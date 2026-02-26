@@ -15,9 +15,9 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-// Mock KnowledgeGraph component
-vi.mock('@/components/graph/KnowledgeGraph', () => ({
-  KnowledgeGraph: () => <div data-testid="knowledge-graph">Graph Visualization</div>,
+// Mock SigmaGraph component
+vi.mock('@/components/graph/SigmaGraph', () => ({
+  SigmaGraph: () => <div data-testid="sigma-graph">Graph Visualization</div>,
 }));
 
 import GraphPage from './page';
@@ -43,7 +43,7 @@ describe('GraphPage', () => {
     expect(screen.getByText('Visualize connections between your content')).toBeInTheDocument();
   });
 
-  it('should render the KnowledgeGraph component', async () => {
+  it('should render the SigmaGraph component', async () => {
     mockAuth.mockResolvedValue({
       user: { id: 'user-123', email: 'test@example.com' },
     });
@@ -51,6 +51,6 @@ describe('GraphPage', () => {
     const page = await GraphPage();
     render(page);
 
-    expect(screen.getByTestId('knowledge-graph')).toBeInTheDocument();
+    expect(screen.getByTestId('sigma-graph')).toBeInTheDocument();
   });
 });
