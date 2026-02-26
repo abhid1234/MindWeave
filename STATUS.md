@@ -1,11 +1,11 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-25
+**Last Updated**: 2026-02-26
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–11 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, and Raindrop.io import.
+✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, and webhook integrations.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -54,6 +54,11 @@
 - **AI Related Items** - Sparkles badge on content cards with lazy-loaded popover showing top 3 related items with similarity %
 - **Enhanced Analytics** - Activity streak heatmap, knowledge gaps detection (sparse/stale topics), content type breakdown donut chart
 - **Raindrop.io Import** - CSV parser with folder-to-tag mapping and enhanced progress bar UI
+- **Mobile-Responsive Improvements** - Touch-friendly dropdowns, stacking filter bars, responsive export dialogs, chart overflow prevention
+- **Enhanced Bulk Operations** - Bulk favorite/unfavorite, move between collections, mobile overflow menu
+- **Filtered Export** - Export by collection, type, tag, or search query from library and collection views
+- **Version Diff View** - Inline and side-by-side text diff highlighting, two-version comparison dialog
+- **Webhook Integrations** - Generic (API key), Slack (HMAC-SHA256), Discord (Ed25519) webhook endpoints with management UI
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -68,7 +73,24 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-25)**:
+**Latest Enhancement (2026-02-26)**:
+- [x] **Mobile Responsiveness, Bulk Ops, Filtered Export, Version Diffing, Webhook Integrations** — Five features deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:edaa320`). Enhances mobile UX, bulk workflows, export flexibility, version comparison, and external integrations:
+  - **Mobile-Responsive Improvements** — CSS-only changes across 8 files. Touch-friendly dropdown triggers (always visible on mobile via `sm:opacity-0 sm:group-hover:opacity-100`). FilterBar stacks vertically on small screens (`flex-col sm:flex-row`). Search input full-width on mobile. Action bars and dialog footers wrap gracefully. Chart containers prevent flex overflow with `min-w-0`.
+  - **Enhanced Bulk Operations** — `bulkToggleFavoriteAction` for bulk favorite/unfavorite. `bulkMoveToCollectionAction` for moving content between collections (with editor+ access checks on both). New `MoveCollectionDialog` with from/to collection selectors. `BulkActionsBar` redesigned: desktop shows full button row (`hidden sm:flex`), mobile shows `DropdownMenu` overflow menu (`sm:hidden`). Delete button always visible.
+  - **Filtered Export** — Export route extended with `collectionId`, `type`, `tag`, `query` filters. Collection filter uses subquery on `contentCollections` junction table. `ExportDialog` shows contextual labels ("Export collection 'X'" / "Export filtered results"). Library "Export All" button changes to "Export" when filters active. Collections grid gets per-collection Export menu item.
+  - **Version Diff View** — `lib/diff.ts` wraps `diff` npm package with `computeLineDiff` and `computeWordDiff`. `DiffView` component renders inline (word-level) or side-by-side (line-level) diffs with green/red highlighting and mode toggle. `VersionComparisonDialog` with two version dropdowns (including "Current version"). `VersionHistoryPanel` enhanced with "Show Changes" toggle per version, "Compare Versions" button, "Title changed" badge, and better skeleton loading.
+  - **Webhook Integrations** — `webhook_configs` table (type, name, isActive, secret, config JSONB, stats). Generic webhook: Bearer API key auth, validates via `webhookCaptureSchema`, creates content with fire-and-forget AI tagging + embeddings. Slack webhook: `url_verification` challenge, HMAC-SHA256 signature verification with timing-safe compare and replay protection, channel filtering. Discord webhook: Ed25519 signature verification using Node.js built-in `crypto.verify`, PING response, APPLICATION_COMMAND content creation. `WebhookManager` and `WebhookCreateDialog` on profile page with status badges, type badges, URL copy, setup instructions.
+  - **1 new DB table** — `webhook_configs` with 3 indexes and FK to users. Migration `0009_giant_gunslinger.sql` applied to production.
+  - **100 new tests across 7 test files** (2,001 → 2,101 passing):
+    - `lib/diff.test.ts` (28): line-level and word-level diff with null/empty/identical/mixed cases
+    - `DiffView.test.tsx` (15): rendering, CSS classes, mode toggle, labels, empty handling
+    - `MoveCollectionDialog.test.tsx` (21): rendering, loading, selects, move, errors, cancel
+    - `content.test.ts` additions (5): bulkToggleFavoriteAction auth, validation, success, rate limit
+    - `webhooks.test.ts` (23): CRUD actions with auth, validation, rate limits, DB errors
+    - `export/route.test.ts` (28): auth, formats, collection/type/tag/query filters, rate limiting, metadata sanitization
+  - **37 files changed** (16 new, 21 modified) — 0 TS errors, 0 lint errors, build succeeds, 2,101 tests passing.
+
+**Previous Enhancement (2026-02-25)**:
 - [x] **Content Templates, AI Related Items, Analytics Enhancements, Raindrop.io Import** — Four new features for faster capture, visible AI connections, deeper analytics, and broader import support:
   - **Content Templates & Quick Capture** — 5 templates (`meeting-notes`, `book-highlights`, `article-summary`, `learning-journal`, `project-idea`) in `lib/templates.ts` with `{date}`/`{time}` placeholders. `TemplateSelector` grid component on capture page. `QuickCaptureDialog` opens with `Ctrl+N`/`Cmd+N` from any dashboard page. 5 template commands added to command palette (e.g., "New Meeting Notes" → `/dashboard/capture?template=meeting-notes`). URL param `?template=` auto-selects and pre-fills form.
   - **AI Related Items Badge** — `RelatedItemsBadge` component on every `ContentCard` in the library grid. Sparkles icon button lazy-fetches `getRecommendationsAction(contentId, 3)` on click (not on mount — avoids N+1). Positioned popover shows top 3 related items with type icon, title, and similarity percentage. Loading, empty, and error states.
@@ -955,6 +977,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-26** - ✅ **Mobile Responsiveness, Bulk Ops, Filtered Export, Version Diffing, Webhook Integrations** — 5 features: mobile-responsive CSS across 8 files, bulk favorite/unfavorite/move with mobile overflow menu, filtered export by collection/type/tag/query, inline/side-by-side diff view with version comparison dialog, webhook endpoints for Generic/Slack/Discord with management UI. 100 new tests (2,101 total). `webhook_configs` DB table. Commit: edaa320. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:edaa320`)
 - **2026-02-23** - ✅ **Rich Text Editor** — Tiptap-based editor with headings, bold, italic, lists, code blocks. MarkdownRenderer for detail/share views. 12 files, 3 new components. Commit: 3e0b7ab
 - **2026-02-23** - ✅ **Version History** — Automatic snapshots on save, view/compare/revert from ContentDetailDialog. Auto-prunes to 50 versions. contentVersions table. Commit: 92e0b0b
 - **2026-02-23** - ✅ **API Keys** — REST API (/api/v1/content) with API key auth. ApiKeysManager on profile page. Extension capture supports API keys. apiKeys table. Commit: 5a4c9f1
