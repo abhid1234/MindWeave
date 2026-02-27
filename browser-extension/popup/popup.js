@@ -81,7 +81,57 @@ function showCaptureForm() {
     urlInput.value = currentTab.url || '';
   }
 
+  // Try to detect selected text on the active tab and pre-fill body
+  if (currentTab?.id) {
+    try {
+      chrome.scripting.executeScript(
+        {
+          target: { tabId: currentTab.id },
+          func: () => window.getSelection().toString(),
+        },
+        (results) => {
+          if (chrome.runtime.lastError) return;
+          const selectedText = results?.[0]?.result?.trim();
+          if (selectedText) {
+            const pageTitle = currentTab.title || currentTab.url;
+            const pageUrl = currentTab.url || '';
+            bodyInput.value = `${selectedText}\n\n---\n*Clipped from [${pageTitle}](${pageUrl})*`;
+
+            // Show clip indicator
+            showClipIndicator(pageUrl);
+          }
+        }
+      );
+    } catch {
+      // Silently fail for pages that block script execution (chrome://, web store)
+    }
+  }
+
   showState('capture-form');
+}
+
+function showClipIndicator(pageUrl) {
+  // Remove existing indicator if any
+  const existing = document.getElementById('clip-indicator');
+  if (existing) existing.remove();
+
+  let domain = '';
+  try {
+    domain = new URL(pageUrl).hostname;
+  } catch {
+    domain = 'page';
+  }
+
+  const indicator = document.createElement('div');
+  indicator.id = 'clip-indicator';
+  indicator.className = 'clip-indicator';
+  indicator.innerHTML = `<span class="clip-badge">Text clipped from ${domain}</span>`;
+
+  // Insert before the form
+  const form = document.getElementById('save-form');
+  if (form) {
+    form.parentNode.insertBefore(indicator, form);
+  }
 }
 
 function showState(stateName) {

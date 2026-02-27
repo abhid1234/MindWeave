@@ -5,6 +5,8 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { generateTags } from '@/lib/ai/gemini';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
+import { generateSummary } from '@/lib/ai/summarization';
+import { syncContentToNeo4j } from '@/lib/neo4j/sync';
 
 // Mock auth
 vi.mock('@/lib/auth', () => ({
@@ -31,6 +33,14 @@ vi.mock('@/lib/ai/embeddings', () => ({
   upsertContentEmbedding: vi.fn(),
 }));
 
+vi.mock('@/lib/ai/summarization', () => ({
+  generateSummary: vi.fn(),
+}));
+
+vi.mock('@/lib/neo4j/sync', () => ({
+  syncContentToNeo4j: vi.fn(),
+}));
+
 // Mock revalidatePath
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
@@ -41,6 +51,8 @@ describe('Extension Capture API Route', () => {
     vi.clearAllMocks();
     vi.mocked(generateTags).mockResolvedValue(['auto-tag-1', 'auto-tag-2']);
     vi.mocked(upsertContentEmbedding).mockResolvedValue(undefined);
+    vi.mocked(generateSummary).mockResolvedValue('A test summary');
+    vi.mocked(syncContentToNeo4j).mockResolvedValue(undefined);
   });
 
   describe('POST /api/extension/capture', () => {

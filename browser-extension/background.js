@@ -1,6 +1,6 @@
 /**
  * Mindweave Browser Extension - Background Service Worker
- * Handles API calls and cookie-based authentication
+ * Handles API calls, cookie-based authentication, context menu, and quick-clip
  */
 
 const API_BASE_URL = 'https://mindweave.space';
@@ -57,7 +57,49 @@ async function saveContent(data) {
   }
 }
 
-// Listen for messages from popup
+/**
+ * Show badge feedback on the extension icon
+ * @param {boolean} success
+ */
+function showBadgeFeedback(success) {
+  const text = success ? '\u2713' : '\u2717';
+  const color = success ? '#10b981' : '#ef4444';
+  chrome.action.setBadgeText({ text });
+  chrome.action.setBadgeBackgroundColor({ color });
+  setTimeout(() => chrome.action.setBadgeText({ text: '' }), 2000);
+}
+
+// Create context menu on install
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'mindweave-save-highlight',
+    title: 'Save Highlight to Mindweave',
+    contexts: ['selection'],
+  });
+});
+
+// Handle context menu click
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId !== 'mindweave-save-highlight') return;
+
+  const selectedText = info.selectionText || '';
+  if (!selectedText) return;
+
+  const pageTitle = tab?.title || 'Untitled';
+  const pageUrl = tab?.url || '';
+  const body = `${selectedText}\n\n---\n*Clipped from [${pageTitle}](${pageUrl})*`;
+
+  const result = await saveContent({
+    type: 'note',
+    title: `Clip from ${pageTitle}`,
+    body,
+    tags: ['web-clip'],
+  });
+
+  showBadgeFeedback(result.success);
+});
+
+// Listen for messages from popup and content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'checkAuth') {
     checkAuth().then(sendResponse);
@@ -69,13 +111,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  return false;
-});
+  if (request.action === 'quickClip') {
+    saveContent(request.data).then(sendResponse);
+    return true;
+  }
 
-// Optional: Handle extension icon click for quick save (badge feedback)
-chrome.action.onClicked.addListener(async (tab) => {
-  // This won't fire when popup is configured, but useful if popup is removed
-  // For now, the popup handles everything
+  return false;
 });
 
 // Log when service worker starts

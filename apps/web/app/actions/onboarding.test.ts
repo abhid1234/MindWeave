@@ -56,8 +56,18 @@ vi.mock('@/lib/ai/embeddings', () => ({
   upsertContentEmbedding: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('@/lib/ai/summarization', () => ({
+  generateSummary: vi.fn().mockResolvedValue('A sample summary'),
+}));
+
+vi.mock('@/lib/neo4j/sync', () => ({
+  syncContentToNeo4j: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
+import { generateSummary } from '@/lib/ai/summarization';
+import { syncContentToNeo4j } from '@/lib/neo4j/sync';
 
 describe('Onboarding Actions', () => {
   beforeEach(() => {
@@ -186,6 +196,69 @@ describe('Onboarding Actions', () => {
       expect(result.seeded).toBe(20); // 15 content + 5 tasks
       expect(mockInsertInto).toHaveBeenCalled();
       expect(mockInsertValues).toHaveBeenCalled();
+    });
+
+    it('calls syncContentToNeo4j for each seeded item', async () => {
+      vi.mocked(auth).mockResolvedValue({ user: { id: 'user-1' } } as never);
+      mockWhere.mockResolvedValue([{ value: 0 }]);
+
+      const fakeInserted = Array.from({ length: 15 }, (_, i) => ({ id: `content-${i}` }));
+      mockReturning.mockResolvedValue(fakeInserted);
+
+      await seedSampleContent();
+
+      expect(syncContentToNeo4j).toHaveBeenCalledTimes(15);
+      for (let i = 0; i < 15; i++) {
+        expect(syncContentToNeo4j).toHaveBeenCalledWith(`content-${i}`);
+      }
+    });
+
+    it('calls generateSummary for each seeded item', async () => {
+      vi.mocked(auth).mockResolvedValue({ user: { id: 'user-1' } } as never);
+      mockWhere.mockResolvedValue([{ value: 0 }]);
+
+      const fakeInserted = Array.from({ length: 15 }, (_, i) => ({ id: `content-${i}` }));
+      mockReturning.mockResolvedValue(fakeInserted);
+
+      await seedSampleContent();
+
+      expect(generateSummary).toHaveBeenCalledTimes(15);
+    });
+
+    it('does not call sync/summary when user already has content', async () => {
+      vi.mocked(auth).mockResolvedValue({ user: { id: 'user-1' } } as never);
+      mockWhere.mockResolvedValue([{ value: 5 }]);
+
+      await seedSampleContent();
+
+      expect(syncContentToNeo4j).not.toHaveBeenCalled();
+      expect(generateSummary).not.toHaveBeenCalled();
+    });
+
+    it('handles syncContentToNeo4j failures gracefully', async () => {
+      vi.mocked(auth).mockResolvedValue({ user: { id: 'user-1' } } as never);
+      mockWhere.mockResolvedValue([{ value: 0 }]);
+
+      const fakeInserted = Array.from({ length: 15 }, (_, i) => ({ id: `content-${i}` }));
+      mockReturning.mockResolvedValue(fakeInserted);
+      vi.mocked(syncContentToNeo4j).mockRejectedValue(new Error('Neo4j down'));
+
+      const result = await seedSampleContent();
+      expect(result.success).toBe(true);
+      expect(result.seeded).toBe(20);
+    });
+
+    it('handles generateSummary failures gracefully', async () => {
+      vi.mocked(auth).mockResolvedValue({ user: { id: 'user-1' } } as never);
+      mockWhere.mockResolvedValue([{ value: 0 }]);
+
+      const fakeInserted = Array.from({ length: 15 }, (_, i) => ({ id: `content-${i}` }));
+      mockReturning.mockResolvedValue(fakeInserted);
+      vi.mocked(generateSummary).mockRejectedValue(new Error('AI unavailable'));
+
+      const result = await seedSampleContent();
+      expect(result.success).toBe(true);
+      expect(result.seeded).toBe(20);
     });
   });
 });

@@ -5,6 +5,8 @@ import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import { generateTags } from '@/lib/ai/gemini';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
+import { generateSummary } from '@/lib/ai/summarization';
+import { syncContentToNeo4j } from '@/lib/neo4j/sync';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import {
@@ -100,18 +102,37 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validationResult.data;
 
-    // Generate auto-tags using Claude AI
+    // Generate auto-tags and summary in parallel (blocking, before DB insert)
     let autoTags: string[] = [];
+    let summary: string | null = null;
     try {
-      autoTags = await generateTags({
-        title: validatedData.title,
-        body: validatedData.body,
-        url: validatedData.url,
-        type: validatedData.type,
-      });
+      const [tagsResult, summaryResult] = await Promise.allSettled([
+        generateTags({
+          title: validatedData.title,
+          body: validatedData.body,
+          url: validatedData.url,
+          type: validatedData.type,
+        }),
+        generateSummary({
+          title: validatedData.title,
+          body: validatedData.body,
+          url: validatedData.url,
+          type: validatedData.type,
+        }),
+      ]);
+      if (tagsResult.status === 'fulfilled') {
+        autoTags = tagsResult.value;
+      } else {
+        console.error('Auto-tagging failed:', tagsResult.reason);
+      }
+      if (summaryResult.status === 'fulfilled') {
+        summary = summaryResult.value;
+      } else {
+        console.error('Summary generation failed:', summaryResult.reason);
+      }
     } catch (error) {
-      // Don't fail content creation if auto-tagging fails
-      console.error('Auto-tagging failed:', error);
+      // Don't fail content creation if AI calls fail
+      console.error('AI pre-processing failed:', error);
     }
 
     // Insert into database
@@ -125,13 +146,18 @@ export async function POST(request: NextRequest) {
         url: validatedData.url || null,
         tags: validatedData.tags,
         autoTags,
+        ...(summary ? { summary } : {}),
         metadata: {},
       })
       .returning({ id: content.id });
 
-    // Generate embedding asynchronously (non-blocking)
+    // Generate embedding and sync to Neo4j asynchronously (non-blocking)
     upsertContentEmbedding(newContent.id).catch((error) => {
       console.error('Failed to generate embedding for content:', newContent.id, error);
+    });
+
+    syncContentToNeo4j(newContent.id).catch((error) => {
+      console.error('Failed to sync content to Neo4j:', newContent.id, error);
     });
 
     // Revalidate relevant pages

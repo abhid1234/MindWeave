@@ -1,0 +1,62 @@
+/* Mindweave Floating Clip Button */
+#mindweave-clip-btn {
+  position: absolute;
+  z-index: 2147483647;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  border: none;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#mindweave-clip-btn:hover {
+  background-color: #4f46e5;
+  transform: scale(1.1);
+}
+
+#mindweave-clip-btn.mindweave-clip-saving {
+  background-color: #6366f1;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+#mindweave-clip-btn.mindweave-clip-success {
+  background-color: #10b981;
+  pointer-events: none;
+}
+
+#mindweave-clip-btn.mindweave-clip-success svg {
+  display: none;
+}
+
+#mindweave-clip-btn.mindweave-clip-success::after {
+  content: '\2713';
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#mindweave-clip-btn.mindweave-clip-error {
+  background-color: #ef4444;
+  pointer-events: none;
+}
+
+#mindweave-clip-btn.mindweave-clip-error svg {
+  display: none;
+}
+
+#mindweave-clip-btn.mindweave-clip-error::after {
+  content: '\2717';
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}

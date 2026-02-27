@@ -6,6 +6,8 @@ import { users, content, tasks } from '@/lib/db/schema';
 import { eq, count } from 'drizzle-orm';
 import { generateTags } from '@/lib/ai/gemini';
 import { upsertContentEmbedding } from '@/lib/ai/embeddings';
+import { generateSummary } from '@/lib/ai/summarization';
+import { syncContentToNeo4j } from '@/lib/neo4j/sync';
 
 type OnboardingResult = {
   success: boolean;
@@ -348,6 +350,22 @@ export async function seedSampleContent(): Promise<SeedResult> {
 
     upsertContentEmbedding(contentId).catch((error) => {
       console.error('Failed to generate embedding for seeded content:', contentId, error);
+    });
+
+    // Generate AI summary (fire-and-forget)
+    generateSummary({ title: item.title, body: item.body, type: item.type })
+      .then(async (summary) => {
+        if (summary) {
+          await db.update(content).set({ summary }).where(eq(content.id, contentId));
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to generate summary for seeded content:', contentId, error);
+      });
+
+    // Sync content node to Neo4j (fire-and-forget)
+    syncContentToNeo4j(contentId).catch((error) => {
+      console.error('Failed to sync seeded content to Neo4j:', contentId, error);
     });
   }
 

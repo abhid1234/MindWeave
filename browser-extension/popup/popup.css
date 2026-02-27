@@ -296,6 +296,28 @@ body {
   color: var(--color-primary);
 }
 
+/* Clip Indicator */
+.clip-indicator {
+  margin-bottom: 12px;
+}
+
+.clip-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4f46e5;
+  background-color: #eef2ff;
+  border-radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .clip-badge {
+    color: #a5b4fc;
+    background-color: rgba(99, 102, 241, 0.15);
+  }
+}
+
 /* Utility */
 .hidden {
   display: none !important;
