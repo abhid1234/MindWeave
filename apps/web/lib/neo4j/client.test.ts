@@ -36,6 +36,15 @@ describe('Neo4j client', () => {
       expect(isNeo4jConfigured()).toBe(false);
     });
 
+    it('returns false when env vars are placeholder values', async () => {
+      vi.stubEnv('NEO4J_URI', 'not-configured');
+      vi.stubEnv('NEO4J_USER', 'not-configured');
+      vi.stubEnv('NEO4J_PASSWORD', 'not-configured');
+
+      const { isNeo4jConfigured } = await import('@/lib/neo4j/client');
+      expect(isNeo4jConfigured()).toBe(false);
+    });
+
     it('returns true when all env vars are set', async () => {
       vi.stubEnv('NEO4J_URI', 'bolt://localhost:7687');
       vi.stubEnv('NEO4J_USER', 'neo4j');

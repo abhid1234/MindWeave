@@ -19,6 +19,7 @@
     "docker:down": "docker compose -f docker/docker-compose.yml down",
     "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
     "gcp:setup-secrets": "./scripts/setup-gcp-secrets.sh",
+    "gcp:setup-neo4j": "./scripts/setup-neo4j.sh",
     "gcp:deploy": "./scripts/deploy-gcp.sh",
     "gcp:build": "gcloud builds submit --config=cloudbuild.yaml",
     "mobile:build": "npm run build --prefix apps/mobile",

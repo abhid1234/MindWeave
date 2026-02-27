@@ -88,6 +88,17 @@ create_secret "google-oauth-client-id" "Google OAuth Client ID" ""
 create_secret "google-oauth-client-secret" "Google OAuth Client Secret" ""
 create_secret "turnstile-secret-key" "Cloudflare Turnstile Secret Key (from dash.cloudflare.com)" ""
 
+# Neo4j AuraDB secrets (optional — graph falls back to pgvector without these)
+echo ""
+echo "Neo4j AuraDB secrets (optional, press Enter to skip):"
+echo "  Create a free instance at https://console.neo4j.io"
+echo ""
+
+create_secret "neo4j-uri" "Neo4j URI (e.g., neo4j+s://abc123.databases.neo4j.io)" ""
+create_secret "neo4j-user" "Neo4j Username" "neo4j"
+create_secret "neo4j-password" "Neo4j Password" ""
+create_secret "cron-secret" "Cron Secret for automated sync (generate with: openssl rand -base64 32)" ""
+
 echo ""
 echo "✅ Secrets setup complete!"
 echo ""

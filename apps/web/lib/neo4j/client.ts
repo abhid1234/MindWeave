@@ -6,10 +6,13 @@ let driver: Driver | null = null;
  * Check if Neo4j environment variables are configured
  */
 export function isNeo4jConfigured(): boolean {
+  const uri = process.env.NEO4J_URI;
+  const user = process.env.NEO4J_USER;
+  const password = process.env.NEO4J_PASSWORD;
   return !!(
-    process.env.NEO4J_URI &&
-    process.env.NEO4J_USER &&
-    process.env.NEO4J_PASSWORD
+    uri && uri !== 'not-configured' &&
+    user && user !== 'not-configured' &&
+    password && password !== 'not-configured'
   );
 }
 

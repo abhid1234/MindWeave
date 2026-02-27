@@ -11,6 +11,10 @@
 #   - auth-secret
 #   - google-oauth-client-id (optional)
 #   - google-oauth-client-secret (optional)
+#   - neo4j-uri (optional, Knowledge Graph)
+#   - neo4j-user (optional, Knowledge Graph)
+#   - neo4j-password (optional, Knowledge Graph)
+#   - cron-secret (optional, automated sync)
 
 steps:
   # Step 1: Build the Docker image
@@ -55,7 +59,7 @@ steps:
       - '--allow-unauthenticated'
       - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_APP_URL=${_APP_URL},AUTH_URL=${_APP_URL},CLOUD_SQL_CONNECTION_NAME=${_CLOUD_SQL_INSTANCE},NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAACa3eqmrh0p5DsBc,GCS_BUCKET_NAME=${_GCS_BUCKET_NAME}'
       - '--add-cloudsql-instances=${_CLOUD_SQL_INSTANCE}'
-      - '--set-secrets=DATABASE_URL=database-url:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest,RESEND_API_KEY=resend-api-key:latest,TURNSTILE_SECRET_KEY=turnstile-secret-key:latest'
+      - '--set-secrets=DATABASE_URL=database-url:latest,GOOGLE_AI_API_KEY=google-ai-api-key:latest,AUTH_SECRET=auth-secret:latest,AUTH_GOOGLE_ID=google-oauth-client-id:latest,AUTH_GOOGLE_SECRET=google-oauth-client-secret:latest,RESEND_API_KEY=resend-api-key:latest,TURNSTILE_SECRET_KEY=turnstile-secret-key:latest,NEO4J_URI=neo4j-uri:latest,NEO4J_USER=neo4j-user:latest,NEO4J_PASSWORD=neo4j-password:latest,CRON_SECRET=cron-secret:latest'
       - '--min-instances=0'
       - '--max-instances=10'
       - '--memory=512Mi'
