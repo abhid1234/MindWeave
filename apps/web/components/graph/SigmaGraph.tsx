@@ -144,12 +144,20 @@ export function SigmaGraph() {
 
     // Run ForceAtlas2 layout
     try {
-      // Assign random initial positions
+      // Assign random initial positions spread out
       for (const nodeId of graph.nodes()) {
-        graph.setNodeAttribute(nodeId, 'x', Math.random() * 100);
-        graph.setNodeAttribute(nodeId, 'y', Math.random() * 100);
+        graph.setNodeAttribute(nodeId, 'x', Math.random() * 200 - 100);
+        graph.setNodeAttribute(nodeId, 'y', Math.random() * 200 - 100);
       }
-      forceAtlas2.assign(graph, { iterations: 100, settings: { gravity: 1 } });
+      forceAtlas2.assign(graph, {
+        iterations: 200,
+        settings: {
+          gravity: 0.05,
+          scalingRatio: 10,
+          barnesHutOptimize: true,
+          strongGravityMode: false,
+        },
+      });
     } catch {
       // Fallback: use random positions already assigned
     }
@@ -159,7 +167,7 @@ export function SigmaGraph() {
       const community = communities[node.id] ?? 0;
       const rank = ranks[node.id] ?? 0;
       const normalizedRank = (rank - minRank) / rankRange;
-      const size = 4 + normalizedRank * 16;
+      const size = 6 + normalizedRank * 18;
 
       return {
         ...node,
@@ -196,6 +204,7 @@ export function SigmaGraph() {
           size: node.size,
           label: node.title,
           color: node.color,
+          originalColor: node.color,
           borderColor: node.borderColor,
           type: node.type,
           community: node.community,
@@ -208,7 +217,7 @@ export function SigmaGraph() {
           try {
             graph.addEdge(edge.source, edge.target, {
               size: 0.5 + edge.similarity * 2.5,
-              color: `rgba(150, 150, 170, ${0.15 + edge.similarity * 0.45})`,
+              color: `rgba(100, 100, 130, ${0.2 + edge.similarity * 0.5})`,
               similarity: edge.similarity,
             });
           } catch {
@@ -219,18 +228,26 @@ export function SigmaGraph() {
 
       if (!containerRef.current) return;
 
+      // Detect light/dark mode for label colors
+      const isDark = document.documentElement.classList.contains('dark');
+      const labelColor = isDark ? '#e2e8f0' : '#1e293b';
+
       sigma = new Sigma(graph, containerRef.current, {
         renderLabels: showLabels,
         labelRenderedSizeThreshold: 0,
         labelSize: 12,
-        labelColor: { color: '#e2e8f0' },
+        labelColor: { color: labelColor },
         defaultNodeColor: '#6366f1',
-        defaultEdgeColor: 'rgba(150, 150, 170, 0.3)',
+        defaultEdgeColor: isDark ? 'rgba(150, 150, 170, 0.3)' : 'rgba(100, 100, 130, 0.25)',
         minCameraRatio: 0.1,
         maxCameraRatio: 10,
       });
 
       sigmaRef.current = sigma;
+
+      // Fit camera to show all nodes
+      const camera = sigma.getCamera();
+      camera.animatedReset({ duration: 200 });
 
       // Event handlers
       sigma.on('enterNode', ({ node }) => {
@@ -259,7 +276,10 @@ export function SigmaGraph() {
       });
     };
 
-    initSigma();
+    initSigma().catch((err) => {
+      console.error('Failed to initialize Sigma.js:', err);
+      setError('Failed to initialize graph renderer');
+    });
 
     return () => {
       if (sigmaRef.current) {
@@ -367,7 +387,7 @@ export function SigmaGraph() {
         <div
           ref={containerRef}
           className="w-full h-full"
-          style={{ background: 'hsl(var(--card))' }}
+          style={{ background: 'hsl(var(--card))', position: 'absolute', inset: 0 }}
         />
 
         {/* Detail Panel */}

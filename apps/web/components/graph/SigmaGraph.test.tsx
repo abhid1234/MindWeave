@@ -62,6 +62,9 @@ vi.mock('sigma', () => {
     on = vi.fn();
     kill = vi.fn();
     refresh = vi.fn();
+    getCamera = vi.fn().mockReturnValue({
+      animatedReset: vi.fn(),
+    });
     getGraph = vi.fn().mockReturnValue({
       nodes: vi.fn().mockReturnValue([]),
       edges: vi.fn().mockReturnValue([]),
