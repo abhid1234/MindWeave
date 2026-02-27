@@ -192,7 +192,12 @@ export function SigmaGraph() {
     let sigma: import('sigma').Sigma | null = null;
 
     const initSigma = async () => {
-      const { Sigma } = await import('sigma');
+      const sigmaModule = await import('sigma');
+      const Sigma = sigmaModule.Sigma || sigmaModule.default;
+
+      if (!Sigma) {
+        throw new Error('Sigma class not found in module exports: ' + Object.keys(sigmaModule).join(', '));
+      }
 
       // Build a fresh graph for Sigma
       const graph = new Graph({ type: 'undirected' });
@@ -246,8 +251,12 @@ export function SigmaGraph() {
       sigmaRef.current = sigma;
 
       // Fit camera to show all nodes
-      const camera = sigma.getCamera();
-      camera.animatedReset({ duration: 200 });
+      try {
+        const camera = sigma.getCamera();
+        camera.animatedReset({ duration: 200 });
+      } catch {
+        // Camera fit is optional — graph still renders without it
+      }
 
       // Event handlers
       sigma.on('enterNode', ({ node }) => {
@@ -278,7 +287,7 @@ export function SigmaGraph() {
 
     initSigma().catch((err) => {
       console.error('Failed to initialize Sigma.js:', err);
-      setError('Failed to initialize graph renderer');
+      setError(`Graph renderer error: ${err instanceof Error ? err.message : String(err)}`);
     });
 
     return () => {
