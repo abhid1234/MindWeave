@@ -211,7 +211,7 @@ export function SigmaGraph() {
           color: node.color,
           originalColor: node.color,
           borderColor: node.borderColor,
-          type: node.type,
+          contentType: node.type,
           community: node.community,
           hidden: false,
         });
