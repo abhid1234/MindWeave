@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-26
+**Last Updated**: 2026-02-27
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -36,7 +36,11 @@
   - Respects OS preference with system default
 - **Browser Extension** - 684 total tests:
   - Chrome extension (Manifest V3) for one-click capture
-  - API endpoints for session check and content capture
+  - **Web Highlights / Text Clipping** (v1.2.0) — select text on any page to clip:
+    - Floating indigo save button appears near selection, saves as note with markdown citation
+    - Right-click context menu "Save Highlight to Mindweave" with badge feedback
+    - Popup auto-fills body when text is selected on active tab
+  - API endpoints for session check and content capture (with Neo4j sync + AI summaries)
   - Dark mode support in popup UI
 - **Rich Text Editor** - Tiptap-based editor with markdown rendering
 - **Version History** - Automatic snapshots, view/compare/revert previous versions
@@ -73,7 +77,10 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-26)**:
+**Latest Enhancement (2026-02-27)**:
+- [x] **Chrome Extension Web Highlights + Onboarding Sync Fix** — Extension v1.2.0 adds text clipping with 3 interaction paths: floating save button on text selection, right-click context menu with badge feedback, and popup pre-fill with clip indicator. New files: `content.js`, `content.css`. Updated `manifest.json` (contextMenus + scripting permissions, content_scripts block), `background.js`, `popup.js`, `popup.css`. Fixed onboarding seeder and extension capture route to call `generateSummary` and `syncContentToNeo4j` so new users see complete knowledge graph and content card summaries. 5 new onboarding tests (2,151 → 2,156 passing). Commit: 33a883a. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:33a883a`).
+
+**Previous Enhancement (2026-02-26)**:
 - [x] **Knowledge Graph Upgrade: Neo4j AuraDB + Sigma.js** — Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:dd98c01`). Complete rewrite of the Knowledge Graph with professional WebGL-accelerated visualization and optional Neo4j graph database layer:
   - **Neo4j AuraDB Integration** — Optional graph database layer with graceful pgvector fallback. Singleton client (`lib/neo4j/client.ts`) with `withNeo4jSession()` wrapper, 10-connection pool, 5s timeout. Graph model: `(:Content)-[:SIMILAR_TO {score}]-(:Content)` and `(:Content)-[:TAGGED_WITH]->(:Tag)`. Cypher queries for full graph, node neighborhood (N-hop traversal), shortest path, and tag clusters.
   - **Automatic Graph Sync** — Fire-and-forget sync wired into all content CRUD actions. `syncContentToNeo4j` on create/update/tag-edit (MERGE nodes, recreate TAGGED_WITH edges). `deleteContentFromNeo4j` on delete (DETACH DELETE). `syncSimilarityEdges` after embedding upsert (pgvector top-50 → SIMILAR_TO edges). `fullSyncUserGraph` for initial setup/recovery via POST `/api/neo4j/sync` (session auth or CRON_SECRET bearer).
@@ -996,6 +1003,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-02-27** - ✅ **Chrome Extension Web Highlights + Onboarding Sync Fix** — Extension v1.2.0: text clipping via floating button, context menu, popup pre-fill. Onboarding seeder + extension capture route now generate summaries and sync to Neo4j. 5 new tests (2,156 total). Commit: 33a883a. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:33a883a`)
 - **2026-02-26** - ✅ **Mobile Responsiveness, Bulk Ops, Filtered Export, Version Diffing, Webhook Integrations** — 5 features: mobile-responsive CSS across 8 files, bulk favorite/unfavorite/move with mobile overflow menu, filtered export by collection/type/tag/query, inline/side-by-side diff view with version comparison dialog, webhook endpoints for Generic/Slack/Discord with management UI. 100 new tests (2,101 total). `webhook_configs` DB table. Commit: edaa320. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:edaa320`)
 - **2026-02-23** - ✅ **Rich Text Editor** — Tiptap-based editor with headings, bold, italic, lists, code blocks. MarkdownRenderer for detail/share views. 12 files, 3 new components. Commit: 3e0b7ab
 - **2026-02-23** - ✅ **Version History** — Automatic snapshots on save, view/compare/revert from ContentDetailDialog. Auto-prunes to 50 versions. contentVersions table. Commit: 92e0b0b
