@@ -8,6 +8,7 @@ export interface PublicGraphNode {
   type: string;
   tags: string[];
   community?: number;
+  pageRank?: number;
 }
 
 export interface PublicGraphEdge {
@@ -16,9 +17,17 @@ export interface PublicGraphEdge {
   weight: number;
 }
 
+export interface PublicGraphStats {
+  nodeCount: number;
+  edgeCount: number;
+  communityCount: number;
+  topTags: string[];
+}
+
 export interface PublicGraphData {
   nodes: PublicGraphNode[];
   edges: PublicGraphEdge[];
+  stats?: PublicGraphStats;
 }
 
 export interface PublicGraphSettings {

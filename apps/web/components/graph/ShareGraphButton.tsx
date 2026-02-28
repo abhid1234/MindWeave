@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Share2, Copy, Check, X } from 'lucide-react';
+import { Share2, Copy, Check, Linkedin, ExternalLink } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { generatePublicGraphAction } from '@/app/actions/public-graph';
 
@@ -40,113 +49,128 @@ export function ShareGraphButton() {
     }
   }
 
-  function handleClose() {
-    setIsOpen(false);
-    setTitle('');
-    setDescription('');
-    setGraphUrl(null);
+  function handleOpenChange(open: boolean) {
+    setIsOpen(open);
+    if (!open) {
+      setTitle('');
+      setDescription('');
+      setGraphUrl(null);
+    }
   }
 
+  const linkedInShareUrl = graphUrl
+    ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(graphUrl)}`
+    : '';
+
   return (
-    <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-      >
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <Button variant="outline" onClick={() => setIsOpen(true)}>
         <Share2 className="h-4 w-4" />
         Share Graph
-      </button>
+      </Button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Share Knowledge Graph</h2>
-              <button onClick={handleClose} className="rounded-lg p-1 hover:bg-accent">
-                <X className="h-4 w-4" />
-              </button>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Share Knowledge Graph</DialogTitle>
+          <DialogDescription>
+            {graphUrl
+              ? 'Your public graph is ready to share!'
+              : 'Create a public snapshot of your graph. Titles and tags will be visible, but note content will not be shared.'}
+          </DialogDescription>
+        </DialogHeader>
+
+        {graphUrl ? (
+          <div className="space-y-4">
+            {/* Copy URL */}
+            <div className="flex gap-2">
+              <Input
+                value={graphUrl}
+                readOnly
+                className="bg-accent/50"
+              />
+              <Button variant="outline" size="icon" onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
             </div>
 
-            {graphUrl ? (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">Your public graph is ready to share!</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={graphUrl}
-                    readOnly
-                    className="flex-1 rounded-lg border border-border bg-accent/50 px-3 py-2 text-sm"
-                  />
-                  <button
-                    onClick={handleCopy}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </button>
-                </div>
-                <button
-                  onClick={handleClose}
-                  className="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Title</label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="My Knowledge Graph"
-                    maxLength={200}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description (optional)</label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="A visual map of my knowledge..."
-                    rows={3}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  This creates a snapshot of your graph. Content titles and tags will be visible, but note content will not be shared.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleClose}
-                    className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleShare}
-                    disabled={isPending || !title.trim()}
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                  >
-                    {isPending ? (
-                      <>
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
-                        Creating...
-                      </>
-                    ) : (
-                      <>
-                        <Share2 className="h-4 w-4" />
-                        Create Public Graph
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Action buttons */}
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <a
+                href={graphUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open in new tab
+              </a>
+              <a
+                href={linkedInShareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-all"
+              >
+                <Linkedin className="h-4 w-4" />
+                Share on LinkedIn
+              </a>
+            </div>
+
+            <Button variant="secondary" className="w-full" onClick={() => handleOpenChange(false)}>
+              Done
+            </Button>
           </div>
-        </div>
-      )}
-    </>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="graph-title" className="block text-sm font-medium mb-1">
+                Title
+              </label>
+              <Input
+                id="graph-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="My Knowledge Graph"
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <label htmlFor="graph-description" className="block text-sm font-medium mb-1">
+                Description (optional)
+              </label>
+              <textarea
+                id="graph-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="A visual map of my knowledge..."
+                rows={3}
+                className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => handleOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleShare}
+                disabled={isPending || !title.trim()}
+              >
+                {isPending ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-4 w-4" />
+                    Create Public Graph
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

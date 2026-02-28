@@ -6,7 +6,16 @@ import { db } from '@/lib/db/client';
 import { content, embeddings, publicGraphs } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
-import type { PublicGraphData, PublicGraphSettings, PublicGraphResult, GeneratePublicGraphResult } from '@/types/public-graph';
+import Graph from 'graphology';
+import louvain from 'graphology-communities-louvain';
+import pagerank from 'graphology-metrics/centrality/pagerank';
+import type {
+  PublicGraphData,
+  PublicGraphSettings,
+  PublicGraphResult,
+  PublicGraphStats,
+  GeneratePublicGraphResult,
+} from '@/types/public-graph';
 
 /**
  * Generate a public shareable graph from the user's knowledge graph
@@ -67,18 +76,95 @@ export async function generatePublicGraphAction(
 
     const edgeRows = edgeResult as unknown as { source: string; target: string; weight: string }[];
 
-    const graphData: PublicGraphData = {
-      nodes: nodes.map((n) => ({
+    // Build graphology graph for analytics
+    const graph = new Graph({ type: 'undirected' });
+
+    const allTags: string[] = [];
+
+    const rawNodes = nodes.map((n) => {
+      const combinedTags = [...n.tags, ...n.autoTags];
+      allTags.push(...combinedTags);
+      return {
         id: n.id,
         title: n.title,
         type: n.type,
-        tags: [...n.tags, ...n.autoTags],
-      })),
-      edges: edgeRows.map((e) => ({
-        source: e.source,
-        target: e.target,
-        weight: parseFloat(e.weight),
-      })),
+        tags: combinedTags,
+      };
+    });
+
+    for (const node of rawNodes) {
+      graph.addNode(node.id, { label: node.title, type: node.type });
+    }
+
+    const rawEdges = edgeRows.map((e) => ({
+      source: e.source,
+      target: e.target,
+      weight: parseFloat(e.weight),
+    }));
+
+    for (const edge of rawEdges) {
+      if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
+        try {
+          graph.addEdge(edge.source, edge.target, { weight: edge.weight });
+        } catch {
+          // Skip duplicate edges
+        }
+      }
+    }
+
+    // Run community detection
+    let communities: Record<string, number> = {};
+    try {
+      if (graph.size > 0) {
+        communities = louvain(graph);
+      }
+    } catch {
+      for (const nodeId of graph.nodes()) {
+        communities[nodeId] = 0;
+      }
+    }
+
+    // Run PageRank
+    let ranks: Record<string, number> = {};
+    try {
+      if (graph.size > 0) {
+        ranks = pagerank(graph);
+      }
+    } catch {
+      for (const nodeId of graph.nodes()) {
+        ranks[nodeId] = 1 / graph.order;
+      }
+    }
+
+    // Compute stats
+    const communitySet = new Set(Object.values(communities));
+    const tagFrequency: Record<string, number> = {};
+    for (const tag of allTags) {
+      tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
+    }
+    const topTags = Object.entries(tagFrequency)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([tag]) => tag);
+
+    const stats: PublicGraphStats = {
+      nodeCount: rawNodes.length,
+      edgeCount: rawEdges.length,
+      communityCount: communitySet.size,
+      topTags,
+    };
+
+    // Enrich nodes with community and pageRank
+    const enrichedNodes = rawNodes.map((node) => ({
+      ...node,
+      community: communities[node.id] ?? 0,
+      pageRank: ranks[node.id] ?? 0,
+    }));
+
+    const graphData: PublicGraphData = {
+      nodes: enrichedNodes,
+      edges: rawEdges,
+      stats,
     };
 
     const graphId = crypto.randomBytes(16).toString('hex');
