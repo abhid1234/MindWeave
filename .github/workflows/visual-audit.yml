@@ -54,7 +54,7 @@ jobs:
 
       - name: Push database schema
         working-directory: apps/web
-        run: pnpm db:push
+        run: pnpm db:push --force
 
       - name: Install Playwright (chromium only)
         working-directory: apps/web
