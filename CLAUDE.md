@@ -107,6 +107,10 @@ Before deployment:
 pnpm build               # Production build succeeds
 ```
 
+### What Needs Deployment
+- **Code changes** (components, actions, pages, config, schema) → commit, push, **and deploy**
+- **STATUS.md / docs-only changes** → commit and push only. **Never deploy** — these are not used at runtime
+
 ### Feature Development
 1. **Plan first** - Enter plan mode, identify files to change, write approach
 2. **Build the feature** - Focus on ONE feature at a time, follow existing patterns
@@ -114,8 +118,8 @@ pnpm build               # Production build succeeds
 4. **Verify quality** - Run all quality gates above
 5. **Test in browser** - `pnpm dev` and manually verify the feature works
 6. **Commit and push** - Descriptive commit messages
-7. **Update STATUS.md** - Mark feature complete, add to recent updates
-8. **Deploy** - Build and deploy to Cloud Run when ready
+7. **Update STATUS.md** - Mark feature complete, add to recent updates (commit + push only, no deploy)
+8. **Deploy** - Build and deploy to Cloud Run when ready (only for code changes)
 
 ### Bug Fixing
 1. **Reproduce** - Understand the bug (screenshot, error message, steps)
