@@ -1,0 +1,84 @@
+name: Visual Audit
+
+on:
+  schedule:
+    # Weekly: Sunday at 2am UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  visual-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: mindweave
+          POSTGRES_PASSWORD: dev_password_change_in_prod
+          POSTGRES_DB: mindweave_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mindweave"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create .env.local
+        working-directory: apps/web
+        run: |
+          cat > .env.local << 'EOF'
+          DATABASE_URL=postgresql://mindweave:dev_password_change_in_prod@localhost:5432/mindweave_dev
+          AUTH_SECRET=visual-audit-ci-secret-not-for-production
+          AUTH_URL=http://localhost:3000
+          GOOGLE_AI_API_KEY=fake-key-for-visual-audit
+          NEXT_PUBLIC_APP_URL=http://localhost:3000
+          NODE_ENV=development
+          ALLOW_DEV_LOGIN=true
+          EOF
+
+      - name: Push database schema
+        working-directory: apps/web
+        run: pnpm db:push
+
+      - name: Install Playwright (chromium only)
+        working-directory: apps/web
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run visual audit
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ./scripts/visual-audit.sh
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-audit-screenshots-${{ github.run_id }}
+          path: apps/web/screenshots/
+          retention-days: 30

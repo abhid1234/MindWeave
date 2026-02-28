@@ -89,6 +89,9 @@ docker/data/
 !**/icons/*.png
 !apps/mobile/android/**/*.png
 
+# Visual audit output
+screenshots/
+
 # Mobile vendor/bundle dirs
 apps/mobile/android/.bundle/
 apps/mobile/android/vendor/
