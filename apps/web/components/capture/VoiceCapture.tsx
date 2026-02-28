@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { Mic, MicOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
@@ -29,14 +29,29 @@ export function VoiceCapture({ onTranscript, disabled = false }: VoiceCapturePro
     reset,
   } = useSpeechRecognition();
 
+  // Use refs to always access the latest values inside setTimeout callbacks,
+  // avoiding stale closures where React 18 batching may defer re-renders.
+  const transcriptRef = useRef(transcript);
+  const interimTranscriptRef = useRef(interimTranscript);
+  const durationRef = useRef(duration);
+  const onTranscriptRef = useRef(onTranscript);
+
+  useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+  useEffect(() => { interimTranscriptRef.current = interimTranscript; }, [interimTranscript]);
+  useEffect(() => { durationRef.current = duration; }, [duration]);
+  useEffect(() => { onTranscriptRef.current = onTranscript; }, [onTranscript]);
+
   const handleToggle = useCallback(() => {
     if (isListening) {
       stop();
       // Deliver transcript on stop (use timeout to allow final onend processing)
       setTimeout(() => {
-        const finalText = transcript + (interimTranscript ? ' ' + interimTranscript : '');
+        const t = transcriptRef.current;
+        const it = interimTranscriptRef.current;
+        const d = durationRef.current;
+        const finalText = t + (it ? ' ' + it : '');
         if (finalText.trim()) {
-          onTranscript(finalText.trim(), duration);
+          onTranscriptRef.current(finalText.trim(), d);
         }
         reset();
       }, 100);
@@ -44,7 +59,7 @@ export function VoiceCapture({ onTranscript, disabled = false }: VoiceCapturePro
       reset();
       start();
     }
-  }, [isListening, stop, start, reset, transcript, interimTranscript, duration, onTranscript]);
+  }, [isListening, stop, start, reset]);
 
   if (!isSupported) {
     return null;
