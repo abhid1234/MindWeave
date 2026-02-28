@@ -79,6 +79,12 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-28)**:
+- [x] **Capture Page UX Fixes** — Four fixes deployed across 5 commits to improve the capture page experience. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:ab0a02d`).
+  - **Templates moved to sidebar** — 6-card template grid was visually confusing next to the Note/Link/File type selector (both were card grids stacked vertically). Moved templates to a compact vertical list sidebar on the right (horizontal scroll on mobile). `TemplateSelector` redesigned from grid of tall cards with tag badges to slim icon+label rows. Page layout changed from single-column `max-w-3xl` to two-column `max-w-5xl` with `lg:flex-row`.
+  - **Sticky Save button** — Save/Cancel buttons were scrolling off-screen when voice capture or URL summarizer filled the editor with content. Made the action bar `sticky bottom-0` with `backdrop-blur-sm` translucent background.
+  - **Voice transcript stale closure fix** — Voice recordings weren't saving body text. Root cause: `handleToggle` in VoiceCapture captured `transcript`/`interimTranscript` from React render closure; with React 18 automatic batching, speech recognition state updates from browser API callbacks could be deferred, leaving the 100ms setTimeout with stale empty values. Fix: added refs (`transcriptRef`, `interimTranscriptRef`, `durationRef`) synced via `useEffect`, setTimeout reads from refs instead of closure.
+  - **Microphone Permissions-Policy fix** — `Permissions-Policy` header in `next.config.js` had `microphone=()` which blocked the browser from showing the mic permission prompt entirely. Changed to `microphone=(self)` to allow same-origin microphone access for voice capture.
+
 - [x] **ContentCard Three-Dot Menu Fix** — Fixed action buttons (star, three-dot menu) being clipped/invisible on content cards with long titles or multiple badges. Root cause: `overflow-hidden` on the card article combined with too many flex items in the header row. Fix: restructured card header layout — moved date to left side with type/shared badges, added `flex-shrink-0` to right-side action buttons, `min-w-0` on left side for graceful text truncation, reduced button sizes (`h-8 w-8` → `h-7 w-7`) and gaps. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:6816d0e`). 1 file changed (`ContentCard.tsx`).
 
 **Previous Enhancement (2026-02-28)**:
