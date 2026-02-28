@@ -39,7 +39,7 @@ interface ReviewResult {
 const SCREENSHOTS_DIR = path.resolve(__dirname, '../apps/web/screenshots');
 const MANIFEST_PATH = path.join(SCREENSHOTS_DIR, 'manifest.json');
 const REPORT_PATH = path.join(SCREENSHOTS_DIR, 'audit-report.md');
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 const REVIEW_PROMPT = `You are a senior frontend engineer performing a visual audit of a web application screenshot.
 
