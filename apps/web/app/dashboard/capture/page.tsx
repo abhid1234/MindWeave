@@ -4,8 +4,10 @@ import { createContentAction } from '@/app/actions/content';
 import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FileText, LinkIcon, Upload, Loader2, PenLine, Sparkles } from 'lucide-react';
+import { FileText, LinkIcon, Upload, Loader2, PenLine, Sparkles, ScanText, AlertCircle } from 'lucide-react';
 import { FileUpload, type UploadedFile } from '@/components/capture/FileUpload';
+import { VoiceCapture } from '@/components/capture/VoiceCapture';
+import { UrlSummarizer } from '@/components/capture/UrlSummarizer';
 import { useToast } from '@/components/ui/toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +20,84 @@ import { getTemplate, fillTemplatePlaceholders } from '@/lib/templates';
 import { TemplateSelector } from '@/components/capture/TemplateSelector';
 
 type ContentType = 'note' | 'link' | 'file';
+
+/** Extract text from an already-uploaded image via /api/ocr */
+function OcrExtractButton({
+  filePath,
+  disabled,
+  onTextExtracted,
+}: {
+  filePath: string;
+  disabled: boolean;
+  onTextExtracted: (text: string) => void;
+}) {
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleExtract = async () => {
+    setIsExtracting(true);
+    setError(null);
+    try {
+      // Fetch the uploaded image and re-send to OCR endpoint
+      const imageResponse = await fetch(filePath);
+      const blob = await imageResponse.blob();
+
+      const formData = new FormData();
+      formData.append('image', blob, 'image.png');
+
+      const response = await fetch('/api/ocr', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Failed to extract text');
+        return;
+      }
+      if (!data.text) {
+        setError('No text was found in the image.');
+        return;
+      }
+      onTextExtracted(data.text);
+    } catch {
+      setError('Failed to extract text. Please try again.');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  return (
+    <div className="mt-3">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleExtract}
+        disabled={disabled || isExtracting}
+        className="gap-1.5"
+      >
+        {isExtracting ? (
+          <>
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span className="text-xs">Extracting text...</span>
+          </>
+        ) : (
+          <>
+            <ScanText className="h-3.5 w-3.5" />
+            <span className="text-xs">Extract Text (OCR)</span>
+          </>
+        )}
+      </Button>
+      {error && (
+        <p className="mt-1 flex items-center gap-1 text-xs text-destructive">
+          <AlertCircle className="h-3 w-3" />
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
 
 const TYPE_OPTIONS: {
   value: ContentType;
@@ -76,6 +156,8 @@ export default function CapturePage() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [body, setBody] = useState('');
+  const [metadata, setMetadata] = useState<Record<string, unknown>>({});
+  const [urlValue, setUrlValue] = useState('');
   const tagInputRef = useRef<TagInputHandle>(null);
   const router = useRouter();
   const { addToast } = useToast();
@@ -125,6 +207,7 @@ export default function CapturePage() {
         fileSize: uploadedFile.fileSize,
         filePath: uploadedFile.filePath,
         fileName: uploadedFile.fileName,
+        ...metadata,
       }));
       // Set URL to file path for easy access
       formData.set('url', uploadedFile.filePath);
@@ -133,6 +216,11 @@ export default function CapturePage() {
       if (!title || title.trim() === '') {
         formData.set('title', uploadedFile.fileName);
       }
+    } else if (Object.keys(metadata).length > 0) {
+      // Merge capture metadata (voice, OCR, summarizer)
+      const existingMeta = formData.get('metadata');
+      const existing = existingMeta ? JSON.parse(existingMeta as string) : {};
+      formData.set('metadata', JSON.stringify({ ...existing, ...metadata }));
     }
 
     startTransition(async () => {
@@ -164,6 +252,8 @@ export default function CapturePage() {
   const handleTypeChange = (type: ContentType) => {
     setContentType(type);
     setUploadedFile(null);
+    setMetadata({});
+    setUrlValue('');
   };
 
   return (
@@ -274,6 +364,31 @@ export default function CapturePage() {
                     Select a file to upload. Title will be auto-filled from filename.
                   </p>
                 )}
+                {/* Screenshot OCR - show Extract Text button when image file is uploaded */}
+                {uploadedFile && uploadedFile.fileType.startsWith('image/') && (
+                  <OcrExtractButton
+                    filePath={uploadedFile.filePath}
+                    disabled={isPending}
+                    onTextExtracted={(text) => {
+                      setContentType('note');
+                      setBody(text);
+                      setMetadata({
+                        captureMethod: 'ocr',
+                        imagePath: uploadedFile.filePath,
+                      });
+                      const titleInput = document.getElementById('title') as HTMLInputElement | null;
+                      const firstLine = text.split('\n')[0].trim();
+                      if (titleInput && !titleInput.value.trim() && firstLine) {
+                        titleInput.value = firstLine.slice(0, 60) + (firstLine.length > 60 ? '...' : '');
+                      }
+                      addToast({
+                        variant: 'success',
+                        title: 'Text extracted',
+                        description: 'Switched to note with extracted text.',
+                      });
+                    }}
+                  />
+                )}
               </div>
             )}
 
@@ -301,9 +416,29 @@ export default function CapturePage() {
             {/* Body - hide for file type */}
             {contentType !== 'file' && (
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  {contentType === 'link' ? 'Description (Optional)' : 'Content (Optional)'}
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">
+                    {contentType === 'link' ? 'Description (Optional)' : 'Content (Optional)'}
+                  </label>
+                  {contentType === 'note' && (
+                    <VoiceCapture
+                      onTranscript={(text, duration) => {
+                        setBody((prev) => (prev ? prev + '\n\n' + text : text));
+                        setMetadata((prev) => ({
+                          ...prev,
+                          captureMethod: 'voice',
+                          voiceDuration: duration,
+                        }));
+                        // Auto-set title from first ~60 chars if empty
+                        const titleInput = document.getElementById('title') as HTMLInputElement | null;
+                        if (titleInput && !titleInput.value.trim()) {
+                          titleInput.value = text.slice(0, 60) + (text.length > 60 ? '...' : '');
+                        }
+                      }}
+                      disabled={isPending}
+                    />
+                  )}
+                </div>
                 <TiptapEditor
                   content={body}
                   onChange={setBody}
@@ -365,10 +500,28 @@ export default function CapturePage() {
                   placeholder="https://example.com"
                   required
                   disabled={isPending}
+                  value={urlValue}
+                  onChange={(e) => setUrlValue(e.target.value)}
                 />
                 {errors.url && (
                   <p className="mt-1 text-sm text-red-600">{errors.url[0]}</p>
                 )}
+                {/* URL Summarizer */}
+                <div className="mt-2">
+                  <UrlSummarizer
+                    url={urlValue}
+                    onSummaryReady={(summaryBody, summaryMeta) => {
+                      setBody(summaryBody);
+                      setMetadata((prev) => ({ ...prev, ...summaryMeta }));
+                      addToast({
+                        variant: 'success',
+                        title: 'Summary generated',
+                        description: 'Content has been filled with the summary.',
+                      });
+                    }}
+                    disabled={isPending}
+                  />
+                </div>
               </div>
             )}
 

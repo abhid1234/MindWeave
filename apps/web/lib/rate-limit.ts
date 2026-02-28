@@ -276,6 +276,16 @@ export const RATE_LIMITS = {
     maxRequests: 60,
     windowMs: 60 * 1000,
   },
+  // OCR: 20 requests per hour (expensive AI vision operation)
+  ocr: {
+    maxRequests: 20,
+    windowMs: 60 * 60 * 1000,
+  },
+  // URL summarization: 10 requests per hour
+  summarizeUrl: {
+    maxRequests: 10,
+    windowMs: 60 * 60 * 1000,
+  },
 } as const;
 
 /**
