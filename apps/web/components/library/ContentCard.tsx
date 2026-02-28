@@ -191,9 +191,9 @@ export function ContentCard({
           aria-hidden="true"
         />
 
-        <div className="flex items-start justify-between mb-2 pl-2">
-          <div className="flex items-center gap-2">
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize transition-colors ${
+        <div className="flex items-start justify-between mb-2 pl-2 gap-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize transition-colors flex-shrink-0 ${
               type === 'note'
                 ? 'bg-note/10 text-note dark:bg-note/20'
                 : type === 'link'
@@ -203,21 +203,21 @@ export function ContentCard({
               {type}
             </span>
             {isShared && (
-              <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary flex-shrink-0">
                 <Globe className="h-3 w-3" aria-hidden="true" />
                 Shared
               </span>
             )}
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground truncate">
               <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
             </span>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
             <RelatedItemsBadge contentId={id} />
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 transition-transform hover:scale-110"
+              className="h-7 w-7 p-0 transition-transform hover:scale-110"
               onClick={handleToggleFavoriteWithAnnouncement}
               disabled={isFavoriteLoading}
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -239,7 +239,7 @@ export function ContentCard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 p-0"
                   aria-label="Content actions"
                 >
                   <MoreHorizontal className="h-4 w-4" />
