@@ -150,12 +150,13 @@ export function SigmaGraph() {
         graph.setNodeAttribute(nodeId, 'y', Math.random() * 200 - 100);
       }
       forceAtlas2.assign(graph, {
-        iterations: 200,
+        iterations: 300,
         settings: {
-          gravity: 0.05,
-          scalingRatio: 10,
+          gravity: 0.02,
+          scalingRatio: 20,
           barnesHutOptimize: true,
           strongGravityMode: false,
+          linLogMode: true,
         },
       });
     } catch {
@@ -239,13 +240,16 @@ export function SigmaGraph() {
 
       sigma = new Sigma(graph, containerRef.current, {
         renderLabels: showLabels,
-        labelRenderedSizeThreshold: 0,
-        labelSize: 12,
+        labelRenderedSizeThreshold: 8,
+        labelSize: 11,
+        labelWeight: 'bold',
         labelColor: { color: labelColor },
         defaultNodeColor: '#6366f1',
         defaultEdgeColor: isDark ? 'rgba(150, 150, 170, 0.3)' : 'rgba(100, 100, 130, 0.25)',
         minCameraRatio: 0.1,
         maxCameraRatio: 10,
+        labelDensity: 0.5,
+        labelGridCellSize: 120,
       });
 
       sigmaRef.current = sigma;

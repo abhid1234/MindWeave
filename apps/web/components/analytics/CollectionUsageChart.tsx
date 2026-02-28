@@ -56,7 +56,7 @@ export function CollectionUsageChart() {
           {error}
         </div>
       ) : data.length === 0 ? (
-        <div className="flex h-[300px] flex-col items-center justify-center text-muted-foreground" data-testid="chart-empty">
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground" data-testid="chart-empty">
           <p>No collections yet</p>
           <p className="mt-1 text-sm">Create collections to organize your content</p>
         </div>
