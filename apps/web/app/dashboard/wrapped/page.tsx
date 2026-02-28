@@ -37,6 +37,17 @@ export default async function WrappedPage() {
         </div>
       </div>
 
+      {/* How it works */}
+      <div className="mb-6 animate-fade-up rounded-lg border border-border bg-muted/40 px-5 py-4 text-sm text-muted-foreground" style={{ animationDelay: '50ms', animationFillMode: 'backwards' }}>
+        <p className="mb-2 font-medium text-foreground">How it works</p>
+        <p>
+          Knowledge Wrapped analyzes everything you&apos;ve saved — notes, links, and files — to create a
+          personalized summary of your knowledge journey. You&apos;ll see your top topics, capture streaks,
+          and an AI-generated &quot;knowledge personality.&quot; Hit <span className="font-medium text-foreground">Generate</span> to
+          create yours, then share it on LinkedIn to show the world what you&apos;ve been learning.
+        </p>
+      </div>
+
       {/* Generator */}
       <div className="animate-fade-up" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
         <WrappedGenerator

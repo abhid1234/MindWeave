@@ -144,7 +144,7 @@ export function ContentDetailDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
+          <DialogHeader className="pr-8">
             <div className="flex items-center gap-2 mb-1">
               <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
                 type === 'note'
@@ -164,7 +164,10 @@ export function ContentDetailDialog({
               {isFavorite && (
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" aria-label="Favorited" />
               )}
-              <span className="ml-auto text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
+                &middot;
+              </span>
+              <span className="text-xs text-muted-foreground">
                 <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
               </span>
             </div>

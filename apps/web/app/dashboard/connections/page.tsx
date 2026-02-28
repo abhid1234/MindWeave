@@ -56,6 +56,17 @@ export default function ConnectionsPage() {
         </div>
       </div>
 
+      {/* How it works */}
+      <div className="mb-6 animate-fade-up rounded-lg border border-border bg-muted/40 px-5 py-4 text-sm text-muted-foreground" style={{ animationDelay: '50ms', animationFillMode: 'backwards' }}>
+        <p className="mb-2 font-medium text-foreground">How it works</p>
+        <p>
+          Connect the Dots uses AI to find surprising links between items in your knowledge base that
+          don&apos;t share any tags but are semantically related. The more diverse content you capture — across
+          different topics — the more unexpected insights you&apos;ll discover. Each connection comes with an
+          AI-generated explanation you can share as a LinkedIn post.
+        </p>
+      </div>
+
       {/* Content */}
       <div className="animate-fade-up space-y-4" style={{ animationDelay: '75ms', animationFillMode: 'backwards' }}>
         {isPending && !loaded ? (

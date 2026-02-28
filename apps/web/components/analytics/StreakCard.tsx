@@ -71,12 +71,12 @@ export function StreakCard() {
         </div>
 
         {/* Heatmap */}
-        <div className="grid grid-cols-[repeat(13,1fr)] gap-1" role="img" aria-label="Activity heatmap for the last 90 days">
+        <div className="grid grid-cols-[repeat(13,14px)] gap-[3px]" role="img" aria-label="Activity heatmap for the last 90 days">
           {data.heatmap.map((day) => (
             <div
               key={day.date}
               className={cn(
-                'aspect-square rounded-sm transition-colors',
+                'h-[14px] w-[14px] rounded-sm transition-colors',
                 getHeatmapColor(day.count)
               )}
               title={`${day.date}: ${day.count} items`}

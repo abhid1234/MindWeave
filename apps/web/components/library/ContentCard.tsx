@@ -208,7 +208,8 @@ export function ContentCard({
                 Shared
               </span>
             )}
-            <span className="text-xs text-muted-foreground truncate">
+            <span className="text-xs text-muted-foreground flex-shrink-0" aria-hidden="true">&middot;</span>
+            <span className="text-xs text-muted-foreground truncate flex-shrink-0">
               <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
             </span>
           </div>

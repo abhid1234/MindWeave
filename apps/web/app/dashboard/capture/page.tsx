@@ -175,7 +175,17 @@ export default function CapturePage() {
 
   const handleTemplateSelect = (templateId: string | null) => {
     setSelectedTemplate(templateId);
-    if (!templateId) return;
+
+    if (!templateId) {
+      // Reset to blank state
+      setBody('');
+      setTags([]);
+      const titleInput = document.getElementById('title') as HTMLInputElement | null;
+      if (titleInput) {
+        titleInput.value = '';
+      }
+      return;
+    }
 
     const template = getTemplate(templateId);
     if (!template) return;
