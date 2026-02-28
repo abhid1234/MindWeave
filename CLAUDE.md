@@ -109,7 +109,7 @@ pnpm build               # Production build succeeds
 
 ### What Needs Deployment
 - **Code changes** (components, actions, pages, config, schema) → commit, push, **and deploy**
-- **STATUS.md / docs-only changes** → commit and push only. **Never deploy** — these are not used at runtime
+- **STATUS.md, CLAUDE.md, and other docs-only changes** → commit and push only. **Never deploy** — these are not used at runtime
 
 ### Feature Development
 1. **Plan first** - Enter plan mode, identify files to change, write approach
