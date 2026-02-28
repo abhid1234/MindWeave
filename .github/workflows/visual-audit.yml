@@ -15,6 +15,14 @@ jobs:
   visual-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://mindweave:dev_password_change_in_prod@localhost:5432/mindweave_dev
+      AUTH_SECRET: visual-audit-ci-secret-not-for-production
+      AUTH_URL: http://localhost:3000
+      GOOGLE_AI_API_KEY: fake-key-for-visual-audit
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: development
+      ALLOW_DEV_LOGIN: 'true'
 
     services:
       postgres:
@@ -43,17 +51,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Create .env.local
-        working-directory: apps/web
-        run: |
-          echo 'DATABASE_URL=postgresql://mindweave:dev_password_change_in_prod@localhost:5432/mindweave_dev' > .env.local
-          echo 'AUTH_SECRET=visual-audit-ci-secret-not-for-production' >> .env.local
-          echo 'AUTH_URL=http://localhost:3000' >> .env.local
-          echo 'GOOGLE_AI_API_KEY=fake-key-for-visual-audit' >> .env.local
-          echo 'NEXT_PUBLIC_APP_URL=http://localhost:3000' >> .env.local
-          echo 'NODE_ENV=development' >> .env.local
-          echo 'ALLOW_DEV_LOGIN=true' >> .env.local
 
       - name: Push database schema
         working-directory: apps/web
