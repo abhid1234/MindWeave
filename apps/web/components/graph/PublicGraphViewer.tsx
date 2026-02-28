@@ -109,7 +109,7 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
 
         graph.addNode(node.id, {
           label: node.title,
-          type: node.type,
+          contentType: node.type,
           tags: node.tags,
           size,
           color: nodeColor,
@@ -198,7 +198,7 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
         updateTooltip(
           {
             title: nodeAttrs.label as string,
-            type: nodeAttrs.type as string,
+            type: nodeAttrs.contentType as string,
             tags: (nodeAttrs.tags as string[]) || [],
             connections: connectionCount[node] || 0,
           },
