@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-27
+**Last Updated**: 2026-02-28
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -63,6 +63,7 @@
 - **Filtered Export** - Export by collection, type, tag, or search query from library and collection views
 - **Version Diff View** - Inline and side-by-side text diff highlighting, two-version comparison dialog
 - **Webhook Integrations** - Generic (API key), Slack (HMAC-SHA256), Discord (Ed25519) webhook endpoints with management UI
+- **Voice Capture, Screenshot OCR, URL Summarizer** - Three new capture modes: voice-to-text via Web Speech API, image OCR via Gemini Vision, YouTube/article summarization
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -77,7 +78,26 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-27)**:
+**Latest Enhancement (2026-02-28)**:
+- [x] **Voice Capture, Screenshot OCR, YouTube/Article Summarizer** — Three new capture enhancements that lower friction and increase content variety, all integrated contextually into the existing capture page. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:f868a52`).
+  - **Voice Capture** — Web Speech API integration for voice-to-text note capture. Custom `useSpeechRecognition` hook with `isSupported`, `isListening`, `transcript`, `interimTranscript`, `duration`, `start()`, `stop()`, `reset()`. `VoiceCapture` component renders mic button next to "Content" label when note type selected. Pulsing red dot + elapsed timer during recording. Auto-fills TiptapEditor body and sets title from first ~60 chars. Metadata: `{ captureMethod: 'voice', voiceDuration }`. WebkitSpeechRecognition fallback for Safari. Hidden on unsupported browsers (Firefox).
+  - **Screenshot OCR** — Gemini 2.0 Flash multimodal text extraction from uploaded images. `extractTextFromImage()` in `lib/ai/ocr.ts` sends base64 image with inlineData to Gemini Vision. `POST /api/ocr` endpoint with auth + rate limiting (20/hr). `ScreenshotOCR` standalone component with drag-drop upload zone. `OcrExtractButton` inline on capture page when File type + image uploaded — extracts text, switches to Note type with pre-filled body. Metadata: `{ captureMethod: 'ocr', imagePath }`. Handles "no text found" gracefully.
+  - **YouTube/Article Summarizer** — Extracts YouTube transcripts (via `youtube-transcript` npm package) or article content (via `node-html-parser`), generates structured summaries with Gemini. `extractUrlContent()` detects URL type, extracts video ID or scrapes article HTML (strips nav/scripts/styles, caps at 10K chars). `summarizeUrlContent()` returns `{ summary, keyTakeaways[], formattedBody }` as markdown with source citation. `POST /api/summarize-url` with auth + rate limiting (10/hr) + SSRF protection (rejects private/internal IPs). `UrlSummarizer` component shows contextual "Summarize Video" (YouTube icon) or "Summarize Article" (sparkles icon) button below URL input. Metadata: `{ sourceType, videoId, domain, title }`.
+  - **Capture Page Integration** — All three features add contextual UI to the existing 3-type capture form: mic button for notes, OCR button for uploaded images, summarize button for link URLs. New `metadata` and `urlValue` state. Metadata JSONB carries provenance through form submission. `handleTypeChange` resets all new state. Rate limit presets added: `ocr` (20/hr), `summarizeUrl` (10/hr).
+  - **1 new dependency** — `youtube-transcript ^1.2.1` (lightweight, no API keys required).
+  - **62 new tests across 9 test files** (2,156 → 2,213 passing, 7 skipped):
+    - `hooks/useSpeechRecognition.test.ts` (11): support detection, webkit fallback, start/stop, transcript accumulation, interim, duration, errors, reset, cleanup
+    - `components/capture/VoiceCapture.test.tsx` (6): renders, unsupported, start/stop, duration display, error, disabled
+    - `lib/ai/ocr.test.ts` (5): extraction, no-text, unsupported types, API errors, all mime types
+    - `app/api/ocr/route.test.ts` (5): auth, validation, success, no-text, missing image
+    - `components/capture/ScreenshotOCR.test.tsx` (6): upload zone, non-image error, preview, extraction, API error, remove
+    - `lib/ai/url-content.test.ts` (8): YouTube URL detection variants, transcript extraction, article extraction, fetch errors
+    - `lib/ai/url-summarizer.test.ts` (5): YouTube summary, article summary, API error, format fallback, source link
+    - `app/api/summarize-url/route.test.ts` (6): auth, missing URL, invalid URL, SSRF blocked, success, errors
+    - `components/capture/UrlSummarizer.test.tsx` (6): hidden empty, invalid URL, YouTube button, article button, callback, error
+  - **23 files changed** (19 new, 4 modified) — 0 TS errors, 0 new lint warnings, build succeeds.
+
+**Previous Enhancement (2026-02-27)**:
 - [x] **Chrome Extension Web Highlights + Onboarding Sync Fix** — Extension v1.2.0 adds text clipping with 3 interaction paths: floating save button on text selection, right-click context menu with badge feedback, and popup pre-fill with clip indicator. New files: `content.js`, `content.css`. Updated `manifest.json` (contextMenus + scripting permissions, content_scripts block), `background.js`, `popup.js`, `popup.css`. Fixed onboarding seeder and extension capture route to call `generateSummary` and `syncContentToNeo4j` so new users see complete knowledge graph and content card summaries. 5 new onboarding tests (2,151 → 2,156 passing). Commit: 33a883a. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:33a883a`).
 
 **Previous Enhancement (2026-02-26)**:
