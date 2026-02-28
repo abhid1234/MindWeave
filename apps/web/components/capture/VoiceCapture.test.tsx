@@ -67,9 +67,9 @@ describe('VoiceCapture', () => {
   });
 
   it('shows error message', () => {
-    mockUseSpeechRecognition.error = 'Microphone access denied.';
+    mockUseSpeechRecognition.error = 'Microphone access denied. Click the lock icon in your address bar, set Microphone to "Allow", then try again.';
     render(<VoiceCapture onTranscript={vi.fn()} />);
-    expect(screen.getByText('Microphone access denied.')).toBeInTheDocument();
+    expect(screen.getByText(/Click the lock icon/)).toBeInTheDocument();
   });
 
   it('is disabled when disabled prop is true', () => {

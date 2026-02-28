@@ -85,9 +85,9 @@ export function VoiceCapture({ onTranscript, disabled = false }: VoiceCapturePro
       )}
 
       {error && (
-        <span className="flex items-center gap-1 text-xs text-destructive">
-          <AlertCircle className="h-3 w-3" />
-          {error}
+        <span className="flex items-center gap-1.5 text-xs text-destructive max-w-[320px]">
+          <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+          <span>{error}</span>
         </span>
       )}
     </div>

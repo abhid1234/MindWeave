@@ -27,15 +27,29 @@ class MockSpeechRecognition {
   abort = vi.fn();
 
   constructor() {
-    // Track latest instance so tests can access event handlers
     mockInstance = this;
   }
 }
+
+// Mock getUserMedia — grant permission by default
+const mockGetUserMedia = vi.fn().mockResolvedValue({
+  getTracks: () => [{ stop: vi.fn() }],
+});
 
 beforeEach(() => {
   vi.useFakeTimers();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).SpeechRecognition = MockSpeechRecognition;
+
+  // Mock navigator.mediaDevices.getUserMedia
+  Object.defineProperty(navigator, 'mediaDevices', {
+    value: { getUserMedia: mockGetUserMedia },
+    writable: true,
+    configurable: true,
+  });
+  mockGetUserMedia.mockResolvedValue({
+    getTracks: () => [{ stop: vi.fn() }],
+  });
 });
 
 afterEach(() => {
@@ -68,23 +82,37 @@ describe('useSpeechRecognition', () => {
     expect(result.current.isSupported).toBe(true);
   });
 
-  it('starts listening', () => {
+  it('requests mic permission then starts listening', async () => {
     const { result } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
     });
 
+    expect(mockGetUserMedia).toHaveBeenCalledWith({ audio: true });
     expect(result.current.isListening).toBe(true);
     expect(mockInstance.continuous).toBe(true);
     expect(mockInstance.interimResults).toBe(true);
   });
 
-  it('stops listening', () => {
+  it('shows actionable error when mic permission denied', async () => {
+    mockGetUserMedia.mockRejectedValueOnce(new DOMException('Permission denied', 'NotAllowedError'));
+
     const { result } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
+    });
+
+    expect(result.current.error).toContain('Click the lock icon');
+    expect(result.current.isListening).toBe(false);
+  });
+
+  it('stops listening', async () => {
+    const { result } = renderHook(() => useSpeechRecognition());
+
+    await act(async () => {
+      await result.current.start();
     });
     expect(result.current.isListening).toBe(true);
 
@@ -94,11 +122,11 @@ describe('useSpeechRecognition', () => {
     expect(result.current.isListening).toBe(false);
   });
 
-  it('accumulates transcript from results', () => {
+  it('accumulates transcript from results', async () => {
     const { result } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
     });
 
     act(() => {
@@ -120,11 +148,11 @@ describe('useSpeechRecognition', () => {
     expect(result.current.transcript).toBe('Hello world');
   });
 
-  it('tracks interim transcript separately', () => {
+  it('tracks interim transcript separately', async () => {
     const { result } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
     });
 
     act(() => {
@@ -146,11 +174,11 @@ describe('useSpeechRecognition', () => {
     expect(result.current.interimTranscript).toBe('Hel');
   });
 
-  it('tracks duration while listening', () => {
+  it('tracks duration while listening', async () => {
     const { result } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
     });
 
     act(() => {
@@ -160,11 +188,11 @@ describe('useSpeechRecognition', () => {
     expect(result.current.duration).toBe(3);
   });
 
-  it('handles errors', () => {
+  it('handles speech recognition errors', async () => {
     const { result } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
     });
 
     act(() => {
@@ -175,15 +203,15 @@ describe('useSpeechRecognition', () => {
       mockInstance.onerror?.(errorEvent);
     });
 
-    expect(result.current.error).toBe('Microphone access denied. Please allow microphone access.');
+    expect(result.current.error).toContain('Click the lock icon');
     expect(result.current.isListening).toBe(false);
   });
 
-  it('resets all state', () => {
+  it('resets all state', async () => {
     const { result } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
     });
 
     act(() => {
@@ -212,14 +240,13 @@ describe('useSpeechRecognition', () => {
     expect(result.current.isListening).toBe(false);
   });
 
-  it('cleans up on unmount', () => {
+  it('cleans up on unmount', async () => {
     const { result, unmount } = renderHook(() => useSpeechRecognition());
 
-    act(() => {
-      result.current.start();
+    await act(async () => {
+      await result.current.start();
     });
 
-    // Unmount should not throw - recognition should be cleaned up
     unmount();
     expect(mockInstance.abort).toHaveBeenCalled();
   });

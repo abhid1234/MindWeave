@@ -40,7 +40,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     }
   }, []);
 
-  const start = useCallback(() => {
+  const start = useCallback(async () => {
     const SpeechRecognitionClass = getSpeechRecognitionClass();
     if (!SpeechRecognitionClass) {
       setError('Speech recognition is not supported in this browser');
@@ -49,6 +49,19 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     setError(null);
     isStoppingRef.current = false;
+
+    // Request microphone permission explicitly before starting speech recognition.
+    // The Speech API doesn't always trigger the browser permission prompt on its own.
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Release the stream immediately — we just needed the permission grant
+      stream.getTracks().forEach((track) => track.stop());
+    } catch {
+      setError(
+        'Microphone access denied. Click the lock icon in your address bar, set Microphone to "Allow", then try again.',
+      );
+      return;
+    }
 
     const recognition = new SpeechRecognitionClass();
     recognition.continuous = true;
@@ -92,10 +105,10 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       if (event.error === 'aborted') return;
 
       const errorMessages: Record<string, string> = {
-        'no-speech': 'No speech detected. Please try again.',
-        'audio-capture': 'No microphone found. Please check your settings.',
-        'not-allowed': 'Microphone access denied. Please allow microphone access.',
-        'network': 'Network error. Please check your connection.',
+        'no-speech': 'No speech detected. Try speaking louder or check your microphone.',
+        'audio-capture': 'No microphone found. Please connect a microphone and try again.',
+        'not-allowed': 'Microphone access denied. Click the lock icon in your address bar, set Microphone to "Allow", then try again.',
+        'network': 'Network error. Please check your connection and try again.',
         'service-not-available': 'Speech service unavailable. Please try again later.',
       };
 
