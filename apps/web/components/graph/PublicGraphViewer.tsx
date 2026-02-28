@@ -34,6 +34,7 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
   const sigmaRef = useRef<import('sigma').Sigma | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const showLabels = settings?.showLabels !== false;
   const colorBy = settings?.colorBy ?? 'community';
@@ -80,7 +81,8 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
     let mounted = true;
 
     async function initGraph() {
-      const { Sigma } = await import('sigma');
+      const sigmaModule = await import('sigma');
+      const Sigma = sigmaModule.Sigma || sigmaModule.default;
 
       if (!mounted || !containerRef.current) return;
 
@@ -213,7 +215,11 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
       setIsLoading(false);
     }
 
-    initGraph();
+    initGraph().catch((err) => {
+      console.error('Failed to initialize public graph:', err);
+      setError(err instanceof Error ? err.message : String(err));
+      setIsLoading(false);
+    });
 
     return () => {
       mounted = false;
@@ -228,6 +234,14 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">This graph has no data.</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-sm text-destructive">Failed to render graph: {error}</p>
       </div>
     );
   }
