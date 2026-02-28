@@ -52,6 +52,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Enable pgvector extension
+        run: PGPASSWORD=dev_password_change_in_prod psql -h localhost -U mindweave -d mindweave_dev -c 'CREATE EXTENSION IF NOT EXISTS vector;'
+
       - name: Push database schema
         working-directory: apps/web
         run: pnpm db:push --force
