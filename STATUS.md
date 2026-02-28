@@ -64,6 +64,7 @@
 - **Version Diff View** - Inline and side-by-side text diff highlighting, two-version comparison dialog
 - **Webhook Integrations** - Generic (API key), Slack (HMAC-SHA256), Discord (Ed25519) webhook endpoints with management UI
 - **Voice Capture, Screenshot OCR, URL Summarizer** - Three new capture modes: voice-to-text via Web Speech API, image OCR via Gemini Vision, YouTube/article summarization
+- **Viral LinkedIn Sharing** - Knowledge Wrapped (personalized stats + AI personality + story viewer + OG images), Connect the Dots (cross-domain AI connections), Public Knowledge Graph (shareable Sigma.js snapshots), Weekly Briefing → LinkedIn Post (auto-generated from recent content)
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -79,6 +80,33 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-02-28)**:
+- [x] **Viral LinkedIn Sharing Features** — Four new features to make Mindweave shareable on LinkedIn, each creating a viral loop (users generate → share → drive traffic back). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:cb0a17f`).
+  - **Knowledge Wrapped** — Personalized knowledge base summary (like Spotify Wrapped). Parallel stat queries gather total items, top tags, streaks, content type split, most connected content, month-over-month growth, and active days. Gemini AI assigns a fun "knowledge personality" (e.g., "The Curious Polymath"). Instagram-style story viewer with progress dots, auto-advance (6s), keyboard nav. OG image generation via `next/og` ImageResponse (1200x630). Public share pages with metadata for LinkedIn previews. Dashboard page at `/dashboard/wrapped`, public page at `/wrapped/[shareId]`.
+  - **Connect the Dots** — Cross-domain content connections using pgvector. SQL finds pairs with moderate similarity (0.3–0.6) and no overlapping tags — the "unexpected" connections. Gemini generates 2-3 sentence insights per pair. Results cached in DB (24h). Each connection has "Share as Post" to generate LinkedIn content. Dashboard page at `/dashboard/connections`.
+  - **Public Knowledge Graph** — Shareable read-only Sigma.js graph snapshots. Snapshots nodes/edges (strips body/userId for privacy). Louvain community detection + ForceAtlas2 layout. Public page at `/graph/[graphId]` with OG metadata. ShareGraphButton added to graph page header.
+  - **Weekly Briefing → LinkedIn Post** — Auto-generated "This Week I Learned" posts from recent content. Groups last 7 days of content by tag themes. Gemini generates hook → themed insights → CTA format. Saves to `generatedPosts` (tone='weekly-briefing'). Sunday cron endpoint for opted-in users (CRON_SECRET auth). WeeklyBriefingButton added above ContentSelector in PostGenerator. Digest email gets "Share as LinkedIn Post" CTA link.
+  - **3 new DB tables** — `knowledge_wrapped` (shareId, stats JSONB, period), `connections` (contentIdA/B, insight, similarity, tagGroups), `public_graphs` (graphId, title, graphData JSONB, settings). All with user FK cascade delete + indexes. Applied to production Cloud SQL via `drizzle-kit push`.
+  - **3 new AI functions** — `generateKnowledgePersonality()`, `generateConnectionInsight()`, `generateWeeklyBriefing()` in `lib/ai/gemini.ts`.
+  - **2 new rate limit presets** — `wrappedGeneration` (5/hr), `connectionGeneration` (10/hr).
+  - **2 new nav items** — Wrapped (Gift icon), Connections (Zap icon).
+  - **39 new tests across 5 test files** (2,236 passing):
+    - `app/actions/wrapped.test.ts` (7): auth, rate limit, stats computation, AI personality, DB save, public fetch, latest fetch
+    - `app/actions/connections.test.ts` (6): auth, rate limit, similarity range, tag exclusion, AI insight, caching
+    - `app/actions/public-graph.test.ts` (5): auth, data snapshot, strip sensitive data, public fetch, 404
+    - `app/actions/weekly-briefing.test.ts` (7): auth, min content check, AI call, save to generatedPosts, cron auth, latest fetch
+    - `components/connections/ConnectionCard.test.tsx` (5): render, similarity badge, insight, tags, share button
+  - **35 files changed** (25 new, 10 modified) — 0 TS errors, 0 new lint warnings, build succeeds.
+
+- [x] **UX Polish** — Six fixes across multiple pages. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:cb0a17f`).
+  - **Wrapped & Connections descriptions** — Added "How it works" blurbs to both pages to guide new users.
+  - **Activity streak heatmap** — Shrunk cells from fluid `1fr` to fixed 14px with 3px gaps (was stretching to fill entire card width).
+  - **Template blank reset** — Switching back to "Blank" template now clears title, body, and tags (was leaving previous template content).
+  - **Date/close button spacing** — Added `pr-8` to ContentDetailDialog header and dot separator between badges and date in ContentCard.
+  - **Template headings** — Changed all template section headings from H2 to H3, added italic placeholder prompts (e.g., "*Who was in the meeting?*").
+  - **Analytics grid gaps** — Removed fixed 300px height from CollectionUsageChart empty state, added `items-start` to all analytics grid rows.
+  - **Knowledge Graph labels** — Added `labelDensity: 0.5`, `labelGridCellSize: 120`, `labelRenderedSizeThreshold: 8` to Sigma config. Increased ForceAtlas2 spread (lower gravity, higher scaling, linLogMode) for less node overlap.
+
+**Previous Enhancement (2026-02-28)**:
 - [x] **Capture Page UX Fixes** — Four fixes deployed across 5 commits to improve the capture page experience. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:ab0a02d`).
   - **Templates moved to sidebar** — 6-card template grid was visually confusing next to the Note/Link/File type selector (both were card grids stacked vertically). Moved templates to a compact vertical list sidebar on the right (horizontal scroll on mobile). `TemplateSelector` redesigned from grid of tall cards with tag badges to slim icon+label rows. Page layout changed from single-column `max-w-3xl` to two-column `max-w-5xl` with `lg:flex-row`.
   - **Sticky Save button** — Save/Cancel buttons were scrolling off-screen when voice capture or URL summarizer filled the editor with content. Made the action bar `sticky bottom-0` with `backdrop-blur-sm` translucent background.
