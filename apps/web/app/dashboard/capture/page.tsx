@@ -549,9 +549,9 @@ export default function CapturePage() {
         </CardContent>
       </Card>
 
-      {/* Actions */}
+      {/* Actions - sticky so they stay visible when content fills the editor */}
       <div
-        className="mt-6 flex gap-4 animate-fade-up"
+        className="sticky bottom-0 z-10 mt-6 flex gap-4 animate-fade-up bg-background/80 backdrop-blur-sm py-4 -mx-4 px-4 border-t border-transparent [&:not(:first-child)]:border-border/50"
         style={{ animationDelay: '225ms', animationFillMode: 'backwards' }}
       >
         <Button
