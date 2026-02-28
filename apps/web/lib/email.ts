@@ -235,6 +235,7 @@ export async function sendDigestEmail(
       ${tagsHtml}
       <p style="margin-top:24px;">
         <a href="${APP_URL}/dashboard/library" style="display:inline-block;padding:10px 20px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:8px;">Open Mindweave</a>
+        <a href="${APP_URL}/dashboard/create-post?auto=weekly" style="display:inline-block;padding:10px 20px;background:#0077B5;color:#fff;text-decoration:none;border-radius:8px;margin-left:8px;">Share as LinkedIn Post</a>
       </p>
       <p style="margin-top:24px;font-size:12px;color:#9ca3af;">
         You can change your digest preferences in <a href="${APP_URL}/dashboard/profile" style="color:#6366f1;">Profile Settings</a>.

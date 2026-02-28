@@ -20,6 +20,11 @@ vi.mock('@/components/graph/SigmaGraph', () => ({
   SigmaGraph: () => <div data-testid="sigma-graph">Graph Visualization</div>,
 }));
 
+// Mock ShareGraphButton component
+vi.mock('@/components/graph/ShareGraphButton', () => ({
+  ShareGraphButton: () => <button data-testid="share-graph-button">Share Graph</button>,
+}));
+
 import GraphPage from './page';
 
 describe('GraphPage', () => {

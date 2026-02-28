@@ -8,6 +8,7 @@ import { ContentSelector } from './ContentSelector';
 import { PostOptions } from './PostOptions';
 import { PostPreview } from './PostPreview';
 import { PostHistory } from './PostHistory';
+import { WeeklyBriefingButton } from './WeeklyBriefingButton';
 
 interface ContentItem {
   id: string;
@@ -145,6 +146,12 @@ export function PostGenerator() {
           </div>
         ) : (
           <div className="space-y-6">
+            <WeeklyBriefingButton
+              onGenerated={(postContent) => {
+                setGeneratedPost({ postContent, sourceContentTitles: [] });
+                setStep('preview');
+              }}
+            />
             <ContentSelector
               selectedItems={selectedContent}
               onSelectionChange={setSelectedContent}

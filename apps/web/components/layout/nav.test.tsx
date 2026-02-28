@@ -18,7 +18,7 @@ vi.mock('next/link', () => ({
 }));
 
 describe('NavLinks', () => {
-  it('should render all 12 nav items', () => {
+  it('should render all 14 nav items', () => {
     render(<NavLinks />);
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
@@ -28,6 +28,8 @@ describe('NavLinks', () => {
     expect(screen.getByText('Ask AI')).toBeInTheDocument();
     expect(screen.getByText('Discover')).toBeInTheDocument();
     expect(screen.getByText('Create Post')).toBeInTheDocument();
+    expect(screen.getByText('Wrapped')).toBeInTheDocument();
+    expect(screen.getByText('Connections')).toBeInTheDocument();
     expect(screen.getByText('Graph')).toBeInTheDocument();
     expect(screen.getByText('Library')).toBeInTheDocument();
     expect(screen.getByText('Tasks')).toBeInTheDocument();
@@ -84,6 +86,6 @@ describe('NavLinks', () => {
 
   it('should render without onNavigate prop', () => {
     render(<NavLinks />);
-    expect(screen.getAllByRole('link')).toHaveLength(12);
+    expect(screen.getAllByRole('link')).toHaveLength(14);
   });
 });

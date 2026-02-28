@@ -188,6 +188,157 @@ Output ONLY the sentence, no quotes, no preamble.`;
   }
 }
 
+export interface GenerateKnowledgePersonalityInput {
+  topTags: string[];
+  totalItems: number;
+  contentTypeSplit: { notes: number; links: number; files: number };
+  longestStreak: number;
+}
+
+/**
+ * Generate a fun "knowledge personality" based on usage patterns
+ */
+export async function generateKnowledgePersonality(
+  input: GenerateKnowledgePersonalityInput
+): Promise<{ personality: string; description: string }> {
+  if (!genAI) {
+    return {
+      personality: 'The Curious Mind',
+      description: 'A dedicated knowledge collector with diverse interests.',
+    };
+  }
+
+  try {
+    const prompt = `You are a fun, creative personality generator. Based on someone's knowledge base usage, assign them a creative "knowledge personality" title and a one-sentence description.
+
+Stats:
+- Top topics: ${input.topTags.join(', ')}
+- Total items saved: ${input.totalItems}
+- Content mix: ${input.contentTypeSplit.notes} notes, ${input.contentTypeSplit.links} links, ${input.contentTypeSplit.files} files
+- Longest daily streak: ${input.longestStreak} days
+
+Examples of personalities: "The Curious Polymath", "The Deep Diver", "The Link Collector", "The Prolific Note-Taker", "The Pattern Seeker"
+
+Return EXACTLY two lines:
+Line 1: The personality title (3-4 words, creative and fun)
+Line 2: A one-sentence description (max 20 words)
+
+No quotes, no labels, no preamble.`;
+
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    if (text) {
+      const lines = text.trim().split('\n').filter(Boolean);
+      return {
+        personality: lines[0]?.trim() || 'The Curious Mind',
+        description: lines[1]?.trim() || 'A dedicated knowledge collector with diverse interests.',
+      };
+    }
+
+    return {
+      personality: 'The Curious Mind',
+      description: 'A dedicated knowledge collector with diverse interests.',
+    };
+  } catch (error) {
+    console.error('Error generating knowledge personality:', error);
+    return {
+      personality: 'The Curious Mind',
+      description: 'A dedicated knowledge collector with diverse interests.',
+    };
+  }
+}
+
+/**
+ * Generate an AI insight for a cross-domain content connection
+ */
+export async function generateConnectionInsight(
+  contentA: { title: string; body?: string; tags: string[] },
+  contentB: { title: string; body?: string; tags: string[] },
+  similarity: number
+): Promise<string> {
+  if (!genAI) {
+    return `These two pieces of knowledge share an unexpected connection at ${Math.round(similarity * 100)}% similarity.`;
+  }
+
+  try {
+    const prompt = `You are a knowledge connection expert. Two pieces of content from different domains have a hidden connection. Explain the non-obvious connection in 2-3 sentences. Be insightful and specific.
+
+Content A: "${contentA.title}"
+${contentA.body ? `Summary: ${contentA.body.slice(0, 300)}` : ''}
+Tags: ${contentA.tags.join(', ')}
+
+Content B: "${contentB.title}"
+${contentB.body ? `Summary: ${contentB.body.slice(0, 300)}` : ''}
+Tags: ${contentB.tags.join(', ')}
+
+Similarity: ${Math.round(similarity * 100)}%
+
+Write the insight. Output ONLY the insight text, no preamble.`;
+
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    if (text) {
+      return text.trim();
+    }
+
+    return `These two pieces of knowledge share an unexpected connection at ${Math.round(similarity * 100)}% similarity.`;
+  } catch (error) {
+    console.error('Error generating connection insight:', error);
+    return `These two pieces of knowledge share an unexpected connection at ${Math.round(similarity * 100)}% similarity.`;
+  }
+}
+
+/**
+ * Generate a weekly briefing LinkedIn post from this week's content
+ */
+export async function generateWeeklyBriefing(
+  weekContent: Array<{ title: string; body?: string; tags: string[] }>,
+  themes: string[]
+): Promise<string> {
+  if (!genAI) {
+    throw new Error('GOOGLE_AI_API_KEY not set');
+  }
+
+  const contentSummary = weekContent
+    .slice(0, 10)
+    .map((item, idx) => `${idx + 1}. "${item.title}" (${item.tags.slice(0, 3).join(', ')})`)
+    .join('\n');
+
+  const prompt = `You are a LinkedIn post writer. Generate a "This Week I Learned" post based on someone's weekly knowledge capture activity.
+
+This week's themes: ${themes.join(', ')}
+Items captured this week (${weekContent.length} total):
+${contentSummary}
+
+Write a LinkedIn post with:
+1. An engaging hook (first line that grabs attention)
+2. 3-4 themed insights/takeaways from the week
+3. A closing CTA or reflection
+4. 3-5 relevant hashtags
+
+Target length: 150-250 words. Tone: thoughtful and authentic.
+Output ONLY the post text, no preamble.`;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    if (text) {
+      return text.trim();
+    }
+
+    throw new Error('Empty response from AI');
+  } catch (error) {
+    console.error('Error generating weekly briefing:', error);
+    throw error;
+  }
+}
+
 /**
  * Generate a LinkedIn post from user's knowledge base content using Gemini Flash
  */

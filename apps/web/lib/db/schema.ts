@@ -448,6 +448,9 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   reminders: many(reminders),
   collectionMemberships: many(collectionMembers),
   webhookConfigs: many(webhookConfigs),
+  knowledgeWrapped: many(knowledgeWrapped),
+  connections: many(connections),
+  publicGraphs: many(publicGraphs),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -660,6 +663,99 @@ export const dailyHighlightsRelations = relations(dailyHighlights, ({ one }) => 
   }),
 }));
 
+// Knowledge Wrapped table (shareable knowledge stats)
+export const knowledgeWrapped = pgTable(
+  'knowledge_wrapped',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    shareId: varchar('share_id', { length: 32 }).unique().notNull(),
+    stats: jsonb('stats').notNull(),
+    period: varchar('period', { length: 20 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('knowledge_wrapped_user_id_idx').on(table.userId),
+    shareIdIdx: index('knowledge_wrapped_share_id_idx').on(table.shareId),
+  })
+);
+
+// Connections table (cross-domain AI insights)
+export const connections = pgTable(
+  'connections',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    contentIdA: uuid('content_id_a')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    contentIdB: uuid('content_id_b')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    insight: text('insight').notNull(),
+    similarity: integer('similarity').notNull(), // stored as 0-100 integer
+    tagGroupA: text('tag_group_a').array().notNull().default([]),
+    tagGroupB: text('tag_group_b').array().notNull().default([]),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('connections_user_id_idx').on(table.userId),
+    contentIdAIdx: index('connections_content_id_a_idx').on(table.contentIdA),
+    contentIdBIdx: index('connections_content_id_b_idx').on(table.contentIdB),
+  })
+);
+
+// Public Graphs table (shareable knowledge graph snapshots)
+export const publicGraphs = pgTable(
+  'public_graphs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    graphId: varchar('graph_id', { length: 32 }).unique().notNull(),
+    title: varchar('title', { length: 200 }).notNull(),
+    description: text('description'),
+    graphData: jsonb('graph_data').notNull(),
+    settings: jsonb('settings'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('public_graphs_user_id_idx').on(table.userId),
+    graphIdIdx: index('public_graphs_graph_id_idx').on(table.graphId),
+  })
+);
+
+// Relations for new tables
+export const knowledgeWrappedRelations = relations(knowledgeWrapped, ({ one }) => ({
+  user: one(users, {
+    fields: [knowledgeWrapped.userId],
+    references: [users.id],
+  }),
+}));
+
+export const connectionsRelations = relations(connections, ({ one }) => ({
+  user: one(users, {
+    fields: [connections.userId],
+    references: [users.id],
+  }),
+  contentA: one(content, {
+    fields: [connections.contentIdA],
+    references: [content.id],
+  }),
+}));
+
+export const publicGraphsRelations = relations(publicGraphs, ({ one }) => ({
+  user: one(users, {
+    fields: [publicGraphs.userId],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -714,3 +810,12 @@ export type NewDailyHighlight = typeof dailyHighlights.$inferInsert;
 
 export type WebhookConfig = typeof webhookConfigs.$inferSelect;
 export type NewWebhookConfig = typeof webhookConfigs.$inferInsert;
+
+export type KnowledgeWrapped = typeof knowledgeWrapped.$inferSelect;
+export type NewKnowledgeWrapped = typeof knowledgeWrapped.$inferInsert;
+
+export type Connection = typeof connections.$inferSelect;
+export type NewConnection = typeof connections.$inferInsert;
+
+export type PublicGraph = typeof publicGraphs.$inferSelect;
+export type NewPublicGraph = typeof publicGraphs.$inferInsert;

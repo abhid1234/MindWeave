@@ -286,6 +286,16 @@ export const RATE_LIMITS = {
     maxRequests: 10,
     windowMs: 60 * 60 * 1000,
   },
+  // Knowledge Wrapped generation: 5 per hour
+  wrappedGeneration: {
+    maxRequests: 5,
+    windowMs: 60 * 60 * 1000,
+  },
+  // Connection generation: 10 per hour
+  connectionGeneration: {
+    maxRequests: 10,
+    windowMs: 60 * 60 * 1000,
+  },
 } as const;
 
 /**
