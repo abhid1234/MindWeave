@@ -51,9 +51,8 @@ MANIFEST_CONTENT=$(cat "$MANIFEST")
 
 cd "$REPO_ROOT"
 
-claude -p \
-  --allowedTools "Bash(read-only:*),Read,Write,Edit,Glob,Grep" \
-  "You are a senior frontend engineer performing a visual audit of the Mindweave app.
+PROMPT=$(cat <<PROMPT_EOF
+You are a senior frontend engineer performing a visual audit of the Mindweave app.
 
 ## Screenshots directory
 All screenshots are in: $SCREENSHOTS_DIR
@@ -63,8 +62,8 @@ $MANIFEST_CONTENT
 
 ## Your task
 
-1. **Read each screenshot** (.png file) listed in the manifest using the Read tool.
-2. **Review each page** for visual bugs and UX issues. Look for:
+1. Read each screenshot (.png file) listed in the manifest using the Read tool.
+2. Review each page for visual bugs and UX issues. Look for:
    - Overlapping or clipped text
    - Broken layouts (overflows, misaligned elements)
    - Empty states that should show placeholder content
@@ -74,19 +73,13 @@ $MANIFEST_CONTENT
    - Buttons or links that look disabled but shouldn't be
    - Responsive issues (elements too wide, too narrow)
    - Console errors (listed in manifest) that indicate real problems
-3. **For each bug found**, create a GitHub issue:
-   \`\`\`
-   gh issue create \\
-     --title \"[Visual Audit] <short description>\" \\
-     --label \"visual-bug\" \\
-     --body \"<details including route, what's wrong, and expected behavior>\"
-   \`\`\`
-4. **If you can fix a bug** directly (CSS, layout, component changes):
+3. For each bug found, create a GitHub issue using: gh issue create --title "[Visual Audit] short description" --label "visual-bug" --body "details including route, what is wrong, and expected behavior"
+4. If you can fix a bug directly (CSS, layout, component changes):
    - Create branch: git checkout -b $BRANCH_NAME
    - Make the fix
    - Commit with descriptive message
    - Push and create a PR referencing the issue
-5. **Write a summary** of your findings to \`$SCREENSHOTS_DIR/audit-report.md\`
+5. Write a summary of your findings to $SCREENSHOTS_DIR/audit-report.md
 
 ## Guidelines
 - Be specific: include the route path and what element is affected
@@ -94,7 +87,10 @@ $MANIFEST_CONTENT
 - Prioritize: broken layouts > missing content > cosmetic issues > minor spacing
 - If everything looks good for a page, note it in the report and move on
 - Do NOT create issues for things that are clearly intentional design choices
-"
+PROMPT_EOF
+)
+
+echo "$PROMPT" | claude -p --allowedTools "Bash(read-only:*),Read,Write,Edit,Glob,Grep"
 
 echo ""
 echo "═══════════════════════════════════════════════════"
