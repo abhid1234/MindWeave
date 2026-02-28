@@ -19,7 +19,7 @@ jobs:
       DATABASE_URL: postgresql://mindweave:dev_password_change_in_prod@localhost:5432/mindweave_dev
       AUTH_SECRET: visual-audit-ci-secret-not-for-production
       AUTH_URL: http://localhost:3000
-      GOOGLE_AI_API_KEY: fake-key-for-visual-audit
+      GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NODE_ENV: development
       ALLOW_DEV_LOGIN: 'true'
@@ -63,12 +63,7 @@ jobs:
         working-directory: apps/web
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
-
       - name: Run visual audit
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: ./scripts/visual-audit.sh
 
       - name: Upload screenshots

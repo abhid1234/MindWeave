@@ -44,6 +44,7 @@
     "pnpm": ">=9.5.0"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "google-auth-library": "^10.5.0"
   }
 }
