@@ -104,9 +104,9 @@ const nextConfig = {
         ].join('; '),
       },
       {
-        // Permissions Policy - disable unused browser features
+        // Permissions Policy - disable unused browser features (microphone allowed for Voice Capture)
         key: 'Permissions-Policy',
-        value: 'camera=(), microphone=(), geolocation=()',
+        value: 'camera=(), microphone=(self), geolocation=()',
       },
     ];
 
