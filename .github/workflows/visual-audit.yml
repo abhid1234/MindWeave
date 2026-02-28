@@ -64,6 +64,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run visual audit
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: ./scripts/visual-audit.sh
 
       - name: Upload screenshots

@@ -213,9 +213,10 @@ function createGitHubIssue(route: string, issue: Issue) {
   ].join('\n');
 
   try {
+    const escapedTitle = title.replace(/'/g, "'\\''");
     execSync(
-      `gh issue create --title "${title.replace(/"/g, '\\"')}" --label "visual-bug" --body "${body.replace(/"/g, '\\"')}"`,
-      { stdio: 'pipe' },
+      `gh issue create --title '${escapedTitle}' --label visual-bug --body-file -`,
+      { input: body, stdio: ['pipe', 'pipe', 'pipe'] },
     );
     console.log(`    → Created GitHub issue`);
   } catch (err) {
