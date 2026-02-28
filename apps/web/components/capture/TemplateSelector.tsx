@@ -20,29 +20,24 @@ interface TemplateSelectorProps {
 export function TemplateSelector({ onSelect, selectedTemplate }: TemplateSelectorProps) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">Template (Optional)</label>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <label className="block text-sm font-medium mb-2">Template</label>
+      <div className="flex flex-row lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0">
         {/* Blank option */}
         <button
           type="button"
           onClick={() => onSelect(null)}
           className={cn(
-            'flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs transition-all',
+            'flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-all whitespace-nowrap flex-shrink-0',
             'hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             selectedTemplate === null
               ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-              : 'border-border bg-card hover:-translate-y-0.5'
+              : 'border-border bg-card hover:bg-accent/50'
           )}
         >
-          <div className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-md transition-colors',
-            selectedTemplate === null ? 'bg-primary/10' : 'bg-muted'
-          )}>
-            <FileText className={cn(
-              'h-4 w-4 transition-colors',
-              selectedTemplate === null ? 'text-primary' : 'text-muted-foreground'
-            )} />
-          </div>
+          <FileText className={cn(
+            'h-3.5 w-3.5 flex-shrink-0 transition-colors',
+            selectedTemplate === null ? 'text-primary' : 'text-muted-foreground'
+          )} />
           <span className={cn(
             'font-medium transition-colors',
             selectedTemplate === null ? 'text-primary' : 'text-muted-foreground'
@@ -60,40 +55,23 @@ export function TemplateSelector({ onSelect, selectedTemplate }: TemplateSelecto
               type="button"
               onClick={() => onSelect(template.id)}
               className={cn(
-                'flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs transition-all',
+                'flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-all whitespace-nowrap flex-shrink-0',
                 'hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 isSelected
                   ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-                  : 'border-border bg-card hover:-translate-y-0.5'
+                  : 'border-border bg-card hover:bg-accent/50'
               )}
             >
-              <div className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-md transition-colors',
-                isSelected ? 'bg-primary/10' : 'bg-muted'
-              )}>
-                <Icon className={cn(
-                  'h-4 w-4 transition-colors',
-                  isSelected ? 'text-primary' : 'text-muted-foreground'
-                )} />
-              </div>
+              <Icon className={cn(
+                'h-3.5 w-3.5 flex-shrink-0 transition-colors',
+                isSelected ? 'text-primary' : 'text-muted-foreground'
+              )} />
               <span className={cn(
-                'font-medium transition-colors text-center leading-tight',
+                'font-medium transition-colors',
                 isSelected ? 'text-primary' : 'text-muted-foreground'
               )}>
                 {template.name}
               </span>
-              {template.defaultTags.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1 mt-0.5">
-                  {template.defaultTags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
             </button>
           );
         })}

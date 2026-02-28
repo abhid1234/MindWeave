@@ -257,7 +257,7 @@ export default function CapturePage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-5xl">
       {/* Header */}
       <div
         className="mb-8 animate-fade-up"
@@ -276,16 +276,9 @@ export default function CapturePage() {
         </div>
       </div>
 
-      {/* Template Selector */}
-      <div
-        className="mb-6 animate-fade-up"
-        style={{ animationDelay: '50ms', animationFillMode: 'backwards' }}
-      >
-        <TemplateSelector
-          onSelect={handleTemplateSelect}
-          selectedTemplate={selectedTemplate}
-        />
-      </div>
+      <div className="flex flex-col lg:flex-row gap-6">
+      {/* Main content column */}
+      <div className="flex-1 min-w-0">
 
       {/* Type Selector Cards */}
       <div
@@ -570,6 +563,21 @@ export default function CapturePage() {
           Cancel
         </Link>
       </div>
+
+      </div>{/* end main content column */}
+
+      {/* Template sidebar */}
+      <div
+        className="lg:w-52 flex-shrink-0 animate-fade-up"
+        style={{ animationDelay: '50ms', animationFillMode: 'backwards' }}
+      >
+        <TemplateSelector
+          onSelect={handleTemplateSelect}
+          selectedTemplate={selectedTemplate}
+        />
+      </div>
+
+      </div>{/* end flex row */}
     </div>
   );
 }

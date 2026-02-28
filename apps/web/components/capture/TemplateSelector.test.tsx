@@ -24,12 +24,10 @@ describe('TemplateSelector', () => {
     }
   });
 
-  it('should render default tags as badges', () => {
+  it('should render template label text', () => {
     render(<TemplateSelector onSelect={mockOnSelect} selectedTemplate={null} />);
 
-    // Check for some known default tags
-    expect(screen.getByText('meeting')).toBeInTheDocument();
-    expect(screen.getByText('notes')).toBeInTheDocument();
+    expect(screen.getByText('Template')).toBeInTheDocument();
   });
 
   it('should call onSelect with template ID when clicked', () => {
