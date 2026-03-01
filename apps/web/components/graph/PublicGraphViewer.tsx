@@ -86,6 +86,9 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
 
       if (!mounted || !containerRef.current) return;
 
+      // Detect light/dark mode
+      const isDark = document.documentElement.classList.contains('dark');
+
       // Build graphology graph
       const graph = new Graph({ type: 'undirected' });
 
@@ -126,7 +129,7 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
             graph.addEdge(edge.source, edge.target, {
               weight: edge.weight,
               size: 0.5 + edge.weight * 2.5,
-              color: 'rgba(100, 100, 130, 0.25)',
+              color: isDark ? 'rgba(150, 150, 170, 0.4)' : 'rgba(100, 100, 140, 0.5)',
             });
             connectionCount[edge.source] = (connectionCount[edge.source] || 0) + 1;
             connectionCount[edge.target] = (connectionCount[edge.target] || 0) + 1;
@@ -158,8 +161,6 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
 
       if (!mounted || !containerRef.current) return;
 
-      // Detect light/dark mode for label colors
-      const isDark = document.documentElement.classList.contains('dark');
       const labelColor = isDark ? '#e2e8f0' : '#1e293b';
 
       // Create Sigma instance (read-only)
