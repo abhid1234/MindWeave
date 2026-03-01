@@ -79,7 +79,16 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-02-28)**:
+**Latest Enhancement (2026-03-01)**:
+- [x] **LinkedIn Post Helper & Graph Coloring Fix** — Three improvements to the public graph sharing experience. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:880111e`).
+  - **LinkedIn suggested post text** — After creating a public graph, the share dialog now shows a pre-composed post with title, stats (nodes/connections/communities), URL, and hashtags. "Copy post text" button for quick paste into LinkedIn. `generatePublicGraphAction` now returns `stats` alongside `graphId` in the result. New `stats` field added to `GeneratePublicGraphResult` type.
+  - **Graph community coloring fix** — Public graph nodes now use community-based coloring (matching the dashboard graph) instead of content-type coloring. Previously defaulted to `colorBy: 'type'` which was inconsistent with the dashboard's Louvain community colors. Edge opacity now scales with similarity weight (matching dashboard).
+  - **Type legend removed from public graph page** — Removed confusing Note/Link/File color legend that didn't match actual node colors. Community legend now shows only when there are 2+ communities.
+  - **1 new test** in `public-graph.test.ts` verifying stats are returned in the action result (2,241 passing).
+  - **Test count metrics updated** — Landing page hero, open source section, animated stats counter, and CLAUDE.md all updated from stale values (352/1,440/1,999) to current 2,241+.
+  - **6 files changed** (0 new, 6 modified) — 0 TS errors, 0 lint errors, 2,241 tests passing.
+
+**Previous Enhancement (2026-02-28)**:
 - [x] **Viral LinkedIn Sharing Features** — Four new features to make Mindweave shareable on LinkedIn, each creating a viral loop (users generate → share → drive traffic back). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:cb0a17f`).
   - **Knowledge Wrapped** — Personalized knowledge base summary (like Spotify Wrapped). Parallel stat queries gather total items, top tags, streaks, content type split, most connected content, month-over-month growth, and active days. Gemini AI assigns a fun "knowledge personality" (e.g., "The Curious Polymath"). Instagram-style story viewer with progress dots, auto-advance (6s), keyboard nav. OG image generation via `next/og` ImageResponse (1200x630). Public share pages with metadata for LinkedIn previews. Dashboard page at `/dashboard/wrapped`, public page at `/wrapped/[shareId]`.
   - **Connect the Dots** — Cross-domain content connections using pgvector. SQL finds pairs with moderate similarity (0.3–0.6) and no overlapping tags — the "unexpected" connections. Gemini generates 2-3 sentence insights per pair. Results cached in DB (24h). Each connection has "Share as Post" to generate LinkedIn content. Dashboard page at `/dashboard/connections`.
