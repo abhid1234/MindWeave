@@ -14,7 +14,7 @@ interface Stat {
 const stats: Stat[] = [
   {
     label: 'Tests Passing',
-    value: 1440,
+    value: 2241,
     suffix: '+',
     color: 'text-green-500',
     bg: 'bg-green-500/10',
