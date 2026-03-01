@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { Share2, Copy, Check, Linkedin, ExternalLink } from 'lucide-react';
+import type { PublicGraphStats } from '@/types/public-graph';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,9 @@ export function ShareGraphButton() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [graphUrl, setGraphUrl] = useState<string | null>(null);
+  const [graphStats, setGraphStats] = useState<PublicGraphStats | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedPost, setCopiedPost] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { addToast } = useToast();
 
@@ -34,12 +37,27 @@ export function ShareGraphButton() {
       if (result.success && result.data) {
         const url = `${window.location.origin}/graph/${result.data.graphId}`;
         setGraphUrl(url);
+        setGraphStats(result.data.stats ?? null);
         addToast({ title: 'Public graph created!', variant: 'success' });
       } else {
         addToast({ title: result.message || 'Failed to create public graph', variant: 'error' });
       }
     });
   }
+
+  const suggestedPostText = useMemo(() => {
+    if (!graphUrl || !graphStats) return null;
+    const lines = [
+      `🧠 Check out my knowledge graph: "${title}"`,
+      '',
+      `📊 ${graphStats.nodeCount} nodes · ${graphStats.edgeCount} connections · ${graphStats.communityCount} communities`,
+      '',
+      graphUrl,
+      '',
+      '#KnowledgeGraph #Mindweave #PersonalKnowledge',
+    ];
+    return lines.join('\n');
+  }, [graphUrl, graphStats, title]);
 
   async function handleCopy() {
     if (graphUrl) {
@@ -49,12 +67,21 @@ export function ShareGraphButton() {
     }
   }
 
+  async function handleCopyPost() {
+    if (suggestedPostText) {
+      await navigator.clipboard.writeText(suggestedPostText);
+      setCopiedPost(true);
+      setTimeout(() => setCopiedPost(false), 2000);
+    }
+  }
+
   function handleOpenChange(open: boolean) {
     setIsOpen(open);
     if (!open) {
       setTitle('');
       setDescription('');
       setGraphUrl(null);
+      setGraphStats(null);
     }
   }
 
@@ -92,6 +119,39 @@ export function ShareGraphButton() {
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
+
+            {/* Suggested post text */}
+            {suggestedPostText && (
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Suggested post text
+                </label>
+                <textarea
+                  value={suggestedPostText}
+                  readOnly
+                  rows={7}
+                  className="flex w-full rounded-lg border border-input bg-accent/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 w-full"
+                  onClick={handleCopyPost}
+                >
+                  {copiedPost ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copy post text
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
 
             {/* Action buttons */}
             <div className="flex flex-col gap-2 sm:flex-row">

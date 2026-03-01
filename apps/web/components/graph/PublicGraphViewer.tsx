@@ -37,7 +37,7 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
   const [error, setError] = useState<string | null>(null);
 
   const showLabels = settings?.showLabels !== false;
-  const colorBy = settings?.colorBy ?? 'community';
+  const colorBy = settings?.colorBy ?? 'type';
 
   // Tooltip state
   const updateTooltip = useCallback((

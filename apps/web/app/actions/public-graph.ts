@@ -178,7 +178,7 @@ export async function generatePublicGraphAction(
       settings: settings || null,
     });
 
-    return { success: true, data: { graphId } };
+    return { success: true, data: { graphId, stats } };
   } catch (error) {
     console.error('Error generating public graph:', error);
     return { success: false, message: 'Failed to create public graph' };

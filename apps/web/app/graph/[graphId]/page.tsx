@@ -80,6 +80,7 @@ export default async function PublicGraphPage({ params }: PageProps) {
   const nodeCount = stats?.nodeCount ?? graphData.nodes.length;
   const edgeCount = stats?.edgeCount ?? graphData.edges.length;
   const communityCount = stats?.communityCount ?? 0;
+  const colorBy = settings?.colorBy ?? 'type';
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mindweave.app';
   const shareUrl = `${appUrl}/graph/${graphId}`;
   const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
@@ -119,21 +120,23 @@ export default async function PublicGraphPage({ params }: PageProps) {
 
         {/* Legends */}
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground flex-wrap gap-y-2">
-          {/* Type Legend */}
-          <div className="flex items-center gap-3">
-            {Object.entries(TYPE_COLORS).map(([type, color]) => (
-              <div key={type} className="flex items-center gap-1.5">
-                <div
-                  className="h-3 w-3 rounded-full border-2"
-                  style={{ borderColor: color, backgroundColor: 'transparent' }}
-                />
-                <span className="capitalize">{type}</span>
-              </div>
-            ))}
-          </div>
+          {/* Type Legend (shown when colorBy is 'type' or default) */}
+          {colorBy !== 'community' && (
+            <div className="flex items-center gap-3">
+              {Object.entries(TYPE_COLORS).map(([type, color]) => (
+                <div key={type} className="flex items-center gap-1.5">
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="capitalize">{type}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Community Legend */}
-          {communityCount > 1 && (
+          {colorBy === 'community' && communityCount > 1 && (
             <div className="flex items-center gap-2">
               <span className="opacity-60">Communities:</span>
               {COMMUNITY_COLORS.slice(0, Math.min(communityCount, 10)).map((color, i) => (

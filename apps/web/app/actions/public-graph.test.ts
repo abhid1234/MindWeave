@@ -180,6 +180,26 @@ describe('Public Graph Actions', () => {
       expect(graphData.stats.topTags[0]).toBe('react');
     });
 
+    it('should return stats in the action result', async () => {
+      mockWhere.mockResolvedValue([
+        { id: 'c1', title: 'Note 1', type: 'note', tags: ['react'], autoTags: [] },
+        { id: 'c2', title: 'Link 1', type: 'link', tags: ['js'], autoTags: [] },
+      ]);
+      mockExecute.mockResolvedValue([
+        { source: 'c1', target: 'c2', weight: '0.45' },
+      ]);
+
+      const { generatePublicGraphAction } = await import('./public-graph');
+      const result = await generatePublicGraphAction('My Graph', 'Description');
+
+      expect(result.success).toBe(true);
+      expect(result.data!.stats).toBeDefined();
+      expect(result.data!.stats!.nodeCount).toBe(2);
+      expect(result.data!.stats!.edgeCount).toBe(1);
+      expect(result.data!.stats!.communityCount).toBeGreaterThan(0);
+      expect(result.data!.stats!.topTags).toContain('react');
+    });
+
     it('should include community and pageRank on nodes', async () => {
       mockWhere.mockResolvedValue([
         { id: 'c1', title: 'Note 1', type: 'note', tags: ['tag1'], autoTags: [] },

@@ -52,6 +52,7 @@ export interface GeneratePublicGraphResult {
   success: boolean;
   data?: {
     graphId: string;
+    stats?: PublicGraphStats;
   };
   message?: string;
 }
