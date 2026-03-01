@@ -83,7 +83,7 @@ export function StreakCard() {
             />
           ))}
         </div>
-        <div className="flex items-center justify-end gap-1 mt-2 text-[10px] text-muted-foreground">
+        <div className="flex items-center justify-center gap-1 mt-2 text-[10px] text-muted-foreground">
           <span>Less</span>
           <div className="h-2.5 w-2.5 rounded-sm bg-muted" />
           <div className="h-2.5 w-2.5 rounded-sm bg-primary/20" />

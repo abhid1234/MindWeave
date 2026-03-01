@@ -53,8 +53,8 @@ describe('DiscoverSection', () => {
     expect(screen.queryByTestId('discover-section-grid')).not.toBeInTheDocument();
   });
 
-  it('should return null when empty and not loading', () => {
-    const { container } = render(
+  it('should show empty state message when empty and not loading', () => {
+    render(
       <DiscoverSection
         title="Test Section"
         description="Test description"
@@ -63,7 +63,9 @@ describe('DiscoverSection', () => {
       />
     );
 
-    expect(container.innerHTML).toBe('');
+    expect(screen.getByText('Test Section')).toBeInTheDocument();
+    expect(screen.getByText('No recommendations available yet.')).toBeInTheDocument();
+    expect(screen.queryByTestId('discover-section-grid')).not.toBeInTheDocument();
   });
 
   it('should show loading state even if isEmpty is true', () => {

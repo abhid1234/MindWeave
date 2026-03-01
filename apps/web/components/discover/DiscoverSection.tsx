@@ -34,8 +34,6 @@ export function DiscoverSection({
   isEmpty = false,
   children,
 }: DiscoverSectionProps) {
-  if (isEmpty && !isLoading) return null;
-
   return (
     <section className="space-y-3" aria-labelledby={`discover-${title.toLowerCase().replace(/\s+/g, '-')}`}>
       <div>
@@ -51,6 +49,8 @@ export function DiscoverSection({
 
       {isLoading ? (
         <LoadingSkeleton />
+      ) : isEmpty ? (
+        <p className="text-sm text-muted-foreground py-4">No recommendations available yet.</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-testid="discover-section-grid">
           {children}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 import { PieChart as PieChartIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getContentTypeBreakdownAction } from '@/app/actions/analytics';
@@ -73,34 +73,32 @@ export function ContentBreakdown() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[260px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={90}
-                paddingAngle={3}
-                dataKey="value"
-              >
-                {chartData.map((entry) => (
-                  <Cell key={entry.name} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value: number) => [value, 'Items']}
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: '1px solid hsl(var(--border))',
-                  background: 'hsl(var(--popover))',
-                  color: 'hsl(var(--popover-foreground))',
-                }}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="flex justify-center">
+          <PieChart width={300} height={260}>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={90}
+              paddingAngle={3}
+              dataKey="value"
+            >
+              {chartData.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value: number) => [value, 'Items']}
+              contentStyle={{
+                borderRadius: '8px',
+                border: '1px solid hsl(var(--border))',
+                background: 'hsl(var(--popover))',
+                color: 'hsl(var(--popover-foreground))',
+              }}
+            />
+            <Legend />
+          </PieChart>
         </div>
         <div className="text-center text-sm text-muted-foreground">
           {total} total items
