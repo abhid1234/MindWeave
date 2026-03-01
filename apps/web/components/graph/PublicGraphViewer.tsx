@@ -37,7 +37,7 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
   const [error, setError] = useState<string | null>(null);
 
   const showLabels = settings?.showLabels !== false;
-  const colorBy = settings?.colorBy ?? 'type';
+  const colorBy = settings?.colorBy ?? 'community';
 
   // Tooltip state
   const updateTooltip = useCallback((
@@ -129,7 +129,7 @@ export function PublicGraphViewer({ graphData, settings }: PublicGraphViewerProp
             graph.addEdge(edge.source, edge.target, {
               weight: edge.weight,
               size: 0.5 + edge.weight * 2.5,
-              color: isDark ? 'rgba(150, 150, 170, 0.4)' : 'rgba(100, 100, 140, 0.5)',
+              color: `rgba(100, 100, 130, ${0.2 + edge.weight * 0.5})`,
             });
             connectionCount[edge.source] = (connectionCount[edge.source] || 0) + 1;
             connectionCount[edge.target] = (connectionCount[edge.target] || 0) + 1;
