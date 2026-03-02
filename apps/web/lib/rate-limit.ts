@@ -296,6 +296,11 @@ export const RATE_LIMITS = {
     maxRequests: 10,
     windowMs: 60 * 60 * 1000,
   },
+  // Marketplace clone: 5 per hour (expensive bulk op)
+  marketplaceClone: {
+    maxRequests: 5,
+    windowMs: 60 * 60 * 1000,
+  },
 } as const;
 
 /**

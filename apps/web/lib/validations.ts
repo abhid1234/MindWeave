@@ -341,3 +341,36 @@ export const createWebhookConfigSchema = z.object({
 });
 
 export type CreateWebhookConfigInput = z.infer<typeof createWebhookConfigSchema>;
+
+/**
+ * Marketplace validation schemas
+ */
+export const marketplaceCategoryValues = [
+  'programming',
+  'design',
+  'business',
+  'science',
+  'learning',
+  'productivity',
+  'career',
+  'health',
+  'other',
+] as const;
+
+export const publishToMarketplaceSchema = z.object({
+  collectionId: z.string().uuid('Invalid collection ID'),
+  category: z.enum(marketplaceCategoryValues),
+  description: z.string().max(1000, 'Description must be at most 1000 characters').optional(),
+});
+
+export type PublishToMarketplaceInput = z.infer<typeof publishToMarketplaceSchema>;
+
+export const browseMarketplaceSchema = z.object({
+  query: z.string().max(200).optional(),
+  category: z.enum(marketplaceCategoryValues).optional(),
+  sort: z.enum(['trending', 'newest', 'most-cloned']).default('trending'),
+  page: z.coerce.number().min(1).default(1),
+  perPage: z.coerce.number().min(1).max(50).default(12),
+});
+
+export type BrowseMarketplaceInput = z.infer<typeof browseMarketplaceSchema>;

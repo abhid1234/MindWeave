@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import PublicCollectionCard from './PublicCollectionCard';
+import { MarketplaceStats } from '@/components/marketplace/MarketplaceStats';
 
 interface PublicProfileProps {
   profile: {
@@ -43,8 +44,13 @@ export default function PublicProfile({ profile }: PublicProfileProps) {
       </div>
 
       {profile.bio && (
-        <p className="text-muted-foreground mb-8 max-w-xl">{profile.bio}</p>
+        <p className="text-muted-foreground mb-6 max-w-xl">{profile.bio}</p>
       )}
+
+      {/* Marketplace stats */}
+      <div className="mb-8">
+        <MarketplaceStats />
+      </div>
 
       {/* Public collections */}
       <div>

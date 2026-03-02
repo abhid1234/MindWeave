@@ -451,6 +451,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   knowledgeWrapped: many(knowledgeWrapped),
   connections: many(connections),
   publicGraphs: many(publicGraphs),
+  marketplaceListings: many(marketplaceListings),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -495,6 +496,7 @@ export const collectionsRelations = relations(collections, ({ one, many }) => ({
   contentCollections: many(contentCollections),
   members: many(collectionMembers),
   invitations: many(collectionInvitations),
+  marketplaceListing: one(marketplaceListings),
 }));
 
 export const tasksRelations = relations(tasks, ({ one }) => ({
@@ -730,6 +732,49 @@ export const publicGraphs = pgTable(
   })
 );
 
+// Marketplace categories
+export const marketplaceCategoryEnum = [
+  'programming',
+  'design',
+  'business',
+  'science',
+  'learning',
+  'productivity',
+  'career',
+  'health',
+  'other',
+] as const;
+export type MarketplaceCategory = (typeof marketplaceCategoryEnum)[number];
+
+// Marketplace Listings table
+export const marketplaceListings = pgTable(
+  'marketplace_listings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    collectionId: uuid('collection_id')
+      .notNull()
+      .unique()
+      .references(() => collections.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    category: varchar('category', { length: 30 }).notNull().$type<MarketplaceCategory>(),
+    description: text('description'),
+    isFeatured: boolean('is_featured').notNull().default(false),
+    viewCount: integer('view_count').notNull().default(0),
+    cloneCount: integer('clone_count').notNull().default(0),
+    publishedAt: timestamp('published_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('marketplace_listings_user_id_idx').on(table.userId),
+    categoryIdx: index('marketplace_listings_category_idx').on(table.category),
+    cloneCountIdx: index('marketplace_listings_clone_count_idx').on(table.cloneCount),
+    publishedAtIdx: index('marketplace_listings_published_at_idx').on(table.publishedAt),
+    isFeaturedIdx: index('marketplace_listings_is_featured_idx').on(table.isFeatured),
+  })
+);
+
 // Relations for new tables
 export const knowledgeWrappedRelations = relations(knowledgeWrapped, ({ one }) => ({
   user: one(users, {
@@ -752,6 +797,17 @@ export const connectionsRelations = relations(connections, ({ one }) => ({
 export const publicGraphsRelations = relations(publicGraphs, ({ one }) => ({
   user: one(users, {
     fields: [publicGraphs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const marketplaceListingsRelations = relations(marketplaceListings, ({ one }) => ({
+  collection: one(collections, {
+    fields: [marketplaceListings.collectionId],
+    references: [collections.id],
+  }),
+  user: one(users, {
+    fields: [marketplaceListings.userId],
     references: [users.id],
   }),
 }));
@@ -819,3 +875,6 @@ export type NewConnection = typeof connections.$inferInsert;
 
 export type PublicGraph = typeof publicGraphs.$inferSelect;
 export type NewPublicGraph = typeof publicGraphs.$inferInsert;
+
+export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
+export type NewMarketplaceListing = typeof marketplaceListings.$inferInsert;

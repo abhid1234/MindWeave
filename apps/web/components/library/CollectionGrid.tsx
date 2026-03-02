@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Library, MoreHorizontal, Pencil, Trash2, Plus, FolderOpen, Users, Download } from 'lucide-react';
+import { Library, MoreHorizontal, Pencil, Trash2, Plus, FolderOpen, Users, Download, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 import { CollectionDialog } from './CollectionDialog';
 import { ShareCollectionDialog } from './ShareCollectionDialog';
 import { ExportDialog } from './ExportDialog';
+import { PublishToMarketplaceDialog } from '@/components/marketplace/PublishToMarketplaceDialog';
 import { getCollectionsAction, deleteCollectionAction } from '@/app/actions/collections';
 import { useToast } from '@/components/ui/toast';
 
@@ -38,6 +39,8 @@ export function CollectionGrid() {
   const [sharingCollection, setSharingCollection] = useState<CollectionWithCount | null>(null);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportingCollection, setExportingCollection] = useState<CollectionWithCount | null>(null);
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [publishingCollection, setPublishingCollection] = useState<CollectionWithCount | null>(null);
 
   const fetchCollections = useCallback(async () => {
     const result = await getCollectionsAction();
@@ -178,6 +181,13 @@ export function CollectionGrid() {
                       <Download className="mr-2 h-4 w-4" />
                       Export
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      setPublishingCollection(collection);
+                      setPublishDialogOpen(true);
+                    }}>
+                      <Store className="mr-2 h-4 w-4" />
+                      Publish to Marketplace
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleDelete(collection.id)}
                       className="text-destructive focus:text-destructive"
@@ -228,6 +238,19 @@ export function CollectionGrid() {
           onOpenChange={setExportDialogOpen}
           collectionId={exportingCollection.id}
           collectionName={exportingCollection.name}
+        />
+      )}
+
+      {publishingCollection && (
+        <PublishToMarketplaceDialog
+          open={publishDialogOpen}
+          onOpenChange={setPublishDialogOpen}
+          collectionId={publishingCollection.id}
+          collectionName={publishingCollection.name}
+          onSuccess={() => {
+            addToast({ variant: 'success', title: 'Collection published to marketplace!' });
+            fetchCollections();
+          }}
         />
       )}
     </>
