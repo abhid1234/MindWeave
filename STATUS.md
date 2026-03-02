@@ -5,7 +5,7 @@
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, and webhook integrations.
+✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, and Knowledge Marketplace.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -65,6 +65,7 @@
 - **Webhook Integrations** - Generic (API key), Slack (HMAC-SHA256), Discord (Ed25519) webhook endpoints with management UI
 - **Voice Capture, Screenshot OCR, URL Summarizer** - Three new capture modes: voice-to-text via Web Speech API, image OCR via Gemini Vision, YouTube/article summarization
 - **Viral LinkedIn Sharing** - Knowledge Wrapped (personalized stats + AI personality + story viewer + OG images), Connect the Dots (cross-domain AI connections), Public Knowledge Graph (shareable Sigma.js snapshots), Weekly Briefing → LinkedIn Post (auto-generated from recent content)
+- **Knowledge Marketplace** - Public marketplace for publishing, discovering, and cloning collections. Viral growth loop: creators publish → share links → visitors browse → sign up to clone → become creators. Browse with search, category filters, and trending/newest/most-cloned sorting. One-click clone imports entire collection into user's library.
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -80,6 +81,22 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-03-02)**:
+- [x] **Knowledge Marketplace** — Complete public marketplace for publishing, discovering, and cloning knowledge collections. Viral growth loop: creators publish → visitors browse → sign up to clone → become creators. Deployed to Cloud Run with schema pushed to production Cloud SQL.
+  - **Schema** — New `marketplace_listings` table (id, collectionId unique FK, userId FK, category enum, description, isFeatured, viewCount, cloneCount, publishedAt, updatedAt) with 5 indexes. Relations added to users and collections.
+  - **Types & Validations** — `types/marketplace.ts` with 10 type definitions (MarketplaceListingWithDetails, MarketplaceCreatorStats, MarketplaceListingDetail, BrowseMarketplaceParams, BrowseMarketplaceResult, etc.). 2 Zod schemas: `publishToMarketplaceSchema` (category enum, description max 1000), `browseMarketplaceSchema` (query, category, sort with trending/newest/most-cloned, pagination). `marketplaceClone` rate limit preset (5/hr).
+  - **7 Server Actions** — `publishToMarketplaceAction` (ownership check, ≥1 item, auto-set isPublic, upsert), `unpublishFromMarketplaceAction`, `browseMarketplaceAction` (search via ilike, trending sort = `(clones*3 + views) / (age+1)`, paginated), `cloneCollectionAction` (copies collection + all content with new ownership, rate limited), `trackMarketplaceViewAction` (atomic increment), `getMarketplaceStatsAction`, `getMarketplaceListingAction` (content preview with titles only).
+  - **7 Components** — `MarketplaceCard` (color accent, category badge, creator avatar, stats, tag pills), `MarketplaceFilters` (debounced search, category select, sort buttons), `MarketplaceGrid` (SSR-prefetched paginated grid with skeletons + empty state), `PublishToMarketplaceDialog` (9-category grid selector, description textarea), `CloneButton` (auth-aware: clone or signup CTA), `MarketplaceListingDetail` (full listing view with creator card, content preview list), `MarketplaceStats` (3-card grid for profile page).
+  - **Public Pages** — `/marketplace` with public layout (logo + login CTA, no sidebar), server-rendered browse page with SEO metadata. `/marketplace/[listingId]` with OG metadata, fire-and-forget view tracking. Loading skeletons for both routes.
+  - **Integration** — "Marketplace" nav item (Store icon) after Discover. "Publish to Marketplace" option in CollectionGrid dropdown menu. MarketplaceStats section on PublicProfile page.
+  - **58 new tests across 5 test files** (28 action + 30 component):
+    - `app/actions/marketplace.test.ts` (28): publish (auth, validation, non-owner, empty collection, success, upsert), unpublish (auth, non-owner, not found, success), browse (default, category filter, search, sort variants, pagination, empty), clone (auth, self-clone, not found, success, rate limit), trackView, getStats, getListing
+    - `components/marketplace/MarketplaceCard.test.tsx` (10): renders, category badge, description, creator, stats, tags, link, avatar, fallback initial, fallback description
+    - `components/marketplace/MarketplaceFilters.test.tsx` (6): search input, category dropdown, sort buttons, debounce, category change, sort change
+    - `components/marketplace/PublishToMarketplaceDialog.test.tsx` (9): render, category buttons, description, validation, submit, loading, error, success close, reset
+    - `components/marketplace/CloneButton.test.tsx` (5): auth states, loading, success, error, size variants
+  - **26 files changed** (22 new, 4 modified) — 0 TS errors, 0 lint errors, 2,195 tests passing.
+
+**Previous Enhancement (2026-03-02)**:
 - [x] **Stale Metrics Audit** — Audited all hardcoded metrics across landing page, docs, and components. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:5a3310b`).
   - **AI features count** — Animated stats counter updated from 6 to 12 AI-powered features (auto-tagging, semantic search, knowledge Q&A, summarization, LinkedIn posts, daily highlights, wrapped personality, connection insights, weekly briefing, related items, screenshot OCR, URL summarization).
   - **README test count** — Phase 3 milestone updated from stale "647 tests total" to "2,241+ tests total".
