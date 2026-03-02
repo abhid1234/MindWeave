@@ -22,7 +22,7 @@ const stats: Stat[] = [
   },
   {
     label: 'AI-Powered Features',
-    value: 6,
+    value: 12,
     suffix: '',
     color: 'text-purple-500',
     bg: 'bg-purple-500/10',
