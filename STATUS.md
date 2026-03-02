@@ -79,7 +79,13 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-03-01)**:
+**Latest Enhancement (2026-03-02)**:
+- [x] **Stale Metrics Audit** — Audited all hardcoded metrics across landing page, docs, and components. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:5a3310b`).
+  - **AI features count** — Animated stats counter updated from 6 to 12 AI-powered features (auto-tagging, semantic search, knowledge Q&A, summarization, LinkedIn posts, daily highlights, wrapped personality, connection insights, weekly briefing, related items, screenshot OCR, URL summarization).
+  - **README test count** — Phase 3 milestone updated from stale "647 tests total" to "2,241+ tests total".
+  - **2 files changed** — 0 TS errors, 0 lint errors, 2,241 tests passing.
+
+**Previous Enhancement (2026-03-01)**:
 - [x] **LinkedIn Post Helper & Graph Coloring Fix** — Three improvements to the public graph sharing experience. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:880111e`).
   - **LinkedIn suggested post text** — After creating a public graph, the share dialog now shows a pre-composed post with title, stats (nodes/connections/communities), URL, and hashtags. "Copy post text" button for quick paste into LinkedIn. `generatePublicGraphAction` now returns `stats` alongside `graphId` in the result. New `stats` field added to `GeneratePublicGraphResult` type.
   - **Graph community coloring fix** — Public graph nodes now use community-based coloring (matching the dashboard graph) instead of content-type coloring. Previously defaulted to `colorBy: 'type'` which was inconsistent with the dashboard's Louvain community colors. Edge opacity now scales with similarity weight (matching dashboard).
