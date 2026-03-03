@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { shareContentAction, unshareContentAction } from '@/app/actions/content';
+import { EmbedCodeGenerator } from './EmbedCodeGenerator';
 
 type ShareDialogProps = {
   contentId: string;
@@ -154,6 +155,13 @@ export function ShareDialog({
                 >
                   {isPending ? 'Removing...' : 'Stop Sharing'}
                 </Button>
+              </div>
+
+              <div className="border-t pt-3">
+                <EmbedCodeGenerator
+                  shareId={currentShareUrl.split('/share/')[1] || shareId || ''}
+                  contentTitle={contentTitle}
+                />
               </div>
             </div>
           ) : (

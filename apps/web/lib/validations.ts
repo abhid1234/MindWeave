@@ -374,3 +374,25 @@ export const browseMarketplaceSchema = z.object({
 });
 
 export type BrowseMarketplaceInput = z.infer<typeof browseMarketplaceSchema>;
+
+/**
+ * TIL (Today I Learned) validation schemas
+ */
+export const publishTilSchema = z.object({
+  contentId: z.string().uuid('Invalid content ID'),
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be at most 200 characters'),
+  body: z.string().max(5000, 'Body must be at most 5000 characters').optional(),
+  tags: z.array(z.string()).max(10, 'Maximum 10 tags allowed').default([]),
+});
+
+export type PublishTilInput = z.infer<typeof publishTilSchema>;
+
+export const browseTilSchema = z.object({
+  query: z.string().max(200).optional(),
+  tag: z.string().max(50).optional(),
+  sort: z.enum(['trending', 'newest', 'most-upvoted']).default('trending'),
+  page: z.coerce.number().min(1).default(1),
+  perPage: z.coerce.number().min(1).max(50).default(20),
+});
+
+export type BrowseTilInput = z.infer<typeof browseTilSchema>;

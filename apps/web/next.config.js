@@ -118,9 +118,28 @@ const nextConfig = {
       });
     }
 
+    // Embed routes need relaxed frame restrictions for iframes
+    const embedHeaders = securityHeaders
+      .filter((h) => h.key !== 'X-Frame-Options')
+      .map((h) => {
+        if (h.key === 'Content-Security-Policy') {
+          // Replace frame-ancestors 'none' with wildcard for embed routes
+          return {
+            ...h,
+            value: h.value.replace("frame-ancestors 'none'", 'frame-ancestors *'),
+          };
+        }
+        return h;
+      });
+
     return [
       {
-        // Apply security headers to all routes
+        // Embed routes: allow iframes from any origin
+        source: '/embed/:path*',
+        headers: embedHeaders,
+      },
+      {
+        // Apply security headers to all other routes
         source: '/:path*',
         headers: securityHeaders,
       },

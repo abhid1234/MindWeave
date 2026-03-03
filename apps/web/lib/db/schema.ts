@@ -452,6 +452,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   connections: many(connections),
   publicGraphs: many(publicGraphs),
   marketplaceListings: many(marketplaceListings),
+  tilPosts: many(tilPosts),
+  tilUpvotes: many(tilUpvotes),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -464,6 +466,7 @@ export const contentRelations = relations(content, ({ one, many }) => ({
   versions: many(contentVersions),
   views: many(contentViews),
   reminders: many(reminders),
+  tilPost: one(tilPosts),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -812,6 +815,76 @@ export const marketplaceListingsRelations = relations(marketplaceListings, ({ on
   }),
 }));
 
+// TIL Posts table (Today I Learned public feed)
+export const tilPosts = pgTable(
+  'til_posts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    contentId: uuid('content_id')
+      .notNull()
+      .unique()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: varchar('title', { length: 200 }).notNull(),
+    body: text('body'),
+    tags: text('tags').array().notNull().default([]),
+    upvoteCount: integer('upvote_count').notNull().default(0),
+    viewCount: integer('view_count').notNull().default(0),
+    publishedAt: timestamp('published_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('til_posts_user_id_idx').on(table.userId),
+    upvoteCountIdx: index('til_posts_upvote_count_idx').on(table.upvoteCount),
+    publishedAtIdx: index('til_posts_published_at_idx').on(table.publishedAt),
+    contentIdIdx: index('til_posts_content_id_idx').on(table.contentId),
+  })
+);
+
+// TIL Upvotes table (one upvote per user per TIL)
+export const tilUpvotes = pgTable(
+  'til_upvotes',
+  {
+    tilId: uuid('til_id')
+      .notNull()
+      .references(() => tilPosts.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.tilId, table.userId] }),
+    tilIdIdx: index('til_upvotes_til_id_idx').on(table.tilId),
+    userIdIdx: index('til_upvotes_user_id_idx').on(table.userId),
+  })
+);
+
+// TIL Relations
+export const tilPostsRelations = relations(tilPosts, ({ one, many }) => ({
+  content: one(content, {
+    fields: [tilPosts.contentId],
+    references: [content.id],
+  }),
+  user: one(users, {
+    fields: [tilPosts.userId],
+    references: [users.id],
+  }),
+  upvotes: many(tilUpvotes),
+}));
+
+export const tilUpvotesRelations = relations(tilUpvotes, ({ one }) => ({
+  tilPost: one(tilPosts, {
+    fields: [tilUpvotes.tilId],
+    references: [tilPosts.id],
+  }),
+  user: one(users, {
+    fields: [tilUpvotes.userId],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -878,3 +951,9 @@ export type NewPublicGraph = typeof publicGraphs.$inferInsert;
 
 export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
 export type NewMarketplaceListing = typeof marketplaceListings.$inferInsert;
+
+export type TilPost = typeof tilPosts.$inferSelect;
+export type NewTilPost = typeof tilPosts.$inferInsert;
+
+export type TilUpvote = typeof tilUpvotes.$inferSelect;
+export type NewTilUpvote = typeof tilUpvotes.$inferInsert;

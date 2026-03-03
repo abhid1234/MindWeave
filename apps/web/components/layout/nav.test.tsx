@@ -18,7 +18,7 @@ vi.mock('next/link', () => ({
 }));
 
 describe('NavLinks', () => {
-  it('should render all 15 nav items', () => {
+  it('should render all 16 nav items', () => {
     render(<NavLinks />);
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
@@ -28,6 +28,7 @@ describe('NavLinks', () => {
     expect(screen.getByText('Ask AI')).toBeInTheDocument();
     expect(screen.getByText('Discover')).toBeInTheDocument();
     expect(screen.getByText('Marketplace')).toBeInTheDocument();
+    expect(screen.getByText('TIL Feed')).toBeInTheDocument();
     expect(screen.getByText('Create Post')).toBeInTheDocument();
     expect(screen.getByText('Wrapped')).toBeInTheDocument();
     expect(screen.getByText('Connections')).toBeInTheDocument();
@@ -51,6 +52,7 @@ describe('NavLinks', () => {
     expect(hrefs).toContain('/dashboard/ask');
     expect(hrefs).toContain('/dashboard/discover');
     expect(hrefs).toContain('/marketplace');
+    expect(hrefs).toContain('/til');
     expect(hrefs).toContain('/dashboard/create-post');
     expect(hrefs).toContain('/dashboard/graph');
     expect(hrefs).toContain('/dashboard/library');
@@ -88,6 +90,6 @@ describe('NavLinks', () => {
 
   it('should render without onNavigate prop', () => {
     render(<NavLinks />);
-    expect(screen.getAllByRole('link')).toHaveLength(15);
+    expect(screen.getAllByRole('link')).toHaveLength(16);
   });
 });

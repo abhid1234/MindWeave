@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles, Bell } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles, Bell, Lightbulb } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
@@ -42,6 +42,10 @@ const RecommendationsDialog = dynamic(
 );
 const ContentDetailDialog = dynamic(
   () => import('./ContentDetailDialog').then((mod) => mod.ContentDetailDialog),
+  { loading: () => null }
+);
+const PublishTilDialog = dynamic(
+  () => import('../til/PublishTilDialog').then((mod) => mod.PublishTilDialog),
   { loading: () => null }
 );
 import { RelatedItemsBadge } from './RelatedItemsBadge';
@@ -109,6 +113,7 @@ export function ContentCard({
   const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
   const [isRecommendationsDialogOpen, setIsRecommendationsDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [isTilDialogOpen, setIsTilDialogOpen] = useState(false);
   const [isShared, setIsShared] = useState(initialIsShared);
   const [shareId, setShareId] = useState(initialShareId);
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
@@ -270,6 +275,10 @@ export function ContentCard({
                   <Bell className="mr-2 h-4 w-4" />
                   Remind Me
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsTilDialogOpen(true)}>
+                  <Lightbulb className="mr-2 h-4 w-4" />
+                  Share as TIL
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setIsDeleteDialogOpen(true)}
@@ -398,6 +407,16 @@ export function ContentCard({
         }}
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
+      />
+
+      <PublishTilDialog
+        open={isTilDialogOpen}
+        onOpenChange={setIsTilDialogOpen}
+        contentId={id}
+        contentTitle={title}
+        contentBody={body}
+        contentTags={tags}
+        onSuccess={() => addToast({ variant: 'success', title: 'Published as TIL!' })}
       />
     </>
   );

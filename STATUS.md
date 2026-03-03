@@ -66,6 +66,8 @@
 - **Voice Capture, Screenshot OCR, URL Summarizer** - Three new capture modes: voice-to-text via Web Speech API, image OCR via Gemini Vision, YouTube/article summarization
 - **Viral LinkedIn Sharing** - Knowledge Wrapped (personalized stats + AI personality + story viewer + OG images), Connect the Dots (cross-domain AI connections), Public Knowledge Graph (shareable Sigma.js snapshots), Weekly Briefing → LinkedIn Post (auto-generated from recent content)
 - **Knowledge Marketplace** - Public marketplace for publishing, discovering, and cloning collections. Viral growth loop: creators publish → share links → visitors browse → sign up to clone → become creators. Browse with search, category filters, and trending/newest/most-cloned sorting. One-click clone imports entire collection into user's library.
+- **Embeddable Knowledge Cards** - Every shared note or public collection becomes an embeddable card (iframe, Markdown badge, or HTML link). Dynamic OG images for social sharing. "Curated with Mindweave" watermark on every embed.
+- **TIL Public Feed** - Public Today I Learned feed at /til. Users publish bite-sized learnings, visitors browse/search/filter by tag, sort by trending/newest/top. Auth required to upvote and publish (drives signups).
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -80,7 +82,37 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-03-02)**:
+**Latest Enhancement (2026-03-03)**:
+- [x] **Embeddable Knowledge Cards + TIL Public Feed** — Two viral growth channels: (1) embeddable cards for blog posts/READMEs with "Curated with Mindweave" watermark, and (2) public TIL (Today I Learned) feed for community learning.
+  - **Embeddable Knowledge Cards**:
+    - Embed pages: `/embed/[shareId]` (content) and `/embed/collection/[collectionId]` (collection) with dark mode support (`?theme=dark`), max-width 600px, watermark footer
+    - OG image generation: `/api/og/embed?id=shareId` — 1200x630 gradient PNG with title, body preview, tags
+    - EmbedCodeGenerator component: three-tab code generator (iframe / Markdown badge / HTML link) with copy buttons
+    - ShareDialog: shows embed codes when content is shared
+    - Share page: OG image URL added to metadata for rich social previews
+    - next.config.js: `/embed/*` routes exempt from X-Frame-Options DENY, frame-ancestors set to wildcard
+    - `app/actions/embed.ts`: 2 server actions (getEmbedDataAction, getEmbedCollectionAction)
+  - **TIL Public Feed**:
+    - Schema: `til_posts` (id, contentId unique FK, userId FK, title, body, tags, upvoteCount, viewCount, publishedAt) + `til_upvotes` (compound PK tilId+userId) with GIN tags index
+    - Types: `types/til.ts` with TilPostWithDetails, BrowseTilParams, BrowseTilResult, TilActionResult, TilDetailResult
+    - Validations: `publishTilSchema` (title 1-200, body max 5000, max 10 tags), `browseTilSchema` (query, tag, sort, pagination)
+    - Rate limits: tilPublish (10/hr), tilUpvote (60/hr)
+    - 6 server actions: publishTilAction (ownership, auto-share, duplicate check), unpublishTilAction, browseTilAction (search, tag filter, trending sort = `(upvotes*3 + views) / (age_hours/24 + 1)`, popularTags), upvoteTilAction (atomic toggle), trackTilViewAction, getTilDetailAction
+    - 6 components: UpvoteButton (optimistic UI, auth-aware → redirect to login), TilCard (upvote + body preview + tags + creator + relative time), TilFilters (debounced search, tag dropdown, sort buttons), TilGrid (SSR-prefetched feed with pagination), TilDetail (markdown body, large upvote, view full content link), PublishTilDialog (pre-filled title/body/tags from content)
+    - Public pages: `/til` layout with auth-aware header, SSR browse page, `/til/[tilId]` detail with SEO metadata, loading skeletons
+    - Integration: "TIL Feed" nav item (Lightbulb icon) after Marketplace, "Share as TIL" in ContentCard dropdown
+  - **65 new tests across 8 test files**:
+    - `app/actions/til.test.ts` (26): publish (auth, rate limit, validation, not found, duplicate, success, auto-share), unpublish (auth, not found, non-owner, success), browse (default, tag, search, empty, pagination), upvote (auth, toggle on/off, rate limit), trackView (success, error), getDetail (invalid, not found, unauth, auth upvote check)
+    - `app/actions/embed.test.ts` (8): getEmbedData (empty, not found, success, db error), getEmbedCollection (empty, not found, success, db error)
+    - `components/library/EmbedCodeGenerator.test.tsx` (6): tabs, default code, switch tabs, copy to clipboard, title in codes
+    - `components/til/TilCard.test.tsx` (8): title, body, tags, creator, upvote count, views, link, relative time
+    - `components/til/TilFilters.test.tsx` (5): search, sort buttons, tag dropdown, debounce, sort change
+    - `components/til/PublishTilDialog.test.tsx` (7): render, prefill title/body/tags, validation, submit, error
+    - `components/til/UpvoteButton.test.tsx` (5): count, upvoted state, non-upvoted, redirect to login, optimistic update
+    - `components/layout/nav.test.tsx` (updated): 15→16 nav items, /til href
+  - **30+ files changed** (25 new, 6 modified) — 0 TS errors, 0 new lint warnings, 2,352 tests passing.
+
+**Previous Enhancement (2026-03-02)**:
 - [x] **Knowledge Marketplace** — Complete public marketplace for publishing, discovering, and cloning knowledge collections. Viral growth loop: creators publish → visitors browse → sign up to clone → become creators. Deployed to Cloud Run with schema pushed to production Cloud SQL.
   - **Schema** — New `marketplace_listings` table (id, collectionId unique FK, userId FK, category enum, description, isFeatured, viewCount, cloneCount, publishedAt, updatedAt) with 5 indexes. Relations added to users and collections.
   - **Types & Validations** — `types/marketplace.ts` with 10 type definitions (MarketplaceListingWithDetails, MarketplaceCreatorStats, MarketplaceListingDetail, BrowseMarketplaceParams, BrowseMarketplaceResult, etc.). 2 Zod schemas: `publishToMarketplaceSchema` (category enum, description max 1000), `browseMarketplaceSchema` (query, category, sort with trending/newest/most-cloned, pagination). `marketplaceClone` rate limit preset (5/hr).

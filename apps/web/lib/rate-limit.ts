@@ -301,6 +301,16 @@ export const RATE_LIMITS = {
     maxRequests: 5,
     windowMs: 60 * 60 * 1000,
   },
+  // TIL publish: 10 per hour
+  tilPublish: {
+    maxRequests: 10,
+    windowMs: 60 * 60 * 1000,
+  },
+  // TIL upvote: 60 per hour
+  tilUpvote: {
+    maxRequests: 60,
+    windowMs: 60 * 60 * 1000,
+  },
 } as const;
 
 /**

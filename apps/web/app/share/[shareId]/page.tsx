@@ -27,6 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? content.body.slice(0, 160) + (content.body.length > 160 ? '...' : '')
     : `A ${content.type} shared via Mindweave`;
 
+  const ogImageUrl = `${baseUrl}/api/og/embed?id=${shareId}`;
+
   return {
     title: `${content.title} - Mindweave`,
     description,
@@ -36,21 +38,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       url: `${baseUrl}/share/${shareId}`,
       siteName: 'Mindweave',
-      ...(content.type === 'file' &&
+      images: content.type === 'file' &&
         content.metadata?.fileType?.startsWith('image/') &&
-        content.metadata?.filePath && {
-          images: [
-            {
-              url: content.metadata.filePath,
-              alt: content.title,
-            },
-          ],
-        }),
+        content.metadata?.filePath
+        ? [{ url: content.metadata.filePath, alt: content.title }]
+        : [{ url: ogImageUrl, width: 1200, height: 630, alt: content.title }],
     },
     twitter: {
       card: 'summary_large_image',
       title: content.title,
       description,
+      images: [ogImageUrl],
     },
   };
 }
