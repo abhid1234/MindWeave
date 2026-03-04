@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-02-28
+**Last Updated**: 2026-03-04
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -68,6 +68,7 @@
 - **Knowledge Marketplace** - Public marketplace for publishing, discovering, and cloning collections. Viral growth loop: creators publish → share links → visitors browse → sign up to clone → become creators. Browse with search, category filters, and trending/newest/most-cloned sorting. One-click clone imports entire collection into user's library.
 - **Embeddable Knowledge Cards** - Every shared note or public collection becomes an embeddable card (iframe, Markdown badge, or HTML link). Dynamic OG images for social sharing. "Curated with Mindweave" watermark on every embed.
 - **TIL Public Feed** - Public Today I Learned feed at /til. Users publish bite-sized learnings, visitors browse/search/filter by tag, sort by trending/newest/top. Auth required to upvote and publish (drives signups).
+- **Gamification & Badges** - 20 achievement badges across 6 categories (Creator, Streak, Sharer, Curator, Community, Explorer). Event-driven badge engine triggers on content creation, TIL publishing, upvotes, collection creation, and marketplace activity. Dashboard badges page, public profile showcase, and toast notifications for newly unlocked badges.
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -82,7 +83,30 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-03-03)**:
+**Latest Enhancement (2026-03-04)**:
+- [x] **Gamification & Badges System** — 20 achievement badges across 6 categories with event-driven unlock engine, dashboard page, public profile showcase, and toast notifications. Deployed to Cloud Run with schema pushed to production.
+  - **Schema** — New `user_badges` table (id, userId FK cascade, badgeId varchar(50), unlockedAt timestamp, notified boolean) with unique index on (userId, badgeId), userId index, unlockedAt index. Relations added to users.
+  - **20 Badge Definitions** across 6 categories:
+    - **Creator** (5): First Step (1), Builder (10), Prolific (50), Centurion (100), Archivist (500) — content count milestones
+    - **Streak** (3): Week Warrior (7), Monthly Master (30), Unstoppable (100) — longest streak days
+    - **Sharer** (3): First TIL (1), Thought Leader (5), Viral (50 upvotes on single TIL) — TIL activity
+    - **Curator** (3): Organizer (1), Curator (5), Mega Collection (50 items in one collection) — collection milestones
+    - **Community** (3): Published (1), Popular (10 clones on one listing), Influencer (100 total clones) — marketplace activity
+    - **Explorer** (3): Diverse Learner (3 content types), Tag Master (20 distinct tags), Deep Diver (100 content views) — engagement diversity
+  - **Badge Engine** (`lib/badges/engine.ts`) — Groups badge candidates by shared checker key to minimize DB queries, runs each checker once per category, inserts unlocks with `onConflictDoNothing` for race safety. Returns newly unlocked badge IDs.
+  - **5 Server Actions** — `getUserBadgesAction` (all 20 badges with progress, runs manual_check), `checkAndUnlockBadgesAction` (event-driven, supports targetUserId for other-user triggers), `getPublicBadgesAction` (unlocked badges for profiles), `getUnnotifiedBadgesAction` (for toast display), `markBadgesNotifiedAction` (batch mark as notified).
+  - **4 Components** — `BadgeCard` (tier-colored card with icon, progress bar for locked, opacity states), `BadgeGrid` (category-grouped sections with unlock counts), `BadgeShowcase` (top 5 recent badges for public profiles), `BadgeUnlockToast` (checks unnotified badges on mount, shows success toasts, marks notified).
+  - **Integration** — Badge checks added to `createContentAction` (content_created), `publishTilAction` (til_published), `upvoteTilAction` (upvote_received on TIL author), `createCollectionAction` (collection_created), `publishToMarketplaceAction` (marketplace_published), `cloneCollectionAction` (clone_received on listing owner). All non-blocking via `.catch(console.error)`.
+  - **UI** — `/dashboard/badges` page with total unlock count, Badges nav item (Award icon) before Analytics, BadgeShowcase on public profiles between MarketplaceStats and collections, BadgeUnlockToast in dashboard layout.
+  - **44 new tests across 5 test files**:
+    - `lib/badges/engine.test.ts` (12): trigger filtering, unlock detection, duplicate prevention, DB insertion, progress calculation, badge count validation
+    - `app/actions/badges.test.ts` (16): auth checks, badge retrieval with progress, manual_check trigger, unlock with targetUserId, public badges, unnotified badges, mark notified
+    - `components/badges/BadgeCard.test.tsx` (6): unlocked/locked rendering, tier labels, progress bars, opacity states, gold tier styling
+    - `components/badges/BadgeGrid.test.tsx` (4): all 6 categories rendered, names/descriptions, unlock counts, all 20 badge cards
+    - `components/layout/nav.test.tsx` (updated): 16→17 nav items, /dashboard/badges href
+  - **24 files changed** (13 new, 11 modified) — 0 TS errors, 0 new lint warnings, 2,388 tests passing.
+
+**Previous Enhancement (2026-03-03)**:
 - [x] **Embeddable Knowledge Cards + TIL Public Feed** — Two viral growth channels: (1) embeddable cards for blog posts/READMEs with "Curated with Mindweave" watermark, and (2) public TIL (Today I Learned) feed for community learning.
   - **Embeddable Knowledge Cards**:
     - Embed pages: `/embed/[shareId]` (content) and `/embed/collection/[collectionId]` (collection) with dark mode support (`?theme=dark`), max-width 600px, watermark footer
