@@ -13,6 +13,7 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { FeedbackWidget } from '@/components/feedback/FeedbackWidget';
 import { QuickCaptureDialog } from '@/components/layout/QuickCaptureDialog';
+import { BadgeUnlockToast } from '@/components/badges/BadgeUnlockToast';
 
 export default async function DashboardLayout({
   children,
@@ -59,6 +60,7 @@ export default async function DashboardLayout({
       <ViewTransition />
       <FeedbackWidget />
       <QuickCaptureDialog />
+      <BadgeUnlockToast />
     </div>
   );
 }

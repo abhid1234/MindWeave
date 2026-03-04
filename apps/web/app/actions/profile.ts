@@ -109,6 +109,7 @@ type PublicProfileResult = {
   success: boolean;
   message: string;
   profile?: {
+    id: string;
     name: string | null;
     image: string | null;
     username: string;
@@ -159,6 +160,7 @@ export async function getPublicProfile(username: string): Promise<PublicProfileR
     success: true,
     message: 'OK',
     profile: {
+      id: user.id,
       name: user.name,
       image: user.image,
       username: user.username,

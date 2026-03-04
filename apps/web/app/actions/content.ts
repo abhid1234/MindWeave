@@ -16,6 +16,7 @@ import { CacheTags } from '@/lib/cache';
 import { randomBytes } from 'crypto';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { isGCSConfigured, deleteFromGCS, extractGCSObjectPath } from '@/lib/storage';
+import { checkAndUnlockBadgesAction } from './badges';
 
 export type ActionResult = {
   success: boolean;
@@ -133,6 +134,9 @@ export async function createContentAction(formData: FormData): Promise<ActionRes
     syncContentToNeo4j(newContent.id).catch((error) => {
       console.error('Failed to sync content to Neo4j:', newContent.id, error);
     });
+
+    // Check for badge unlocks (non-blocking)
+    checkAndUnlockBadgesAction('content_created').catch(console.error);
 
     // Revalidate relevant pages and cache tags
     revalidatePath('/dashboard/library');

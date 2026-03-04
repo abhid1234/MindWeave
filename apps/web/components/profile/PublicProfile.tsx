@@ -1,9 +1,11 @@
 import Image from 'next/image';
 import PublicCollectionCard from './PublicCollectionCard';
 import { MarketplaceStats } from '@/components/marketplace/MarketplaceStats';
+import { BadgeShowcase } from '@/components/badges/BadgeShowcase';
 
 interface PublicProfileProps {
   profile: {
+    id: string;
     name: string | null;
     image: string | null;
     username: string;
@@ -50,6 +52,11 @@ export default function PublicProfile({ profile }: PublicProfileProps) {
       {/* Marketplace stats */}
       <div className="mb-8">
         <MarketplaceStats />
+      </div>
+
+      {/* Badge showcase */}
+      <div className="mb-8">
+        <BadgeShowcase userId={profile.id} />
       </div>
 
       {/* Public collections */}

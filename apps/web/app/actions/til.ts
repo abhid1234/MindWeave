@@ -15,6 +15,7 @@ import type {
   TilPostWithDetails,
 } from '@/types/til';
 import crypto from 'crypto';
+import { checkAndUnlockBadgesAction } from './badges';
 
 // Publish content as a TIL post
 export async function publishTilAction(
@@ -87,6 +88,9 @@ export async function publishTilAction(
         tags: validatedData.tags,
       })
       .returning({ id: tilPosts.id });
+
+    // Check for badge unlocks (non-blocking)
+    checkAndUnlockBadgesAction('til_published').catch(console.error);
 
     revalidatePath('/til');
     revalidatePath('/dashboard/library');
@@ -360,6 +364,15 @@ export async function upvoteTilAction(tilId: string): Promise<TilActionResult> {
         .update(tilPosts)
         .set({ upvoteCount: sql`${tilPosts.upvoteCount} + 1` })
         .where(eq(tilPosts.id, tilId));
+
+      // Check badge for TIL author (non-blocking)
+      db.select({ userId: tilPosts.userId })
+        .from(tilPosts)
+        .where(eq(tilPosts.id, tilId))
+        .then(([post]) => {
+          if (post) checkAndUnlockBadgesAction('upvote_received', post.userId).catch(console.error);
+        })
+        .catch(console.error);
 
       return { success: true, message: 'Upvoted!' };
     }

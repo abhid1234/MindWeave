@@ -50,4 +50,5 @@ export const CacheTags = {
   CONTENT: 'content',
   COLLECTIONS: 'collections',
   USER: 'user',
+  BADGES: 'badges',
 } as const;

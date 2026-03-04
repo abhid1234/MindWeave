@@ -11,6 +11,7 @@ import {
   integer,
   primaryKey,
   boolean,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
 
@@ -454,6 +455,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   marketplaceListings: many(marketplaceListings),
   tilPosts: many(tilPosts),
   tilUpvotes: many(tilUpvotes),
+  badges: many(userBadges),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -885,6 +887,35 @@ export const tilUpvotesRelations = relations(tilUpvotes, ({ one }) => ({
   }),
 }));
 
+// User Badges table (gamification)
+export const userBadges = pgTable(
+  'user_badges',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    badgeId: varchar('badge_id', { length: 50 }).notNull(),
+    unlockedAt: timestamp('unlocked_at').defaultNow().notNull(),
+    notified: boolean('notified').notNull().default(false),
+  },
+  (table) => ({
+    userBadgeUnique: uniqueIndex('user_badges_user_badge_unique').on(
+      table.userId,
+      table.badgeId
+    ),
+    userIdIdx: index('user_badges_user_id_idx').on(table.userId),
+    unlockedAtIdx: index('user_badges_unlocked_at_idx').on(table.unlockedAt),
+  })
+);
+
+export const userBadgesRelations = relations(userBadges, ({ one }) => ({
+  user: one(users, {
+    fields: [userBadges.userId],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -957,3 +988,6 @@ export type NewTilPost = typeof tilPosts.$inferInsert;
 
 export type TilUpvote = typeof tilUpvotes.$inferSelect;
 export type NewTilUpvote = typeof tilUpvotes.$inferInsert;
+
+export type UserBadgeRecord = typeof userBadges.$inferSelect;
+export type NewUserBadgeRecord = typeof userBadges.$inferInsert;

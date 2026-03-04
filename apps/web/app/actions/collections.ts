@@ -8,6 +8,7 @@ import { eq, and, inArray, sql, or } from 'drizzle-orm';
 import { checkCollectionAccess } from './collection-sharing';
 import { z } from 'zod';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { checkAndUnlockBadgesAction } from './badges';
 
 // Validation schemas
 const createCollectionSchema = z.object({
@@ -88,6 +89,9 @@ export async function createCollectionAction(
       userId: session.user.id,
       role: 'owner',
     });
+
+    // Check for badge unlocks (non-blocking)
+    checkAndUnlockBadgesAction('collection_created').catch(console.error);
 
     revalidatePath('/dashboard/library');
     revalidatePath('/dashboard/collections');

@@ -23,6 +23,7 @@ import type {
   GetMarketplaceListingResult,
   MarketplaceListingWithDetails,
 } from '@/types/marketplace';
+import { checkAndUnlockBadgesAction } from './badges';
 
 // Publish a collection to the marketplace
 export async function publishToMarketplaceAction(
@@ -99,6 +100,9 @@ export async function publishToMarketplaceAction(
         description: validatedData.description || null,
       });
     }
+
+    // Check for badge unlocks (non-blocking)
+    checkAndUnlockBadgesAction('marketplace_published').catch(console.error);
 
     revalidatePath('/marketplace');
     revalidatePath('/dashboard/library');
@@ -433,6 +437,9 @@ export async function cloneCollectionAction(
         cloneCount: sql`${marketplaceListings.cloneCount} + 1`,
       })
       .where(eq(marketplaceListings.id, listingId));
+
+    // Check badge for listing owner (non-blocking)
+    checkAndUnlockBadgesAction('clone_received', listing.userId).catch(console.error);
 
     revalidatePath('/marketplace');
     revalidatePath('/dashboard/library');
