@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles, Bell, Lightbulb } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles, Bell, Lightbulb, BrainCircuit } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
 import { formatDateUTC } from '@/lib/utils';
@@ -46,6 +46,10 @@ const ContentDetailDialog = dynamic(
 );
 const PublishTilDialog = dynamic(
   () => import('../til/PublishTilDialog').then((mod) => mod.PublishTilDialog),
+  { loading: () => null }
+);
+const GenerateFlashcardsDialog = dynamic(
+  () => import('../flashcards/GenerateFlashcardsDialog').then((mod) => mod.GenerateFlashcardsDialog),
   { loading: () => null }
 );
 import { RelatedItemsBadge } from './RelatedItemsBadge';
@@ -114,6 +118,7 @@ export function ContentCard({
   const [isRecommendationsDialogOpen, setIsRecommendationsDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isTilDialogOpen, setIsTilDialogOpen] = useState(false);
+  const [isFlashcardsDialogOpen, setIsFlashcardsDialogOpen] = useState(false);
   const [isShared, setIsShared] = useState(initialIsShared);
   const [shareId, setShareId] = useState(initialShareId);
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
@@ -279,6 +284,10 @@ export function ContentCard({
                   <Lightbulb className="mr-2 h-4 w-4" />
                   Share as TIL
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsFlashcardsDialogOpen(true)}>
+                  <BrainCircuit className="mr-2 h-4 w-4" />
+                  Generate Flashcards
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setIsDeleteDialogOpen(true)}
@@ -417,6 +426,13 @@ export function ContentCard({
         contentBody={body}
         contentTags={tags}
         onSuccess={() => addToast({ variant: 'success', title: 'Published as TIL!' })}
+      />
+
+      <GenerateFlashcardsDialog
+        open={isFlashcardsDialogOpen}
+        onOpenChange={setIsFlashcardsDialogOpen}
+        contentId={id}
+        contentTitle={title}
       />
     </>
   );

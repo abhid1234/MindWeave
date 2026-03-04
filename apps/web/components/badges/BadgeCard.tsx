@@ -9,6 +9,7 @@ import {
   Globe, Heart, Star,
   Palette, Eye,
   Lock, Tags,
+  Brain, GraduationCap, BookMarked,
 } from 'lucide-react';
 import type { UserBadgeWithDefinition } from '@/types/badges';
 
@@ -19,6 +20,7 @@ const iconMap: Record<string, React.ElementType> = {
   FolderPlus, Folders: Library, Library,
   Globe, Heart, Star,
   Palette, Tags, Eye,
+  Brain, GraduationCap, BookMarked,
 };
 
 const tierColors = {

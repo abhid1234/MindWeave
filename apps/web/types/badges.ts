@@ -6,7 +6,8 @@ export type BadgeCategory =
   | 'sharer'
   | 'curator'
   | 'community'
-  | 'explorer';
+  | 'explorer'
+  | 'scholar';
 
 export type BadgeTrigger =
   | 'content_created'
@@ -15,6 +16,7 @@ export type BadgeTrigger =
   | 'collection_created'
   | 'marketplace_published'
   | 'clone_received'
+  | 'flashcard_reviewed'
   | 'manual_check';
 
 export interface BadgeDefinition {

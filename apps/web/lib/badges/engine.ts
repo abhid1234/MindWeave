@@ -7,6 +7,7 @@ import {
   marketplaceListings,
   tilPosts,
   userBadges,
+  flashcards,
 } from '@/lib/db/schema';
 import { eq, sql, count, countDistinct, max } from 'drizzle-orm';
 import { getBadgesByTrigger } from './definitions';
@@ -28,6 +29,8 @@ function getCheckerKey(badge: BadgeDefinition): string {
   if (badge.id === 'explorer-diverse') return 'explorer_diverse';
   if (badge.id === 'explorer-tags') return 'explorer_tags';
   if (badge.id === 'explorer-views') return 'explorer_views';
+  if (badge.category === 'scholar' && badge.id !== 'scholar-streak') return 'scholar_reviews';
+  if (badge.id === 'scholar-streak') return 'scholar_streak';
   return badge.id;
 }
 
@@ -162,6 +165,50 @@ function getChecker(key: string): CheckerFn {
         .from(contentViews)
         .where(eq(contentViews.userId, userId));
       return result[0]?.value ?? 0;
+    },
+
+    scholar_reviews: async (userId) => {
+      const result = await db
+        .select({ value: sql<number>`COALESCE(SUM(${flashcards.reviewCount}), 0)` })
+        .from(flashcards)
+        .where(eq(flashcards.userId, userId));
+      return Number(result[0]?.value ?? 0);
+    },
+
+    scholar_streak: async (userId) => {
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+      const result = await db.execute<{ day: string }>(sql`
+        SELECT DISTINCT DATE(updated_at) as day
+        FROM ${flashcards}
+        WHERE user_id = ${userId}
+          AND review_count > 0
+          AND updated_at >= ${ninetyDaysAgo.toISOString()}::timestamp
+        ORDER BY day DESC
+      `);
+
+      const rows = result as unknown as { day: string }[];
+      if (rows.length === 0) return 0;
+
+      const daySet = new Set(rows.map((r) => r.day));
+      const today = new Date().toISOString().slice(0, 10);
+      let streak = 0;
+      const checkDate = new Date();
+      if (!daySet.has(today)) {
+        checkDate.setDate(checkDate.getDate() - 1);
+        if (!daySet.has(checkDate.toISOString().slice(0, 10))) return 0;
+      }
+      for (let i = 0; i < 90; i++) {
+        const dateStr = checkDate.toISOString().slice(0, 10);
+        if (daySet.has(dateStr)) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return streak;
     },
   };
 

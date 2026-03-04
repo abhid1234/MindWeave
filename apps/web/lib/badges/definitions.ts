@@ -35,6 +35,11 @@ export const BADGE_CATEGORIES: BadgeCategoryMeta[] = [
     name: 'Explorer',
     description: 'Diverse engagement patterns',
   },
+  {
+    id: 'scholar',
+    name: 'Scholar',
+    description: 'Flashcard study achievements',
+  },
 ];
 
 export const BADGE_DEFINITIONS: BadgeDefinition[] = [
@@ -248,6 +253,38 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     threshold: 100,
     triggers: ['content_created', 'manual_check'],
     icon: 'Eye',
+  },
+
+  // Scholar badges
+  {
+    id: 'scholar-first',
+    name: 'First Flash',
+    description: 'Review your first flashcard',
+    tier: 'bronze',
+    category: 'scholar',
+    threshold: 1,
+    triggers: ['flashcard_reviewed', 'manual_check'],
+    icon: 'Brain',
+  },
+  {
+    id: 'scholar-50',
+    name: 'Dedicated Student',
+    description: 'Review 50 flashcards',
+    tier: 'silver',
+    category: 'scholar',
+    threshold: 50,
+    triggers: ['flashcard_reviewed', 'manual_check'],
+    icon: 'GraduationCap',
+  },
+  {
+    id: 'scholar-streak',
+    name: 'Study Streak',
+    description: 'Study flashcards 7 days in a row',
+    tier: 'gold',
+    category: 'scholar',
+    threshold: 7,
+    triggers: ['flashcard_reviewed', 'manual_check'],
+    icon: 'BookMarked',
   },
 ];
 

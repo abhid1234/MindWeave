@@ -456,6 +456,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   tilPosts: many(tilPosts),
   tilUpvotes: many(tilUpvotes),
   badges: many(userBadges),
+  flashcards: many(flashcards),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -469,6 +470,7 @@ export const contentRelations = relations(content, ({ one, many }) => ({
   views: many(contentViews),
   reminders: many(reminders),
   tilPost: one(tilPosts),
+  flashcards: many(flashcards),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -887,6 +889,34 @@ export const tilUpvotesRelations = relations(tilUpvotes, ({ one }) => ({
   }),
 }));
 
+// Flashcards table (AI-generated study cards)
+export const flashcards = pgTable(
+  'flashcards',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    question: text('question').notNull(),
+    answer: text('answer').notNull(),
+    interval: varchar('interval', { length: 10 }).notNull().default('1d'),
+    nextReviewAt: timestamp('next_review_at').notNull(),
+    reviewCount: integer('review_count').notNull().default(0),
+    status: varchar('status', { length: 20 }).notNull().default('active'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('flashcards_user_id_idx').on(table.userId),
+    contentIdIdx: index('flashcards_content_id_idx').on(table.contentId),
+    userNextReviewIdx: index('flashcards_user_next_review_idx').on(table.userId, table.nextReviewAt),
+    userStatusIdx: index('flashcards_user_status_idx').on(table.userId, table.status),
+  })
+);
+
 // User Badges table (gamification)
 export const userBadges = pgTable(
   'user_badges',
@@ -908,6 +938,17 @@ export const userBadges = pgTable(
     unlockedAtIdx: index('user_badges_unlocked_at_idx').on(table.unlockedAt),
   })
 );
+
+export const flashcardsRelations = relations(flashcards, ({ one }) => ({
+  content: one(content, {
+    fields: [flashcards.contentId],
+    references: [content.id],
+  }),
+  user: one(users, {
+    fields: [flashcards.userId],
+    references: [users.id],
+  }),
+}));
 
 export const userBadgesRelations = relations(userBadges, ({ one }) => ({
   user: one(users, {
@@ -991,3 +1032,6 @@ export type NewTilUpvote = typeof tilUpvotes.$inferInsert;
 
 export type UserBadgeRecord = typeof userBadges.$inferSelect;
 export type NewUserBadgeRecord = typeof userBadges.$inferInsert;
+
+export type Flashcard = typeof flashcards.$inferSelect;
+export type NewFlashcard = typeof flashcards.$inferInsert;

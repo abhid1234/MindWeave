@@ -396,3 +396,19 @@ export const browseTilSchema = z.object({
 });
 
 export type BrowseTilInput = z.infer<typeof browseTilSchema>;
+
+/**
+ * Flashcard validation schemas
+ */
+export const generateFlashcardsSchema = z.object({
+  contentId: z.string().uuid('Invalid content ID'),
+});
+
+export type GenerateFlashcardsInput = z.infer<typeof generateFlashcardsSchema>;
+
+export const rateFlashcardSchema = z.object({
+  cardId: z.string().uuid('Invalid flashcard ID'),
+  rating: z.enum(['easy', 'hard', 'again']),
+});
+
+export type RateFlashcardInput = z.infer<typeof rateFlashcardSchema>;
