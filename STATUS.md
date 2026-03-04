@@ -104,7 +104,7 @@
     - `components/badges/BadgeCard.test.tsx` (6): unlocked/locked rendering, tier labels, progress bars, opacity states, gold tier styling
     - `components/badges/BadgeGrid.test.tsx` (4): all 6 categories rendered, names/descriptions, unlock counts, all 20 badge cards
     - `components/layout/nav.test.tsx` (updated): 16→17 nav items, /dashboard/badges href
-  - **24 files changed** (13 new, 11 modified) — 0 TS errors, 0 new lint warnings, 2,388 tests passing.
+  - **24 files changed** (13 new, 11 modified) — 0 TS errors, 0 new lint warnings, 2,389 tests passing.
 
 **Previous Enhancement (2026-03-03)**:
 - [x] **Embeddable Knowledge Cards + TIL Public Feed** — Two viral growth channels: (1) embeddable cards for blog posts/READMEs with "Curated with Mindweave" watermark, and (2) public TIL (Today I Learned) feed for community learning.
