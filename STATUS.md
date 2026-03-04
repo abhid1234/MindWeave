@@ -84,7 +84,7 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-03-04)**:
-- [x] **Gamification & Badges System** — 20 achievement badges across 6 categories with event-driven unlock engine, dashboard page, public profile showcase, and toast notifications. Deployed to Cloud Run with schema pushed to production.
+- [x] **Gamification & Badges System** — 20 achievement badges across 6 categories with event-driven unlock engine, dashboard page, public profile showcase, and toast notifications. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d413d41`) with schema pushed to production Cloud SQL.
   - **Schema** — New `user_badges` table (id, userId FK cascade, badgeId varchar(50), unlockedAt timestamp, notified boolean) with unique index on (userId, badgeId), userId index, unlockedAt index. Relations added to users.
   - **20 Badge Definitions** across 6 categories:
     - **Creator** (5): First Step (1), Builder (10), Prolific (50), Centurion (100), Archivist (500) — content count milestones
