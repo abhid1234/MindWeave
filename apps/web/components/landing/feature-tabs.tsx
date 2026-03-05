@@ -75,6 +75,42 @@ const tabs: TabData[] = [
       'Bulk actions and tag management',
     ],
   },
+  {
+    id: 'flashcards',
+    label: 'Study Mode',
+    title: 'AI Flashcards & Spaced Repetition',
+    description:
+      'Turn your knowledge base into study material. AI generates flashcards from your content and schedules reviews using spaced repetition — so you remember what matters.',
+    bullets: [
+      'AI-generated flashcards from your notes and links',
+      'Spaced repetition with SM-2 algorithm',
+      'Track mastery with per-card confidence ratings',
+    ],
+  },
+  {
+    id: 'marketplace',
+    label: 'Marketplace',
+    title: 'Knowledge Marketplace',
+    description:
+      'Discover and clone curated knowledge collections from the community. Share your own expertise and grow your reach — a viral loop for collective learning.',
+    bullets: [
+      'Browse and clone public knowledge collections',
+      'Publish your own curated collections',
+      'Category tags, ratings, and clone counts',
+    ],
+  },
+  {
+    id: 'badges',
+    label: 'Badges',
+    title: 'Gamification & Badges',
+    description:
+      'Stay motivated with achievements that reward consistent learning. Earn badges for streaks, milestones, and mastery — from bronze to gold tier.',
+    bullets: [
+      'Bronze, silver, and gold tier badges',
+      'Streak tracking and milestone rewards',
+      'Progress bars show how close you are to the next unlock',
+    ],
+  },
 ];
 
 function CaptureMockup() {
@@ -248,12 +284,143 @@ function LibraryMockup() {
   );
 }
 
+function FlashcardsMockup() {
+  return (
+    <div className="rounded-xl border border-border/50 bg-card p-5 shadow-soft">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          Card 3 of 12
+        </span>
+        <span className="text-[10px] font-medium text-green-600 dark:text-green-400">
+          8 mastered
+        </span>
+      </div>
+      <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-4 text-center min-h-[80px] flex flex-col items-center justify-center">
+        <span className="text-[10px] font-medium text-muted-foreground mb-1">Question</span>
+        <span className="text-sm font-medium">What is spaced repetition?</span>
+      </div>
+      <div className="mb-4 rounded-lg border border-green-500/20 bg-green-500/5 p-4 text-center min-h-[60px] flex flex-col items-center justify-center">
+        <span className="text-[10px] font-medium text-muted-foreground mb-1">Answer</span>
+        <span className="text-xs text-muted-foreground">A learning technique that increases intervals between reviews as mastery improves.</span>
+      </div>
+      <div className="flex gap-2">
+        {[
+          { label: 'Again', color: 'bg-red-500/10 text-red-600 border-red-500/20' },
+          { label: 'Hard', color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' },
+          { label: 'Easy', color: 'bg-green-500/10 text-green-600 border-green-500/20' },
+        ].map((btn) => (
+          <span key={btn.label} className={`flex-1 rounded-lg border px-2 py-1.5 text-center text-xs font-medium ${btn.color}`}>
+            {btn.label}
+          </span>
+        ))}
+      </div>
+      <div className="mt-3">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[10px] text-muted-foreground">Progress</span>
+          <span className="text-[10px] font-medium text-muted-foreground">67%</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-muted">
+          <div className="h-1.5 rounded-full bg-primary" style={{ width: '67%' }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarketplaceMockup() {
+  const collections = [
+    { title: 'Web Dev Essentials', author: 'sarah_dev', clones: 342, tags: ['javascript', 'react'] },
+    { title: 'ML Research Papers', author: 'ai_researcher', clones: 128, tags: ['machine-learning', 'papers'] },
+    { title: 'Design Systems Guide', author: 'ux_craft', clones: 256, tags: ['design', 'ui/ux'] },
+  ];
+  return (
+    <div className="rounded-xl border border-border/50 bg-card p-5 shadow-soft">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-sm font-medium">Trending Collections</span>
+        <span className="text-[10px] text-muted-foreground">1,200+ public</span>
+      </div>
+      <div className="space-y-2.5">
+        {collections.map((c) => (
+          <div key={c.title} className="rounded-lg border border-border/30 bg-muted/30 p-3">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <span className="text-xs font-medium block">{c.title}</span>
+                <span className="text-[10px] text-muted-foreground">by {c.author}</span>
+              </div>
+              <span className="rounded-md bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
+                Clone
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                {c.tags.map((tag) => (
+                  <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <span className="ml-auto text-[10px] text-muted-foreground">{c.clones} clones</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BadgesMockup() {
+  const badges = [
+    { name: 'First Capture', tier: 'gold', icon: '🏆', progress: 100, unlocked: true },
+    { name: '7-Day Streak', tier: 'silver', icon: '🔥', progress: 100, unlocked: true },
+    { name: '100 Notes', tier: 'bronze', icon: '📝', progress: 73, unlocked: false },
+    { name: 'Knowledge Guru', tier: 'gold', icon: '🧠', progress: 45, unlocked: false },
+  ];
+  const tierColors: Record<string, string> = {
+    gold: 'border-yellow-500/30 bg-yellow-500/5',
+    silver: 'border-gray-400/30 bg-gray-400/5',
+    bronze: 'border-orange-600/30 bg-orange-600/5',
+  };
+  return (
+    <div className="rounded-xl border border-border/50 bg-card p-5 shadow-soft">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-sm font-medium">Your Badges</span>
+        <span className="text-[10px] font-medium text-primary">2 of 4 unlocked</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        {badges.map((b) => (
+          <div
+            key={b.name}
+            className={`rounded-lg border p-3 text-center ${tierColors[b.tier]} ${!b.unlocked ? 'opacity-60' : ''}`}
+          >
+            <span className="text-2xl block mb-1">{b.icon}</span>
+            <span className="text-[11px] font-medium block">{b.name}</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground capitalize">
+              {b.tier}
+            </span>
+            {!b.unlocked && (
+              <div className="mt-1.5">
+                <div className="h-1 rounded-full bg-muted">
+                  <div className="h-1 rounded-full bg-primary/60" style={{ width: `${b.progress}%` }} />
+                </div>
+                <span className="text-[9px] text-muted-foreground mt-0.5 block">{b.progress}%</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const mockups: Record<string, () => React.JSX.Element> = {
   capture: CaptureMockup,
   tagging: TaggingMockup,
   search: SearchMockup,
   qa: QAMockup,
   library: LibraryMockup,
+  flashcards: FlashcardsMockup,
+  marketplace: MarketplaceMockup,
+  badges: BadgesMockup,
 };
 
 export function FeatureTabs() {

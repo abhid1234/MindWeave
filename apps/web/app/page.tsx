@@ -22,6 +22,18 @@ import {
   Star,
   Check,
   X,
+  Mic,
+  Camera,
+  Link2,
+  Bell,
+  Webhook,
+  BarChart3,
+  Newspaper,
+  History,
+  Key,
+  Users,
+  Zap,
+  Layout,
 } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
@@ -125,7 +137,7 @@ const useCases = [
     description: 'Capture lecture notes, readings, and study materials. AI-powered review when exams hit.',
     bullets: [
       'Capture lecture notes & reading highlights',
-      'AI-powered review when exam season hits',
+      'AI flashcards with spaced repetition for exams',
       'Organize by course, semester, and topic',
     ],
     color: 'text-purple-500',
@@ -234,6 +246,34 @@ const comparisonFeatures = [
     evernote: 'no',
     obsidian: 'no',
   },
+  {
+    feature: 'AI Flashcards & Spaced Repetition',
+    mindweave: 'yes',
+    notion: 'no',
+    evernote: 'no',
+    obsidian: 'plugin',
+  },
+  {
+    feature: 'Gamification & Badges',
+    mindweave: 'yes',
+    notion: 'no',
+    evernote: 'no',
+    obsidian: 'no',
+  },
+  {
+    feature: 'Knowledge Marketplace',
+    mindweave: 'yes',
+    notion: 'no',
+    evernote: 'no',
+    obsidian: 'plugin',
+  },
+  {
+    feature: 'Embeddable Knowledge Cards',
+    mindweave: 'yes',
+    notion: 'no',
+    evernote: 'no',
+    obsidian: 'no',
+  },
 ];
 
 const techNames = ['Next.js 15', 'TypeScript', 'PostgreSQL', 'pgvector', 'Tailwind CSS', 'Auth.js', 'Drizzle ORM', 'Gemini AI'];
@@ -273,6 +313,12 @@ const jsonLd = {
         'Quick Capture',
         'Smart Library',
         'Chrome Extension',
+        'AI Flashcards',
+        'Knowledge Marketplace',
+        'Gamification & Badges',
+        'Collaborative Collections',
+        'TIL Public Feed',
+        'Voice Capture & OCR',
       ],
       screenshot: 'https://www.mindweave.space/opengraph-image',
     },
@@ -416,7 +462,7 @@ export default async function Home() {
                   {gitHubStars} GitHub stars
                 </span>
                 <span className="text-border">|</span>
-                <span>2,241+ tests passing</span>
+                <span>2,425+ tests passing</span>
                 <span className="text-border">|</span>
                 <span>Open source &amp; free</span>
               </div>
@@ -645,6 +691,55 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Beyond the Basics */}
+        <section className="bg-muted/50 py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-5xl">
+              <ScrollReveal>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                    Beyond the <span className="text-gradient">basics</span>
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Mindweave keeps shipping. Here&apos;s what else is in the box.
+                  </p>
+                </div>
+              </ScrollReveal>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { icon: Users, title: 'Collaborative Collections', desc: 'Share collections with role-based access' },
+                  { icon: Zap, title: 'Daily Highlights', desc: 'AI-powered daily content spotlight' },
+                  { icon: Layout, title: 'Content Templates', desc: 'Quick-start templates for common note types' },
+                  { icon: Mic, title: 'Voice Capture', desc: 'Speak your ideas, AI transcribes them' },
+                  { icon: Camera, title: 'Screenshot OCR', desc: 'Extract text from images with Gemini Vision' },
+                  { icon: Link2, title: 'URL Summarizer', desc: 'Auto-summarize articles and YouTube videos' },
+                  { icon: Bell, title: 'Reminders', desc: 'Spaced repetition review scheduling' },
+                  { icon: Webhook, title: 'Webhook Integrations', desc: 'Connect to Slack, Discord, and custom APIs' },
+                  { icon: BarChart3, title: 'Knowledge Wrapped', desc: 'Shareable year-in-review stats' },
+                  { icon: Newspaper, title: 'TIL Public Feed', desc: 'Share bite-sized learnings publicly' },
+                  { icon: History, title: 'Version History', desc: 'Track and compare content changes' },
+                  { icon: Key, title: 'API Access', desc: 'REST API with key-based auth for integrations' },
+                ].map((feature, i) => {
+                  const Icon = feature.icon;
+                  return (
+                    <ScrollReveal key={feature.title} delay={i * 50}>
+                      <div className="group flex items-start gap-4 rounded-xl border border-border/50 bg-card p-5 transition-all duration-300 hover:shadow-soft hover:-translate-y-0.5 hover:border-primary/20 h-full">
+                        <div className="flex-shrink-0 rounded-lg bg-primary/10 border border-primary/20 p-2.5">
+                          <Icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold">{feature.title}</h3>
+                          <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{feature.desc}</p>
+                        </div>
+                      </div>
+                    </ScrollReveal>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Available Everywhere */}
         <section className="py-24">
           <div className="container mx-auto px-4">
@@ -744,7 +839,7 @@ export default async function Home() {
                   </a>
                 </div>
                 <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                  <span>2,241+ tests passing</span>
+                  <span>2,425+ tests passing</span>
                   <span className="text-border">|</span>
                   <span>TypeScript strict</span>
                   <span className="text-border">|</span>
