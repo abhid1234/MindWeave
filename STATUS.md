@@ -1,6 +1,6 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-03-04
+**Last Updated**: 2026-03-05
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
@@ -68,7 +68,8 @@
 - **Knowledge Marketplace** - Public marketplace for publishing, discovering, and cloning collections. Viral growth loop: creators publish → share links → visitors browse → sign up to clone → become creators. Browse with search, category filters, and trending/newest/most-cloned sorting. One-click clone imports entire collection into user's library.
 - **Embeddable Knowledge Cards** - Every shared note or public collection becomes an embeddable card (iframe, Markdown badge, or HTML link). Dynamic OG images for social sharing. "Curated with Mindweave" watermark on every embed.
 - **TIL Public Feed** - Public Today I Learned feed at /til. Users publish bite-sized learnings, visitors browse/search/filter by tag, sort by trending/newest/top. Auth required to upvote and publish (drives signups).
-- **Gamification & Badges** - 20 achievement badges across 6 categories (Creator, Streak, Sharer, Curator, Community, Explorer). Event-driven badge engine triggers on content creation, TIL publishing, upvotes, collection creation, and marketplace activity. Dashboard badges page, public profile showcase, and toast notifications for newly unlocked badges.
+- **Gamification & Badges** - 23 achievement badges across 7 categories (Creator, Streak, Sharer, Curator, Community, Explorer, Scholar). Event-driven badge engine triggers on content creation, TIL publishing, upvotes, collection creation, marketplace activity, and flashcard reviews. Dashboard badges page, public profile showcase, and toast notifications for newly unlocked badges.
+- **AI Flashcards & Study Mode** - AI-generated Q&A flashcards from saved content with flip-card study UI and spaced repetition scheduling (1d→3d→7d→30d). Generate from any content card, study due cards with Again/Hard/Easy rating, track stats and streaks. 3 Scholar badges for study milestones.
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -83,7 +84,41 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-03-04)**:
+**Latest Enhancement (2026-03-05)**:
+- [x] **AI Flashcards & Study Mode** — AI-generated study flashcards from saved content with flip-card UI and spaced repetition. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4357eb4`).
+  - **Schema** — New `flashcards` table (id, contentId FK cascade, userId FK cascade, question text, answer text, interval varchar(10) default '1d', nextReviewAt timestamp, reviewCount integer default 0, status varchar(20) default 'active', createdAt, updatedAt) with indexes on userId, contentId, (userId+nextReviewAt), (userId+status). Relations added to users and content.
+  - **AI Generation** (`lib/ai/flashcards.ts`) — Gemini 2.0 Flash generates 3-5 Q&A pairs from content title/body/tags. Body truncated to 3000 chars. Returns `[]` on any error (soft-fail pattern).
+  - **Spaced Repetition** — Reuses existing `lib/reminder-utils.ts` interval progression:
+    - Easy: advance interval (1d→3d→7d→30d), suspend at 30d
+    - Hard: keep current interval, reset timer
+    - Again: reset to 1d
+  - **5 Server Actions** (`app/actions/flashcards.ts`):
+    - `generateFlashcardsAction` — ownership check, AI generate, delete existing, bulk insert (serverActionAI rate limit)
+    - `getDueFlashcardsAction` — active cards where nextReviewAt <= now, limit 20, joined with content title
+    - `rateFlashcardAction` — apply rating logic, increment reviewCount, trigger badge check
+    - `getStudyStatsAction` — total cards, due today, reviewed today, study streak (consecutive days)
+    - `deleteFlashcardsAction` — delete all cards for content (ownership check)
+  - **3 Scholar Badges** — New `scholar` category and `flashcard_reviewed` trigger:
+    - First Flash (bronze, 1 review), Dedicated Student (silver, 50 reviews), Study Streak (gold, 7 consecutive study days)
+    - 2 new checkers in engine: `scholar_reviews` (SUM reviewCount), `scholar_streak` (consecutive days via updatedAt)
+  - **5 Components**:
+    - `FlashcardViewer` — flip-card UI with progress bar, question→click→answer→3 rating buttons (Again/Hard/Easy)
+    - `FlashcardStats` — stats panel: total cards, due today, reviewed today, study streak
+    - `GenerateFlashcardsDialog` — dialog from ContentCard dropdown, generate button→loading→success count→link to Study
+    - `StudySessionComplete` — "All caught up!" message after reviewing all due cards
+    - `FlashcardList` — read-only expandable list of a content item's cards
+  - **Study Page** (`/dashboard/study`) — client component with header, stats, viewer, empty state
+  - **Nav** — Study item (BrainCircuit icon) after Badges (17→18 items)
+  - **ContentCard** — "Generate Flashcards" dropdown menu item with GenerateFlashcardsDialog (dynamic import)
+  - **36 new tests across 5 test files**:
+    - `lib/ai/flashcards.test.ts` (8): valid response, code fences, filtering, max limit, API error, non-array, invalid JSON, tags in prompt
+    - `app/actions/flashcards.test.ts` (17): auth checks, validation, ownership, generation flow, empty AI response, due cards, rating (easy/hard/again), stats, delete
+    - `components/flashcards/FlashcardViewer.test.tsx` (7): render question, progress bar, flip on click, rating buttons, advance on rate, onComplete, error toast
+    - `components/flashcards/GenerateFlashcardsDialog.test.tsx` (3): dialog rendering, success state, error display
+    - `components/layout/nav.test.tsx` (updated): 17→18 nav items, /dashboard/study href
+  - **24 files changed** (12 new, 12 modified) — 0 TS errors, 0 new lint warnings, 2,425 tests passing.
+
+**Previous Enhancement (2026-03-04)**:
 - [x] **Gamification & Badges System** — 20 achievement badges across 6 categories with event-driven unlock engine, dashboard page, public profile showcase, and toast notifications. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:d413d41`) with schema pushed to production Cloud SQL.
   - **Schema** — New `user_badges` table (id, userId FK cascade, badgeId varchar(50), unlockedAt timestamp, notified boolean) with unique index on (userId, badgeId), userId index, unlockedAt index. Relations added to users.
   - **20 Badge Definitions** across 6 categories:
@@ -106,7 +141,7 @@
     - `components/layout/nav.test.tsx` (updated): 16→17 nav items, /dashboard/badges href
   - **24 files changed** (13 new, 11 modified) — 0 TS errors, 0 new lint warnings, 2,389 tests passing.
 
-**Previous Enhancement (2026-03-03)**:
+**Previous Enhancement 2 (2026-03-03)**:
 - [x] **Embeddable Knowledge Cards + TIL Public Feed** — Two viral growth channels: (1) embeddable cards for blog posts/READMEs with "Curated with Mindweave" watermark, and (2) public TIL (Today I Learned) feed for community learning.
   - **Embeddable Knowledge Cards**:
     - Embed pages: `/embed/[shareId]` (content) and `/embed/collection/[collectionId]` (collection) with dark mode support (`?theme=dark`), max-width 600px, watermark footer
@@ -1148,6 +1183,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-03-05** - ✅ **AI Flashcards & Study Mode** — AI-generated Q&A flashcards from saved content with flip-card study UI, spaced repetition scheduling (1d→3d→7d→30d), and 3 Scholar badges. 36 new tests (2,425 total). `flashcards` DB table. Commit: 4357eb4. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4357eb4`)
 - **2026-02-27** - ✅ **Chrome Extension Web Highlights + Onboarding Sync Fix** — Extension v1.2.0: text clipping via floating button, context menu, popup pre-fill. Onboarding seeder + extension capture route now generate summaries and sync to Neo4j. 5 new tests (2,156 total). Commit: 33a883a. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:33a883a`)
 - **2026-02-26** - ✅ **Mobile Responsiveness, Bulk Ops, Filtered Export, Version Diffing, Webhook Integrations** — 5 features: mobile-responsive CSS across 8 files, bulk favorite/unfavorite/move with mobile overflow menu, filtered export by collection/type/tag/query, inline/side-by-side diff view with version comparison dialog, webhook endpoints for Generic/Slack/Discord with management UI. 100 new tests (2,101 total). `webhook_configs` DB table. Commit: edaa320. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:edaa320`)
 - **2026-02-23** - ✅ **Rich Text Editor** — Tiptap-based editor with headings, bold, italic, lists, code blocks. MarkdownRenderer for detail/share views. 12 files, 3 new components. Commit: 3e0b7ab
