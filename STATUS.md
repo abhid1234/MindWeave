@@ -85,7 +85,7 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-03-05)**:
-- [x] **AI Flashcards & Study Mode** — AI-generated study flashcards from saved content with flip-card UI and spaced repetition. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4357eb4`).
+- [x] **AI Flashcards & Study Mode** — AI-generated study flashcards from saved content with flip-card UI and spaced repetition. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4357eb4`) with schema pushed to production Cloud SQL.
   - **Schema** — New `flashcards` table (id, contentId FK cascade, userId FK cascade, question text, answer text, interval varchar(10) default '1d', nextReviewAt timestamp, reviewCount integer default 0, status varchar(20) default 'active', createdAt, updatedAt) with indexes on userId, contentId, (userId+nextReviewAt), (userId+status). Relations added to users and content.
   - **AI Generation** (`lib/ai/flashcards.ts`) — Gemini 2.0 Flash generates 3-5 Q&A pairs from content title/body/tags. Body truncated to 3000 chars. Returns `[]` on any error (soft-fail pattern).
   - **Spaced Repetition** — Reuses existing `lib/reminder-utils.ts` interval progression:
