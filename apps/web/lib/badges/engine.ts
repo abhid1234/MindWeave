@@ -8,6 +8,9 @@ import {
   tilPosts,
   userBadges,
   flashcards,
+  learningPaths,
+  learningPathItems,
+  learningPathProgress,
 } from '@/lib/db/schema';
 import { eq, sql, count, countDistinct, max } from 'drizzle-orm';
 import { getBadgesByTrigger } from './definitions';
@@ -31,6 +34,9 @@ function getCheckerKey(badge: BadgeDefinition): string {
   if (badge.id === 'explorer-views') return 'explorer_views';
   if (badge.category === 'scholar' && badge.id !== 'scholar-streak') return 'scholar_reviews';
   if (badge.id === 'scholar-streak') return 'scholar_streak';
+  if (badge.id === 'pathfinder-creator') return 'pathfinder_created';
+  if (badge.id === 'pathfinder-first-complete' || badge.id === 'pathfinder-5-complete')
+    return 'pathfinder_completed';
   return badge.id;
 }
 
@@ -173,6 +179,39 @@ function getChecker(key: string): CheckerFn {
         .from(flashcards)
         .where(eq(flashcards.userId, userId));
       return Number(result[0]?.value ?? 0);
+    },
+
+    pathfinder_created: async (userId) => {
+      const result = await db
+        .select({ value: count() })
+        .from(learningPaths)
+        .where(eq(learningPaths.userId, userId));
+      return result[0]?.value ?? 0;
+    },
+
+    pathfinder_completed: async (userId) => {
+      // Count paths where all required items are completed
+      const result = await db.execute<{ completed_paths: string }>(sql`
+        SELECT COUNT(*) as completed_paths FROM (
+          SELECT lp.id
+          FROM ${learningPaths} lp
+          WHERE lp.user_id = ${userId}
+            AND EXISTS (SELECT 1 FROM ${learningPathItems} lpi WHERE lpi.path_id = lp.id)
+            AND NOT EXISTS (
+              SELECT 1 FROM ${learningPathItems} lpi
+              WHERE lpi.path_id = lp.id
+                AND lpi.is_optional = false
+                AND NOT EXISTS (
+                  SELECT 1 FROM ${learningPathProgress} lpp
+                  WHERE lpp.path_id = lp.id
+                    AND lpp.user_id = ${userId}
+                    AND lpp.content_id = lpi.content_id
+                )
+            )
+        ) completed
+      `);
+      const rows = result as unknown as { completed_paths: string }[];
+      return parseInt(rows[0]?.completed_paths ?? '0', 10);
     },
 
     scholar_streak: async (userId) => {

@@ -40,6 +40,11 @@ export const BADGE_CATEGORIES: BadgeCategoryMeta[] = [
     name: 'Scholar',
     description: 'Flashcard study achievements',
   },
+  {
+    id: 'pathfinder',
+    name: 'Pathfinder',
+    description: 'Learning path achievements',
+  },
 ];
 
 export const BADGE_DEFINITIONS: BadgeDefinition[] = [
@@ -285,6 +290,37 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     threshold: 7,
     triggers: ['flashcard_reviewed', 'manual_check'],
     icon: 'BookMarked',
+  },
+  // Pathfinder badges
+  {
+    id: 'pathfinder-creator',
+    name: 'Path Creator',
+    description: 'Create your first learning path',
+    tier: 'bronze',
+    category: 'pathfinder',
+    threshold: 1,
+    triggers: ['path_created', 'manual_check'],
+    icon: 'Route',
+  },
+  {
+    id: 'pathfinder-first-complete',
+    name: 'First Journey',
+    description: 'Complete your first learning path',
+    tier: 'silver',
+    category: 'pathfinder',
+    threshold: 1,
+    triggers: ['path_completed', 'manual_check'],
+    icon: 'MapPin',
+  },
+  {
+    id: 'pathfinder-5-complete',
+    name: 'Trail Blazer',
+    description: 'Complete 5 learning paths',
+    tier: 'gold',
+    category: 'pathfinder',
+    threshold: 5,
+    triggers: ['path_completed', 'manual_check'],
+    icon: 'Mountain',
   },
 ];
 

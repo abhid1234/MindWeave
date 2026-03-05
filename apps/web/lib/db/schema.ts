@@ -457,6 +457,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   tilUpvotes: many(tilUpvotes),
   badges: many(userBadges),
   flashcards: many(flashcards),
+  learningPaths: many(learningPaths),
+  learningPathProgress: many(learningPathProgress),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -471,6 +473,8 @@ export const contentRelations = relations(content, ({ one, many }) => ({
   reminders: many(reminders),
   tilPost: one(tilPosts),
   flashcards: many(flashcards),
+  learningPathItems: many(learningPathItems),
+  learningPathProgress: many(learningPathProgress),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -939,6 +943,108 @@ export const userBadges = pgTable(
   })
 );
 
+// Learning Paths table
+export const learningPaths = pgTable(
+  'learning_paths',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: varchar('title', { length: 200 }).notNull(),
+    description: text('description'),
+    estimatedMinutes: integer('estimated_minutes'),
+    difficulty: varchar('difficulty', { length: 20 }).$type<
+      'beginner' | 'intermediate' | 'advanced'
+    >(),
+    isPublic: boolean('is_public').notNull().default(false),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIdx: index('learning_paths_user_id_idx').on(table.userId),
+    createdAtIdx: index('learning_paths_created_at_idx').on(table.createdAt),
+  })
+);
+
+// Learning Path Items table (ordered content within a path)
+export const learningPathItems = pgTable(
+  'learning_path_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    pathId: uuid('path_id')
+      .notNull()
+      .references(() => learningPaths.id, { onDelete: 'cascade' }),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull(),
+    isOptional: boolean('is_optional').notNull().default(false),
+    addedAt: timestamp('added_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    pathIdIdx: index('learning_path_items_path_id_idx').on(table.pathId),
+    contentIdIdx: index('learning_path_items_content_id_idx').on(table.contentId),
+    pathPositionIdx: index('learning_path_items_path_position_idx').on(table.pathId, table.position),
+  })
+);
+
+// Learning Path Progress table (per-item completion tracking)
+export const learningPathProgress = pgTable(
+  'learning_path_progress',
+  {
+    pathId: uuid('path_id')
+      .notNull()
+      .references(() => learningPaths.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    completedAt: timestamp('completed_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.pathId, table.userId, table.contentId] }),
+    pathUserIdx: index('learning_path_progress_path_user_idx').on(table.pathId, table.userId),
+  })
+);
+
+export const learningPathsRelations = relations(learningPaths, ({ one, many }) => ({
+  user: one(users, {
+    fields: [learningPaths.userId],
+    references: [users.id],
+  }),
+  items: many(learningPathItems),
+  progress: many(learningPathProgress),
+}));
+
+export const learningPathItemsRelations = relations(learningPathItems, ({ one }) => ({
+  path: one(learningPaths, {
+    fields: [learningPathItems.pathId],
+    references: [learningPaths.id],
+  }),
+  content: one(content, {
+    fields: [learningPathItems.contentId],
+    references: [content.id],
+  }),
+}));
+
+export const learningPathProgressRelations = relations(learningPathProgress, ({ one }) => ({
+  path: one(learningPaths, {
+    fields: [learningPathProgress.pathId],
+    references: [learningPaths.id],
+  }),
+  user: one(users, {
+    fields: [learningPathProgress.userId],
+    references: [users.id],
+  }),
+  content: one(content, {
+    fields: [learningPathProgress.contentId],
+    references: [content.id],
+  }),
+}));
+
 export const flashcardsRelations = relations(flashcards, ({ one }) => ({
   content: one(content, {
     fields: [flashcards.contentId],
@@ -1035,3 +1141,12 @@ export type NewUserBadgeRecord = typeof userBadges.$inferInsert;
 
 export type Flashcard = typeof flashcards.$inferSelect;
 export type NewFlashcard = typeof flashcards.$inferInsert;
+
+export type LearningPath = typeof learningPaths.$inferSelect;
+export type NewLearningPath = typeof learningPaths.$inferInsert;
+
+export type LearningPathItem = typeof learningPathItems.$inferSelect;
+export type NewLearningPathItem = typeof learningPathItems.$inferInsert;
+
+export type LearningPathProgressRecord = typeof learningPathProgress.$inferSelect;
+export type NewLearningPathProgressRecord = typeof learningPathProgress.$inferInsert;

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PlusCircle, Search, Library, MessageCircleQuestion, Upload, BarChart3, User, CheckSquare, Compass, Network, PenSquare, Gift, Zap, Store, Lightbulb, Award, BrainCircuit } from 'lucide-react';
+import { Home, PlusCircle, Search, Library, MessageCircleQuestion, Upload, BarChart3, User, CheckSquare, Compass, Network, PenSquare, Gift, Zap, Store, Lightbulb, Award, BrainCircuit, Route } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -21,6 +21,7 @@ const navItems = [
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/dashboard/badges', label: 'Badges', icon: Award },
   { href: '/dashboard/study', label: 'Study', icon: BrainCircuit },
+  { href: '/dashboard/learning-paths', label: 'Paths', icon: Route },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/profile', label: 'Profile', icon: User },
 ];

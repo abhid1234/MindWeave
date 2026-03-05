@@ -412,3 +412,47 @@ export const rateFlashcardSchema = z.object({
 });
 
 export type RateFlashcardInput = z.infer<typeof rateFlashcardSchema>;
+
+/**
+ * Learning Paths validation schemas
+ */
+export const createLearningPathSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be at most 200 characters'),
+  description: z.string().max(2000, 'Description must be at most 2000 characters').optional().nullable(),
+  estimatedMinutes: z.number().int().min(1).max(10000).optional().nullable(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional().nullable(),
+});
+
+export type CreateLearningPathInput = z.infer<typeof createLearningPathSchema>;
+
+export const updateLearningPathSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be at most 200 characters').optional(),
+  description: z.string().max(2000, 'Description must be at most 2000 characters').optional().nullable(),
+  estimatedMinutes: z.number().int().min(1).max(10000).optional().nullable(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional().nullable(),
+  isPublic: z.boolean().optional(),
+});
+
+export type UpdateLearningPathInput = z.infer<typeof updateLearningPathSchema>;
+
+export const addLearningPathItemSchema = z.object({
+  pathId: z.string().uuid('Invalid path ID'),
+  contentId: z.string().uuid('Invalid content ID'),
+  isOptional: z.boolean().default(false),
+});
+
+export type AddLearningPathItemInput = z.infer<typeof addLearningPathItemSchema>;
+
+export const reorderLearningPathItemsSchema = z.object({
+  pathId: z.string().uuid('Invalid path ID'),
+  itemIds: z.array(z.string().uuid('Invalid item ID')).min(1, 'At least one item is required'),
+});
+
+export type ReorderLearningPathItemsInput = z.infer<typeof reorderLearningPathItemsSchema>;
+
+export const toggleLearningPathProgressSchema = z.object({
+  pathId: z.string().uuid('Invalid path ID'),
+  contentId: z.string().uuid('Invalid content ID'),
+});
+
+export type ToggleLearningPathProgressInput = z.infer<typeof toggleLearningPathProgressSchema>;

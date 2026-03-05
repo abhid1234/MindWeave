@@ -7,7 +7,8 @@ export type BadgeCategory =
   | 'curator'
   | 'community'
   | 'explorer'
-  | 'scholar';
+  | 'scholar'
+  | 'pathfinder';
 
 export type BadgeTrigger =
   | 'content_created'
@@ -17,6 +18,8 @@ export type BadgeTrigger =
   | 'marketplace_published'
   | 'clone_received'
   | 'flashcard_reviewed'
+  | 'path_created'
+  | 'path_completed'
   | 'manual_check';
 
 export interface BadgeDefinition {
