@@ -5,7 +5,7 @@
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, Learning Paths, Brain Dump, and Smart Review Queue.
+✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, Learning Paths, Brain Dump, Smart Review Queue, and Content Refinement AI.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -73,6 +73,7 @@
 - **Learning Paths** - Structured learning tracks to sequence content into ordered progressions. Create paths with title, description, difficulty, and estimated time. Add content items, reorder with up/down arrows, mark items as complete with progress tracking. AI-powered item suggestions using semantic similarity. 3 Pathfinder badges for path creation and completion milestones.
 - **Brain Dump** - Paste messy stream-of-consciousness text and AI transforms it into multiple structured notes with titles, markdown bodies, tags, and action items. 3-phase UI (input → processing → review) with editable note cards, before/after comparison, and bulk save. 3 Alchemist badges for brain dump milestones.
 - **Smart Review Queue** - Curated daily queue of ~8 items from due flashcards, due reminders, stale/forgotten content, and rediscovery. Process items one at a time with type-specific interactions (flashcard flip/rate, reminder dismiss/snooze, content mark reviewed). Dashboard widget shows pending review count. 3 Reviewer badges for daily review milestones.
+- **Content Refinement AI** - "Refine with AI" button in content detail dialog transforms messy notes into polished content with 4 tone controls (professional, casual, academic, concise). Before/after comparison preview with apply/discard. Optional custom instructions.
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -88,6 +89,23 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-03-06)**:
+- [x] **Content Refinement AI** — "Refine with AI" button in content detail dialog transforms rough notes into polished content using Gemini 2.0 Flash with 4 tone controls. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:17ba44a`).
+  - **AI Function** (`lib/ai/refine.ts`) — `refineContent()` sends text to Gemini with tone-specific instructions (professional: clear & polished, casual: friendly & conversational, academic: formal & precise, concise: brief & direct). Supports optional custom instructions. Truncates at 50k chars.
+  - **1 Validation Schema** (`lib/validations.ts`) — `refineContentSchema` (contentId UUID, tone enum, customInstruction max 200 chars optional).
+  - **1 Server Action** (`app/actions/refine.ts`):
+    - `refineContentAction` — auth, rate limit (serverActionAI 20/min), validate, fetch content (verify ownership), check body exists, call AI, return `{ refined, original }` for preview. Does NOT auto-save.
+  - **ContentRefineDialog** (`components/library/ContentRefineDialog.tsx`) — Two-phase client component:
+    - **Options phase**: 2x2 grid of tone selector pills with descriptions, optional custom instruction input with char counter, original text preview (truncated at 500 chars), "Refine" button
+    - **Preview phase**: Refined/Original toggle tabs, content display area, Apply (calls `updateContentAction`), Try Again (re-refine), Discard (back to options)
+  - **Integration** (`components/library/ContentDetailDialog.tsx`) — Refine button (Wand2 icon) between Edit and Share buttons, disabled when content has no body. Dynamic import for lazy loading.
+  - **42 new tests across 4 test files**:
+    - `lib/ai/refine.test.ts` (7): AI response, tone in prompt, custom instruction, empty response error, API error propagation, text truncation, all 4 tones
+    - `app/actions/refine.test.ts` (12): auth, validation (missing/invalid contentId, invalid tone, custom instruction max length), content not found, no body, correct AI params, custom instruction passthrough, AI error handling, all 4 tones
+    - `components/library/ContentRefineDialog.test.tsx` (20): open/close, tone options/descriptions, custom instruction input/char count, original preview/truncation, refine button, tone selection, refine action call, refined text display, preview tabs, toggle original/refined, apply calls updateContentAction, onRefined callback, discard, error toasts
+    - `components/library/ContentDetailDialog.test.tsx` (+3): Refine button renders, disabled without body, opens refine dialog
+  - **9 files changed** (6 new, 3 modified) — 0 TS errors, 0 new lint warnings.
+
+**Previous Enhancement (2026-03-06)**:
 - [x] **Smart Review Queue** — Curated daily queue of ~8 items from 4 sources: due flashcards, due reminders, stale content (>14d, never viewed), and rediscovery (not viewed in >30d). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:6a25ba2`).
   - **1 Validation Schema** (`lib/validations.ts`) — `markReviewedSchema` (contentId UUID).
   - **2 Server Actions** (`app/actions/review.ts`):
