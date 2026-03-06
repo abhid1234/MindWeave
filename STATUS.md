@@ -1,11 +1,11 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-03-05
+**Last Updated**: 2026-03-06
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, and Learning Paths.
+✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, Learning Paths, and Brain Dump.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -68,9 +68,10 @@
 - **Knowledge Marketplace** - Public marketplace for publishing, discovering, and cloning collections. Viral growth loop: creators publish → share links → visitors browse → sign up to clone → become creators. Browse with search, category filters, and trending/newest/most-cloned sorting. One-click clone imports entire collection into user's library.
 - **Embeddable Knowledge Cards** - Every shared note or public collection becomes an embeddable card (iframe, Markdown badge, or HTML link). Dynamic OG images for social sharing. "Curated with Mindweave" watermark on every embed.
 - **TIL Public Feed** - Public Today I Learned feed at /til. Users publish bite-sized learnings, visitors browse/search/filter by tag, sort by trending/newest/top. Auth required to upvote and publish (drives signups).
-- **Gamification & Badges** - 26 achievement badges across 8 categories (Creator, Streak, Sharer, Curator, Community, Explorer, Scholar, Pathfinder). Event-driven badge engine triggers on content creation, TIL publishing, upvotes, collection creation, marketplace activity, flashcard reviews, and learning path milestones. Dashboard badges page, public profile showcase, and toast notifications for newly unlocked badges.
+- **Gamification & Badges** - 29 achievement badges across 9 categories (Creator, Streak, Sharer, Curator, Community, Explorer, Scholar, Pathfinder, Alchemist). Event-driven badge engine triggers on content creation, TIL publishing, upvotes, collection creation, marketplace activity, flashcard reviews, learning path milestones, and brain dump processing. Dashboard badges page, public profile showcase, and toast notifications for newly unlocked badges.
 - **AI Flashcards & Study Mode** - AI-generated Q&A flashcards from saved content with flip-card study UI and spaced repetition scheduling (1d→3d→7d→30d). Generate from any content card, study due cards with Again/Hard/Easy rating, track stats and streaks. 3 Scholar badges for study milestones.
 - **Learning Paths** - Structured learning tracks to sequence content into ordered progressions. Create paths with title, description, difficulty, and estimated time. Add content items, reorder with up/down arrows, mark items as complete with progress tracking. AI-powered item suggestions using semantic similarity. 3 Pathfinder badges for path creation and completion milestones.
+- **Brain Dump** - Paste messy stream-of-consciousness text and AI transforms it into multiple structured notes with titles, markdown bodies, tags, and action items. 3-phase UI (input → processing → review) with editable note cards, before/after comparison, and bulk save. 3 Alchemist badges for brain dump milestones.
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -85,7 +86,34 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-03-05)**:
+**Latest Enhancement (2026-03-06)**:
+- [x] **Brain Dump → Structured Notes** — Paste messy stream-of-consciousness text and AI (Gemini 2.0 Flash) transforms it into 2-8 structured notes with titles, markdown bodies, tags, and action items. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:04926b9`).
+  - **AI Function** (`lib/ai/brain-dump.ts`) — `processBrainDump()` sends raw text to Gemini with instructions to extract distinct notes, preserve all info, format in markdown, generate tags, and extract TODOs. Handles JSON wrapped in code fences. Sanitizes output (title max 80 chars, 2-5 tags, max 8 notes).
+  - **3 Validation Schemas** (`lib/validations.ts`) — `brainDumpInputSchema` (rawText 50-10000 chars), `structuredNoteSchema` (title, body, tags, actionItems), `saveBrainDumpNotesSchema` (1-20 notes array).
+  - **2 Server Actions** (`app/actions/brain-dump.ts`):
+    - `processBrainDumpAction` — auth, rate limit (serverActionAI 20/min), validate, call AI, return structured notes
+    - `saveBrainDumpNotesAction` — auth, rate limit (serverActionBulk 10/min), validate, bulk insert with `type: 'note'` and `metadata: { source: 'brain-dump', actionItems }`, fire embeddings + Neo4j sync per note (non-blocking), trigger `content_created` + `brain_dump_processed` badge checks
+  - **3 Alchemist Badges** — New `alchemist` category and `brain_dump_processed` trigger:
+    - First Transform (bronze, 1 brain dump), Mind Organizer (silver, 5), Thought Alchemist (gold, 50)
+    - New `alchemist_count` checker: `COUNT(*) FROM content WHERE metadata->>'source' = 'brain-dump'`
+  - **3-Phase Page** (`/dashboard/brain-dump`) — Client component state machine:
+    - **Input**: Large textarea with char counter (50-10000), "Process with AI" button with Sparkles icon
+    - **Processing**: Animated Wand2 icon with rotating messages every 1.5s
+    - **Review**: Summary bar with note count, toggleable Before/After view, grid of editable StructuredNoteCards with staggered animations, "Save All" button
+  - **3 Components** (`components/brain-dump/`):
+    - `BrainDumpInput` — textarea, character counter with warning states, submit button
+    - `StructuredNoteCard` — editable title (click to edit), markdown body, tag pills with remove, action items as checkboxes, color-coded left border (8 colors cycling), remove button
+    - `BeforeAfterView` — side-by-side: raw text (mono, faded) vs structured note cards (clean)
+  - **Navigation** — Brain Dump item (Wand2 icon) after Capture (19→20 nav items)
+  - **60 new tests across 5 test files**:
+    - `app/actions/brain-dump.test.ts` (18): auth, rate limit, validation (min/max chars, empty notes, missing title), AI processing, save with embeddings/neo4j/badges, error handling
+    - `components/brain-dump/BrainDumpInput.test.tsx` (9): rendering, char counter, button enable/disable, submit callback, processing state
+    - `components/brain-dump/StructuredNoteCard.test.tsx` (14): title display/edit (Enter/Escape), body/tags/action items rendering, tag removal, note removal, color borders, animation delay, empty state handling
+    - `components/brain-dump/BeforeAfterView.test.tsx` (7): before/after sections, raw text, note titles/bodies/tags, monospace formatting
+    - `app/dashboard/brain-dump/page.test.tsx` (12): initial render, processing state, review phase, error display, before/after toggle, note removal, save success/error, start over
+  - **20 files changed** (13 new, 7 modified) — 0 TS errors, 0 new lint warnings, 2,564 tests passing.
+
+**Previous Enhancement (2026-03-05)**:
 - [x] **AI Flashcards & Study Mode** — AI-generated study flashcards from saved content with flip-card UI and spaced repetition. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4357eb4`) with schema pushed to production Cloud SQL.
   - **Schema** — New `flashcards` table (id, contentId FK cascade, userId FK cascade, question text, answer text, interval varchar(10) default '1d', nextReviewAt timestamp, reviewCount integer default 0, status varchar(20) default 'active', createdAt, updatedAt) with indexes on userId, contentId, (userId+nextReviewAt), (userId+status). Relations added to users and content.
   - **AI Generation** (`lib/ai/flashcards.ts`) — Gemini 2.0 Flash generates 3-5 Q&A pairs from content title/body/tags. Body truncated to 3000 chars. Returns `[]` on any error (soft-fail pattern).
