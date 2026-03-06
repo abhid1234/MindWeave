@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
+import { Pencil, Share2, Trash2, Star, Globe, File, FileText, Image as ImageIcon, Download, ExternalLink, Sparkles, Loader2, Wand2 } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 import { VersionHistoryPanel } from './VersionHistoryPanel';
 import NextImage from 'next/image';
@@ -34,6 +34,10 @@ const ContentEditDialog = dynamic(
 );
 const ShareDialog = dynamic(
   () => import('./ShareDialog').then((mod) => mod.ShareDialog),
+  { loading: () => null }
+);
+const ContentRefineDialog = dynamic(
+  () => import('./ContentRefineDialog').then((mod) => mod.ContentRefineDialog),
   { loading: () => null }
 );
 
@@ -90,6 +94,7 @@ export function ContentDetailDialog({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isRefineDialogOpen, setIsRefineDialogOpen] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationResult[]>([]);
   const [recsLoading, setRecsLoading] = useState(false);
   const [currentSummary, setCurrentSummary] = useState(content.summary);
@@ -343,6 +348,16 @@ export function ContentDetailDialog({
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setIsRefineDialogOpen(true)}
+                disabled={!body}
+                data-testid="refine-button"
+              >
+                <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+                Refine
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setIsShareDialogOpen(true)}
               >
                 <Share2 className="mr-1.5 h-3.5 w-3.5" />
@@ -384,6 +399,16 @@ export function ContentDetailDialog({
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       />
+
+      {body && (
+        <ContentRefineDialog
+          contentId={id}
+          contentBody={body}
+          open={isRefineDialogOpen}
+          onOpenChange={setIsRefineDialogOpen}
+          onRefined={() => onOpenChange(false)}
+        />
+      )}
     </>
   );
 }

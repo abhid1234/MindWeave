@@ -485,3 +485,14 @@ export type SaveBrainDumpNotesInput = z.infer<typeof saveBrainDumpNotesSchema>;
 export const markReviewedSchema = z.object({
   contentId: z.string().uuid(),
 });
+
+/**
+ * Content refinement validation schema
+ */
+export const refineContentSchema = z.object({
+  contentId: z.string().uuid(),
+  tone: z.enum(['professional', 'casual', 'academic', 'concise']),
+  customInstruction: z.string().max(200).optional(),
+});
+
+export type RefineContentInput = z.infer<typeof refineContentSchema>;

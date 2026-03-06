@@ -44,6 +44,19 @@ vi.mock('./ShareDialog', () => ({
     ) : null,
 }));
 
+vi.mock('./ContentRefineDialog', () => ({
+  ContentRefineDialog: ({
+    open,
+    contentBody,
+  }: {
+    open: boolean;
+    contentBody: string;
+  }) =>
+    open ? (
+      <div data-testid="refine-dialog">Refine dialog for: {contentBody.slice(0, 20)}</div>
+    ) : null,
+}));
+
 vi.mock('@/components/editor/MarkdownRenderer', () => ({
   MarkdownRenderer: ({ content }: { content: string }) => (
     <div data-testid="markdown-renderer">{content}</div>
@@ -266,6 +279,37 @@ describe('ContentDetailDialog', () => {
     await user.click(btn);
 
     expect(mockGenerateSummaryAction).toHaveBeenCalledWith('1');
+  });
+
+  it('renders Refine button when content has body', () => {
+    render(
+      <ContentDetailDialog content={baseContent} open={true} onOpenChange={() => {}} />
+    );
+
+    expect(screen.getByTestId('refine-button')).toBeInTheDocument();
+    expect(screen.getByTestId('refine-button')).not.toBeDisabled();
+  });
+
+  it('disables Refine button when content has no body', () => {
+    const noBodyContent = { ...baseContent, body: null };
+
+    render(
+      <ContentDetailDialog content={noBodyContent} open={true} onOpenChange={() => {}} />
+    );
+
+    expect(screen.getByTestId('refine-button')).toBeDisabled();
+  });
+
+  it('opens refine dialog when Refine button is clicked', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ContentDetailDialog content={baseContent} open={true} onOpenChange={() => {}} />
+    );
+
+    await user.click(screen.getByTestId('refine-button'));
+
+    expect(screen.getByTestId('refine-dialog')).toBeInTheDocument();
   });
 
   it('renders file info for file type content', () => {
