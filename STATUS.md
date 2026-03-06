@@ -5,7 +5,7 @@
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, Learning Paths, and Brain Dump.
+✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, Learning Paths, Brain Dump, and Smart Review Queue.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -68,10 +68,11 @@
 - **Knowledge Marketplace** - Public marketplace for publishing, discovering, and cloning collections. Viral growth loop: creators publish → share links → visitors browse → sign up to clone → become creators. Browse with search, category filters, and trending/newest/most-cloned sorting. One-click clone imports entire collection into user's library.
 - **Embeddable Knowledge Cards** - Every shared note or public collection becomes an embeddable card (iframe, Markdown badge, or HTML link). Dynamic OG images for social sharing. "Curated with Mindweave" watermark on every embed.
 - **TIL Public Feed** - Public Today I Learned feed at /til. Users publish bite-sized learnings, visitors browse/search/filter by tag, sort by trending/newest/top. Auth required to upvote and publish (drives signups).
-- **Gamification & Badges** - 29 achievement badges across 9 categories (Creator, Streak, Sharer, Curator, Community, Explorer, Scholar, Pathfinder, Alchemist). Event-driven badge engine triggers on content creation, TIL publishing, upvotes, collection creation, marketplace activity, flashcard reviews, learning path milestones, and brain dump processing. Dashboard badges page, public profile showcase, and toast notifications for newly unlocked badges.
+- **Gamification & Badges** - 32 achievement badges across 10 categories (Creator, Streak, Sharer, Curator, Community, Explorer, Scholar, Pathfinder, Alchemist, Reviewer). Event-driven badge engine triggers on content creation, TIL publishing, upvotes, collection creation, marketplace activity, flashcard reviews, learning path milestones, brain dump processing, and daily reviews. Dashboard badges page, public profile showcase, and toast notifications for newly unlocked badges.
 - **AI Flashcards & Study Mode** - AI-generated Q&A flashcards from saved content with flip-card study UI and spaced repetition scheduling (1d→3d→7d→30d). Generate from any content card, study due cards with Again/Hard/Easy rating, track stats and streaks. 3 Scholar badges for study milestones.
 - **Learning Paths** - Structured learning tracks to sequence content into ordered progressions. Create paths with title, description, difficulty, and estimated time. Add content items, reorder with up/down arrows, mark items as complete with progress tracking. AI-powered item suggestions using semantic similarity. 3 Pathfinder badges for path creation and completion milestones.
 - **Brain Dump** - Paste messy stream-of-consciousness text and AI transforms it into multiple structured notes with titles, markdown bodies, tags, and action items. 3-phase UI (input → processing → review) with editable note cards, before/after comparison, and bulk save. 3 Alchemist badges for brain dump milestones.
+- **Smart Review Queue** - Curated daily queue of ~8 items from due flashcards, due reminders, stale/forgotten content, and rediscovery. Process items one at a time with type-specific interactions (flashcard flip/rate, reminder dismiss/snooze, content mark reviewed). Dashboard widget shows pending review count. 3 Reviewer badges for daily review milestones.
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -87,6 +88,35 @@
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
 **Latest Enhancement (2026-03-06)**:
+- [x] **Smart Review Queue** — Curated daily queue of ~8 items from 4 sources: due flashcards, due reminders, stale content (>14d, never viewed), and rediscovery (not viewed in >30d). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:6a25ba2`).
+  - **1 Validation Schema** (`lib/validations.ts`) — `markReviewedSchema` (contentId UUID).
+  - **2 Server Actions** (`app/actions/review.ts`):
+    - `getReviewQueueAction` — auth, rate limit (serverAction 60/min), aggregates up to 8 items from 4 sources (due flashcards max 3, due reminders max 2, stale content max 2, rediscovery max 1), excludes items already reviewed today via contentViews
+    - `markReviewedAction` — auth, rate limit, validate UUID, insert contentViews row, trigger `review_completed` badge check, revalidate `/dashboard/review`
+  - **3 Reviewer Badges** — New `reviewer` category and `review_completed` trigger:
+    - First Review (bronze, 1 day), Weekly Reviewer (silver, 7 days), Review Habit (gold, 30 days)
+    - New `reviewer_days` checker: `COUNT(DISTINCT DATE(viewed_at)) FROM content_views`
+  - **State Machine Page** (`/dashboard/review`) — Client component: loading → reviewing → complete
+    - **Reviewing**: ReviewProgress bar, single ReviewCard per item with source-colored label pill
+    - **Flashcards**: question → click to flip → rate (Again/Hard/Easy) via rateFlashcardAction
+    - **Reminders**: content preview → Reviewed (dismiss + markReviewed) or Snooze (1d/3d/7d)
+    - **Content (stale/rediscovery)**: title, body, tags → Mark Reviewed, Skip, Open link
+    - **Complete**: CheckCircle2 icon, "All caught up!", reviewed count, link to dashboard
+  - **3 Components** (`components/review/`):
+    - `ReviewCard` — renders differently per type: flashcard flip, reminder with snooze, content preview
+    - `ReviewProgress` — progress bar with current/total and percentage
+    - `ReviewComplete` — completion state with stats
+  - **Dashboard Widget** (`components/dashboard/ReviewQueueWidget.tsx`) — Self-fetch widget showing "N items to review" with link to /dashboard/review, above DailyHighlight
+  - **Navigation** — Review item (ClipboardCheck icon) after Brain Dump (20→21 nav items)
+  - **87 new tests across 9 test files**:
+    - `app/actions/review.test.ts` (15): auth, rate limit, empty queue, flashcard/reminder/stale/rediscovery returns, exclude reviewed today, aggregation, max 8 limit, DB errors, markReviewed auth/rate/validation/insert/badges/errors
+    - `components/review/ReviewCard.test.tsx` (15): flashcard question/flip/rating, reminder title/dismiss/snooze, content title/tags/markReviewed/skip/open link
+    - `app/dashboard/review/page.test.tsx` (10): loading, empty complete, review card display, progress bar, advance to complete, flashcard rating, page header, skip, error, multi-item advance
+    - `components/review/ReviewProgress.test.tsx` (4): count display, percentage, aria attributes, zero total
+    - `components/review/ReviewComplete.test.tsx` (3): completion message, plural/singular count
+    - `components/dashboard/ReviewQueueWidget.test.tsx` (5): loading, count display, singular, empty hide, link href
+
+**Previous Enhancement (2026-03-06)**:
 - [x] **Brain Dump → Structured Notes** — Paste messy stream-of-consciousness text and AI (Gemini 2.0 Flash) transforms it into 2-8 structured notes with titles, markdown bodies, tags, and action items. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:04926b9`).
   - **AI Function** (`lib/ai/brain-dump.ts`) — `processBrainDump()` sends raw text to Gemini with instructions to extract distinct notes, preserve all info, format in markdown, generate tags, and extract TODOs. Handles JSON wrapped in code fences. Sanitizes output (title max 80 chars, 2-5 tags, max 8 notes).
   - **3 Validation Schemas** (`lib/validations.ts`) — `brainDumpInputSchema` (rawText 50-10000 chars), `structuredNoteSchema` (title, body, tags, actionItems), `saveBrainDumpNotesSchema` (1-20 notes array).
@@ -1212,6 +1242,7 @@ None - Ready for feature development
 None - fresh scaffolding
 
 ## 📝 Recent Updates
+- **2026-03-06** - ✅ **Smart Review Queue** — Curated daily queue of ~8 items from due flashcards, due reminders, stale content, and rediscovery. State machine page (loading → reviewing → complete) with type-specific interactions. Dashboard widget, 3 Reviewer badges, 21 nav items. 87 new tests (2,615 total). Commit: 6a25ba2. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:6a25ba2`)
 - **2026-03-05** - ✅ **Learning Paths** — Structured learning tracks with ordered content, progress tracking, and AI-powered item suggestions. 3 new DB tables (`learningPaths`, `learningPathItems`, `learningPathProgress`), 11 server actions, 6 new components, 2 pages (list + detail), 3 Pathfinder badges. 97 new tests (2,504 total). Commit: 28c0b0c. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:28c0b0c`)
 - **2026-03-05** - ✅ **Landing Page — All Latest Features** — Added 3 new feature tabs (Study Mode, Marketplace, Badges) with interactive mockups, "Beyond the Basics" 12-card grid section, 4 new comparison table rows, updated JSON-LD featureList (6→12 items), updated Students use case bullet, fixed test counts to 2,425+. Commit: 1dca960. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:1dca960`)
 - **2026-03-05** - ✅ **AI Flashcards & Study Mode** — AI-generated Q&A flashcards from saved content with flip-card study UI, spaced repetition scheduling (1d→3d→7d→30d), and 3 Scholar badges. 36 new tests (2,425 total). `flashcards` DB table. Commit: 4357eb4. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:4357eb4`)
