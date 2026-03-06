@@ -50,6 +50,11 @@ export const BADGE_CATEGORIES: BadgeCategoryMeta[] = [
     name: 'Alchemist',
     description: 'Brain dump transformation achievements',
   },
+  {
+    id: 'reviewer',
+    name: 'Reviewer',
+    description: 'Daily review achievements',
+  },
 ];
 
 export const BADGE_DEFINITIONS: BadgeDefinition[] = [
@@ -358,6 +363,38 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     threshold: 50,
     triggers: ['brain_dump_processed', 'manual_check'],
     icon: 'FlaskConical',
+  },
+
+  // Reviewer badges
+  {
+    id: 'reviewer-first',
+    name: 'First Review',
+    description: 'Complete your first daily review',
+    tier: 'bronze',
+    category: 'reviewer',
+    threshold: 1,
+    triggers: ['review_completed', 'manual_check'],
+    icon: 'ClipboardCheck',
+  },
+  {
+    id: 'reviewer-7',
+    name: 'Weekly Reviewer',
+    description: 'Review on 7 different days',
+    tier: 'silver',
+    category: 'reviewer',
+    threshold: 7,
+    triggers: ['review_completed', 'manual_check'],
+    icon: 'CalendarCheck',
+  },
+  {
+    id: 'reviewer-30',
+    name: 'Review Habit',
+    description: 'Review on 30 different days',
+    tier: 'gold',
+    category: 'reviewer',
+    threshold: 30,
+    triggers: ['review_completed', 'manual_check'],
+    icon: 'Trophy',
   },
 ];
 

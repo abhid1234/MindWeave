@@ -481,3 +481,7 @@ export const saveBrainDumpNotesSchema = z.object({
 });
 
 export type SaveBrainDumpNotesInput = z.infer<typeof saveBrainDumpNotesSchema>;
+
+export const markReviewedSchema = z.object({
+  contentId: z.string().uuid(),
+});

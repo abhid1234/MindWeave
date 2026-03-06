@@ -8,6 +8,7 @@ import { DashboardRecommendations } from '@/components/dashboard/DashboardRecomm
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { DailyHighlight } from '@/components/dashboard/DailyHighlight';
 import { DashboardReminders } from '@/components/dashboard/DashboardReminders';
+import { ReviewQueueWidget } from '@/components/dashboard/ReviewQueueWidget';
 import { Zap, Search, Library, ArrowRight, LayoutDashboard, PenLine } from 'lucide-react';
 
 export default async function DashboardPage() {
@@ -117,6 +118,7 @@ export default async function DashboardPage() {
 
         {/* Right column - Daily Highlight + Quick Actions */}
         <div className="flex flex-col gap-3">
+          <ReviewQueueWidget />
           <DailyHighlight />
           {quickActions.map((action, i) => (
             <Link

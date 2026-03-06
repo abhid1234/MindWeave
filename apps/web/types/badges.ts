@@ -9,7 +9,8 @@ export type BadgeCategory =
   | 'explorer'
   | 'scholar'
   | 'pathfinder'
-  | 'alchemist';
+  | 'alchemist'
+  | 'reviewer';
 
 export type BadgeTrigger =
   | 'content_created'
@@ -22,6 +23,7 @@ export type BadgeTrigger =
   | 'path_created'
   | 'path_completed'
   | 'brain_dump_processed'
+  | 'review_completed'
   | 'manual_check';
 
 export interface BadgeDefinition {

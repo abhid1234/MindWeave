@@ -101,7 +101,7 @@ describe('getUserBadgesAction', () => {
 
     const result = await getUserBadgesAction();
     expect(result.success).toBe(true);
-    expect(result.data).toHaveLength(29);
+    expect(result.data).toHaveLength(32);
   });
 
   it('marks unlocked badges correctly', async () => {

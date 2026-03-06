@@ -176,7 +176,7 @@ describe('getProgressForBadge', () => {
 
 describe('BADGE_DEFINITIONS', () => {
   it('has 26 badges defined', () => {
-    expect(BADGE_DEFINITIONS).toHaveLength(29);
+    expect(BADGE_DEFINITIONS).toHaveLength(32);
   });
 
   it('has unique IDs', () => {

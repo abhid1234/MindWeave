@@ -38,6 +38,7 @@ function getCheckerKey(badge: BadgeDefinition): string {
   if (badge.id === 'pathfinder-first-complete' || badge.id === 'pathfinder-5-complete')
     return 'pathfinder_completed';
   if (badge.category === 'alchemist') return 'alchemist_count';
+  if (badge.category === 'reviewer') return 'reviewer_days';
   return badge.id;
 }
 
@@ -226,6 +227,14 @@ function getChecker(key: string): CheckerFn {
           )
         );
       return result[0]?.value ?? 0;
+    },
+
+    reviewer_days: async (userId) => {
+      const result = await db
+        .select({ value: sql<number>`COUNT(DISTINCT DATE(${contentViews.viewedAt}))` })
+        .from(contentViews)
+        .where(eq(contentViews.userId, userId));
+      return Number(result[0]?.value ?? 0);
     },
 
     scholar_streak: async (userId) => {
