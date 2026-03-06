@@ -45,6 +45,11 @@ export const BADGE_CATEGORIES: BadgeCategoryMeta[] = [
     name: 'Pathfinder',
     description: 'Learning path achievements',
   },
+  {
+    id: 'alchemist',
+    name: 'Alchemist',
+    description: 'Brain dump transformation achievements',
+  },
 ];
 
 export const BADGE_DEFINITIONS: BadgeDefinition[] = [
@@ -321,6 +326,38 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     threshold: 5,
     triggers: ['path_completed', 'manual_check'],
     icon: 'Mountain',
+  },
+
+  // Alchemist badges
+  {
+    id: 'alchemist-first',
+    name: 'First Transform',
+    description: 'Process your first brain dump',
+    tier: 'bronze',
+    category: 'alchemist',
+    threshold: 1,
+    triggers: ['brain_dump_processed', 'manual_check'],
+    icon: 'Wand2',
+  },
+  {
+    id: 'alchemist-5',
+    name: 'Mind Organizer',
+    description: 'Process 5 brain dumps',
+    tier: 'silver',
+    category: 'alchemist',
+    threshold: 5,
+    triggers: ['brain_dump_processed', 'manual_check'],
+    icon: 'Sparkles',
+  },
+  {
+    id: 'alchemist-mega',
+    name: 'Thought Alchemist',
+    description: 'Process 50 brain dumps',
+    tier: 'gold',
+    category: 'alchemist',
+    threshold: 50,
+    triggers: ['brain_dump_processed', 'manual_check'],
+    icon: 'FlaskConical',
   },
 ];
 

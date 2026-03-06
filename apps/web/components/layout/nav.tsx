@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PlusCircle, Search, Library, MessageCircleQuestion, Upload, BarChart3, User, CheckSquare, Compass, Network, PenSquare, Gift, Zap, Store, Lightbulb, Award, BrainCircuit, Route } from 'lucide-react';
+import { Home, PlusCircle, Search, Library, MessageCircleQuestion, Upload, BarChart3, User, CheckSquare, Compass, Network, PenSquare, Gift, Zap, Store, Lightbulb, Award, BrainCircuit, Route, Wand2 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
   { href: '/dashboard/capture', label: 'Capture', icon: PlusCircle },
+  { href: '/dashboard/brain-dump', label: 'Brain Dump', icon: Wand2 },
   { href: '/dashboard/import', label: 'Import', icon: Upload },
   { href: '/dashboard/search', label: 'Search', icon: Search },
   { href: '/dashboard/ask', label: 'Ask AI', icon: MessageCircleQuestion },

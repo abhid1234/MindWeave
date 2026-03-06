@@ -456,3 +456,28 @@ export const toggleLearningPathProgressSchema = z.object({
 });
 
 export type ToggleLearningPathProgressInput = z.infer<typeof toggleLearningPathProgressSchema>;
+
+/**
+ * Brain Dump validation schemas
+ */
+export const brainDumpInputSchema = z.object({
+  rawText: z.string().min(50, 'Brain dump must be at least 50 characters').max(10000, 'Brain dump must be at most 10,000 characters'),
+});
+
+export type BrainDumpInput = z.infer<typeof brainDumpInputSchema>;
+
+export const structuredNoteSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(500, 'Title is too long'),
+  body: z.string().max(50000, 'Content is too long').optional(),
+  tags: z.array(z.string()).default([]),
+  actionItems: z.array(z.string()).default([]),
+});
+
+export type StructuredNoteInput = z.infer<typeof structuredNoteSchema>;
+
+export const saveBrainDumpNotesSchema = z.object({
+  notes: z.array(structuredNoteSchema).min(1, 'At least one note is required').max(20, 'Too many notes'),
+  sourceText: z.string().max(10000, 'Source text is too long').optional(),
+});
+
+export type SaveBrainDumpNotesInput = z.infer<typeof saveBrainDumpNotesSchema>;

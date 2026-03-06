@@ -12,7 +12,7 @@ import {
   learningPathItems,
   learningPathProgress,
 } from '@/lib/db/schema';
-import { eq, sql, count, countDistinct, max } from 'drizzle-orm';
+import { eq, and, sql, count, countDistinct, max } from 'drizzle-orm';
 import { getBadgesByTrigger } from './definitions';
 import type { BadgeTrigger, BadgeDefinition } from '@/types/badges';
 
@@ -37,6 +37,7 @@ function getCheckerKey(badge: BadgeDefinition): string {
   if (badge.id === 'pathfinder-creator') return 'pathfinder_created';
   if (badge.id === 'pathfinder-first-complete' || badge.id === 'pathfinder-5-complete')
     return 'pathfinder_completed';
+  if (badge.category === 'alchemist') return 'alchemist_count';
   return badge.id;
 }
 
@@ -212,6 +213,19 @@ function getChecker(key: string): CheckerFn {
       `);
       const rows = result as unknown as { completed_paths: string }[];
       return parseInt(rows[0]?.completed_paths ?? '0', 10);
+    },
+
+    alchemist_count: async (userId) => {
+      const result = await db
+        .select({ value: count() })
+        .from(content)
+        .where(
+          and(
+            eq(content.userId, userId),
+            sql`${content.metadata}->>'source' = 'brain-dump'`
+          )
+        );
+      return result[0]?.value ?? 0;
     },
 
     scholar_streak: async (userId) => {
