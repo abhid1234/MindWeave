@@ -8,7 +8,7 @@ import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 import { VersionHistoryPanel } from './VersionHistoryPanel';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
-import { formatDateUTC } from '@/lib/utils';
+import { formatDateUTC, countWords, getReadingTime } from '@/lib/utils';
 import { getRecommendationsAction } from '@/app/actions/search';
 import type { RecommendationResult } from '@/app/actions/search';
 import { trackContentViewAction } from '@/app/actions/views';
@@ -175,6 +175,14 @@ export function ContentDetailDialog({
               <span className="text-xs text-muted-foreground">
                 <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
               </span>
+              {body && countWords(body) > 0 && (
+                <>
+                  <span className="text-xs text-muted-foreground">&middot;</span>
+                  <span className="text-xs text-muted-foreground">{countWords(body).toLocaleString()} words</span>
+                  <span className="text-xs text-muted-foreground">&middot;</span>
+                  <span className="text-xs text-muted-foreground">{getReadingTime(body)}</span>
+                </>
+              )}
             </div>
             <DialogTitle className="text-xl">{title}</DialogTitle>
             <DialogDescription className="sr-only">

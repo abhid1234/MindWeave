@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { cn, formatRelativeTime, truncate, getDomain, slugify, generateId } from './utils';
+import { cn, formatRelativeTime, truncate, getDomain, slugify, generateId, countWords, getReadingTime } from './utils';
 
 describe('utils', () => {
   describe('cn', () => {
@@ -178,6 +178,56 @@ describe('utils', () => {
     it('should generate alphanumeric strings', () => {
       const id = generateId();
       expect(id).toMatch(/^[a-z0-9]+$/);
+    });
+  });
+
+  describe('countWords', () => {
+    it('should return 0 for empty string', () => {
+      expect(countWords('')).toBe(0);
+    });
+
+    it('should return 0 for whitespace-only string', () => {
+      expect(countWords('   \n\t  ')).toBe(0);
+    });
+
+    it('should count a single word', () => {
+      expect(countWords('hello')).toBe(1);
+    });
+
+    it('should count multiple words', () => {
+      expect(countWords('hello world foo bar')).toBe(4);
+    });
+
+    it('should handle extra whitespace between words', () => {
+      expect(countWords('  hello   world  ')).toBe(2);
+    });
+  });
+
+  describe('getReadingTime', () => {
+    it('should return empty string for empty text', () => {
+      expect(getReadingTime('')).toBe('');
+    });
+
+    it('should return "1 min read" for short text', () => {
+      expect(getReadingTime('hello world')).toBe('1 min read');
+    });
+
+    it('should calculate minutes correctly for longer text', () => {
+      // 450 words at 225 wpm = 2 min
+      const words = Array(450).fill('word').join(' ');
+      expect(getReadingTime(words)).toBe('2 min read');
+    });
+
+    it('should round up partial minutes', () => {
+      // 226 words at 225 wpm = ceil(1.004) = 2 min
+      const words = Array(226).fill('word').join(' ');
+      expect(getReadingTime(words)).toBe('2 min read');
+    });
+
+    it('should support custom wpm', () => {
+      // 100 words at 100 wpm = 1 min
+      const words = Array(100).fill('word').join(' ');
+      expect(getReadingTime(words, 100)).toBe('1 min read');
     });
   });
 });

@@ -503,6 +503,24 @@ describe('ContentCard', () => {
     });
   });
 
+  describe('Reading time', () => {
+    it('should show reading time when body has content', () => {
+      const longBody = Array(450).fill('word').join(' ');
+      render(<ContentCard {...baseProps} body={longBody} />);
+      expect(screen.getByText('2 min read')).toBeInTheDocument();
+    });
+
+    it('should not show reading time when body is null', () => {
+      render(<ContentCard {...baseProps} body={null} />);
+      expect(screen.queryByText(/min read/)).not.toBeInTheDocument();
+    });
+
+    it('should not show reading time when body is empty', () => {
+      render(<ContentCard {...baseProps} body="   " />);
+      expect(screen.queryByText(/min read/)).not.toBeInTheDocument();
+    });
+  });
+
   describe('Detail dialog', () => {
     it('should open detail dialog when clicking the card title area', async () => {
       const user = userEvent.setup();

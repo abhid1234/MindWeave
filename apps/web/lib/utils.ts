@@ -113,3 +113,22 @@ export function formatDateLongUTC(date: Date | string): string {
   ];
   return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
 }
+
+/**
+ * Count words in a text string
+ */
+export function countWords(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
+/**
+ * Get estimated reading time for a text string
+ */
+export function getReadingTime(text: string, wpm = 225): string {
+  const words = countWords(text);
+  if (words === 0) return '';
+  const minutes = Math.ceil(words / wpm);
+  return `${minutes} min read`;
+}

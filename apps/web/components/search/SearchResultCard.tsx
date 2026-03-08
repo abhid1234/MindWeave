@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { ContentType } from '@/lib/db/schema';
-import { formatDateUTC, cn } from '@/lib/utils';
+import { formatDateUTC, cn, getReadingTime } from '@/lib/utils';
 import { highlightText } from '@/lib/highlight';
 import { Card } from '@/components/ui/card';
 
@@ -120,9 +120,15 @@ export function SearchResultCard({ item, query, similarity }: SearchResultCardPr
               </div>
             )}
           </div>
-          <span className="ml-4 text-xs text-muted-foreground whitespace-nowrap">
-            {formatDateUTC(item.createdAt)}
-          </span>
+          <div className="ml-4 flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
+            <span>{formatDateUTC(item.createdAt)}</span>
+            {item.body && getReadingTime(item.body) && (
+              <>
+                <span aria-hidden="true">&middot;</span>
+                <span>{getReadingTime(item.body)}</span>
+              </>
+            )}
+          </div>
         </div>
       </Card>
 

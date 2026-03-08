@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { MoreHorizontal, Pencil, Trash2, File, FileText, Image as ImageIcon, Share2, Globe, FolderPlus, Star, Loader2, Sparkles, Bell, Lightbulb, BrainCircuit } from 'lucide-react';
 import NextImage from 'next/image';
 import type { ContentType } from '@/lib/db/schema';
-import { formatDateUTC } from '@/lib/utils';
+import { formatDateUTC, getReadingTime } from '@/lib/utils';
 import { EditableTags } from './EditableTags';
 import { toggleFavoriteAction } from '@/app/actions/content';
 import { setReminderAction } from '@/app/actions/reminders';
@@ -222,6 +222,12 @@ export function ContentCard({
             <span className="text-xs text-muted-foreground truncate flex-shrink-0">
               <time dateTime={createdAt.toISOString()}>{formatDateUTC(createdAt)}</time>
             </span>
+            {body && getReadingTime(body) && (
+              <>
+                <span className="text-xs text-muted-foreground flex-shrink-0" aria-hidden="true">&middot;</span>
+                <span className="text-xs text-muted-foreground flex-shrink-0">{getReadingTime(body)}</span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <RelatedItemsBadge contentId={id} />

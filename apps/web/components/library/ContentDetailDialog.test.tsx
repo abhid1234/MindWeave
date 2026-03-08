@@ -312,6 +312,27 @@ describe('ContentDetailDialog', () => {
     expect(screen.getByTestId('refine-dialog')).toBeInTheDocument();
   });
 
+  it('shows word count and reading time when body has content', () => {
+    render(
+      <ContentDetailDialog content={baseContent} open={true} onOpenChange={() => {}} />
+    );
+
+    // baseContent body is "This is the full body content of the note." = 9 words
+    expect(screen.getByText('9 words')).toBeInTheDocument();
+    expect(screen.getByText('1 min read')).toBeInTheDocument();
+  });
+
+  it('does not show word count or reading time when body is null', () => {
+    const noBodyContent = { ...baseContent, body: null };
+
+    render(
+      <ContentDetailDialog content={noBodyContent} open={true} onOpenChange={() => {}} />
+    );
+
+    expect(screen.queryByText(/words/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/min read/)).not.toBeInTheDocument();
+  });
+
   it('renders file info for file type content', () => {
     const fileContent = {
       ...baseContent,
