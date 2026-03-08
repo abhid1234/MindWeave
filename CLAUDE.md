@@ -97,7 +97,7 @@ Mindweave/
 ### Quality Gates
 Before any commit, run these checks:
 ```bash
-pnpm test -- --run       # All tests pass (2,660+ tests)
+pnpm test -- --run       # All tests pass (2,675+ tests)
 pnpm lint                # No linting errors
 pnpm type-check          # No TypeScript errors
 ```
@@ -264,7 +264,7 @@ Files: `lib/ai/embeddings.ts`
 
 ## Testing Strategy
 
-**Current Status**: 2,660+ tests passing with comprehensive coverage
+**Current Status**: 2,675+ tests passing with comprehensive coverage
 
 - **Unit tests**: Vitest - testing business logic, utilities, server actions
 - **Component tests**: React Testing Library - testing UI components
