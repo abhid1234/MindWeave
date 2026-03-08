@@ -202,7 +202,7 @@ export function ContentCard({
         />
 
         <div className="flex items-start justify-between mb-2 pl-2 gap-1">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 overflow-hidden">
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize transition-colors flex-shrink-0 ${
               type === 'note'
                 ? 'bg-note/10 text-note dark:bg-note/20'
