@@ -1,10 +1,15 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Sparkles, Loader2, FileText, Link2, File } from 'lucide-react';
 import { getRecommendationsAction } from '@/app/actions/search';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface RelatedItemsBadgeProps {
   contentId: string;
@@ -17,7 +22,7 @@ const typeIcons: Record<string, typeof FileText> = {
 };
 
 export function RelatedItemsBadge({ contentId }: RelatedItemsBadgeProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<Array<{
     id: string;
@@ -26,7 +31,10 @@ export function RelatedItemsBadge({ contentId }: RelatedItemsBadgeProps) {
     similarity: number;
   }> | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchRelated = useCallback(async () => {
     if (items !== null) return; // Already fetched
@@ -48,80 +56,80 @@ export function RelatedItemsBadge({ contentId }: RelatedItemsBadgeProps) {
     }
   }, [contentId, items]);
 
-  const handleClick = () => {
-    if (!isOpen) {
-      fetchRelated();
-    }
-    setIsOpen((prev) => !prev);
-  };
-
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  return (
-    <div className="relative" ref={popoverRef}>
+  if (!mounted) {
+    return (
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0 transition-transform hover:scale-110"
-        onClick={handleClick}
+        className="h-8 w-8 p-0"
+        disabled
         aria-label="View related items"
-        aria-expanded={isOpen}
       >
-        <Sparkles className={cn(
-          'h-4 w-4 transition-colors',
-          isOpen ? 'text-primary' : 'text-muted-foreground hover:text-primary'
-        )} />
+        <Sparkles className="h-4 w-4 text-muted-foreground/50" />
       </Button>
+    );
+  }
 
-      {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border bg-popover p-3 shadow-soft-lg animate-scale-in">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Related Items</p>
+  return (
+    <DropdownMenu onOpenChange={(open) => open && fetchRelated()}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 transition-transform hover:scale-110"
+          aria-label="View related items"
+        >
+          <Sparkles className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+        </Button>
+      </DropdownMenuTrigger>
 
-          {isLoading && (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            </div>
-          )}
+      <DropdownMenuContent
+        align="end"
+        className="w-64 p-3 shadow-soft-lg"
+        sideOffset={8}
+      >
+        <p className="text-xs font-medium text-muted-foreground mb-2 px-2">
+          {items && items.length > 0 && items.some(i => i.similarity > 0) 
+            ? 'Related Items' 
+            : 'Recent Items'}
+        </p>
 
-          {!isLoading && error && (
-            <p className="text-xs text-muted-foreground py-2">{error}</p>
-          )}
+        {isLoading && (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        )}
 
-          {!isLoading && !error && items && items.length === 0 && (
-            <p className="text-xs text-muted-foreground py-2">No related items found</p>
-          )}
+        {!isLoading && error && (
+          <p className="text-xs text-muted-foreground py-2 px-2 cursor-default">{error}</p>
+        )}
 
-          {!isLoading && items && items.length > 0 && (
-            <div className="space-y-2">
-              {items.map((item) => {
-                const TypeIcon = typeIcons[item.type] || FileText;
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-2 rounded-md p-1.5 text-xs hover:bg-accent transition-colors"
-                  >
-                    <TypeIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span className="flex-1 truncate">{item.title}</span>
+        {!isLoading && !error && items && items.length === 0 && (
+          <p className="text-xs text-muted-foreground py-2 px-2 cursor-default">No related items found</p>
+        )}
+
+        {!isLoading && items && items.length > 0 && (
+          <div className="space-y-1">
+            {items.map((item) => {
+              const TypeIcon = typeIcons[item.type] || FileText;
+              return (
+                <DropdownMenuItem
+                  key={item.id}
+                  className="flex items-center gap-2 text-xs p-1.5 cursor-pointer"
+                >
+                  <TypeIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <span className="flex-1 truncate">{item.title}</span>
+                  {item.similarity > 0 && (
                     <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                       {Math.round(item.similarity * 100)}%
                     </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
