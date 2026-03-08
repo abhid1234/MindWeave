@@ -1,12 +1,21 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { RelatedItemsBadge } from './RelatedItemsBadge';
 import * as searchActions from '@/app/actions/search';
 
 vi.mock('@/app/actions/search', () => ({
   getRecommendationsAction: vi.fn(),
 }));
+
+// Mock ResizeObserver which is needed for Radix UI components
+class ResizeObserverMock {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+global.ResizeObserver = ResizeObserverMock as any;
 
 const mockRecommendation = (overrides: Record<string, unknown> = {}) => ({
   id: 'r1',
@@ -22,6 +31,8 @@ const mockRecommendation = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe('RelatedItemsBadge', () => {
+  const user = userEvent.setup();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -46,7 +57,7 @@ describe('RelatedItemsBadge', () => {
     });
 
     render(<RelatedItemsBadge contentId="test-1" />);
-    fireEvent.click(screen.getByRole('button', { name: /related items/i }));
+    await user.click(screen.getByRole('button', { name: /related items/i }));
 
     await waitFor(() => {
       expect(searchActions.getRecommendationsAction).toHaveBeenCalledWith('test-1', 3);
@@ -62,10 +73,12 @@ describe('RelatedItemsBadge', () => {
     );
 
     render(<RelatedItemsBadge contentId="test-1" />);
-    fireEvent.click(screen.getByRole('button', { name: /related items/i }));
+    await user.click(screen.getByRole('button', { name: /related items/i }));
 
-    const spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    await waitFor(() => {
+      const spinner = document.querySelector('.animate-spin');
+      expect(spinner).toBeInTheDocument();
+    });
   });
 
   it('should render related items with titles', async () => {
@@ -78,12 +91,10 @@ describe('RelatedItemsBadge', () => {
     });
 
     render(<RelatedItemsBadge contentId="test-1" />);
-    fireEvent.click(screen.getByRole('button', { name: /related items/i }));
+    await user.click(screen.getByRole('button', { name: /related items/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('Related Item 1')).toBeInTheDocument();
-      expect(screen.getByText('Related Item 2')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Related Item 1')).toBeInTheDocument();
+    expect(await screen.findByText('Related Item 2')).toBeInTheDocument();
   });
 
   it('should show similarity percentage', async () => {
@@ -95,11 +106,9 @@ describe('RelatedItemsBadge', () => {
     });
 
     render(<RelatedItemsBadge contentId="test-1" />);
-    fireEvent.click(screen.getByRole('button', { name: /related items/i }));
+    await user.click(screen.getByRole('button', { name: /related items/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('85%')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('85%')).toBeInTheDocument();
   });
 
   it('should show empty state when no related items found', async () => {
@@ -109,11 +118,9 @@ describe('RelatedItemsBadge', () => {
     });
 
     render(<RelatedItemsBadge contentId="test-1" />);
-    fireEvent.click(screen.getByRole('button', { name: /related items/i }));
+    await user.click(screen.getByRole('button', { name: /related items/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('No related items found')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('No related items found')).toBeInTheDocument();
   });
 
   it('should show error message on failure', async () => {
@@ -124,10 +131,8 @@ describe('RelatedItemsBadge', () => {
     });
 
     render(<RelatedItemsBadge contentId="test-1" />);
-    fireEvent.click(screen.getByRole('button', { name: /related items/i }));
+    await user.click(screen.getByRole('button', { name: /related items/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Something went wrong')).toBeInTheDocument();
   });
 });

@@ -277,22 +277,31 @@ export async function getRecommendations(
         c.auto_tags as "autoTags",
         c.url,
         c.created_at as "createdAt",
-        1 - (e.embedding <=> ${vectorString}::vector) as similarity
+        COALESCE(1 - (e.embedding <=> ${vectorString}::vector), 0) as similarity
       FROM ${content} c
       INNER JOIN ${embeddings} e ON c.id = e.content_id
       WHERE c.id != ${contentId}
         AND c.user_id = ${userId}
-        AND (e.embedding <=> ${vectorString}::vector) <> 'NaN'::float8
+        AND (e.embedding <=> ${vectorString}::vector) IS NOT NULL
         AND 1 - (e.embedding <=> ${vectorString}::vector) >= ${minSimilarity}
       ORDER BY e.embedding <=> ${vectorString}::vector
       LIMIT ${limit}
     `);
 
-    return (results as unknown as Record<string, unknown>[]).map((row) => ({
+    const recommendations = (results as unknown as Record<string, unknown>[]).map((row) => ({
       ...row,
       similarity: Number.isFinite(row.similarity as number) ? Number(row.similarity) : 0,
       createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt as string),
     })) as Recommendation[];
+
+    // If no recommendations found, fall back to recent items
+    if (recommendations.length === 0) {
+      return fetchRecentContent(userId, limit).then(items => 
+        items.filter(item => item.id !== contentId).slice(0, limit)
+      );
+    }
+
+    return recommendations;
   } catch (error) {
     console.error('Error getting recommendations:', error);
     return [];
