@@ -1,11 +1,11 @@
 # Mindweave Project Status
 
-**Last Updated**: 2026-03-06
+**Last Updated**: 2026-03-08
 **Current Phase**: Soft Launch
 **Active Ralph Loop**: No
 
 ## 🎯 Current Focus
-✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, Learning Paths, Brain Dump, Smart Review Queue, and Content Refinement AI.
+✅ **All Phase 2–12 features complete!** Mindweave is fully functional with AI-powered knowledge management, advanced content organization, browser extension, native mobile apps, comprehensive AI enhancements, rich text editing, version history, API keys, email digests, content discovery with view tracking, push notifications, admin feedback management, Knowledge-to-Post Generator, reminders with spaced repetition, collaborative collections, daily highlights, content templates, AI related items, enhanced analytics, Raindrop.io import, mobile-responsive UI, enhanced bulk operations, filtered exports, version diff view, webhook integrations, Knowledge Marketplace, Learning Paths, Brain Dump, Smart Review Queue, Content Refinement AI, and Reading Time & Word Count.
 
 **Completed Features**:
 - Authentication (Google OAuth + Email/Password + Password Reset + Email Verification with JWT sessions) - 97 tests + 37 email verification tests, 94.73% coverage
@@ -74,6 +74,7 @@
 - **Brain Dump** - Paste messy stream-of-consciousness text and AI transforms it into multiple structured notes with titles, markdown bodies, tags, and action items. 3-phase UI (input → processing → review) with editable note cards, before/after comparison, and bulk save. 3 Alchemist badges for brain dump milestones.
 - **Smart Review Queue** - Curated daily queue of ~8 items from due flashcards, due reminders, stale/forgotten content, and rediscovery. Process items one at a time with type-specific interactions (flashcard flip/rate, reminder dismiss/snooze, content mark reviewed). Dashboard widget shows pending review count. 3 Reviewer badges for daily review milestones.
 - **Content Refinement AI** - "Refine with AI" button in content detail dialog transforms messy notes into polished content with 4 tone controls (professional, casual, academic, concise). Before/after comparison preview with apply/discard. Optional custom instructions.
+- **Reading Time & Word Count** - Estimated reading time on ContentCard and SearchResultCard, word count + reading time in ContentDetailDialog. Pure UI enhancement using body text with `countWords()` and `getReadingTime()` utilities.
 
 **Current Status**: Soft launch is live at [mindweave.space](https://mindweave.space). Chrome Extension available on [Chrome Web Store](https://chromewebstore.google.com/detail/mindweave-quick-capture/dijnigojjcgddengnjlohamenopgpelp). Android app in Closed Testing on Google Play. Bug reports welcome at [GitHub Issues](https://github.com/abhid1234/MindWeave/issues). LinkedIn launch post live: [LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7428965058388590592/).
 
@@ -88,7 +89,21 @@
 
 - [x] **In-App Documentation Site** - 12 public docs pages with sidebar navigation, mobile nav, breadcrumbs, SEO metadata, and 29 component tests
 
-**Latest Enhancement (2026-03-06)**:
+**Latest Enhancement (2026-03-08)**:
+- [x] **Reading Time & Word Count** — Displays estimated reading time on ContentCard and SearchResultCard metadata rows (e.g., "3 min read"), and both word count and reading time in ContentDetailDialog header (e.g., "650 words · 3 min read"). Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:ec861b0`).
+  - **2 Utility Functions** (`lib/utils.ts`) — `countWords(text)` splits on whitespace, `getReadingTime(text, wpm=225)` returns formatted reading time string. Both handle empty/whitespace-only input gracefully.
+  - **3 Components Updated** (no new files):
+    - `ContentCard.tsx` — Reading time after date, guarded by `body` truthy + non-empty
+    - `ContentDetailDialog.tsx` — Word count + reading time after date in header metadata
+    - `SearchResultCard.tsx` — Reading time after date, same pattern as ContentCard
+  - **14 new tests across 4 test files**:
+    - `lib/utils.test.ts` (+10): countWords (empty, whitespace, single, multi, extra spaces), getReadingTime (empty, short, long, round-up, custom wpm)
+    - `ContentCard.test.tsx` (+3): shows reading time, hidden for null body, hidden for empty body
+    - `ContentDetailDialog.test.tsx` (+2): shows word count + reading time, hidden for null body
+    - `SearchResultCard.test.tsx` (new, 2): shows reading time, hidden for null body
+  - **8 files changed** (1 new test file, 7 modified) — 0 TS errors, 0 new lint warnings.
+
+**Previous Enhancement (2026-03-06)**:
 - [x] **Content Refinement AI** — "Refine with AI" button in content detail dialog transforms rough notes into polished content using Gemini 2.0 Flash with 4 tone controls. Deployed to Cloud Run (`gcr.io/mindweave-prod/mindweave:17ba44a`).
   - **AI Function** (`lib/ai/refine.ts`) — `refineContent()` sends text to Gemini with tone-specific instructions (professional: clear & polished, casual: friendly & conversational, academic: formal & precise, concise: brief & direct). Supports optional custom instructions. Truncates at 50k chars.
   - **1 Validation Schema** (`lib/validations.ts`) — `refineContentSchema` (contentId UUID, tone enum, customInstruction max 200 chars optional).
