@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Sparkles, Loader2, FileText, Link2, File } from 'lucide-react';
 import { getRecommendationsAction } from '@/app/actions/search';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ const typeIcons: Record<string, typeof FileText> = {
 };
 
 export function RelatedItemsBadge({ contentId }: RelatedItemsBadgeProps) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<Array<{
@@ -116,6 +118,7 @@ export function RelatedItemsBadge({ contentId }: RelatedItemsBadgeProps) {
                 <DropdownMenuItem
                   key={item.id}
                   className="flex items-center gap-2 text-xs p-1.5 cursor-pointer"
+                  onClick={() => router.push(`/dashboard/library?highlight=${item.id}`)}
                 >
                   <TypeIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                   <span className="flex-1 truncate">{item.title}</span>
