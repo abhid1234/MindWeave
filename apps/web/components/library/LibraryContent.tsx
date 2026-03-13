@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Download, Loader2, Search, Library } from 'lucide-react';
 import { BulkSelectionProvider } from './BulkSelectionContext';
@@ -17,12 +18,18 @@ import type { ViewMode } from './ViewToggle';
 const ExportDialog = dynamic(() => import('./ExportDialog').then((mod) => mod.ExportDialog), {
   loading: () => null,
 });
-const ContentListView = dynamic(() => import('./ContentListView').then((mod) => mod.ContentListView), {
-  loading: () => null,
-});
-const ContentBoardView = dynamic(() => import('./ContentBoardView').then((mod) => mod.ContentBoardView), {
-  loading: () => null,
-});
+const ContentListView = dynamic(
+  () => import('./ContentListView').then((mod) => mod.ContentListView),
+  {
+    loading: () => null,
+  }
+);
+const ContentBoardView = dynamic(
+  () => import('./ContentBoardView').then((mod) => mod.ContentBoardView),
+  {
+    loading: () => null,
+  }
+);
 
 type ContentItem = {
   id: string;
@@ -75,6 +82,8 @@ export function LibraryContent({
   initialHasMore = false,
   filterParams = {},
 }: LibraryContentProps) {
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get('highlight');
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [items, setItems] = useState<ContentItem[]>(initialItems);
   const [allTags, setAllTags] = useState<string[]>(initialAllTags);
@@ -84,6 +93,23 @@ export function LibraryContent({
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const isLoadingRef = useRef(false);
+
+  // Scroll to and highlight a card when ?highlight=id is in the URL
+  useEffect(() => {
+    if (!highlightId) return;
+    // Small delay to let the DOM render
+    const timer = setTimeout(() => {
+      const el = document.querySelector(`[data-content-id="${highlightId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+        setTimeout(() => {
+          el.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+        }, 2000);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [highlightId, items]);
 
   // Reset state when initial items change (e.g., filter changes)
   useEffect(() => {
@@ -107,7 +133,7 @@ export function LibraryContent({
       });
 
       if (result.success) {
-        setItems(prev => [...prev, ...result.items as ContentItem[]]);
+        setItems((prev) => [...prev, ...(result.items as ContentItem[])]);
         setCursor(result.nextCursor ?? null);
         setHasMore(result.hasMore ?? false);
         if (result.allTags.length > 0) {
@@ -149,22 +175,23 @@ export function LibraryContent({
   }, [hasMore, loadMore]);
 
   const allIds = items.map((item) => item.id);
-  const hasActiveFilters = !!(filterParams.type || filterParams.tag || filterParams.query || filterParams.collectionId);
+  const hasActiveFilters = !!(
+    filterParams.type ||
+    filterParams.tag ||
+    filterParams.query ||
+    filterParams.collectionId
+  );
 
   return (
     <BulkSelectionProvider>
       {/* Selection Toggle and Count */}
       {items.length > 0 && (
         <div className="mb-4 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             Showing {items.length} item{items.length !== 1 ? 's' : ''}
           </span>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowExportDialog(true)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
               <Download className="mr-2 h-4 w-4" />
               {hasActiveFilters ? 'Export' : 'Export All'}
             </Button>
@@ -175,25 +202,25 @@ export function LibraryContent({
 
       {/* Content Grid */}
       {items.length === 0 ? (
-        <div className="rounded-xl border bg-card p-16 text-center shadow-soft animate-fade-up">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+        <div className="bg-card shadow-soft animate-fade-up rounded-xl border p-16 text-center">
+          <div className="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
             {hasFilters ? (
-              <Search className="h-7 w-7 text-primary" />
+              <Search className="text-primary h-7 w-7" />
             ) : (
-              <Library className="h-7 w-7 text-primary" />
+              <Library className="text-primary h-7 w-7" />
             )}
           </div>
-          <h3 className="text-lg font-semibold mb-1">
+          <h3 className="mb-1 text-lg font-semibold">
             {hasFilters ? 'No results found' : 'Your library is empty'}
           </h3>
-          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+          <p className="text-muted-foreground mx-auto max-w-sm text-sm">
             {hasFilters
               ? 'Try adjusting your filters or search terms to find what you are looking for.'
               : 'Start capturing your ideas, links, and files to build your knowledge base.'}
           </p>
           <Link
             href="/dashboard/capture"
-            className="mt-6 inline-flex h-12 items-center justify-center rounded-lg bg-primary px-6 text-base font-medium text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 mt-6 inline-flex h-12 items-center justify-center rounded-lg px-6 text-base font-medium shadow-sm transition-all duration-200 hover:shadow-md"
           >
             {hasFilters ? 'Clear Filters' : 'Create Your First Item'}
           </Link>
@@ -209,12 +236,16 @@ export function LibraryContent({
               <ContentBoardView items={items} allTags={allTags} />
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pb-4">
+            <div className="grid gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className="animate-fade-up"
-                  style={{ animationDelay: `${Math.min(index * 50, 300)}ms`, animationFillMode: 'backwards' }}
+                  data-content-id={item.id}
+                  className="animate-fade-up rounded-xl transition-shadow duration-300"
+                  style={{
+                    animationDelay: `${Math.min(index * 50, 300)}ms`,
+                    animationFillMode: 'backwards',
+                  }}
                 >
                   <SelectableContentCard {...item} allTags={allTags} />
                 </div>
@@ -223,20 +254,15 @@ export function LibraryContent({
           )}
 
           {/* Infinite scroll trigger */}
-          <div
-            ref={loadMoreRef}
-            className="flex items-center justify-center py-8 pb-20"
-          >
+          <div ref={loadMoreRef} className="flex items-center justify-center py-8 pb-20">
             {isLoadingMore && (
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin" />
                 <span>Loading more...</span>
               </div>
             )}
             {!hasMore && items.length > 0 && (
-              <p className="text-sm text-muted-foreground">
-                You&apos;ve reached the end
-              </p>
+              <p className="text-muted-foreground text-sm">You&apos;ve reached the end</p>
             )}
           </div>
         </>
