@@ -19,9 +19,19 @@ interface StatConfig {
   icon: LucideIcon;
   iconBg: string;
   iconColor: string;
+  borderHover: string;
 }
 
-function AnimatedStat({ value, label, delay, href, icon: Icon, iconBg, iconColor }: {
+function AnimatedStat({
+  value,
+  label,
+  delay,
+  href,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  borderHover,
+}: {
   value: number;
   label: string;
   delay: number;
@@ -29,13 +39,14 @@ function AnimatedStat({ value, label, delay, href, icon: Icon, iconBg, iconColor
   icon: LucideIcon;
   iconBg: string;
   iconColor: string;
+  borderHover: string;
 }) {
   const animated = useCountUp(value);
 
   return (
     <Link
       href={href}
-      className="group block rounded-xl border bg-card p-5 animate-fade-up transition-all duration-200 hover:shadow-soft-md hover:-translate-y-0.5 cursor-pointer"
+      className={`bg-card animate-fade-up hover:shadow-soft-md group block cursor-pointer rounded-xl border p-5 transition-all duration-200 hover:-translate-y-0.5 ${borderHover}`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'backwards' }}
     >
       <div className="flex items-center gap-3">
@@ -44,14 +55,19 @@ function AnimatedStat({ value, label, delay, href, icon: Icon, iconBg, iconColor
         </div>
         <div className="min-w-0">
           <div className="text-2xl font-bold tracking-tight">{animated.toLocaleString()}</div>
-          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="text-muted-foreground text-sm">{label}</p>
         </div>
       </div>
     </Link>
   );
 }
 
-export function DashboardStats({ totalCount, tagCount, thisWeekCount, favoritesCount }: DashboardStatsProps) {
+export function DashboardStats({
+  totalCount,
+  tagCount,
+  thisWeekCount,
+  favoritesCount,
+}: DashboardStatsProps) {
   const stats: StatConfig[] = [
     {
       value: totalCount,
@@ -60,6 +76,7 @@ export function DashboardStats({ totalCount, tagCount, thisWeekCount, favoritesC
       icon: Library,
       iconBg: 'bg-blue-500/10',
       iconColor: 'text-blue-600',
+      borderHover: 'hover:border-blue-500/30',
     },
     {
       value: tagCount,
@@ -68,6 +85,7 @@ export function DashboardStats({ totalCount, tagCount, thisWeekCount, favoritesC
       icon: Tags,
       iconBg: 'bg-purple-500/10',
       iconColor: 'text-purple-600',
+      borderHover: 'hover:border-purple-500/30',
     },
     {
       value: thisWeekCount,
@@ -76,6 +94,7 @@ export function DashboardStats({ totalCount, tagCount, thisWeekCount, favoritesC
       icon: CalendarDays,
       iconBg: 'bg-green-500/10',
       iconColor: 'text-green-600',
+      borderHover: 'hover:border-green-500/30',
     },
     {
       value: favoritesCount,
@@ -84,6 +103,7 @@ export function DashboardStats({ totalCount, tagCount, thisWeekCount, favoritesC
       icon: Star,
       iconBg: 'bg-amber-500/10',
       iconColor: 'text-amber-600',
+      borderHover: 'hover:border-amber-500/30',
     },
   ];
 
@@ -99,6 +119,7 @@ export function DashboardStats({ totalCount, tagCount, thisWeekCount, favoritesC
           icon={stat.icon}
           iconBg={stat.iconBg}
           iconColor={stat.iconColor}
+          borderHover={stat.borderHover}
         />
       ))}
     </div>

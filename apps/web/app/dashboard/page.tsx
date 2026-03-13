@@ -37,7 +37,10 @@ export default async function DashboardPage() {
     ) as all_tags
     WHERE tag IS NOT NULL AND tag != ''
   `);
-  const tagCount = parseInt((tagsResult as unknown as { tag_count: string }[])[0]?.tag_count || '0', 10);
+  const tagCount = parseInt(
+    (tagsResult as unknown as { tag_count: string }[])[0]?.tag_count || '0',
+    10
+  );
 
   // Get items created this week
   const oneWeekAgo = new Date();
@@ -95,13 +98,18 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-8 animate-fade-up" style={{ animationFillMode: 'backwards' }}>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <LayoutDashboard className="h-5 w-5 text-primary" />
+      <div
+        className="animate-fade-up from-primary/10 via-primary/5 mb-8 rounded-2xl bg-gradient-to-r to-transparent p-6"
+        style={{ animationFillMode: 'backwards' }}
+      >
+        <div className="flex items-center gap-4">
+          <div className="bg-primary/15 flex h-12 w-12 items-center justify-center rounded-xl shadow-sm">
+            <LayoutDashboard className="text-primary h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, {session.user?.name?.split(' ')[0]}!</h1>
+            <h1 className="text-3xl font-bold">
+              Welcome back, {session.user?.name?.split(' ')[0]}!
+            </h1>
             <p className="text-muted-foreground">
               Here&apos;s what&apos;s happening with your knowledge hub
             </p>
@@ -113,7 +121,12 @@ export default async function DashboardPage() {
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         {/* Left column - Stats */}
         <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
-          <DashboardStats totalCount={totalCount} tagCount={tagCount} thisWeekCount={thisWeekCount} favoritesCount={favoritesCount} />
+          <DashboardStats
+            totalCount={totalCount}
+            tagCount={tagCount}
+            thisWeekCount={thisWeekCount}
+            favoritesCount={favoritesCount}
+          />
         </div>
 
         {/* Right column - Daily Highlight + Quick Actions */}
@@ -124,17 +137,19 @@ export default async function DashboardPage() {
             <Link
               key={action.href}
               href={action.href}
-              className={`group flex items-center gap-4 rounded-xl border bg-card p-4 transition-all duration-200 animate-fade-up hover:shadow-soft-md hover:-translate-y-0.5 ${action.borderHover}`}
+              className={`bg-card animate-fade-up hover:shadow-soft-md group flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5 ${action.borderHover}`}
               style={{ animationDelay: `${(i + 1) * 75}ms`, animationFillMode: 'backwards' }}
             >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.iconBg}`}>
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.iconBg}`}
+              >
                 <action.icon className={`h-5 w-5 ${action.iconColor}`} />
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold">{action.label}</h3>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
+                <p className="text-muted-foreground text-xs">{action.description}</p>
               </div>
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
+              <ArrowRight className="text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
             </Link>
           ))}
         </div>
@@ -146,21 +161,21 @@ export default async function DashboardPage() {
         >
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Recent Items</h2>
-            <Link href="/dashboard/library" className="text-sm text-primary hover:underline">
+            <Link href="/dashboard/library" className="text-primary text-sm hover:underline">
               View All
             </Link>
           </div>
 
           {latestItems.length === 0 ? (
-            <div className="rounded-xl border bg-card p-12 text-center shadow-soft">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                <PenLine className="h-6 w-6 text-primary" />
+            <div className="bg-card shadow-soft rounded-xl border p-12 text-center">
+              <div className="bg-primary/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+                <PenLine className="text-primary h-6 w-6" />
               </div>
               <h3 className="font-semibold">No content yet</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Start capturing your ideas!</p>
+              <p className="text-muted-foreground mt-1 text-sm">Start capturing your ideas!</p>
               <Link
                 href="/dashboard/capture"
-                className="mt-4 inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors"
               >
                 Create Your First Note
               </Link>
@@ -171,13 +186,16 @@ export default async function DashboardPage() {
                 <Link
                   key={item.id}
                   href={`/dashboard/library?highlight=${item.id}`}
-                  className="block rounded-xl border bg-card p-4 transition-all duration-200 hover:shadow-soft-md hover:-translate-y-0.5"
+                  className="bg-card hover:shadow-soft-md block rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold">{item.title.split(/\s+/).slice(0, 10).join(' ')}{item.title.split(/\s+/).length > 10 ? '...' : ''}</h3>
+                      <h3 className="font-semibold">
+                        {item.title.split(/\s+/).slice(0, 10).join(' ')}
+                        {item.title.split(/\s+/).length > 10 ? '...' : ''}
+                      </h3>
                       {item.body && (
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                        <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
                           {item.body}
                         </p>
                       )}
@@ -186,7 +204,7 @@ export default async function DashboardPage() {
                           {(item.tags ?? []).map((tag) => (
                             <span
                               key={tag}
-                              className="rounded-full bg-secondary px-2 py-1 text-xs font-medium"
+                              className="bg-secondary rounded-full px-2 py-1 text-xs font-medium"
                             >
                               {tag}
                             </span>
@@ -194,7 +212,7 @@ export default async function DashboardPage() {
                         </div>
                       )}
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {formatDateUTC(item.createdAt)}
                     </span>
                   </div>
