@@ -9,7 +9,8 @@ import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { DailyHighlight } from '@/components/dashboard/DailyHighlight';
 import { DashboardReminders } from '@/components/dashboard/DashboardReminders';
 import { ReviewQueueWidget } from '@/components/dashboard/ReviewQueueWidget';
-import { Zap, Search, Library, ArrowRight, LayoutDashboard, PenLine } from 'lucide-react';
+import { OnboardingWelcome } from '@/components/dashboard/OnboardingWelcome';
+import { Zap, Search, Library, ArrowRight, LayoutDashboard } from 'lucide-react';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -111,117 +112,112 @@ export default async function DashboardPage() {
               Welcome back, {session.user?.name?.split(' ')[0]}!
             </h1>
             <p className="text-muted-foreground">
-              Here&apos;s what&apos;s happening with your knowledge hub
+              {totalCount === 0
+                ? 'Let\u2019s get your knowledge hub set up'
+                : 'Here\u2019s what\u2019s happening with your knowledge hub'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Bento Grid */}
-      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        {/* Left column - Stats */}
-        <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
-          <DashboardStats
-            totalCount={totalCount}
-            tagCount={tagCount}
-            thisWeekCount={thisWeekCount}
-            favoritesCount={favoritesCount}
-          />
-        </div>
-
-        {/* Right column - Daily Highlight + Quick Actions */}
-        <div className="flex flex-col gap-3">
-          <ReviewQueueWidget />
-          <DailyHighlight />
-          {quickActions.map((action, i) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className={`bg-card animate-fade-up hover:shadow-soft-md group flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5 ${action.borderHover}`}
-              style={{ animationDelay: `${(i + 1) * 75}ms`, animationFillMode: 'backwards' }}
-            >
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.iconBg}`}
-              >
-                <action.icon className={`h-5 w-5 ${action.iconColor}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold">{action.label}</h3>
-                <p className="text-muted-foreground text-xs">{action.description}</p>
-              </div>
-              <ArrowRight className="text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </Link>
-          ))}
-        </div>
-
-        {/* Recent Items - spans full left column */}
-        <div
-          className="animate-fade-up"
-          style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Recent Items</h2>
-            <Link href="/dashboard/library" className="text-primary text-sm hover:underline">
-              View All
-            </Link>
-          </div>
-
-          {latestItems.length === 0 ? (
-            <div className="bg-card shadow-soft rounded-xl border p-12 text-center">
-              <div className="bg-primary/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-                <PenLine className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="font-semibold">No content yet</h3>
-              <p className="text-muted-foreground mt-1 text-sm">Start capturing your ideas!</p>
-              <Link
-                href="/dashboard/capture"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-              >
-                Create Your First Note
-              </Link>
+      {totalCount === 0 ? (
+        <OnboardingWelcome />
+      ) : (
+        <>
+          {/* Bento Grid */}
+          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+            {/* Left column - Stats */}
+            <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
+              <DashboardStats
+                totalCount={totalCount}
+                tagCount={tagCount}
+                thisWeekCount={thisWeekCount}
+                favoritesCount={favoritesCount}
+              />
             </div>
-          ) : (
-            <div className="space-y-3">
-              {latestItems.map((item) => (
+
+            {/* Right column - Daily Highlight + Quick Actions */}
+            <div className="flex flex-col gap-3">
+              <ReviewQueueWidget />
+              <DailyHighlight />
+              {quickActions.map((action, i) => (
                 <Link
-                  key={item.id}
-                  href={`/dashboard/library?highlight=${item.id}`}
-                  className="bg-card hover:shadow-soft-md block rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
+                  key={action.href}
+                  href={action.href}
+                  className={`bg-card animate-fade-up hover:shadow-soft-md group flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5 ${action.borderHover}`}
+                  style={{
+                    animationDelay: `${(i + 1) * 75}ms`,
+                    animationFillMode: 'backwards',
+                  }}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold">
-                        {item.title.split(/\s+/).slice(0, 10).join(' ')}
-                        {item.title.split(/\s+/).length > 10 ? '...' : ''}
-                      </h3>
-                      {item.body && (
-                        <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                          {item.body}
-                        </p>
-                      )}
-                      {(item.tags?.length ?? 0) > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {(item.tags ?? []).map((tag) => (
-                            <span
-                              key={tag}
-                              className="bg-secondary rounded-full px-2 py-1 text-xs font-medium"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-muted-foreground text-xs">
-                      {formatDateUTC(item.createdAt)}
-                    </span>
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.iconBg}`}
+                  >
+                    <action.icon className={`h-5 w-5 ${action.iconColor}`} />
                   </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-semibold">{action.label}</h3>
+                    <p className="text-muted-foreground text-xs">{action.description}</p>
+                  </div>
+                  <ArrowRight className="text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
               ))}
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* Recent Items - spans full left column */}
+            <div
+              className="animate-fade-up"
+              style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Recent Items</h2>
+                <Link href="/dashboard/library" className="text-primary text-sm hover:underline">
+                  View All
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {latestItems.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/dashboard/library?highlight=${item.id}`}
+                    className="bg-card hover:shadow-soft-md block rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold">
+                          {item.title.split(/\s+/).slice(0, 10).join(' ')}
+                          {item.title.split(/\s+/).length > 10 ? '...' : ''}
+                        </h3>
+                        {item.body && (
+                          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
+                            {item.body}
+                          </p>
+                        )}
+                        {(item.tags?.length ?? 0) > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {(item.tags ?? []).map((tag) => (
+                              <span
+                                key={tag}
+                                className="bg-secondary rounded-full px-2 py-1 text-xs font-medium"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-muted-foreground text-xs">
+                        {formatDateUTC(item.createdAt)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Reminders */}
       <DashboardReminders />
