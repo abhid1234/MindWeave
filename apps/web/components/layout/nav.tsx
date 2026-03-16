@@ -239,7 +239,7 @@ export function NavLinks({ onNavigate }: NavLinksProps) {
 
 export default function Nav() {
   return (
-    <nav className="border-border/40 from-background to-muted/20 hidden w-64 border-r bg-gradient-to-b p-3 lg:block">
+    <nav className="border-border/40 from-background via-background to-accent/10 hidden w-64 border-r bg-gradient-to-b p-3 lg:block">
       <NavLinks />
     </nav>
   );

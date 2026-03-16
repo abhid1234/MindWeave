@@ -15,11 +15,7 @@ import { FeedbackWidget } from '@/components/feedback/FeedbackWidget';
 import { QuickCaptureDialog } from '@/components/layout/QuickCaptureDialog';
 import { BadgeUnlockToast } from '@/components/badges/BadgeUnlockToast';
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
   if (!session?.user) {
@@ -40,15 +36,19 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <Header user={session.user} />
-      <div className="flex flex-1 relative">
+      <div className="relative flex flex-1">
         {/* Gradient mesh background */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-          <div className="absolute -top-1/4 -left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl animate-drift" />
-          <div className="absolute top-1/3 -right-1/4 h-[500px] w-[500px] rounded-full bg-purple-500/5 blur-3xl animate-drift drift-delay-1" />
-          <div className="absolute -bottom-1/4 left-1/3 h-[550px] w-[550px] rounded-full bg-green-500/5 blur-3xl animate-drift drift-delay-2" />
+          <div className="bg-primary/[0.07] animate-drift absolute -left-1/4 -top-1/4 h-[600px] w-[600px] rounded-full blur-3xl" />
+          <div className="bg-file/[0.06] animate-drift drift-delay-1 absolute -right-1/4 top-1/3 h-[500px] w-[500px] rounded-full blur-3xl" />
+          <div className="bg-link/[0.05] animate-drift drift-delay-2 absolute -bottom-1/4 left-1/3 h-[550px] w-[550px] rounded-full blur-3xl" />
         </div>
         <Nav />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6 lg:pb-6" tabIndex={-1}>
+        <main
+          id="main-content"
+          className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6 lg:pb-6"
+          tabIndex={-1}
+        >
           <Breadcrumbs />
           {children}
         </main>

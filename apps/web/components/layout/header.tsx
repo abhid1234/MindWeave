@@ -14,23 +14,27 @@ interface HeaderProps {
 
 export default function Header({ user }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+    <header className="border-border/50 bg-background/80 supports-[backdrop-filter]:bg-background/60 dark:border-border/30 dark:bg-background/70 sticky top-0 z-50 border-b backdrop-blur-xl">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-2">
           <MobileNav />
           <Link
             href="/dashboard"
-            className="group flex items-center gap-2 text-xl font-bold tracking-tight transition-colors hover:text-primary"
+            className="hover:text-primary group flex items-center gap-2 text-xl font-bold tracking-tight transition-colors"
           >
-            <Image src="/icons/icon.svg" alt="Mindweave logo" width={28} height={28} className="rounded-lg" />
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Mindweave
-            </span>
+            <Image
+              src="/icons/icon.svg"
+              alt="Mindweave logo"
+              width={28}
+              height={28}
+              className="rounded-lg"
+            />
+            <span className="text-gradient">Mindweave</span>
           </Link>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <kbd className="pointer-events-none hidden h-7 select-none items-center gap-1 rounded border bg-muted px-2 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+          <kbd className="bg-muted text-muted-foreground pointer-events-none hidden h-7 select-none items-center gap-1 rounded border px-2 font-mono text-[10px] font-medium sm:inline-flex">
             <span className="text-xs">⌘</span>K
           </kbd>
           <ThemeToggle />
