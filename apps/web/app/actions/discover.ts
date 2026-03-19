@@ -2,9 +2,9 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { content, contentViews, embeddings } from '@/lib/db/schema';
+import { content, contentViews } from '@/lib/db/schema';
 import type { ContentType } from '@/lib/db/schema';
-import { eq, desc, and, gte, notInArray, sql, lt } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { getRecommendations } from '@/lib/ai/embeddings';
 import { calculateBlendedScore } from '@/lib/recommendations';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';

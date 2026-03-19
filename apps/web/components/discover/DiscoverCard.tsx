@@ -39,7 +39,7 @@ export function DiscoverCard({
   tags,
   autoTags,
   similarity,
-  score,
+  score: _score,
   lastViewedAt,
   createdAt,
   onClick,

@@ -49,7 +49,6 @@ vi.mock('@/lib/badges/engine', () => ({
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { checkBadgesForUser, getProgressForBadge } from '@/lib/badges/engine';
-import { BADGE_DEFINITIONS } from '@/lib/badges/definitions';
 
 const mockSession = {
   user: { id: 'user-1', email: 'test@example.com' },

@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { content, embeddings } from '@/lib/db/schema';
+import { content } from '@/lib/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { isNeo4jConfigured } from '@/lib/neo4j/client';

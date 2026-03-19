@@ -90,7 +90,7 @@ export async function getDailyHighlightAction(): Promise<HighlightResult> {
     const recentIds = recentlyViewed.map((v) => v.contentId);
 
     // Find eligible content (has body or tags, not recently viewed)
-    let eligibleQuery = db
+    const eligibleQuery = db
       .select({
         id: content.id,
         title: content.title,

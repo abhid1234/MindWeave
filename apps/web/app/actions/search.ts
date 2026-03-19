@@ -6,7 +6,7 @@ import { answerQuestion } from '@/lib/ai/gemini';
 import { db } from '@/lib/db/client';
 import { content } from '@/lib/db/schema';
 import type { ContentType } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { checkServerActionRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { getBlendedRecommendationsAction } from './discover';
 

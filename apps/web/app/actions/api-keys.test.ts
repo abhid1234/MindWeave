@@ -95,23 +95,6 @@ function setupSelectChain(rows: unknown[]) {
   mockSelect.mockReturnValue({ from: mockFromFn });
 }
 
-/** Set up a second select call that resolves to `rows` (for the active-keys-count query). */
-function setupTwoSelects(firstRows: unknown[], secondRows: unknown[]) {
-  let callCount = 0;
-  mockSelect.mockImplementation(() => {
-    callCount++;
-    if (callCount === 1) {
-      const mockOrderByFn = vi.fn().mockResolvedValue(firstRows);
-      const mockWhereFn = vi.fn(() => ({ orderBy: mockOrderByFn }));
-      const mockFromFn = vi.fn(() => ({ where: mockWhereFn }));
-      return { from: mockFromFn };
-    }
-    // second call — active keys count check (no orderBy, just resolves directly)
-    const mockWhereFn = vi.fn().mockResolvedValue(secondRows);
-    const mockFromFn = vi.fn(() => ({ where: mockWhereFn }));
-    return { from: mockFromFn };
-  });
-}
 
 function setupInsertChain(rows: unknown[]) {
   const mockReturningFn = vi.fn().mockResolvedValue(rows);

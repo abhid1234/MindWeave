@@ -2,7 +2,7 @@
 
 import { BadgeCard } from './BadgeCard';
 import { BADGE_CATEGORIES } from '@/lib/badges/definitions';
-import type { UserBadgeWithDefinition, BadgeCategory } from '@/types/badges';
+import type { UserBadgeWithDefinition } from '@/types/badges';
 
 interface BadgeGridProps {
   badges: UserBadgeWithDefinition[];

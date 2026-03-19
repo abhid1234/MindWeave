@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { CollectionGrid } from './CollectionGrid';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getCollectionsAction, deleteCollectionAction } from '@/app/actions/collections';
+import { getCollectionsAction } from '@/app/actions/collections';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),

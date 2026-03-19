@@ -84,7 +84,7 @@ vi.mock('@/app/actions/views', () => ({
 }));
 
 vi.mock('@/components/reminders/ReminderButton', () => ({
-  ReminderButton: ({ contentId }: { contentId: string }) => (
+  ReminderButton: ({ contentId: _contentId }: { contentId: string }) => (
     <button data-testid="reminder-button">Remind Me</button>
   ),
 }));

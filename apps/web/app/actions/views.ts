@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { contentViews, content } from '@/lib/db/schema';
-import { eq, and, desc, gte, sql } from 'drizzle-orm';
+import { eq, and, gte, sql } from 'drizzle-orm';
 
 const DEBOUNCE_SECONDS = 30;
 

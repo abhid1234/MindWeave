@@ -51,7 +51,7 @@ export function SigmaGraph() {
   const [error, setError] = useState<string | null>(null);
   const [minSimilarity, setMinSimilarity] = useState(0.5);
   const [selectedNode, setSelectedNode] = useState<EnrichedNode | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [, setHoveredNode] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [showLabels, setShowLabels] = useState(true);
