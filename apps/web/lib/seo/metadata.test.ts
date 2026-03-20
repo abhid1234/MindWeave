@@ -42,7 +42,7 @@ describe('generateSeoMetadata', () => {
     expect(result.openGraph?.description).toBe('Take notes with AI assistance');
     expect(result.openGraph?.url).toBe('https://www.mindweave.space/use-cases/ai-note-taking');
     expect(result.openGraph?.siteName).toBe('Mindweave');
-    expect(result.openGraph?.type).toBe('website');
+    expect((result.openGraph as Record<string, unknown>)?.type).toBe('website');
   });
 
   it('should include twitter card metadata', () => {
@@ -52,7 +52,7 @@ describe('generateSeoMetadata', () => {
       path: '/use-cases/ai-note-taking',
     });
 
-    expect(result.twitter?.card).toBe('summary_large_image');
+    expect((result.twitter as Record<string, unknown>)?.card).toBe('summary_large_image');
     expect(result.twitter?.title).toBe('AI Note Taking App - Mindweave');
     expect(result.twitter?.description).toBe('Take notes with AI assistance');
   });
@@ -65,6 +65,6 @@ describe('generateSeoMetadata', () => {
       ogType: 'article',
     });
 
-    expect(result.openGraph?.type).toBe('article');
+    expect((result.openGraph as Record<string, unknown>)?.type).toBe('article');
   });
 });
