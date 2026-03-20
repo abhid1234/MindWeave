@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SiteHeader } from './SiteHeader';
 import {
   Sparkles,
   Search,
@@ -187,6 +188,7 @@ function BottomCta({ cta }: { cta: LandingPageData['hero']['cta'] }) {
 export function LandingPageTemplate({ data }: LandingPageTemplateProps) {
   return (
     <div className="flex min-h-screen flex-col">
+      <SiteHeader />
       <main className="flex-1">
         <HeroSection hero={data.hero} />
         <ProblemSection problem={data.problem} />

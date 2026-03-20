@@ -409,6 +409,24 @@ export default async function Home() {
               How It Works
             </a>
             <Link
+              href="/use-cases/ai-note-taking"
+              className="text-muted-foreground hover:text-foreground hidden text-sm font-medium transition-colors md:inline-block"
+            >
+              Use Cases
+            </Link>
+            <Link
+              href="/compare/notion"
+              className="text-muted-foreground hover:text-foreground hidden text-sm font-medium transition-colors md:inline-block"
+            >
+              Compare
+            </Link>
+            <Link
+              href="/blog"
+              className="text-muted-foreground hover:text-foreground hidden text-sm font-medium transition-colors md:inline-block"
+            >
+              Blog
+            </Link>
+            <Link
               href="/docs"
               className="text-muted-foreground hover:text-foreground hidden text-sm font-medium transition-colors sm:inline-block"
             >
