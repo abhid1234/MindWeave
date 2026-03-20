@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getMarketplaceListingAction, trackMarketplaceViewAction } from '@/app/actions/marketplace';
 import { MarketplaceListingDetail } from '@/components/marketplace/MarketplaceListingDetail';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 type Props = {
   params: Promise<{ listingId: string }>;
@@ -58,5 +59,29 @@ export default async function MarketplaceListingPage({ params }: Props) {
   // Fire-and-forget view tracking
   trackMarketplaceViewAction(listingId);
 
-  return <MarketplaceListingDetail listing={result.listing} />;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const { listing } = result;
+
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: listing.collection.name,
+    description:
+      listing.description ||
+      listing.collection.description ||
+      `A curated collection of ${listing.contentCount} items on Mindweave.`,
+    url: `${baseUrl}/marketplace/${listing.id}`,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+  };
+
+  return (
+    <>
+      <JsonLd data={productJsonLd} />
+      <MarketplaceListingDetail listing={listing} />
+    </>
+  );
 }

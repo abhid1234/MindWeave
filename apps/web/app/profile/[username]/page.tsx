@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getPublicProfile } from '@/app/actions/profile';
 import PublicProfile from '@/components/profile/PublicProfile';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 type Props = {
   params: Promise<{ username: string }>;
@@ -50,22 +51,37 @@ export default async function PublicProfilePage({ params }: Props) {
     notFound();
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold">
-              Mindweave
-            </Link>
-            <span className="text-sm text-muted-foreground">Public Profile</span>
-          </div>
-        </div>
-      </header>
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const { profile } = result;
+  const displayName = profile.name ?? profile.username;
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <PublicProfile profile={result.profile} />
-      </main>
-    </div>
+  const personJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: displayName,
+    url: `${baseUrl}/profile/${profile.username}`,
+    description: profile.bio ?? `${displayName}'s public knowledge collections on Mindweave`,
+  };
+
+  return (
+    <>
+      <JsonLd data={personJsonLd} />
+      <div className="bg-background min-h-screen">
+        <header className="bg-card border-b">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="text-xl font-bold">
+                Mindweave
+              </Link>
+              <span className="text-muted-foreground text-sm">Public Profile</span>
+            </div>
+          </div>
+        </header>
+
+        <main className="container mx-auto max-w-4xl px-4 py-8">
+          <PublicProfile profile={profile} />
+        </main>
+      </div>
+    </>
   );
 }

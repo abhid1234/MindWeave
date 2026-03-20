@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: 'FAQ',
@@ -69,53 +70,69 @@ const faqs = [
   },
 ];
 
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
+
 export default function FAQPage() {
   return (
-    <div className="space-y-8">
-      <section>
-        <h1 className="text-4xl font-bold mb-3">Frequently Asked Questions</h1>
-        <p className="text-lg text-muted-foreground leading-relaxed">
-          Answers to common questions about Mindweave. Can&apos;t find what you&apos;re looking for?
-          Reach out to{' '}
-          <a href="mailto:mindweaveapp27@gmail.com" className="text-primary hover:underline">support</a>.
-        </p>
-      </section>
+    <>
+      <JsonLd data={faqJsonLd} />
+      <div className="space-y-8">
+        <section>
+          <h1 className="mb-3 text-4xl font-bold">Frequently Asked Questions</h1>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Answers to common questions about Mindweave. Can&apos;t find what you&apos;re looking
+            for? Reach out to{' '}
+            <a href="mailto:mindweaveapp27@gmail.com" className="text-primary hover:underline">
+              support
+            </a>
+            .
+          </p>
+        </section>
 
-      <section className="space-y-6">
-        {faqs.map((faq) => (
-          <div key={faq.question} className="border-b pb-6 last:border-b-0">
-            <h2 className="text-lg font-semibold mb-2">{faq.question}</h2>
-            <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
+        <section className="space-y-6">
+          {faqs.map((faq) => (
+            <div key={faq.question} className="border-b pb-6 last:border-b-0">
+              <h2 className="mb-2 text-lg font-semibold">{faq.question}</h2>
+              <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="bg-card rounded-xl border p-6">
+          <h2 className="mb-2 text-xl font-semibold">Still have questions?</h2>
+          <p className="text-muted-foreground mb-3">
+            Check out the detailed documentation for each feature, or reach out to support.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/docs/getting-started"
+              className="text-primary text-sm font-medium hover:underline"
+            >
+              Getting Started &rarr;
+            </Link>
+            <Link
+              href="/docs/features"
+              className="text-primary text-sm font-medium hover:underline"
+            >
+              All Features &rarr;
+            </Link>
+            <Link href="/support" className="text-primary text-sm font-medium hover:underline">
+              Contact Support &rarr;
+            </Link>
           </div>
-        ))}
-      </section>
-
-      <section className="rounded-xl border bg-card p-6">
-        <h2 className="text-xl font-semibold mb-2">Still have questions?</h2>
-        <p className="text-muted-foreground mb-3">
-          Check out the detailed documentation for each feature, or reach out to support.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/docs/getting-started"
-            className="text-sm text-primary hover:underline font-medium"
-          >
-            Getting Started &rarr;
-          </Link>
-          <Link
-            href="/docs/features"
-            className="text-sm text-primary hover:underline font-medium"
-          >
-            All Features &rarr;
-          </Link>
-          <Link
-            href="/support"
-            className="text-sm text-primary hover:underline font-medium"
-          >
-            Contact Support &rarr;
-          </Link>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }
