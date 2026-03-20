@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client';
 import { tilPosts } from '@/lib/db/schema';
 import { desc } from 'drizzle-orm';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.mindweave.space';
