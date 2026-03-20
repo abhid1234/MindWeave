@@ -13,6 +13,11 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: 'Mindweave',
   },
+  alternates: {
+    types: {
+      'application/rss+xml': 'https://www.mindweave.space/til/feed',
+    },
+  },
 };
 
 export default async function TilPage() {
@@ -23,9 +28,9 @@ export default async function TilPage() {
 
   return (
     <div className="space-y-6">
-      <div className="text-center space-y-2">
+      <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold">Today I Learned</h1>
-        <p className="text-muted-foreground max-w-lg mx-auto">
+        <p className="text-muted-foreground mx-auto max-w-lg">
           Bite-sized learnings from the community. Share what you discovered today.
         </p>
       </div>
