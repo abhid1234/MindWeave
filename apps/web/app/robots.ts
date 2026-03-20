@@ -1,14 +1,14 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
+
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.mindweave.space';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
   return {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
-        disallow: ['/api/', '/dashboard/'],
+        allow: ['/', '/embed/', '/share/'],
+        disallow: ['/api/', '/dashboard/', '/onboarding', '/.well-known/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
