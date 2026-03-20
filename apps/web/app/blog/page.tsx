@@ -1,6 +1,5 @@
 import { ExternalLink, PenLine } from 'lucide-react';
 import { generateSeoMetadata } from '@/lib/seo/metadata';
-import { SiteHeader } from '@/components/seo/SiteHeader';
 
 export const metadata = generateSeoMetadata({
   title: 'Blog',
@@ -30,7 +29,6 @@ function formatDate(dateStr: string): string {
 export default function BlogPage() {
   return (
     <div className="bg-background min-h-screen">
-      <SiteHeader />
       <div className="container mx-auto max-w-3xl px-4 py-16">
         {/* Heading */}
         <div className="animate-fade-up" style={{ animationFillMode: 'backwards' }}>
