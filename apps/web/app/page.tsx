@@ -447,22 +447,20 @@ export default async function Home() {
                 Your AI-Powered
                 <br />
                 <span className="from-primary bg-gradient-to-r via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                  Knowledge Hub
+                  Second Brain
                 </span>
               </h1>
               <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg leading-8 sm:text-xl lg:text-2xl">
-                You read 100 articles a week.{' '}
-                <span className="text-foreground font-medium">How many can you recall?</span>
-                <br className="hidden sm:block" />
-                Capture, organize, and rediscover everything with AI.
+                Capture notes, links, and files — AI auto-tags, organizes, and lets you search by
+                meaning so you never lose a great idea again.
               </p>
 
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link
-                  href="/login"
+                  href="/auth/register"
                   className="bg-primary text-primary-foreground group inline-flex items-center gap-2 rounded-lg px-8 py-3.5 text-base font-semibold shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
                 >
-                  Start Your Knowledge Base
+                  Start Free — No Credit Card
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <a
@@ -475,8 +473,10 @@ export default async function Home() {
                   View on GitHub
                 </a>
               </div>
+              {/* Trust signals */}
               <p className="text-muted-foreground mt-3 text-sm">
-                Free forever. No credit card required.
+                Free forever for individuals&nbsp;&bull;&nbsp;Privacy-first&nbsp;&bull;&nbsp;No
+                credit card required
               </p>
 
               {/* Social Proof Strip */}
