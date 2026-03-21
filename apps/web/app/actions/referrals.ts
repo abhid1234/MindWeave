@@ -4,6 +4,12 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { users, referrals } from '@/lib/db/schema';
 import { eq, and, sql, count } from 'drizzle-orm';
+import { Resend } from 'resend';
+import { getInviteEmailHtml } from '@/lib/email/templates/invite';
+
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 type ActionResult = {
   success: boolean;
@@ -16,6 +22,58 @@ type ReferralStatsResult = ActionResult & {
   totalSignups?: number;
   totalActivated?: number;
 };
+
+export async function sendInviteEmails(emails: string[]): Promise<ActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    if (!Array.isArray(emails) || emails.length < 1 || emails.length > 5) {
+      return { success: false, message: 'Please provide between 1 and 5 email addresses' };
+    }
+
+    const userId = session.user.id;
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { username: true, name: true },
+    });
+
+    if (!user?.username) {
+      return {
+        success: false,
+        message: 'You need to set a username before sending invites',
+      };
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://mindweave.app';
+    const referralLink = `${appUrl}/r/${user.username}`;
+    const inviterName = user.name ?? user.username;
+
+    const resend = getResend();
+    const results = await Promise.allSettled(
+      emails.map((email) =>
+        resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+          to: email,
+          subject: `${inviterName} invited you to Mindweave`,
+          html: getInviteEmailHtml(inviterName, referralLink),
+        })
+      )
+    );
+
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    if (failed > 0) {
+      console.error(`[sendInviteEmails] ${failed} of ${emails.length} invites failed`);
+    }
+
+    return { success: true, message: `Invited ${emails.length - failed} contact(s) successfully` };
+  } catch {
+    return { success: false, message: 'Failed to send invite emails' };
+  }
+}
 
 export async function trackReferralClick(username: string): Promise<ActionResult> {
   try {
