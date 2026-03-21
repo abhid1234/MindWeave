@@ -58,6 +58,30 @@ async function getPublicGraphEntries(baseUrl: string): Promise<MetadataRoute.Sit
   }
 }
 
+async function getTopicEntries(baseUrl: string): Promise<MetadataRoute.Sitemap> {
+  try {
+    const tagResults = await db.select({ tags: tilPosts.tags }).from(tilPosts);
+
+    const tagCounts = new Map<string, number>();
+    for (const row of tagResults) {
+      for (const tag of row.tags) {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      }
+    }
+
+    const popularTags = Array.from(tagCounts.entries())
+      .filter(([, count]) => count >= 3)
+      .map(([tag]) => tag);
+
+    return popularTags.map((tag) => ({
+      url: `${baseUrl}/til/topic/${encodeURIComponent(tag)}`,
+      lastModified: new Date(),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 async function getPublicProfileEntries(baseUrl: string): Promise<MetadataRoute.Sitemap> {
   try {
     const publicUsers = await db
@@ -88,6 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, lastModified: now },
     { url: `${baseUrl}/terms`, lastModified: now },
     { url: `${baseUrl}/til`, lastModified: now },
+    { url: `${baseUrl}/til/trending`, lastModified: now },
     { url: `${baseUrl}/marketplace`, lastModified: now },
     ...useCaseSlugs.map((slug) => ({ url: `${baseUrl}/use-cases/${slug}`, lastModified: now })),
     ...featureSlugs.map((slug) => ({ url: `${baseUrl}/features/${slug}`, lastModified: now })),
@@ -107,12 +132,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/docs/faq`, lastModified: now },
   ];
 
-  const [tilEntries, marketplaceEntries, publicGraphEntries, publicProfileEntries] =
+  const [tilEntries, marketplaceEntries, publicGraphEntries, publicProfileEntries, topicEntries] =
     await Promise.all([
       getTilEntries(baseUrl),
       getMarketplaceEntries(baseUrl),
       getPublicGraphEntries(baseUrl),
       getPublicProfileEntries(baseUrl),
+      getTopicEntries(baseUrl),
     ]);
 
   return [
@@ -121,5 +147,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...marketplaceEntries,
     ...publicGraphEntries,
     ...publicProfileEntries,
+    ...topicEntries,
   ];
 }
