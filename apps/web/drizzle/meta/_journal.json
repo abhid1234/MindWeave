@@ -71,6 +71,13 @@
       "when": 1772082125223,
       "tag": "0009_giant_gunslinger",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774065461582,
+      "tag": "0010_neat_swordsman",
+      "breakpoints": true
     }
   ]
 }

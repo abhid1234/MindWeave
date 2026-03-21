@@ -916,7 +916,10 @@ export const flashcards = pgTable(
   (table) => ({
     userIdIdx: index('flashcards_user_id_idx').on(table.userId),
     contentIdIdx: index('flashcards_content_id_idx').on(table.contentId),
-    userNextReviewIdx: index('flashcards_user_next_review_idx').on(table.userId, table.nextReviewAt),
+    userNextReviewIdx: index('flashcards_user_next_review_idx').on(
+      table.userId,
+      table.nextReviewAt
+    ),
     userStatusIdx: index('flashcards_user_status_idx').on(table.userId, table.status),
   })
 );
@@ -934,10 +937,7 @@ export const userBadges = pgTable(
     notified: boolean('notified').notNull().default(false),
   },
   (table) => ({
-    userBadgeUnique: uniqueIndex('user_badges_user_badge_unique').on(
-      table.userId,
-      table.badgeId
-    ),
+    userBadgeUnique: uniqueIndex('user_badges_user_badge_unique').on(table.userId, table.badgeId),
     userIdIdx: index('user_badges_user_id_idx').on(table.userId),
     unlockedAtIdx: index('user_badges_unlocked_at_idx').on(table.unlockedAt),
   })
@@ -985,7 +985,10 @@ export const learningPathItems = pgTable(
   (table) => ({
     pathIdIdx: index('learning_path_items_path_id_idx').on(table.pathId),
     contentIdIdx: index('learning_path_items_content_id_idx').on(table.contentId),
-    pathPositionIdx: index('learning_path_items_path_position_idx').on(table.pathId, table.position),
+    pathPositionIdx: index('learning_path_items_path_position_idx').on(
+      table.pathId,
+      table.position
+    ),
   })
 );
 
@@ -1059,6 +1062,36 @@ export const flashcardsRelations = relations(flashcards, ({ one }) => ({
 export const userBadgesRelations = relations(userBadges, ({ one }) => ({
   user: one(users, {
     fields: [userBadges.userId],
+    references: [users.id],
+  }),
+}));
+
+// Analytics Events table (anonymous + authenticated visitor tracking)
+export const analyticsEvents = pgTable(
+  'analytics_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sessionId: text('session_id').notNull(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    event: text('event').notNull(),
+    page: text('page').notNull(),
+    referrer: text('referrer'),
+    utmSource: text('utm_source'),
+    utmMedium: text('utm_medium'),
+    utmCampaign: text('utm_campaign'),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    createdAtIdx: index('analytics_events_created_at_idx').on(table.createdAt),
+    eventIdx: index('analytics_events_event_idx').on(table.event),
+    sessionIdIdx: index('analytics_events_session_id_idx').on(table.sessionId),
+  })
+);
+
+export const analyticsEventsRelations = relations(analyticsEvents, ({ one }) => ({
+  user: one(users, {
+    fields: [analyticsEvents.userId],
     references: [users.id],
   }),
 }));
@@ -1150,3 +1183,6 @@ export type NewLearningPathItem = typeof learningPathItems.$inferInsert;
 
 export type LearningPathProgressRecord = typeof learningPathProgress.$inferSelect;
 export type NewLearningPathProgressRecord = typeof learningPathProgress.$inferInsert;
+
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type NewAnalyticsEvent = typeof analyticsEvents.$inferInsert;

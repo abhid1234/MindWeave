@@ -1,17 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockAuth, mockSelect, mockExecute, mockRateLimit, mockExtractInsights } = vi.hoisted(
-  () => {
+const { mockAuth, mockSelect, mockExecute, mockInsert, mockRateLimit, mockExtractInsights } =
+  vi.hoisted(() => {
     const mockGroupBy = vi.fn();
     const mockOrderBy = vi.fn(() => ({ groupBy: mockGroupBy }));
-    const mockLeftJoin = vi.fn(() => ({ where: vi.fn(() => ({ groupBy: mockGroupBy, orderBy: mockOrderBy })) }));
-    const mockWhere = vi.fn(() => ({ orderBy: mockOrderBy, leftJoin: mockLeftJoin, groupBy: mockGroupBy }));
+    const mockLeftJoin = vi.fn(() => ({
+      where: vi.fn(() => ({ groupBy: mockGroupBy, orderBy: mockOrderBy })),
+    }));
+    const mockWhere = vi.fn(() => ({
+      orderBy: mockOrderBy,
+      leftJoin: mockLeftJoin,
+      groupBy: mockGroupBy,
+    }));
     const mockFrom = vi.fn(() => ({ where: mockWhere, leftJoin: mockLeftJoin }));
     const mockSelect = vi.fn(() => ({ from: mockFrom }));
     const mockExecute = vi.fn();
     const mockAuth = vi.fn();
     const mockRateLimit = vi.fn();
     const mockExtractInsights = vi.fn();
+    const mockValues = vi.fn().mockResolvedValue(undefined);
+    const mockInsert = vi.fn(() => ({ values: mockValues }));
 
     Object.assign(mockSelect, {
       from: mockFrom,
@@ -22,9 +30,15 @@ const { mockAuth, mockSelect, mockExecute, mockRateLimit, mockExtractInsights } 
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return { mockAuth, mockSelect: mockSelect as any, mockExecute, mockRateLimit, mockExtractInsights };
-  }
-);
+    return {
+      mockAuth,
+      mockSelect: mockSelect as any,
+      mockExecute,
+      mockInsert,
+      mockRateLimit,
+      mockExtractInsights,
+    };
+  });
 
 vi.mock('@/lib/auth', () => ({
   auth: () => mockAuth(),
@@ -34,6 +48,7 @@ vi.mock('@/lib/db/client', () => ({
   db: {
     select: (...args: any[]) => mockSelect(...args),
     execute: (query: any) => mockExecute(query),
+    insert: (...args: any[]) => mockInsert(...args),
   },
 }));
 
@@ -56,6 +71,18 @@ vi.mock('@/lib/db/schema', () => ({
   contentCollections: {
     contentId: 'contentId',
     collectionId: 'collectionId',
+  },
+  analyticsEvents: {
+    sessionId: 'sessionId',
+    userId: 'userId',
+    event: 'event',
+    page: 'page',
+    referrer: 'referrer',
+    utmSource: 'utmSource',
+    utmMedium: 'utmMedium',
+    utmCampaign: 'utmCampaign',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
   },
   users: {},
 }));
@@ -84,7 +111,12 @@ vi.mock('next/cache', () => ({
 vi.mock('@/lib/cache', () => ({
   createCachedFn: vi.fn((fn: (...args: unknown[]) => unknown) => fn),
   CacheDuration: { SHORT: 30, MEDIUM: 60, LONG: 300, EXTRA_LONG: 600, INFINITE: false },
-  CacheTags: { ANALYTICS: 'analytics', CONTENT: 'content', COLLECTIONS: 'collections', USER: 'user' },
+  CacheTags: {
+    ANALYTICS: 'analytics',
+    CONTENT: 'content',
+    COLLECTIONS: 'collections',
+    USER: 'user',
+  },
 }));
 
 vi.mock('@/lib/ai/insights', () => ({
@@ -98,12 +130,15 @@ import {
   getCollectionUsageAction,
   getKnowledgeInsightsAction,
   exportAnalyticsAction,
+  trackAnalyticsEvent,
 } from './analytics';
 
 // Helper to set up the db.select chain returning a resolved value
 function setupDbSelectChain(resolvedValue: unknown[]) {
   const mockGroupByFn = vi.fn().mockResolvedValue(resolvedValue);
-  const mockOrderByFn = vi.fn(() => ({ groupBy: mockGroupByFn })).mockResolvedValue(resolvedValue as never);
+  const mockOrderByFn = vi
+    .fn(() => ({ groupBy: mockGroupByFn }))
+    .mockResolvedValue(resolvedValue as never);
   const mockLeftJoinFn = vi.fn(() => ({
     where: vi.fn(() => ({
       groupBy: mockGroupByFn,
@@ -153,9 +188,9 @@ describe('getOverviewStatsAction', () => {
     // The cached function calls db.select 3 times and db.execute once
     // Set up sequential calls
     const selectResults = [
-      [{ count: 42 }],   // totalItems
-      [{ count: 7 }],    // thisMonth
-      [{ count: 3 }],    // collections
+      [{ count: 42 }], // totalItems
+      [{ count: 7 }], // thisMonth
+      [{ count: 3 }], // collections
     ];
     let selectCallIdx = 0;
     mockSelect.mockImplementation(() => {
@@ -240,9 +275,7 @@ describe('getContentGrowthAction', () => {
   it('returns growth data for year period with monthly grouping', async () => {
     const monthStr = new Date().toISOString().slice(0, 7);
 
-    mockExecute.mockResolvedValue([
-      { date: monthStr, type: 'file', count: '5' },
-    ]);
+    mockExecute.mockResolvedValue([{ date: monthStr, type: 'file', count: '5' }]);
 
     const result = await getContentGrowthAction('year');
     expect(result.success).toBe(true);
@@ -391,9 +424,9 @@ describe('getKnowledgeInsightsAction', () => {
   it('returns insights with stats-based thresholds and AI insights merged', async () => {
     // Set up overview stats (totalItems >= 100 triggers "Knowledge Champion")
     const overviewSelectResults = [
-      [{ count: 120 }],  // totalItems
-      [{ count: 15 }],   // thisMonth
-      [{ count: 2 }],    // collections
+      [{ count: 120 }], // totalItems
+      [{ count: 15 }], // thisMonth
+      [{ count: 2 }], // collections
     ];
     let overviewCallIdx = 0;
 
@@ -466,9 +499,9 @@ describe('getKnowledgeInsightsAction', () => {
 
   it('returns "Growing Library" achievement for 50+ items', async () => {
     const selectResults = [
-      [{ count: 55 }],  // totalItems (50-99 range)
-      [{ count: 5 }],   // thisMonth
-      [{ count: 1 }],   // collections
+      [{ count: 55 }], // totalItems (50-99 range)
+      [{ count: 5 }], // thisMonth
+      [{ count: 1 }], // collections
     ];
     let callIdx = 0;
 
@@ -493,9 +526,9 @@ describe('getKnowledgeInsightsAction', () => {
 
   it('suggests collections when user has items but no collections', async () => {
     const selectResults = [
-      [{ count: 10 }],  // totalItems >= 5
-      [{ count: 3 }],   // thisMonth
-      [{ count: 0 }],   // totalCollections = 0
+      [{ count: 10 }], // totalItems >= 5
+      [{ count: 3 }], // thisMonth
+      [{ count: 0 }], // totalCollections = 0
     ];
     let callIdx = 0;
 
@@ -519,11 +552,7 @@ describe('getKnowledgeInsightsAction', () => {
   });
 
   it('returns top focus area from tag distribution', async () => {
-    const selectResults = [
-      [{ count: 10 }],
-      [{ count: 2 }],
-      [{ count: 1 }],
-    ];
+    const selectResults = [[{ count: 10 }], [{ count: 2 }], [{ count: 1 }]];
     let callIdx = 0;
 
     mockSelect.mockImplementation(() => {
@@ -573,9 +602,9 @@ describe('exportAnalyticsAction', () => {
   it('returns combined analytics data on success', async () => {
     // Overview stats
     const selectResults = [
-      [{ count: 30 }],  // totalItems
-      [{ count: 5 }],   // thisMonth
-      [{ count: 2 }],   // collections
+      [{ count: 30 }], // totalItems
+      [{ count: 5 }], // thisMonth
+      [{ count: 2 }], // collections
     ];
     let callIdx = 0;
 
@@ -597,7 +626,7 @@ describe('exportAnalyticsAction', () => {
     // db.execute calls: overview tags, content growth, tag distribution
     mockExecute
       .mockResolvedValueOnce([{ tag_count: '10' }]) // overview tags
-      .mockResolvedValueOnce([])                     // content growth (year)
+      .mockResolvedValueOnce([]) // content growth (year)
       .mockResolvedValueOnce([{ tag: 'js', count: '5' }]); // tag distribution
 
     const result = await exportAnalyticsAction();
@@ -614,5 +643,91 @@ describe('exportAnalyticsAction', () => {
     const result = await exportAnalyticsAction();
     expect(result.success).toBe(false);
     expect(result.message).toBe('Failed to export analytics data');
+  });
+});
+
+// ──────────────────────────────────────────────────────────────
+// trackAnalyticsEvent
+// ──────────────────────────────────────────────────────────────
+describe('trackAnalyticsEvent', () => {
+  it('tracks a page_view event successfully', async () => {
+    const result = await trackAnalyticsEvent({
+      sessionId: 'sess-abc123',
+      event: 'page_view',
+      page: '/til',
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockInsert).toHaveBeenCalledOnce();
+  });
+
+  it('tracks an event with UTM params', async () => {
+    const result = await trackAnalyticsEvent({
+      sessionId: 'sess-utm',
+      event: 'page_view',
+      page: '/marketplace',
+      utmSource: 'twitter',
+      utmMedium: 'social',
+      utmCampaign: 'launch',
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockInsert).toHaveBeenCalledOnce();
+    // Verify values call received the utm fields
+    const valuesArg = mockInsert.mock.results[0].value.values.mock.calls[0][0];
+    expect(valuesArg.utmSource).toBe('twitter');
+    expect(valuesArg.utmMedium).toBe('social');
+    expect(valuesArg.utmCampaign).toBe('launch');
+  });
+
+  it('rejects empty event', async () => {
+    const result = await trackAnalyticsEvent({
+      sessionId: 'sess-abc123',
+      event: '',
+      page: '/til',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('event is required.');
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects empty sessionId', async () => {
+    const result = await trackAnalyticsEvent({
+      sessionId: '',
+      event: 'page_view',
+      page: '/til',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('sessionId is required.');
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects empty page', async () => {
+    const result = await trackAnalyticsEvent({
+      sessionId: 'sess-abc123',
+      event: 'page_view',
+      page: '',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('page is required.');
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
+  it('returns failure on database error', async () => {
+    mockInsert.mockImplementationOnce(() => ({
+      values: vi.fn().mockRejectedValue(new Error('DB insert failed')),
+    }));
+
+    const result = await trackAnalyticsEvent({
+      sessionId: 'sess-abc123',
+      event: 'page_view',
+      page: '/til',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Failed to track analytics event.');
   });
 });

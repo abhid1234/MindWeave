@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { content, collections, contentCollections } from '@/lib/db/schema';
+import { content, collections, contentCollections, analyticsEvents } from '@/lib/db/schema';
 import { eq, sql, gte, and, count } from 'drizzle-orm';
 import { revalidateTag } from 'next/cache';
 import { unstable_cache } from 'next/cache';
@@ -43,12 +43,7 @@ const getCachedOverviewStats = unstable_cache(
     const [thisMonthResult] = await db
       .select({ count: count() })
       .from(content)
-      .where(
-        and(
-          eq(content.userId, userId),
-          gte(content.createdAt, startOfMonth)
-        )
-      );
+      .where(and(eq(content.userId, userId), gte(content.createdAt, startOfMonth)));
 
     // Get total collections count
     const [collectionsResult] = await db
@@ -305,10 +300,7 @@ const getCachedCollectionUsage = unstable_cache(
         itemCount: sql<number>`cast(count(${contentCollections.contentId}) as int)`,
       })
       .from(collections)
-      .leftJoin(
-        contentCollections,
-        eq(collections.id, contentCollections.collectionId)
-      )
+      .leftJoin(contentCollections, eq(collections.id, contentCollections.collectionId))
       .where(eq(collections.userId, userId))
       .groupBy(collections.id)
       .orderBy(sql`count(${contentCollections.contentId}) DESC`);
@@ -354,7 +346,11 @@ export async function getKnowledgeInsightsAction(): Promise<
     }
 
     // Rate limit (AI-intensive)
-    const rateCheck = checkServerActionRateLimit(session.user.id, 'knowledgeInsights', RATE_LIMITS.serverActionAI);
+    const rateCheck = checkServerActionRateLimit(
+      session.user.id,
+      'knowledgeInsights',
+      RATE_LIMITS.serverActionAI
+    );
     if (!rateCheck.success) {
       return { success: false, message: rateCheck.message! };
     }
@@ -394,8 +390,7 @@ export async function getKnowledgeInsightsAction(): Promise<
         insights.push({
           type: 'suggestion',
           title: 'Organize with Collections',
-          description:
-            'Create collections to group related items together and find them faster.',
+          description: 'Create collections to group related items together and find them faster.',
           icon: 'lightbulb',
         });
       }
@@ -430,8 +425,7 @@ export async function getKnowledgeInsightsAction(): Promise<
       insights.push({
         type: 'suggestion',
         title: 'Start Capturing Knowledge',
-        description:
-          'Add notes, links, and files to build your personal knowledge base.',
+        description: 'Add notes, links, and files to build your personal knowledge base.',
         icon: 'zap',
       });
     }
@@ -474,10 +468,10 @@ export async function exportAnalyticsAction(): Promise<
     return {
       success: true,
       data: {
-        overview: overviewResult.success ? overviewResult.data ?? null : null,
-        contentGrowth: growthResult.success ? growthResult.data ?? null : null,
-        tagDistribution: tagResult.success ? tagResult.data ?? null : null,
-        collectionUsage: collectionResult.success ? collectionResult.data ?? null : null,
+        overview: overviewResult.success ? (overviewResult.data ?? null) : null,
+        contentGrowth: growthResult.success ? (growthResult.data ?? null) : null,
+        tagDistribution: tagResult.success ? (tagResult.data ?? null) : null,
+        collectionUsage: collectionResult.success ? (collectionResult.data ?? null) : null,
         exportedAt: new Date().toISOString(),
       },
     };
@@ -561,7 +555,9 @@ const getCachedStreakData = unstable_cache(
 /**
  * Get streak data for the analytics dashboard
  */
-export async function getStreakDataAction(): Promise<AnalyticsActionResult<import('@/types/analytics').StreakData>> {
+export async function getStreakDataAction(): Promise<
+  AnalyticsActionResult<import('@/types/analytics').StreakData>
+> {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -608,7 +604,9 @@ const getCachedKnowledgeGaps = unstable_cache(
 /**
  * Get knowledge gaps - tags with sparse or stale content
  */
-export async function getKnowledgeGapsAction(): Promise<AnalyticsActionResult<import('@/types/analytics').KnowledgeGap[]>> {
+export async function getKnowledgeGapsAction(): Promise<
+  AnalyticsActionResult<import('@/types/analytics').KnowledgeGap[]>
+> {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -657,7 +655,9 @@ const getCachedContentTypeBreakdown = unstable_cache(
 /**
  * Get content type breakdown
  */
-export async function getContentTypeBreakdownAction(): Promise<AnalyticsActionResult<import('@/types/analytics').ContentTypeBreakdown>> {
+export async function getContentTypeBreakdownAction(): Promise<
+  AnalyticsActionResult<import('@/types/analytics').ContentTypeBreakdown>
+> {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -669,5 +669,72 @@ export async function getContentTypeBreakdownAction(): Promise<AnalyticsActionRe
   } catch (error) {
     console.error('Error getting content type breakdown:', error);
     return { success: false, message: 'Failed to fetch content type breakdown' };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Visitor / Growth Analytics
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface TrackAnalyticsEventInput {
+  sessionId: string;
+  userId?: string;
+  event: string;
+  page: string;
+  referrer?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Track an analytics event. No authentication required — anonymous visitors
+ * can also trigger events (e.g. page_view, signup_click).
+ */
+export async function trackAnalyticsEvent(
+  input: TrackAnalyticsEventInput
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const {
+      sessionId,
+      event,
+      page,
+      userId,
+      referrer,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      metadata,
+    } = input;
+
+    if (!sessionId || typeof sessionId !== 'string' || sessionId.trim() === '') {
+      return { success: false, message: 'sessionId is required.' };
+    }
+
+    if (!event || typeof event !== 'string' || event.trim() === '') {
+      return { success: false, message: 'event is required.' };
+    }
+
+    if (!page || typeof page !== 'string' || page.trim() === '') {
+      return { success: false, message: 'page is required.' };
+    }
+
+    await db.insert(analyticsEvents).values({
+      sessionId,
+      userId: userId ?? null,
+      event,
+      page,
+      referrer: referrer ?? null,
+      utmSource: utmSource ?? null,
+      utmMedium: utmMedium ?? null,
+      utmCampaign: utmCampaign ?? null,
+      metadata: metadata ?? null,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error tracking analytics event:', error);
+    return { success: false, message: 'Failed to track analytics event.' };
   }
 }
