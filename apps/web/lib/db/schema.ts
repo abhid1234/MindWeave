@@ -459,6 +459,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   flashcards: many(flashcards),
   learningPaths: many(learningPaths),
   learningPathProgress: many(learningPathProgress),
+  referralsGiven: many(referrals, { relationName: 'referrer' }),
+  referralsReceived: many(referrals, { relationName: 'referredUser' }),
 }));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
@@ -1096,6 +1098,42 @@ export const analyticsEventsRelations = relations(analyticsEvents, ({ one }) => 
   }),
 }));
 
+// Referrals table (viral growth tracking)
+export const referrals = pgTable(
+  'referrals',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    referrerId: uuid('referrer_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    referredUserId: uuid('referred_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    status: text('status').notNull().default('pending'), // 'pending' | 'converted' | 'activated'
+    clickCount: integer('click_count').notNull().default(0),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    convertedAt: timestamp('converted_at', { mode: 'date' }),
+  },
+  (table) => ({
+    referrerIdIdx: index('referrals_referrer_id_idx').on(table.referrerId),
+    referredUserIdIdx: index('referrals_referred_user_id_idx').on(table.referredUserId),
+    statusIdx: index('referrals_status_idx').on(table.status),
+  })
+);
+
+export const referralsRelations = relations(referrals, ({ one }) => ({
+  referrer: one(users, {
+    fields: [referrals.referrerId],
+    references: [users.id],
+    relationName: 'referrer',
+  }),
+  referredUser: one(users, {
+    fields: [referrals.referredUserId],
+    references: [users.id],
+    relationName: 'referredUser',
+  }),
+}));
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -1186,3 +1224,6 @@ export type NewLearningPathProgressRecord = typeof learningPathProgress.$inferIn
 
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
 export type NewAnalyticsEvent = typeof analyticsEvents.$inferInsert;
+
+export type Referral = typeof referrals.$inferSelect;
+export type NewReferral = typeof referrals.$inferInsert;
