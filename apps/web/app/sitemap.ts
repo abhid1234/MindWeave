@@ -113,6 +113,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/terms`, lastModified: now },
     { url: `${baseUrl}/til`, lastModified: now },
     { url: `${baseUrl}/til/trending`, lastModified: now },
+    { url: `${baseUrl}/til/weekly`, lastModified: now },
     { url: `${baseUrl}/marketplace`, lastModified: now },
     ...useCaseSlugs.map((slug) => ({ url: `${baseUrl}/use-cases/${slug}`, lastModified: now })),
     ...featureSlugs.map((slug) => ({ url: `${baseUrl}/features/${slug}`, lastModified: now })),
