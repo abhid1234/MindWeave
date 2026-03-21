@@ -16,7 +16,20 @@ vi.mock('@/lib/auth', () => ({
 vi.mock('@/lib/db/client', () => {
   const createChain = () => {
     const chain: Record<string, unknown> = {};
-    const methods = ['from', 'where', 'innerJoin', 'leftJoin', 'orderBy', 'groupBy', 'limit', 'offset', 'set', 'values', 'returning', 'onConflictDoNothing'];
+    const methods = [
+      'from',
+      'where',
+      'innerJoin',
+      'leftJoin',
+      'orderBy',
+      'groupBy',
+      'limit',
+      'offset',
+      'set',
+      'values',
+      'returning',
+      'onConflictDoNothing',
+    ];
     for (const method of methods) {
       chain[method] = vi.fn().mockReturnValue(chain);
     }
@@ -61,7 +74,16 @@ function mockDbSelect(...results: unknown[][]) {
     const idx = Math.min(callCount++, results.length - 1);
     const resolveValue = results[idx];
     const chain: Record<string, unknown> = {};
-    const methods = ['from', 'where', 'innerJoin', 'leftJoin', 'orderBy', 'groupBy', 'limit', 'offset'];
+    const methods = [
+      'from',
+      'where',
+      'innerJoin',
+      'leftJoin',
+      'orderBy',
+      'groupBy',
+      'limit',
+      'offset',
+    ];
     for (const method of methods) {
       chain[method] = vi.fn().mockReturnValue(chain);
     }
@@ -100,7 +122,7 @@ describe('getUserBadgesAction', () => {
 
     const result = await getUserBadgesAction();
     expect(result.success).toBe(true);
-    expect(result.data).toHaveLength(32);
+    expect(result.data).toHaveLength(35);
   });
 
   it('marks unlocked badges correctly', async () => {
@@ -110,7 +132,7 @@ describe('getUserBadgesAction', () => {
 
     const result = await getUserBadgesAction();
     expect(result.success).toBe(true);
-    const creator1 = result.data?.find(b => b.badge.id === 'creator-1');
+    const creator1 = result.data?.find((b) => b.badge.id === 'creator-1');
     expect(creator1?.unlocked).toBe(true);
     expect(creator1?.unlockedAt).toEqual(unlockedAt);
   });
@@ -128,7 +150,7 @@ describe('getUserBadgesAction', () => {
     mockDbSelect([{ badgeId: 'creator-1', unlockedAt: new Date() }]);
 
     const result = await getUserBadgesAction();
-    const creator1 = result.data?.find(b => b.badge.id === 'creator-1');
+    const creator1 = result.data?.find((b) => b.badge.id === 'creator-1');
     expect(creator1?.progress).toBe(1); // threshold for creator-1
   });
 });

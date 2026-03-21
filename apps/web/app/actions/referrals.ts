@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { users, referrals } from '@/lib/db/schema';
-import { eq, and, sql, count } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { Resend } from 'resend';
 import { getInviteEmailHtml } from '@/lib/email/templates/invite';
 
