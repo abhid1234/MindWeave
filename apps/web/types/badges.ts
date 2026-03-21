@@ -10,7 +10,8 @@ export type BadgeCategory =
   | 'scholar'
   | 'pathfinder'
   | 'alchemist'
-  | 'reviewer';
+  | 'reviewer'
+  | 'referrer';
 
 export type BadgeTrigger =
   | 'content_created'
@@ -24,6 +25,7 @@ export type BadgeTrigger =
   | 'path_completed'
   | 'brain_dump_processed'
   | 'review_completed'
+  | 'referral_activated'
   | 'manual_check';
 
 export interface BadgeDefinition {

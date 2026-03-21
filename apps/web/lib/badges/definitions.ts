@@ -1,8 +1,4 @@
-import type {
-  BadgeDefinition,
-  BadgeCategoryMeta,
-  BadgeTrigger,
-} from '@/types/badges';
+import type { BadgeDefinition, BadgeCategoryMeta, BadgeTrigger } from '@/types/badges';
 
 export const BADGE_CATEGORIES: BadgeCategoryMeta[] = [
   {
@@ -54,6 +50,11 @@ export const BADGE_CATEGORIES: BadgeCategoryMeta[] = [
     id: 'reviewer',
     name: 'Reviewer',
     description: 'Daily review achievements',
+  },
+  {
+    id: 'referrer',
+    name: 'Referrer',
+    description: 'Growing the Mindweave community through referrals',
   },
 ];
 
@@ -363,6 +364,38 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     threshold: 50,
     triggers: ['brain_dump_processed', 'manual_check'],
     icon: 'FlaskConical',
+  },
+
+  // Referrer badges
+  {
+    id: 'community-builder',
+    name: 'Community Builder',
+    description: 'Refer 3 users who activate their accounts',
+    tier: 'bronze',
+    category: 'referrer',
+    threshold: 3,
+    triggers: ['referral_activated', 'manual_check'],
+    icon: 'Users',
+  },
+  {
+    id: 'growth-champion',
+    name: 'Growth Champion',
+    description: 'Refer 10 users who activate their accounts',
+    tier: 'silver',
+    category: 'referrer',
+    threshold: 10,
+    triggers: ['referral_activated', 'manual_check'],
+    icon: 'TrendingUp',
+  },
+  {
+    id: 'mindweave-ambassador',
+    name: 'Mindweave Ambassador',
+    description: 'Refer 25 users who activate their accounts',
+    tier: 'gold',
+    category: 'referrer',
+    threshold: 25,
+    triggers: ['referral_activated', 'manual_check'],
+    icon: 'Globe',
   },
 
   // Reviewer badges

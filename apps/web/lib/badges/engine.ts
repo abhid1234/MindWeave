@@ -11,6 +11,7 @@ import {
   learningPaths,
   learningPathItems,
   learningPathProgress,
+  referrals,
 } from '@/lib/db/schema';
 import { eq, and, sql, count, countDistinct, max } from 'drizzle-orm';
 import { getBadgesByTrigger } from './definitions';
@@ -39,6 +40,7 @@ function getCheckerKey(badge: BadgeDefinition): string {
     return 'pathfinder_completed';
   if (badge.category === 'alchemist') return 'alchemist_count';
   if (badge.category === 'reviewer') return 'reviewer_days';
+  if (badge.category === 'referrer') return 'referrer_activated';
   return badge.id;
 }
 
@@ -220,12 +222,7 @@ function getChecker(key: string): CheckerFn {
       const result = await db
         .select({ value: count() })
         .from(content)
-        .where(
-          and(
-            eq(content.userId, userId),
-            sql`${content.metadata}->>'source' = 'brain-dump'`
-          )
-        );
+        .where(and(eq(content.userId, userId), sql`${content.metadata}->>'source' = 'brain-dump'`));
       return result[0]?.value ?? 0;
     },
 
@@ -235,6 +232,14 @@ function getChecker(key: string): CheckerFn {
         .from(contentViews)
         .where(eq(contentViews.userId, userId));
       return Number(result[0]?.value ?? 0);
+    },
+
+    referrer_activated: async (userId) => {
+      const result = await db
+        .select({ value: count() })
+        .from(referrals)
+        .where(and(eq(referrals.referrerId, userId), eq(referrals.status, 'activated')));
+      return result[0]?.value ?? 0;
     },
 
     scholar_streak: async (userId) => {
@@ -277,10 +282,7 @@ function getChecker(key: string): CheckerFn {
   return checkers[key] ?? (async () => 0);
 }
 
-export async function checkBadgesForUser(
-  userId: string,
-  trigger: BadgeTrigger
-): Promise<string[]> {
+export async function checkBadgesForUser(userId: string, trigger: BadgeTrigger): Promise<string[]> {
   const candidates = getBadgesByTrigger(trigger);
   if (candidates.length === 0) return [];
 
@@ -334,10 +336,7 @@ export async function checkBadgesForUser(
   return newlyUnlocked;
 }
 
-export async function getProgressForBadge(
-  userId: string,
-  badge: BadgeDefinition
-): Promise<number> {
+export async function getProgressForBadge(userId: string, badge: BadgeDefinition): Promise<number> {
   const key = getCheckerKey(badge);
   const checker = getChecker(key);
   const value = await checker(userId);

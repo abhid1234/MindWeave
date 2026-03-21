@@ -4,7 +4,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('@/lib/db/client', () => {
   const createChain = () => {
     const chain: Record<string, unknown> = {};
-    const methods = ['from', 'where', 'innerJoin', 'leftJoin', 'orderBy', 'groupBy', 'limit', 'offset', 'set', 'values', 'returning', 'onConflictDoNothing'];
+    const methods = [
+      'from',
+      'where',
+      'innerJoin',
+      'leftJoin',
+      'orderBy',
+      'groupBy',
+      'limit',
+      'offset',
+      'set',
+      'values',
+      'returning',
+      'onConflictDoNothing',
+    ];
     for (const method of methods) {
       chain[method] = vi.fn().mockReturnValue(chain);
     }
@@ -33,7 +46,17 @@ function mockDbSelectSequential(...results: unknown[][]) {
     const idx = Math.min(callCount++, results.length - 1);
     const resolveValue = results[idx];
     const chain: Record<string, unknown> = {};
-    const methods = ['from', 'where', 'innerJoin', 'leftJoin', 'orderBy', 'groupBy', 'limit', 'offset', 'onConflictDoNothing'];
+    const methods = [
+      'from',
+      'where',
+      'innerJoin',
+      'leftJoin',
+      'orderBy',
+      'groupBy',
+      'limit',
+      'offset',
+      'onConflictDoNothing',
+    ];
     for (const method of methods) {
       chain[method] = vi.fn().mockReturnValue(chain);
     }
@@ -62,7 +85,9 @@ describe('checkBadgesForUser', () => {
     // Use a trigger that matches some badges, but all already unlocked
     mockDbSelectSequential(
       // Already unlocked badges - return all creator badges as unlocked
-      BADGE_DEFINITIONS.filter(b => b.triggers.includes('content_created')).map(b => ({ badgeId: b.id }))
+      BADGE_DEFINITIONS.filter((b) => b.triggers.includes('content_created')).map((b) => ({
+        badgeId: b.id,
+      }))
     );
 
     const result = await checkBadgesForUser('user-1', 'content_created');
@@ -78,7 +103,7 @@ describe('checkBadgesForUser', () => {
       [{ value: 1 }], // curator_mega
       [{ value: 2 }], // explorer_diverse
       [{ value: 3 }], // explorer_tags (via db.execute)
-      [{ value: 10 }], // explorer_views
+      [{ value: 10 }] // explorer_views
     );
     // For streak and tags checkers that use db.execute
     vi.mocked(db.execute).mockResolvedValue([] as never);
@@ -90,7 +115,7 @@ describe('checkBadgesForUser', () => {
 
   it('does not re-unlock already unlocked badges', async () => {
     mockDbSelectSequential(
-      [{ badgeId: 'creator-1' }, { badgeId: 'creator-10' }], // already unlocked
+      [{ badgeId: 'creator-1' }, { badgeId: 'creator-10' }] // already unlocked
     );
 
     // All remaining candidates would need their checkers run
@@ -104,7 +129,7 @@ describe('checkBadgesForUser', () => {
   it('handles til_published trigger', async () => {
     mockDbSelectSequential(
       [], // no existing badges
-      [{ value: 1 }], // sharer count = 1
+      [{ value: 1 }] // sharer count = 1
     );
 
     const result = await checkBadgesForUser('user-1', 'til_published');
@@ -114,7 +139,7 @@ describe('checkBadgesForUser', () => {
   it('handles collection_created trigger', async () => {
     mockDbSelectSequential(
       [], // no existing badges
-      [{ value: 3 }], // curator count = 3
+      [{ value: 3 }] // curator count = 3
     );
 
     const result = await checkBadgesForUser('user-1', 'collection_created');
@@ -124,7 +149,7 @@ describe('checkBadgesForUser', () => {
   it('handles marketplace_published trigger', async () => {
     mockDbSelectSequential(
       [], // no existing badges
-      [{ value: 1 }], // community published count = 1
+      [{ value: 1 }] // community published count = 1
     );
 
     const result = await checkBadgesForUser('user-1', 'marketplace_published');
@@ -134,7 +159,7 @@ describe('checkBadgesForUser', () => {
   it('inserts newly unlocked badges into database', async () => {
     mockDbSelectSequential(
       [], // no existing badges
-      [{ value: 1 }], // sharer count = 1
+      [{ value: 1 }] // sharer count = 1
     );
 
     await checkBadgesForUser('user-1', 'til_published');
@@ -144,7 +169,7 @@ describe('checkBadgesForUser', () => {
   it('does not insert when nothing is unlocked', async () => {
     mockDbSelectSequential(
       [], // no existing badges
-      [{ value: 0 }], // sharer count = 0
+      [{ value: 0 }] // sharer count = 0
     );
 
     await checkBadgesForUser('user-1', 'til_published');
@@ -158,7 +183,7 @@ describe('checkBadgesForUser', () => {
 
 describe('getProgressForBadge', () => {
   it('returns progress value for a badge', async () => {
-    const badge = BADGE_DEFINITIONS.find(b => b.id === 'creator-10')!;
+    const badge = BADGE_DEFINITIONS.find((b) => b.id === 'creator-10')!;
     mockDbSelectSequential([{ value: 7 }]);
 
     const progress = await getProgressForBadge('user-1', badge);
@@ -166,7 +191,7 @@ describe('getProgressForBadge', () => {
   });
 
   it('caps progress at threshold', async () => {
-    const badge = BADGE_DEFINITIONS.find(b => b.id === 'creator-1')!;
+    const badge = BADGE_DEFINITIONS.find((b) => b.id === 'creator-1')!;
     mockDbSelectSequential([{ value: 100 }]);
 
     const progress = await getProgressForBadge('user-1', badge);
@@ -175,12 +200,12 @@ describe('getProgressForBadge', () => {
 });
 
 describe('BADGE_DEFINITIONS', () => {
-  it('has 26 badges defined', () => {
-    expect(BADGE_DEFINITIONS).toHaveLength(32);
+  it('has 35 badges defined', () => {
+    expect(BADGE_DEFINITIONS).toHaveLength(35);
   });
 
   it('has unique IDs', () => {
-    const ids = BADGE_DEFINITIONS.map(b => b.id);
+    const ids = BADGE_DEFINITIONS.map((b) => b.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
