@@ -9,6 +9,7 @@ import { formatDateLongUTC } from '@/lib/utils';
 import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 import { ContextualCTA } from '@/components/growth/ContextualCTA';
 import { SignupBanner } from '@/components/growth/SignupBanner';
+import { ShareButton } from '@/components/growth/ShareButton';
 
 type Props = {
   params: Promise<{ shareId: string }>;
@@ -123,6 +124,8 @@ export default async function SharePage({ params }: Props) {
   }
 
   const { content } = result;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mindweave.space';
+  const pageUrl = `${baseUrl}/share/${shareId}`;
 
   return (
     <div className="bg-background min-h-screen">
@@ -159,6 +162,7 @@ export default async function SharePage({ params }: Props) {
                   {formatDateLongUTC(content.createdAt)}
                 </p>
               </div>
+              <ShareButton url={pageUrl} title={content.title} />
             </div>
           </div>
 

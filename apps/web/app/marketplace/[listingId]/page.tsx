@@ -7,6 +7,7 @@ import { MarketplaceListingDetail } from '@/components/marketplace/MarketplaceLi
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ContextualCTA } from '@/components/growth/ContextualCTA';
 import { SignupBanner } from '@/components/growth/SignupBanner';
+import { ShareButton } from '@/components/growth/ShareButton';
 
 type Props = {
   params: Promise<{ listingId: string }>;
@@ -86,10 +87,15 @@ export default async function MarketplaceListingPage({ params }: Props) {
     },
   };
 
+  const pageUrl = `${baseUrl}/marketplace/${listing.id}`;
+
   return (
     <>
       <JsonLd data={productJsonLd} />
       <div className="space-y-6">
+        <div className="flex items-center justify-end">
+          <ShareButton url={pageUrl} title={listing.collection.name} />
+        </div>
         <MarketplaceListingDetail listing={listing} />
         {!session?.user && <ContextualCTA variant="marketplace" />}
       </div>

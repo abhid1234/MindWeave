@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ContextualCTA } from '@/components/growth/ContextualCTA';
 import { SignupBanner } from '@/components/growth/SignupBanner';
+import { ShareButton } from '@/components/growth/ShareButton';
 
 type Props = {
   params: Promise<{ tilId: string }>;
@@ -28,6 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = post.body
     ? post.body.slice(0, 160) + (post.body.length > 160 ? '...' : '')
     : `A TIL shared on Mindweave`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mindweave.space';
+  const ogImageUrl = `${baseUrl}/api/og/til?id=${tilId}`;
 
   return {
     title: `${post.title} - TIL - Mindweave`,
@@ -37,6 +40,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: 'article',
       siteName: 'Mindweave',
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [ogImageUrl],
     },
   };
 }
@@ -91,10 +101,15 @@ export default async function TilDetailPage({ params }: Props) {
     url: `${baseUrl}/til/${post.id}`,
   };
 
+  const pageUrl = `${baseUrl}/til/${post.id}`;
+
   return (
     <>
       <JsonLd data={articleJsonLd} />
       <div className="space-y-6">
+        <div className="mx-auto flex max-w-3xl items-center justify-end">
+          <ShareButton url={pageUrl} title={post.title} />
+        </div>
         <TilDetail post={post} isAuthenticated={!!session?.user} />
         {!session?.user && <ContextualCTA variant="til" />}
       </div>
