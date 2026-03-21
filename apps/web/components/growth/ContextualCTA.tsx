@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 type CtaVariant = 'til' | 'marketplace' | 'share' | 'profile' | 'comparison';
 
@@ -39,12 +38,13 @@ export function ContextualCTA({ variant }: ContextualCTAProps) {
       <h3 className="text-card-foreground text-lg font-semibold">{heading}</h3>
       <p className="text-muted-foreground mt-1 text-sm">{body}</p>
       <div className="mt-4">
-        <Button asChild>
-          <Link href="/auth/register" className="inline-flex items-center gap-2">
-            Get Started Free
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+        <Link
+          href="/auth/register"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-all"
+        >
+          Get Started Free
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   );

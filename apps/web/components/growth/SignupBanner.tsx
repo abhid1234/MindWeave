@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics/tracker';
 
 interface SignupBannerProps {
@@ -54,9 +53,13 @@ export function SignupBanner({ userCount }: SignupBannerProps) {
         Join {userCount.toLocaleString()}+ knowledge builders on Mindweave
       </p>
       <div className="flex items-center gap-2">
-        <Button asChild size="sm" variant="secondary" onClick={handleSignupClick}>
-          <Link href="/auth/register">Sign Up Free</Link>
-        </Button>
+        <Link
+          href="/auth/register"
+          onClick={handleSignupClick}
+          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex h-8 items-center rounded-lg px-3 text-xs font-medium transition-colors"
+        >
+          Sign Up Free
+        </Link>
         <button
           onClick={handleDismiss}
           aria-label="Dismiss banner"

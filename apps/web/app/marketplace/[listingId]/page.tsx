@@ -1,8 +1,12 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { auth } from '@/lib/auth';
 import { getMarketplaceListingAction, trackMarketplaceViewAction } from '@/app/actions/marketplace';
+import { getSocialProofStats } from '@/app/actions/social-proof';
 import { MarketplaceListingDetail } from '@/components/marketplace/MarketplaceListingDetail';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { ContextualCTA } from '@/components/growth/ContextualCTA';
+import { SignupBanner } from '@/components/growth/SignupBanner';
 
 type Props = {
   params: Promise<{ listingId: string }>;
@@ -50,7 +54,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MarketplaceListingPage({ params }: Props) {
   const { listingId } = await params;
-  const result = await getMarketplaceListingAction(listingId);
+  const [session, result, stats] = await Promise.all([
+    auth(),
+    getMarketplaceListingAction(listingId),
+    getSocialProofStats(),
+  ]);
 
   if (!result.success || !result.listing) {
     notFound();
@@ -81,7 +89,11 @@ export default async function MarketplaceListingPage({ params }: Props) {
   return (
     <>
       <JsonLd data={productJsonLd} />
-      <MarketplaceListingDetail listing={listing} />
+      <div className="space-y-6">
+        <MarketplaceListingDetail listing={listing} />
+        {!session?.user && <ContextualCTA variant="marketplace" />}
+      </div>
+      {!session?.user && stats?.data && <SignupBanner userCount={stats.data.userCount} />}
     </>
   );
 }

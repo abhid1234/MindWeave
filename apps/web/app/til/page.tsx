@@ -1,7 +1,10 @@
 import { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import { browseTilAction } from '@/app/actions/til';
+import { getSocialProofStats } from '@/app/actions/social-proof';
 import { TilGrid } from '@/components/til/TilGrid';
+import { ContextualCTA } from '@/components/growth/ContextualCTA';
+import { SignupBanner } from '@/components/growth/SignupBanner';
 
 export const metadata: Metadata = {
   title: 'TIL Feed - Mindweave',
@@ -21,26 +24,33 @@ export const metadata: Metadata = {
 };
 
 export default async function TilPage() {
-  const [session, result] = await Promise.all([
+  const [session, result, stats] = await Promise.all([
     auth(),
     browseTilAction({ sort: 'trending', perPage: 20 }),
+    getSocialProofStats(),
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Today I Learned</h1>
-        <p className="text-muted-foreground mx-auto max-w-lg">
-          Bite-sized learnings from the community. Share what you discovered today.
-        </p>
+    <>
+      <div className="space-y-6">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold">Today I Learned</h1>
+          <p className="text-muted-foreground mx-auto max-w-lg">
+            Bite-sized learnings from the community. Share what you discovered today.
+          </p>
+        </div>
+
+        <TilGrid
+          initialPosts={result.success ? result.posts : undefined}
+          initialTotal={result.success ? result.pagination.total : undefined}
+          initialPopularTags={result.success ? result.popularTags : undefined}
+          isAuthenticated={!!session?.user}
+        />
+
+        {!session?.user && <ContextualCTA variant="til" />}
       </div>
 
-      <TilGrid
-        initialPosts={result.success ? result.posts : undefined}
-        initialTotal={result.success ? result.pagination.total : undefined}
-        initialPopularTags={result.success ? result.popularTags : undefined}
-        isAuthenticated={!!session?.user}
-      />
-    </div>
+      {!session?.user && stats?.data && <SignupBanner userCount={stats.data.userCount} />}
+    </>
   );
 }

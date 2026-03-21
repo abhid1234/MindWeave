@@ -38,6 +38,8 @@ import {
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
 import { CommandPaletteShowcase } from '@/components/landing/command-palette-showcase';
+import { SocialProofCounters } from '@/components/growth/SocialProofCounters';
+import { getSocialProofStats } from '@/app/actions/social-proof';
 
 export const metadata: Metadata = {
   title: 'Mindweave - AI-Powered Personal Knowledge Hub',
@@ -356,7 +358,7 @@ function ComparisonCell({ value }: { value: string }) {
 }
 
 export default async function Home() {
-  const session = await auth();
+  const [session, stats] = await Promise.all([auth(), getSocialProofStats()]);
 
   if (session?.user) {
     redirect('/dashboard');
@@ -509,6 +511,18 @@ export default async function Home() {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
+
+              {/* Social Proof Counters */}
+              {stats?.data && (
+                <div className="mt-10">
+                  <SocialProofCounters
+                    tilCount={stats.data.tilCount}
+                    collectionCount={stats.data.collectionCount}
+                    noteCount={stats.data.noteCount}
+                    userCount={stats.data.userCount}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </section>

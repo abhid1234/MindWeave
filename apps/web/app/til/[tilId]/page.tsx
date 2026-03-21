@@ -1,10 +1,13 @@
 import { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import { getTilDetailAction } from '@/app/actions/til';
+import { getSocialProofStats } from '@/app/actions/social-proof';
 import { TilDetail } from '@/components/til/TilDetail';
 import { Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { ContextualCTA } from '@/components/growth/ContextualCTA';
+import { SignupBanner } from '@/components/growth/SignupBanner';
 
 type Props = {
   params: Promise<{ tilId: string }>;
@@ -40,7 +43,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TilDetailPage({ params }: Props) {
   const { tilId } = await params;
-  const [session, result] = await Promise.all([auth(), getTilDetailAction(tilId)]);
+  const [session, result, stats] = await Promise.all([
+    auth(),
+    getTilDetailAction(tilId),
+    getSocialProofStats(),
+  ]);
 
   if (!result.success || !result.post) {
     return (
@@ -87,7 +94,11 @@ export default async function TilDetailPage({ params }: Props) {
   return (
     <>
       <JsonLd data={articleJsonLd} />
-      <TilDetail post={post} isAuthenticated={!!session?.user} />
+      <div className="space-y-6">
+        <TilDetail post={post} isAuthenticated={!!session?.user} />
+        {!session?.user && <ContextualCTA variant="til" />}
+      </div>
+      {!session?.user && stats?.data && <SignupBanner userCount={stats.data.userCount} />}
     </>
   );
 }

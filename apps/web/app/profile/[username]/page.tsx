@@ -1,9 +1,13 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { auth } from '@/lib/auth';
 import { getPublicProfile } from '@/app/actions/profile';
+import { getSocialProofStats } from '@/app/actions/social-proof';
 import PublicProfile from '@/components/profile/PublicProfile';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { ContextualCTA } from '@/components/growth/ContextualCTA';
+import { SignupBanner } from '@/components/growth/SignupBanner';
 
 type Props = {
   params: Promise<{ username: string }>;
@@ -45,7 +49,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicProfilePage({ params }: Props) {
   const { username } = await params;
-  const result = await getPublicProfile(username);
+  const [session, result, stats] = await Promise.all([
+    auth(),
+    getPublicProfile(username),
+    getSocialProofStats(),
+  ]);
 
   if (!result.success || !result.profile) {
     notFound();
@@ -78,10 +86,13 @@ export default async function PublicProfilePage({ params }: Props) {
           </div>
         </header>
 
-        <main className="container mx-auto max-w-4xl px-4 py-8">
+        <main className="container mx-auto max-w-4xl space-y-6 px-4 py-8">
           <PublicProfile profile={profile} />
+          {!session?.user && <ContextualCTA variant="profile" />}
         </main>
       </div>
+
+      {!session?.user && stats?.data && <SignupBanner userCount={stats.data.userCount} />}
     </>
   );
 }
