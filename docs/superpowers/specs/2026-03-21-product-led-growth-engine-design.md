@@ -164,10 +164,13 @@ CREATE TABLE referrals (
 
 **Flow:**
 1. Visitor arrives at `/r/[username]`
-2. Server sets `referrer` cookie (30-day expiry)
-3. Redirects to homepage
-4. On signup, check for referrer cookie → create referral record
-5. After referred user creates first content → mark as "activated"
+2. Server creates a referral row (or increments `click_count` on existing row for this referrer) with `referred_user_id` = null
+3. Sets `referrer` cookie (30-day expiry) containing the referrer's username
+4. Redirects to homepage
+5. On signup, check for referrer cookie → update the referrer's row with `referred_user_id`
+6. After referred user creates first content → mark as "activated"
+
+**Note:** Click tracking is per-referrer (not per-visitor). One row per referrer tracks total clicks and the most recent conversion. This is sufficient for badge rewards; per-visitor attribution is a non-goal.
 
 ### 3.2 Referral Dashboard
 
@@ -293,6 +296,9 @@ CREATE TABLE analytics_events (
 CREATE INDEX idx_analytics_events_created ON analytics_events(created_at);
 CREATE INDEX idx_analytics_events_event ON analytics_events(event);
 CREATE INDEX idx_analytics_events_session ON analytics_events(session_id);
+
+-- Retention: partition by month or run a weekly cleanup cron that deletes raw events older than 90 days
+-- (aggregate into daily_stats summary table before deleting)
 ```
 
 ### 5.2 Event Tracking Implementation
@@ -366,7 +372,7 @@ Extends existing email digest system. Only sent to users with at least 1 public 
 
 Extend existing streak tracking:
 
-- At 8pm local time (or configurable), if user hasn't been active today and has a streak ≥ 3 days:
+- At 8pm UTC (no timezone tracking needed — simple and predictable), if user hasn't been active today and has a streak ≥ 3 days:
   - Send push notification (existing FCM infrastructure): "Don't lose your X-day streak!"
   - Or email if push not enabled
 - Max 1 nudge per day
@@ -388,7 +394,7 @@ Time-based email drip for first 7 days after signup:
 | Day | Email | CTA |
 |-----|-------|-----|
 | 0 | Welcome + quick start guide | "Capture your first note" → /dashboard/capture |
-| 1 | Browser extension intro | "Install the extension" → Chrome Web Store link |
+| 1 | Browser extension intro | "Install the extension" → Chrome Web Store link (already published) |
 | 3 | TIL feature spotlight | "Publish your first TIL" → /dashboard/capture |
 | 5 | Marketplace discovery | "Explore community collections" → /marketplace |
 | 7 | Profile + sharing | "Share your profile" → /dashboard/settings/profile |
