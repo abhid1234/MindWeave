@@ -673,6 +673,94 @@ export async function getContentTypeBreakdownAction(): Promise<
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Creator Content Stats
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface CreatorStats {
+  tilViewsThisWeek: number;
+  totalTilViews: number;
+  topTilTitle: string | null;
+  topTilViews: number;
+  collectionsCloned: number;
+}
+
+/**
+ * Get content performance stats for the authenticated creator.
+ * Uses a CTE to efficiently query TIL page views from analytics_events.
+ */
+export async function getCreatorStats(): Promise<AnalyticsActionResult<CreatorStats>> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const userId = session.user.id;
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    type CreatorStatsRow = {
+      til_views_this_week: string;
+      total_til_views: string;
+      top_til_title: string | null;
+      top_til_views: string;
+    };
+
+    const result = await db.execute<CreatorStatsRow>(sql`
+      WITH user_tils AS (
+        SELECT tp.id, tp.title, tp.view_count
+        FROM til_posts tp
+        WHERE tp.user_id = ${userId}
+      ),
+      event_views AS (
+        SELECT ae.page, COUNT(*) AS view_count
+        FROM analytics_events ae
+        INNER JOIN user_tils ut ON ae.page LIKE '/til/' || ut.id::text || '%'
+        WHERE ae.event = 'page_view'
+        GROUP BY ae.page
+      ),
+      event_views_week AS (
+        SELECT ae.page, COUNT(*) AS view_count
+        FROM analytics_events ae
+        INNER JOIN user_tils ut ON ae.page LIKE '/til/' || ut.id::text || '%'
+        WHERE ae.event = 'page_view'
+          AND ae.created_at >= ${oneWeekAgo.toISOString()}::timestamp
+        GROUP BY ae.page
+      ),
+      top_til AS (
+        SELECT ut.title, ut.view_count
+        FROM user_tils ut
+        ORDER BY ut.view_count DESC
+        LIMIT 1
+      )
+      SELECT
+        COALESCE(SUM(evw.view_count), 0)::text AS til_views_this_week,
+        COALESCE(SUM(ev.view_count), 0)::text  AS total_til_views,
+        (SELECT title FROM top_til)            AS top_til_title,
+        COALESCE((SELECT view_count FROM top_til), 0)::text AS top_til_views
+      FROM event_views ev
+      FULL OUTER JOIN event_views_week evw ON ev.page = evw.page
+    `);
+
+    const rows = result as unknown as CreatorStatsRow[];
+    const row = rows[0];
+
+    return {
+      success: true,
+      data: {
+        tilViewsThisWeek: parseInt(row?.til_views_this_week ?? '0', 10),
+        totalTilViews: parseInt(row?.total_til_views ?? '0', 10),
+        topTilTitle: row?.top_til_title ?? null,
+        topTilViews: parseInt(row?.top_til_views ?? '0', 10),
+        collectionsCloned: 0,
+      },
+    };
+  } catch (error) {
+    console.error('Error getting creator stats:', error);
+    return { success: false, message: 'Failed to fetch creator stats' };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Visitor / Growth Analytics
 // ─────────────────────────────────────────────────────────────────────────────
 
