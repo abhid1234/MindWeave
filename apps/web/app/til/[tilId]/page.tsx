@@ -9,6 +9,9 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { ContextualCTA } from '@/components/growth/ContextualCTA';
 import { SignupBanner } from '@/components/growth/SignupBanner';
 import { ShareButton } from '@/components/growth/ShareButton';
+import { db } from '@/lib/db/client';
+import { tilPosts } from '@/lib/db/schema';
+import { eq, ne, and, sql } from 'drizzle-orm';
 
 type Props = {
   params: Promise<{ tilId: string }>;
@@ -84,19 +87,46 @@ export default async function TilDetailPage({ params }: Props) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const { post } = result;
 
+  // Fetch related TILs in parallel
+  const [authorTilsRows, relatedTilsRows] = await Promise.all([
+    db
+      .select({ id: tilPosts.id, title: tilPosts.title })
+      .from(tilPosts)
+      .where(and(eq(tilPosts.userId, post.creator.id), ne(tilPosts.id, post.id)))
+      .orderBy(sql`${tilPosts.publishedAt} DESC`)
+      .limit(3),
+    post.tags && post.tags.length > 0
+      ? db
+          .select({ id: tilPosts.id, title: tilPosts.title })
+          .from(tilPosts)
+          .where(
+            and(
+              ne(tilPosts.id, post.id),
+              sql`${tilPosts.tags} && ${sql.raw(`ARRAY[${post.tags.map((t) => `'${t.replace(/'/g, "''")}'`).join(',')}]::text[]`)}`
+            )
+          )
+          .orderBy(sql`${tilPosts.publishedAt} DESC`)
+          .limit(3)
+      : Promise.resolve([]),
+  ]);
+
+  const authorTils = authorTilsRows;
+  const relatedTils = relatedTilsRows.filter((t) => !authorTils.some((a) => a.id === t.id));
+
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
-    datePublished: post.publishedAt,
+    datePublished: post.publishedAt?.toISOString(),
     author: {
       '@type': 'Person',
       name: post.creator.name ?? post.creator.username ?? 'Mindweave User',
     },
+    keywords: post.tags?.join(', '),
     publisher: {
       '@type': 'Organization',
       name: 'Mindweave',
-      url: baseUrl,
+      url: 'https://mindweave.space',
     },
     url: `${baseUrl}/til/${post.id}`,
   };
@@ -111,6 +141,42 @@ export default async function TilDetailPage({ params }: Props) {
           <ShareButton url={pageUrl} title={post.title} />
         </div>
         <TilDetail post={post} isAuthenticated={!!session?.user} />
+        {(authorTils.length > 0 || relatedTils.length > 0) && (
+          <div className="mx-auto max-w-3xl">
+            <div className="space-y-4 border-t pt-6">
+              {authorTils.length > 0 && (
+                <div>
+                  <h3 className="text-muted-foreground text-sm font-semibold">
+                    More by this author
+                  </h3>
+                  <ul className="mt-2 space-y-1">
+                    {authorTils.map((t) => (
+                      <li key={t.id}>
+                        <Link href={`/til/${t.id}`} className="text-sm hover:underline">
+                          {t.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {relatedTils.length > 0 && (
+                <div>
+                  <h3 className="text-muted-foreground text-sm font-semibold">Related TILs</h3>
+                  <ul className="mt-2 space-y-1">
+                    {relatedTils.map((t) => (
+                      <li key={t.id}>
+                        <Link href={`/til/${t.id}`} className="text-sm hover:underline">
+                          {t.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {!session?.user && <ContextualCTA variant="til" />}
       </div>
       {!session?.user && stats?.data && <SignupBanner userCount={stats.data.userCount} />}
