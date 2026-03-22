@@ -38,6 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'profile',
       url: `${baseUrl}/profile/${profile.username}`,
       siteName: 'Mindweave',
+      images: [`${baseUrl}/opengraph-image`],
     },
     twitter: {
       card: 'summary',

@@ -5,6 +5,7 @@ import { getSocialProofStats } from '@/app/actions/social-proof';
 import { TilGrid } from '@/components/til/TilGrid';
 import { ContextualCTA } from '@/components/growth/ContextualCTA';
 import { SignupBanner } from '@/components/growth/SignupBanner';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: 'TIL Feed - Mindweave',
@@ -15,12 +16,21 @@ export const metadata: Metadata = {
     description: 'Bite-sized learnings shared by the Mindweave community.',
     type: 'website',
     siteName: 'Mindweave',
+    images: ['https://www.mindweave.space/opengraph-image'],
   },
   alternates: {
     types: {
       'application/rss+xml': 'https://www.mindweave.space/til/feed',
     },
   },
+};
+
+const jsonLdData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'TIL Feed — Today I Learned',
+  description: 'Bite-sized learnings shared by the Mindweave community.',
+  url: 'https://www.mindweave.space/til',
 };
 
 export default async function TilPage() {
@@ -32,6 +42,7 @@ export default async function TilPage() {
 
   return (
     <>
+      <JsonLd data={jsonLdData} />
       <div className="space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Today I Learned</h1>

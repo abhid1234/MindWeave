@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { MarketplaceGrid } from '@/components/marketplace/MarketplaceGrid';
 import { browseMarketplaceAction } from '@/app/actions/marketplace';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: 'Marketplace - Mindweave',
@@ -8,10 +9,19 @@ export const metadata: Metadata = {
     'Discover and clone curated knowledge collections from the Mindweave community. Programming, design, business, science, and more.',
   openGraph: {
     title: 'Knowledge Marketplace - Mindweave',
-    description:
-      'Discover and clone curated knowledge collections from the Mindweave community.',
+    description: 'Discover and clone curated knowledge collections from the Mindweave community.',
     type: 'website',
+    siteName: 'Mindweave',
+    images: ['https://www.mindweave.space/opengraph-image'],
   },
+};
+
+const jsonLdData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Knowledge Marketplace — Mindweave',
+  description: 'Discover and clone curated knowledge collections from the Mindweave community.',
+  url: 'https://www.mindweave.space/marketplace',
 };
 
 export default async function MarketplacePage() {
@@ -23,18 +33,22 @@ export default async function MarketplacePage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold md:text-3xl">Knowledge Marketplace</h1>
-        <p className="mt-1 text-muted-foreground">
-          Discover curated collections from the community. Clone them to your library with one click.
-        </p>
-      </div>
+    <>
+      <JsonLd data={jsonLdData} />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">Knowledge Marketplace</h1>
+          <p className="text-muted-foreground mt-1">
+            Discover curated collections from the community. Clone them to your library with one
+            click.
+          </p>
+        </div>
 
-      <MarketplaceGrid
-        initialListings={result.success ? result.listings : undefined}
-        initialTotal={result.success ? result.pagination.total : undefined}
-      />
-    </div>
+        <MarketplaceGrid
+          initialListings={result.success ? result.listings : undefined}
+          initialTotal={result.success ? result.pagination.total : undefined}
+        />
+      </div>
+    </>
   );
 }

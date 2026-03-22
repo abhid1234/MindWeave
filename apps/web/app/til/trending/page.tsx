@@ -20,6 +20,7 @@ export const metadata: Metadata = {
       'The most upvoted Today I Learned posts from the past week. Discover the best bite-sized learnings from the Mindweave community.',
     type: 'website',
     siteName: 'Mindweave',
+    images: ['https://www.mindweave.space/opengraph-image'],
   },
   alternates: {
     canonical: '/til/trending',

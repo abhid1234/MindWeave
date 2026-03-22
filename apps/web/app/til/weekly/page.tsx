@@ -21,6 +21,7 @@ export const metadata: Metadata = {
       "The highest-upvoted Today I Learned posts from the past 7 days. Discover this week's best bite-sized learnings from the Mindweave community.",
     type: 'website',
     siteName: 'Mindweave',
+    images: ['https://www.mindweave.space/opengraph-image'],
   },
   alternates: {
     canonical: '/til/weekly',

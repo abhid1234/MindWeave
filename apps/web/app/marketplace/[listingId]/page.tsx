@@ -41,6 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       url: `${baseUrl}/marketplace/${listing.id}`,
       siteName: 'Mindweave',
+      images: [`${baseUrl}/opengraph-image`],
     },
     twitter: {
       card: 'summary',
@@ -92,6 +93,8 @@ export default async function MarketplaceListingPage({ params }: Props) {
   return (
     <>
       <JsonLd data={productJsonLd} />
+      {/* Server-rendered H1 for SEO — the client component renders a visible H1 below */}
+      <h1 className="sr-only">{listing.collection.name}</h1>
       <div className="space-y-6">
         <div className="flex items-center justify-end">
           <ShareButton url={pageUrl} title={listing.collection.name} />
