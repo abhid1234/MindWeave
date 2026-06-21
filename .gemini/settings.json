@@ -1,0 +1,59 @@
+{
+  "mcpServers": {
+    "gdocs": {
+      "type": "stdio",
+      "command": "/home/abhidaas/Core/Workspace/ClaudeCode/Work/gmail-mcp-env/bin/python",
+      "args": [
+        "/home/abhidaas/Core/Workspace/ClaudeCode/Work/gdocs-mcp-server.py"
+      ],
+      "env": {}
+    },
+    "gcal": {
+      "type": "stdio",
+      "command": "/home/abhidaas/Core/Workspace/ClaudeCode/Work/gmail-mcp-env/bin/python3",
+      "args": [
+        "/home/abhidaas/Core/Workspace/ClaudeCode/Work/gcal-mcp-server.py"
+      ],
+      "env": {}
+    },
+    "bigquery": {
+      "type": "stdio",
+      "command": "/home/abhidaas/Core/Workspace/ClaudeCode/Work/gmail-mcp-env/bin/python3",
+      "args": [
+        "/home/abhidaas/Core/Workspace/ClaudeCode/Work/bigquery-mcp-server.py"
+      ],
+      "env": {}
+    },
+    "youtube-transcript": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@nicholasgriffintn/youtube-transcript-mcp"
+      ],
+      "env": {}
+    },
+    "youtube-transcript-alt": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "youtube-transcript-mcp"
+      ],
+      "env": {}
+    }
+  },
+  "hooks": {
+    "AfterTool": [
+      {
+        "matcher": "replace|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(cat | jq -r '.tool_input.file_path // empty') && if [[ \"$FILE\" =~ \\.(ts|tsx|js|jsx|json|css)$ ]]; then cd /home/abhidaas/Core/Workspace/ClaudeCode/Mindweave && npx prettier --write \"$FILE\" 2>/dev/null; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

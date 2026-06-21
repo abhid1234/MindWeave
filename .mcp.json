@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "/home/abhidaas/.local/bin/context7-mcp"
+    }
+  }
+}
